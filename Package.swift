@@ -3,6 +3,9 @@ import PackageDescription
 
 let package = Package(
 	name: "FolioReaderKit",
+	products: [
+		.library(name: "FolioReaderKit", targets: ["FolioReaderKit"])
+	],
 	dependencies: [
 		// .Package(url: "https://github.com/ZipArchive/ZipArchive.git", majorVersion: 2, minor: 1),
 		// .Package(url: "https://github.com/cxa/MenuItemKit.git", majorVersion: 3, minor: 0),
