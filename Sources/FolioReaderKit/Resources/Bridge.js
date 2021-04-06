@@ -17,6 +17,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
 //    }
     removeOuterTable()
     removePSpace()
+    removeBodyClass()
     reParagraph()
 });
 
@@ -37,6 +38,10 @@ function removePSpace() {
         var p = ps[i]
         p.innerHTML = p.innerHTML.trim()
     }
+}
+
+function removeBodyClass() {
+    document.body.removeAttribute("class")
 }
 
 function reParagraph() {
