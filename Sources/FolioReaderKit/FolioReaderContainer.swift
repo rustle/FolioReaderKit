@@ -131,7 +131,7 @@ open class FolioReaderContainer: UIViewController {
         self.readerConfig.shouldHideNavigationOnTap = ((hideBars == true) ? true : self.readerConfig.shouldHideNavigationOnTap)
 
         self.centerViewController = FolioReaderCenter(withContainer: self)
-        self.centerViewController?.delegate = MyFolioReaderCenterDelegate()
+        //self.centerViewController?.delegate = MyFolioReaderCenterDelegate()
 
         if let rootViewController = self.centerViewController {
             self.centerNavigationController = UINavigationController(rootViewController: rootViewController)
