@@ -158,7 +158,8 @@ class FolioReaderQuoteShare: UIViewController {
         collectionViewLayout.minimumInteritemSpacing = 0
         collectionViewLayout.scrollDirection = .horizontal
 
-        let background = self.folioReader.isNight(self.readerConfig.nightModeBackground, UIColor.white)
+        //let background = self.folioReader.isNight(self.readerConfig.nightModeBackground, UIColor.white)
+        let background = self.readerConfig.themeModeBackground[self.folioReader.themeMode]
         view.backgroundColor = background
 
         // CollectionView
@@ -192,7 +193,8 @@ class FolioReaderQuoteShare: UIViewController {
     }
 
     func configureNavBar() {
-        let navBackground = self.folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        //let navBackground = self.folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        let navBackground = self.readerConfig.themeModeNavBackground[self.folioReader.themeMode]
         let tintColor = self.readerConfig.tintColor
         let navText = self.folioReader.isNight(UIColor.white, UIColor.black)
         let font = UIFont(name: "Avenir-Light", size: 17)!

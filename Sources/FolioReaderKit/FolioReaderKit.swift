@@ -19,6 +19,7 @@ internal let kCurrentHighlightStyle = "com.folioreader.kCurrentHighlightStyle"
 internal let kCurrentMediaOverlayStyle = "com.folioreader.kMediaOverlayStyle"
 internal let kCurrentScrollDirection = "com.folioreader.kCurrentScrollDirection"
 internal let kNightMode = "com.folioreader.kNightMode"
+internal let kThemeMode = "com.folioreader.kThemeMode"
 internal let kCurrentTOCMenu = "com.folioreader.kCurrentTOCMenu"
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
@@ -107,7 +108,7 @@ open class FolioReader: NSObject {
     /// FolioReaderDelegate
     open weak var delegate: FolioReaderDelegate?
     
-    open weak var readerContainer: FolioReaderContainer?
+    var readerContainer: FolioReaderContainer?
     open weak var readerAudioPlayer: FolioReaderAudioPlayer?
     open weak var readerCenter: FolioReaderCenter? {
         return self.readerContainer?.centerViewController
@@ -160,11 +161,18 @@ extension FolioReader {
     ///   - config: FolioReader configuration.
     ///   - shouldRemoveEpub: Boolean to remove the epub or not. Default true.
     ///   - animated: Pass true to animate the presentation; otherwise, pass false.
-    open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated:
-        Bool = true) {
+    open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
         let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath, unzipPath: unzipPath, removeEpub: shouldRemoveEpub)
         self.readerContainer = readerContainer
+        
         parentViewController.present(readerContainer, animated: animated, completion: nil)
+        addObservers()
+    }
+    
+    open func prepareReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
+        let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath, unzipPath: unzipPath, removeEpub: shouldRemoveEpub)
+        self.readerContainer = readerContainer
+        
         addObservers()
     }
 }
@@ -185,11 +193,31 @@ extension FolioReader {
 
             if let readerCenter = self.readerCenter {
                 UIView.animate(withDuration: 0.6, animations: {
-                    _ = readerCenter.currentPage?.webView?.js("nightMode(\(self.nightMode))")
+                    // _ = readerCenter.currentPage?.webView?.js("nightMode(\(self.nightMode))")
                     readerCenter.pageIndicatorView?.reloadColors()
                     readerCenter.configureNavBar()
                     readerCenter.scrollScrubber?.reloadColors()
                     readerCenter.collectionView.backgroundColor = (self.nightMode == true ? self.readerContainer?.readerConfig.nightModeBackground : UIColor.white)
+                }, completion: { (finished: Bool) in
+                    NotificationCenter.default.post(name: Notification.Name(rawValue: "needRefreshPageMode"), object: nil)
+                })
+            }
+        }
+    }
+    
+    open var themeMode: Int {
+        get { return self.defaults.integer(forKey: kThemeMode) }
+        set (value) {
+            self.defaults.set(value, forKey: kThemeMode)
+
+            if let readerCenter = self.readerCenter {
+                UIView.animate(withDuration: 0.6, animations: {
+                    _ = readerCenter.currentPage?.webView?.js("themeMode(\(self.themeMode))")
+                    readerCenter.pageIndicatorView?.reloadColors()
+                    readerCenter.configureNavBar()
+                    readerCenter.scrollScrubber?.reloadColors()
+                    //readerCenter.collectionView.backgroundColor = (self.themeMode == FolioReaderThemeMode.night.rawValue ? self.readerContainer?.readerConfig.nightModeBackground : UIColor.white)
+                    readerCenter.collectionView.backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.themeMode]
                 }, completion: { (finished: Bool) in
                     NotificationCenter.default.post(name: Notification.Name(rawValue: "needRefreshPageMode"), object: nil)
                 })
@@ -290,7 +318,7 @@ extension FolioReader {
         }
     }
 
-    open var savedPositionForCurrentBook: [String: Any]? {
+    @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
             guard let bookId = self.readerContainer?.book.name else {
                 return nil

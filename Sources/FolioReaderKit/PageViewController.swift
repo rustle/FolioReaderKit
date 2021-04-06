@@ -73,7 +73,8 @@ class PageViewController: UIPageViewController {
     }
 
     func configureNavBar() {
-        let navBackground = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground,self.readerConfig.daysModeNavBackground)
+        //let navBackground = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.daysModeNavBackground)
+        let navBackground = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         let tintColor = self.readerConfig.tintColor
         let navText = self.folioReader.isNight(UIColor.white, UIColor.black)
         let font = UIFont(name: "Avenir-Light", size: 17)!
@@ -104,7 +105,7 @@ extension PageViewController: UIPageViewControllerDelegate {
 
         if finished && completed {
             let viewController = pageViewController.viewControllers?.last
-            segmentedControl.selectedSegmentIndex = viewList.index(of: viewController!)!
+            segmentedControl.selectedSegmentIndex = viewList.firstIndex(of: viewController!)!
         }
     }
 }

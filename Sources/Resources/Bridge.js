@@ -15,6 +15,9 @@ document.addEventListener("DOMContentLoaded", function(event) {
 //    for (var i=0; i<lnk.length; i++) {
 //        lnk[i].setAttribute("onclick","return callVerseURL(this);");
 //    }
+    removeOuterTable()
+    removePSpace()
+    reParagraph()
 });
 
 // Generate a GUID
@@ -24,6 +27,134 @@ function guid() {
     }
     var guid = s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
     return guid.toUpperCase();
+}
+
+function removePSpace() {
+    var ps = Array.from(document.getElementsByTagName('p'));
+    var len = ps.length
+    var i = 0
+    for (; i<len; i++) {
+        var p = ps[i]
+        p.innerHTML = p.innerHTML.trim()
+    }
+}
+
+function reParagraph() {
+    var leafNodes = getLeafNodes(document);
+    var len = leafNodes.length
+    var i = 0
+    var startWithSpaceReg = new RegExp('^\\s{2}')
+    for (; i<len; i++) {
+        var leafNode = leafNodes[i]
+        //var lines = leafNode.innerHTML.split(/\r\n|\r|\n/g)
+        var lines = leafNode.textContent.split(/\r\n|\r|\n/g)
+        var j = 0
+        var linesLen = lines.length
+        if (linesLen < 10)
+            continue
+        var para = ""
+        var pNodes = []
+        for (; j<linesLen; j++) {
+            if (lines[j].match(startWithSpaceReg)) {
+                if (para.length > 0) {
+                    var pNode = document.createElement('p')
+                    var text = document.createTextNode(para)
+                    pNode.appendChild(text)
+                    pNodes.push(pNode)
+                }
+                para = lines[j]
+            } else {
+                para = para + lines[j]
+            }
+        }
+        if (para.length > 0) {
+            var pNode = document.createElement('p')
+            var text = document.createTextNode(para)
+            pNode.appendChild(text)
+            pNodes.push(pNode)
+        }
+        if (pNodes.length > 0) {
+            //alert(leafNode.textContent.split(/\r\n|\r|\n/g).length)
+            //alert(pNodes.length)
+            //leafNode.innerHTML = ""
+            leafNode.removeChild(leafNode.firstChild)
+            var k = 0
+            var pNodesLen = pNodes.length
+            for(; k<pNodesLen; k++) {
+                leafNode.appendChild(pNodes[k])
+            }
+        }
+    }
+}
+
+function getLeafNodes(master) {
+    var nodes = Array.prototype.slice.call(master.getElementsByTagName("*"), 0);
+    var leafNodes = nodes.filter(function(elem) {
+        if (elem.hasChildNodes()) {
+            // see if any of the child nodes are elements
+            for (var i = 0; i < elem.childNodes.length; i++) {
+                if (elem.childNodes[i].nodeType == 1) {
+                    // there is a child element, so return false to not include
+                    // this parent element
+                    return false;
+                }
+            }
+        }
+        return true;
+    });
+    return leafNodes;
+}
+
+function removeOuterTable() {
+    // table references the table DOM element
+    var tables = Array.from(document.getElementsByTagName('table'));
+    var handled = 0;
+    while (tables.length > 0) {
+        var table = tables[0];
+        //alert(table.innerHTML);
+//        if (!table.hasAttribute("width")) {
+//            break
+//        }
+        var keep = document.createDocumentFragment(),
+        tds = table.getElementsByTagName('td'),
+        td, i, l;
+
+        // alert("after keep");
+        
+        while (tds.length > 0) {
+            //alert(i + " in " + tds.length)
+            td = tds[0];
+            //alert(td.innerHTML)
+            while(td.firstChild) {
+                var pArray = Array.from(td.getElementsByTagName('p'))
+                if (pArray.length == 0 && td.firstChild.textContent.length > 1) {
+                    var pNode = document.createElement('p')
+                    pNode.appendChild(td.firstChild)
+                    keep.appendChild(pNode)
+                    //alert(pNode.innerHTML)
+                } else if (td.firstChild.tagName != "BR") {
+                    //alert(td.firstChild.tagName)
+                    keep.appendChild(td.firstChild);
+                } else {
+                    td.removeChild(td.firstChild)
+                }
+            }
+            //alert("after while(td.firstChild)")
+            
+            td.parentNode.removeChild(td)
+            tds = table.getElementsByTagName('td')
+        }
+        
+        var tableParent = table.parentNode
+        tableParent.insertBefore(keep, table);
+        tableParent.removeChild(table);
+        
+        // alert(tableParent.innerHTML)
+        
+        tables = Array.from(document.getElementsByTagName('table'));
+        //alert(tables.length);
+    }
+    return handled
 }
 
 // Get All HTML
@@ -64,6 +195,23 @@ function nightMode(enable) {
         addClass(elm, "nightMode");
     } else {
         removeClass(elm, "nightMode");
+    }
+}
+
+// Toggle night mode
+function themeMode(mode) {
+    var elm = document.documentElement;
+    removeClass(elm, "nightMode");
+    removeClass(elm, "serpiaMode");
+    removeClass(elm, "greenMode");
+    if( mode == 1) {
+        addClass(elm, "serpiaMode");
+    }
+    if( mode == 2) {
+        addClass(elm, "greenMode");
+    }
+    if( mode == 3) {
+        addClass(elm, "nightMode");
     }
 }
 
@@ -652,3 +800,5 @@ var onClassBasedListenerClick = function(schemeName, attributeContent) {
 	// Set the custom link URL to the event
 	window.location = schemeName + "://" + attributeContent + positionParameterString;
 }
+
+

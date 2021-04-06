@@ -100,7 +100,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         var visibleHeight: CGFloat = self.readerConfig.canChangeScrollDirection ? 222 : 170
         visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
         menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
-        menuView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, UIColor.white)
+        //menuView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, UIColor.white)
+        menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         menuView.autoresizingMask = .flexibleWidth
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
@@ -141,8 +142,10 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         dayNight.delegate = self
         dayNight.tag = 1
         dayNight.addSegmentWithTitle(self.readerConfig.localizedFontMenuDay, onSelectionImage: sunSelected, offSelectionImage: sunNormal)
+        dayNight.addSegmentWithTitle(self.readerConfig.localizedFontMenuSerpia, onSelectionImage: sunSelected, offSelectionImage: sunNormal)
+        dayNight.addSegmentWithTitle(self.readerConfig.localizedFontMenuGreen, onSelectionImage: sunSelected, offSelectionImage: sunNormal)
         dayNight.addSegmentWithTitle(self.readerConfig.localizedFontMenuNight, onSelectionImage: moonSelected, offSelectionImage: moonNormal)
-        dayNight.selectSegmentAtIndex(self.folioReader.nightMode ? 1 : 0)
+        dayNight.selectSegmentAtIndex(self.folioReader.themeMode)
         menuView.addSubview(dayNight)
 
 
@@ -274,12 +277,14 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
     func segmentView(_ segmentView: SMSegmentView, didSelectSegmentAtIndex index: Int) {
         guard (self.folioReader.readerCenter?.currentPage) != nil else { return }
 
-        if segmentView.tag == 1 {
+        if segmentView.tag == 1 {   //Theme Mode
 
-            self.folioReader.nightMode = Bool(index == 1)
+            self.folioReader.nightMode = Bool(index == 3)
+            self.folioReader.themeMode = index
 
             UIView.animate(withDuration: 0.6, animations: {
-                self.menuView.backgroundColor = (self.folioReader.nightMode ? self.readerConfig.nightModeBackground : self.readerConfig.daysModeNavBackground)
+                //self.menuView.backgroundColor = (self.folioReader.nightMode ? self.readerConfig.nightModeBackground : self.readerConfig.daysModeNavBackground)
+                self.menuView.backgroundColor = self.readerConfig.themeModeBackground[self.folioReader.themeMode]
             })
 
         } else if segmentView.tag == 2 {

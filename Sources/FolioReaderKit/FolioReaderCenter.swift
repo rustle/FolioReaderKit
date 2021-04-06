@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import ZFDragableModalTransition
+// import ZFDragableModalTransition
 
 /// Protocol which is used from `FolioReaderCenter`s.
 @objc public protocol FolioReaderCenterDelegate: class {
@@ -23,7 +23,7 @@ import ZFDragableModalTransition
     ///   - page: The `FolioReaderPage`.
     ///   - htmlContent: The current HTML content as `String`.
     /// - Returns: The adjusted HTML content as `String`. This is the content which will be loaded into the given `FolioReaderPage`.
-    @objc optional func htmlContentForPage(_ page: FolioReaderPage, htmlContent: String) -> String
+    @objc func htmlContentForPage(_ page: FolioReaderPage, htmlContent: String) -> String
     
     /// Notifies that a page changed. This is triggered when collection view cell is changed.
     ///
@@ -36,7 +36,7 @@ import ZFDragableModalTransition
 open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
 
     /// This delegate receives the events from the current `FolioReaderPage`s delegate.
-    open weak var delegate: FolioReaderCenterDelegate?
+    open var delegate: FolioReaderCenterDelegate?
 
     /// This delegate receives the events from current page
     open weak var pageDelegate: FolioReaderPageDelegate?
@@ -141,7 +141,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         collectionViewLayout.minimumInteritemSpacing = 0
         collectionViewLayout.scrollDirection = .direction(withConfiguration: self.readerConfig)
         
-        let background = folioReader.isNight(self.readerConfig.nightModeBackground, UIColor.white)
+        //let background = folioReader.isNight(self.readerConfig.nightModeBackground, UIColor.white)
+        let background = self.readerConfig.themeModeBackground[folioReader.themeMode]
         view.backgroundColor = background
 
         // CollectionView
@@ -208,6 +209,10 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         pageIndicatorView?.reloadView(updateShadow: true)
     }
 
+    override open func viewWillDisappear(_ animated: Bool) {
+        folioReader.saveReaderState()
+    }
+    
     override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
 
@@ -250,7 +255,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     }
 
     func configureNavBar() {
-        let navBackground = folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        //let navBackground = folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        let navBackground = self.readerConfig.themeModeNavBackground[folioReader.themeMode]
         let tintColor = readerConfig.tintColor
         let navText = folioReader.isNight(UIColor.white, UIColor.black)
         let font = UIFont(name: "Avenir-Light", size: 17)!
@@ -302,7 +308,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         self.setCollectionViewProgressiveDirection()
 
         if self.readerConfig.loadSavedPositionForCurrentBook {
-            guard let position = folioReader.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
+//            guard let position = folioReader.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
+            guard let position = self.readerConfig.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
                 self.currentPageNumber = 1
                 return
             }
@@ -485,6 +492,16 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         if folioReader.nightMode {
             classes += " nightMode"
         }
+        switch folioReader.themeMode {
+        case 1:
+            classes += " serpiaMode"
+            break
+        case 2:
+            classes += " greenMode"
+            break
+        default:
+            break
+        }
 
         // Font Size
         classes += " \(folioReader.currentFontSize.cssIdentifier)"
@@ -492,7 +509,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         html = html.replacingOccurrences(of: "<html ", with: "<html class=\"\(classes)\"")
 
         // Let the delegate adjust the html string
-        if let modifiedHtmlContent = self.delegate?.htmlContentForPage?(cell, htmlContent: html) {
+        if let modifiedHtmlContent = self.delegate?.htmlContentForPage(cell, htmlContent: html) {
             html = modifiedHtmlContent
         }
 
@@ -1418,7 +1435,9 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 extension FolioReaderCenter: FolioReaderPageDelegate {
 
     public func pageDidLoad(_ page: FolioReaderPage) {
-        if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
+//        if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
+        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
+            folioReader.savedPositionForCurrentBook = position
             let pageNumber = position["pageNumber"] as? Int
             let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
             let pageOffset = offset

@@ -13,6 +13,7 @@ open class FolioReaderWebView: UIWebView {
     var isColors = false
     var isShare = false
     var isOneWord = false
+    var mDictView = MDictViewContainer()
 
     fileprivate weak var readerContainer: FolioReaderContainer?
 
@@ -37,6 +38,8 @@ open class FolioReaderWebView: UIWebView {
 
     init(frame: CGRect, readerContainer: FolioReaderContainer) {
         self.readerContainer = readerContainer
+        
+        mDictView.loadViewIfNeeded()
 
         super.init(frame: frame)
     }
@@ -61,6 +64,7 @@ open class FolioReaderWebView: UIWebView {
                 || action == #selector(highlightWithNote(_:))
                 || action == #selector(updateHighlightNote(_:))
                 || (action == #selector(define(_:)) && isOneWord)
+                || (action == #selector(lookup(_:)))
                 || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
                 || (action == #selector(share(_:)) && readerConfig.allowSharing)
                 || (action == #selector(copy(_:)) && readerConfig.allowSharing) {
@@ -212,6 +216,24 @@ open class FolioReaderWebView: UIWebView {
         readerContainer.show(vc, sender: nil)
     }
 
+    @objc func lookup(_ sender: UIMenuController?) {
+        guard let selectedText = js("getSelectedText()") else {
+            return
+        }
+        
+        self.setMenuVisible(false)
+        self.clearTextSelection()
+        
+        guard let readerContainer = readerContainer else { return }
+        mDictView.word = selectedText
+        
+        let nav = UINavigationController(rootViewController: mDictView)
+        nav.navigationBar.isTranslucent = false
+
+        readerContainer.show(nav, sender: nil)
+        
+    }
+    
     @objc func play(_ sender: UIMenuController?) {
         self.folioReader.readerAudioPlayer?.play()
 
@@ -274,6 +296,8 @@ open class FolioReaderWebView: UIWebView {
         let editNoteItem = UIMenuItem(title: self.readerConfig.localizedHighlightNote, action: #selector(updateHighlightNote(_:)))
         let playAudioItem = UIMenuItem(title: self.readerConfig.localizedPlayMenu, action: #selector(play(_:)))
         let defineItem = UIMenuItem(title: self.readerConfig.localizedDefineMenu, action: #selector(define(_:)))
+        let mDictItem = UIMenuItem(title: self.readerConfig.localizedMDictMenu, action: #selector(lookup(_:)))
+        
         let colorsItem = UIMenuItem(title: "C", image: colors) { [weak self] _ in
             self?.colors(menuController)
         }
@@ -315,7 +339,7 @@ open class FolioReaderWebView: UIWebView {
             menuItems = [yellowItem, greenItem, blueItem, pinkItem, underlineItem]
         } else {
             // default menu
-            menuItems = [highlightItem, defineItem, highlightNoteItem]
+            menuItems = [highlightItem, defineItem, highlightNoteItem, mDictItem]
 
             if self.book.hasAudio || self.readerConfig.enableTTS {
                 menuItems.insert(playAudioItem, at: 0)
@@ -327,6 +351,7 @@ open class FolioReaderWebView: UIWebView {
         }
         
         menuController.menuItems = menuItems
+        menuController.update()
     }
     
     open func setMenuVisible(_ menuVisible: Bool, animated: Bool = true, andRect rect: CGRect = CGRect.zero) {

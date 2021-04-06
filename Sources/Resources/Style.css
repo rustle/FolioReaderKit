@@ -83,6 +83,7 @@ p {
     margin: 1.3em 0 1.5em 0;
     line-height: 1.40em !important;
     text-indent: 1.25em;
+    text-align: justify !important;
 }
 
 b, strong, th {font-weight: bolder !important;}
@@ -115,7 +116,11 @@ sup {
 /* iBooks like */
 a { text-decoration: none; }
 pre { white-space: pre-wrap; }
-@page { margin: 0 0 !important; }
+@page {
+    margin: 0 0 !important;
+    margin-top: 1em !important;
+    margin-bottom: 1em !important;
+}
 table, ol, il { text-align: -webkit-auto; }
 h1 ,h2 ,h3 ,h4 ,h5 ,h6 {
     text-align: -webkit-auto;
@@ -203,7 +208,8 @@ html, body {
 }
 
 html {
-    background-color: #FFFFFF !important;
+    text-align: justify !important;
+    hyphens: auto !important;
 }
 
 body {
@@ -230,6 +236,26 @@ html.nightMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
 html.nightMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
 
 
+html.serpiaMode, html.serpiaMode body {
+    background-color: #FBF0D9 !important;  /*kindle sepia*/
+}
+
+.serpiaMode p, .serpiaMode div, .serpiaMode span:not(.epub-media-overlay-playing) {
+    color: #5F4B32 !important;
+    background-color: transparent !important;
+}
+
+.serpiaMode h1, .serpiaMode h2, .serpiaMode h3, .serpiaMode h4, .serpiaMode h5, .serpiaMode h6 {
+    color: #5F4B32 !important;
+}
+
+html.serpiaMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
+html.serpiaMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
+html.serpiaMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
+html.serpiaMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
+html.serpiaMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
+
+
 /*
  *
  * Font classes
@@ -241,11 +267,11 @@ html.nightMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 
 .lora, .lora p, .lora span, .lora div { font-family: "Lora", serif !important; }
 .raleway, .raleway p, .raleway span, .raleway div { font-family: "Raleway", sans-serif !important; }
 
-html.textSizeOne, .textSizeOne body { font-size: 13px !important; }
-html.textSizeTwo, .textSizeTwo body { font-size: 15px !important; }
-html.textSizeThree, .textSizeThree body { font-size: 17px !important; }
-html.textSizeFour, .textSizeFour body { font-size: 19px !important; }
-html.textSizeFive, .textSizeFive body { font-size: 21px !important; }
+html.textSizeOne, .textSizeOne body { font-size: 17px !important; }
+html.textSizeTwo, .textSizeTwo body { font-size: 20px !important; }
+html.textSizeThree, .textSizeThree body { font-size: 23px !important; }
+html.textSizeFour, .textSizeFour body { font-size: 26px !important; }
+html.textSizeFive, .textSizeFive body { font-size: 30px !important; }
 
 h1 {
     font-size: 2em;

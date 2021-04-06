@@ -37,6 +37,13 @@ public enum FolioReaderScrollDirection: Int {
     }
 }
 
+public enum FolioReaderThemeMode: Int {
+    case day
+    case serpia
+    case forest
+    case night
+}
+
 // MARK: - ClassBasedOnClickListener
 
 /**
@@ -115,7 +122,7 @@ open class FolioReaderConfig: NSObject {
     // Day mode nav color
     open var daysModeNavBackground = UIColor.white
     
-    // Day mode nav color
+    // Night mode nav color
     open var nightModeNavBackground = UIColor(rgba: "#131313")
     
     /// Night mode background color
@@ -124,6 +131,16 @@ open class FolioReaderConfig: NSObject {
     /// Night mode menu background color
     open var nightModeMenuBackground = UIColor(rgba: "#1E1E1E")
 
+    // theme mode nav color
+    open var themeModeNavBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#131313")]
+    
+    /// theme mode background color
+    open var themeModeBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#131313")]
+
+    /// theme mode menu background color
+    open var themeModeMenuBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#1E1E1E")]
+
+    
     /// Night mode separator color
     open var nightModeSeparatorColor = UIColor(white: 0.5, alpha: 0.2)
 
@@ -145,7 +162,7 @@ open class FolioReaderConfig: NSObject {
     open var canChangeFontStyle = true
     
     /// Should hide navigation bar on user tap
-    open var shouldHideNavigationOnTap = true
+    open var shouldHideNavigationOnTap = false
 
     /// Allow sharing option, if `false` will hide all sharing icons and options
     open var allowSharing = true
@@ -161,6 +178,8 @@ open class FolioReaderConfig: NSObject {
 
     /// Go to saved position when open a book
     open var loadSavedPositionForCurrentBook = true
+    
+    open var savedPositionForCurrentBook: [String: Any]?
     
     // MARK: Quote image share
 
@@ -196,11 +215,14 @@ open class FolioReaderConfig: NSObject {
     open var localizedHighlightsDateFormat = "MMM dd, YYYY | HH:mm"
     open var localizedHighlightMenu = NSLocalizedString("Highlight", comment: "")
     open var localizedDefineMenu = NSLocalizedString("Define", comment: "")
+    open var localizedMDictMenu = NSLocalizedString("MDict", comment: "")
     open var localizedPlayMenu = NSLocalizedString("Play", comment: "")
     open var localizedPauseMenu = NSLocalizedString("Pause", comment: "")
     open var localizedFontMenuNight = NSLocalizedString("Night", comment: "")
     open var localizedPlayerMenuStyle = NSLocalizedString("Style", comment: "")
     open var localizedFontMenuDay = NSLocalizedString("Day", comment: "")
+    open var localizedFontMenuSerpia = NSLocalizedString("Serpia", comment: "")
+    open var localizedFontMenuGreen = NSLocalizedString("Green", comment: "")
     open var localizedLayoutHorizontal = NSLocalizedString("Horizontal", comment: "")
     open var localizedLayoutVertical = NSLocalizedString("Vertical", comment: "")
     open var localizedReaderOnePageLeft = NSLocalizedString("1 page left", comment: "")

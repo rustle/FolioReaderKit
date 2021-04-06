@@ -75,7 +75,7 @@ open class FolioReaderContainer: UIViewController {
     }
 
     /// Common Initialization
-    fileprivate func initialization() {
+    open func initialization() {
         // Register custom fonts
         FontBlaster.blast(bundle: Bundle.frameworkBundle())
 
@@ -83,6 +83,7 @@ open class FolioReaderContainer: UIViewController {
         self.folioReader.register(defaults: [
             kCurrentFontFamily: FolioReaderFont.andada.rawValue,
             kNightMode: false,
+            kThemeMode: FolioReaderThemeMode.day.rawValue,
             kCurrentFontSize: 2,
             kCurrentAudioRate: 1,
             kCurrentHighlightStyle: 0,
@@ -130,6 +131,7 @@ open class FolioReaderContainer: UIViewController {
         self.readerConfig.shouldHideNavigationOnTap = ((hideBars == true) ? true : self.readerConfig.shouldHideNavigationOnTap)
 
         self.centerViewController = FolioReaderCenter(withContainer: self)
+        self.centerViewController?.delegate = MyFolioReaderCenterDelegate()
 
         if let rootViewController = self.centerViewController {
             self.centerNavigationController = UINavigationController(rootViewController: rootViewController)

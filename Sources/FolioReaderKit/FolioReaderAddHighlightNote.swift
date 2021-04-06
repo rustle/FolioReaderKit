@@ -130,7 +130,8 @@ class FolioReaderAddHighlightNote: UIViewController {
     }
     
     private func configureNavBar() {
-        let navBackground = folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        //let navBackground = folioReader.isNight(self.readerConfig.nightModeNavBackground, self.readerConfig.daysModeNavBackground)
+        let navBackground = self.readerConfig.themeModeNavBackground[folioReader.themeMode]
         let tintColor = readerConfig.tintColor
         let navText = folioReader.isNight(UIColor.white, UIColor.black)
         let font = UIFont(name: "Avenir-Light", size: 17)!
