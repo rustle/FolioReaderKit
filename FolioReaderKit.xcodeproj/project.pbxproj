@@ -325,20 +325,10 @@
 			path = Raleway;
 			sourceTree = "<group>";
 		};
-		2ABB9098261C28A3004AA7C0 /* DictView */ = {
-			isa = PBXGroup;
-			children = (
-				2ABB9099261C28A3004AA7C0 /* MDictView.swift */,
-				2ABB909A261C28A3004AA7C0 /* StarDictView.swift */,
-			);
-			path = DictView;
-			sourceTree = "<group>";
-		};
 		2ABB90A4261C2A65004AA7C0 /* FolioReaderKit */ = {
 			isa = PBXGroup;
 			children = (
 				B0D69C421D0387F7003B4CCD /* Vendor */,
-				2ABB9098261C28A3004AA7C0 /* DictView */,
 				2ABB90A9261C2C57004AA7C0 /* FolioReaderUserDefaults.swift */,
 				3A27F08B1FD9BE5800D84A57 /* Extensions.swift */,
 				1A958F0F1D397BE900D56699 /* FolioReaderAudioPlayer.swift */,
@@ -361,6 +351,8 @@
 				1A958F241D397BE900D56699 /* PageViewController.swift */,
 				1A65DDD41DA744410033C277 /* QuoteImage.swift */,
 				1A958F901D397BE900D56699 /* ScrollScrubber.swift */,
+				2ABB9099261C28A3004AA7C0 /* MDictView.swift */,
+				2ABB909A261C28A3004AA7C0 /* StarDictView.swift */,
 				1A958F041D397BE900D56699 /* EPUBCore */,
 				1A958F1D1D397BE900D56699 /* Models */,
 			);
