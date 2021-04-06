@@ -1,4 +1,4 @@
-// swift-tools-version:5.0
+// swift-tools-version:5.3
 import PackageDescription
 
 let package = Package(
@@ -16,12 +16,16 @@ let package = Package(
         .package(url: "https://github.com/tadija/AEXML.git", from: "4.3.3"),
         .package(url: "https://github.com/ArtSabintsev/FontBlaster.git", from: "5.1.0"),
 		// .Package(url: "https://github.com/fantim/JSQWebViewController.git", majorVersion: 6, minor: 1),
-        .package(url: "https://github.com/realm/realm-cocoa.git", from: "3.17.0"),
+        .package(name: "Realm", url: "https://github.com/realm/realm-cocoa.git", from: "3.17.0"),
 	],
 	targets: [
         .target(
             name: "FolioReaderKit",
-            dependencies: ["AEXML", "ZipArchive", "RealmSwift", "FontBlaster", "MenuItemKit", "ZFDragableModalTransition"]
+            dependencies: ["AEXML", "ZipArchive", "FontBlaster", "MenuItemKit", "ZFDragableModalTransition", .product(name: "RealmSwift", package: "Realm")],
+            exclude: ["Info.plist"],
+            resources: [
+                .copy("Sources/Resources")
+            ]
         ),
 		.testTarget(name: "FolioReaderKitTests", dependencies: ["FolioReaderKit"])
 	]
