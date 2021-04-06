@@ -7,7 +7,7 @@
 //
 
 import UIKit
-// import ZFDragableModalTransition
+import ZFDragableModalTransition
 
 /// Protocol which is used from `FolioReaderCenter`s.
 @objc public protocol FolioReaderCenterDelegate: class {

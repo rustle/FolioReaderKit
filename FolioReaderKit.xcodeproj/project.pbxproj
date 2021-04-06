@@ -69,12 +69,10 @@
 		2ABB9049261C178E004AA7C0 /* FontBlaster in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB9048261C178E004AA7C0 /* FontBlaster */; };
 		2ABB9050261C17CB004AA7C0 /* AEXML in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB904F261C17CB004AA7C0 /* AEXML */; };
 		2ABB905B261C1825004AA7C0 /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB905A261C1825004AA7C0 /* ZipArchive */; };
-		2ABB907A261C2381004AA7C0 /* ZFModalTransitionAnimator.h in Headers */ = {isa = PBXBuildFile; fileRef = 2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2ABB907B261C2381004AA7C0 /* ZFDragableModalTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = 2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		2ABB907C261C2381004AA7C0 /* ZFModalTransitionAnimator.m in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */; };
 		2ABB909B261C28A3004AA7C0 /* MDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB9099261C28A3004AA7C0 /* MDictView.swift */; };
 		2ABB909C261C28A3004AA7C0 /* StarDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB909A261C28A3004AA7C0 /* StarDictView.swift */; };
 		2ABB90AA261C2C58004AA7C0 /* FolioReaderUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB90A9261C2C57004AA7C0 /* FolioReaderUserDefaults.swift */; };
+		2ABB90C8261C39BA004AA7C0 /* ZFDragableModalTransition in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB90C7261C39BA004AA7C0 /* ZFDragableModalTransition */; };
 		3A27F08E1FD9BE5800D84A57 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A27F08B1FD9BE5800D84A57 /* Extensions.swift */; };
 		3A27F09D1FD9C24A00D84A57 /* FRBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F051D397BE900D56699 /* FRBook.swift */; };
 		3A27F09E1FD9C24A00D84A57 /* FREpubParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F061D397BE900D56699 /* FREpubParser.swift */; };
@@ -177,9 +175,6 @@
 		1A9590141D397C1300D56699 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1A9590161D397CAF00D56699 /* FolioReaderKit.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FolioReaderKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderAddHighlightNote.swift; sourceTree = "<group>"; };
-		2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZFModalTransitionAnimator.h; sourceTree = "<group>"; };
-		2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZFDragableModalTransition.h; sourceTree = "<group>"; };
-		2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZFModalTransitionAnimator.m; sourceTree = "<group>"; };
 		2ABB9099261C28A3004AA7C0 /* MDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDictView.swift; sourceTree = "<group>"; };
 		2ABB909A261C28A3004AA7C0 /* StarDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StarDictView.swift; sourceTree = "<group>"; };
 		2ABB90A9261C2C57004AA7C0 /* FolioReaderUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderUserDefaults.swift; sourceTree = "<group>"; };
@@ -203,6 +198,7 @@
 			files = (
 				2ABB9044261C1750004AA7C0 /* MenuItemKit in Frameworks */,
 				2ABB903D261C15DF004AA7C0 /* RealmSwift in Frameworks */,
+				2ABB90C8261C39BA004AA7C0 /* ZFDragableModalTransition in Frameworks */,
 				2ABB9050261C17CB004AA7C0 /* AEXML in Frameworks */,
 				2ABB903B261C15DF004AA7C0 /* Realm in Frameworks */,
 				2ABB9049261C178E004AA7C0 /* FontBlaster in Frameworks */,
@@ -329,16 +325,6 @@
 			path = Raleway;
 			sourceTree = "<group>";
 		};
-		2ABB9076261C2380004AA7C0 /* ZFDragableModalTransition */ = {
-			isa = PBXGroup;
-			children = (
-				2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */,
-				2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */,
-				2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */,
-			);
-			path = ZFDragableModalTransition;
-			sourceTree = "<group>";
-		};
 		2ABB9098261C28A3004AA7C0 /* DictView */ = {
 			isa = PBXGroup;
 			children = (
@@ -423,7 +409,6 @@
 		B0D69C421D0387F7003B4CCD /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
-				2ABB9076261C2380004AA7C0 /* ZFDragableModalTransition */,
 				B0D69C431D0387F7003B4CCD /* HAControls */,
 				B0D69C451D0387F7003B4CCD /* SMSegmentView */,
 			);
@@ -456,8 +441,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A958FA31D397BE900D56699 /* FolioReaderKit.h in Headers */,
-				2ABB907A261C2381004AA7C0 /* ZFModalTransitionAnimator.h in Headers */,
-				2ABB907B261C2381004AA7C0 /* ZFDragableModalTransition.h in Headers */,
 				B0D6990F1D035FA2003B4CCD /* FolioReaderKit.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -486,6 +469,7 @@
 				2ABB9048261C178E004AA7C0 /* FontBlaster */,
 				2ABB904F261C17CB004AA7C0 /* AEXML */,
 				2ABB905A261C1825004AA7C0 /* ZipArchive */,
+				2ABB90C7261C39BA004AA7C0 /* ZFDragableModalTransition */,
 			);
 			productName = FolioReaderKit;
 			productReference = B0D6990B1D035FA2003B4CCD /* FolioReaderKit.framework */;
@@ -545,6 +529,7 @@
 				2ABB9047261C178E004AA7C0 /* XCRemoteSwiftPackageReference "FontBlaster" */,
 				2ABB904E261C17CB004AA7C0 /* XCRemoteSwiftPackageReference "AEXML" */,
 				2ABB9059261C1825004AA7C0 /* XCRemoteSwiftPackageReference "ZipArchive" */,
+				2ABB90C6261C39BA004AA7C0 /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */,
 			);
 			productRefGroup = B0D6990C1D035FA2003B4CCD /* Products */;
 			projectDirPath = "";
@@ -625,7 +610,6 @@
 				3A27F08E1FD9BE5800D84A57 /* Extensions.swift in Sources */,
 				1A958F9D1D397BE900D56699 /* FolioReaderChapterList.swift in Sources */,
 				1A958F951D397BE900D56699 /* FRResource.swift in Sources */,
-				2ABB907C261C2381004AA7C0 /* ZFModalTransitionAnimator.m in Sources */,
 				1A958F9B1D397BE900D56699 /* FolioReaderAudioPlayer.swift in Sources */,
 				1A958F9E1D397BE900D56699 /* FolioReaderChapterListCell.swift in Sources */,
 				2ABB90AA261C2C58004AA7C0 /* FolioReaderUserDefaults.swift in Sources */,
@@ -988,6 +972,14 @@
 				minimumVersion = 2.2.5;
 			};
 		};
+		2ABB90C6261C39BA004AA7C0 /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drearycold/ZFDragableModalTransition.git";
+			requirement = {
+				branch = peter_dev;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1020,6 +1012,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 2ABB9059261C1825004AA7C0 /* XCRemoteSwiftPackageReference "ZipArchive" */;
 			productName = ZipArchive;
+		};
+		2ABB90C7261C39BA004AA7C0 /* ZFDragableModalTransition */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB90C6261C39BA004AA7C0 /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */;
+			productName = ZFDragableModalTransition;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
