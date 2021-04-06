@@ -24,7 +24,7 @@ let package = Package(
             dependencies: ["AEXML", "ZipArchive", "FontBlaster", "MenuItemKit", "ZFDragableModalTransition", .product(name: "RealmSwift", package: "Realm")],
             exclude: ["Info.plist"],
             resources: [
-                .copy("Sources/Resources")
+                .process("Resources")
             ]
         ),
 		.testTarget(name: "FolioReaderKitTests", dependencies: ["FolioReaderKit"])
