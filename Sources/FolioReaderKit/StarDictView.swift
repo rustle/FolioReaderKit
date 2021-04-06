@@ -11,7 +11,7 @@ import WebKit
 
 open class StarDictViewContainer : UIViewController, WKUIDelegate {
     var webView: WKWebView!
-    var word = ""
+    open var word = ""
     
     open override func loadView() {
         super.loadView()
