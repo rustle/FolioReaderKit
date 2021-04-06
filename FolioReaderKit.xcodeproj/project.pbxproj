@@ -3,14 +3,11 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		1A41E8912031E22300A8F70C /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A41E8902031E22300A8F70C /* MediaType.swift */; };
-		1A65DDCC1DA73F8E0033C277 /* MenuItemKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A65DDCB1DA73F8D0033C277 /* MenuItemKit.framework */; };
-		1A65DDD21DA744190033C277 /* Realm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A65DDD01DA744190033C277 /* Realm.framework */; };
-		1A65DDD31DA744190033C277 /* RealmSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A65DDD11DA744190033C277 /* RealmSwift.framework */; };
 		1A65DDD51DA744410033C277 /* QuoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65DDD41DA744410033C277 /* QuoteImage.swift */; };
 		1A65DDD71DA7450A0033C277 /* FolioReaderQuoteShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65DDD61DA7450A0033C277 /* FolioReaderQuoteShare.swift */; };
 		1A958F911D397BE900D56699 /* FRBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F051D397BE900D56699 /* FRBook.swift */; };
@@ -66,6 +63,17 @@
 		1AC255D42202195200841FA2 /* HADiscreteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C441D0387F7003B4CCD /* HADiscreteSlider.swift */; };
 		1AC255D52202196D00841FA2 /* FolioReaderAddHighlightNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */; };
 		256AE60B20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */; };
+		2ABB903B261C15DF004AA7C0 /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB903A261C15DF004AA7C0 /* Realm */; };
+		2ABB903D261C15DF004AA7C0 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB903C261C15DF004AA7C0 /* RealmSwift */; };
+		2ABB9044261C1750004AA7C0 /* MenuItemKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB9043261C1750004AA7C0 /* MenuItemKit */; };
+		2ABB9049261C178E004AA7C0 /* FontBlaster in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB9048261C178E004AA7C0 /* FontBlaster */; };
+		2ABB9050261C17CB004AA7C0 /* AEXML in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB904F261C17CB004AA7C0 /* AEXML */; };
+		2ABB905B261C1825004AA7C0 /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 2ABB905A261C1825004AA7C0 /* ZipArchive */; };
+		2ABB907A261C2381004AA7C0 /* ZFModalTransitionAnimator.h in Headers */ = {isa = PBXBuildFile; fileRef = 2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2ABB907B261C2381004AA7C0 /* ZFDragableModalTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = 2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2ABB907C261C2381004AA7C0 /* ZFModalTransitionAnimator.m in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */; };
+		2ABB909B261C28A3004AA7C0 /* MDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB9099261C28A3004AA7C0 /* MDictView.swift */; };
+		2ABB909C261C28A3004AA7C0 /* StarDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2ABB909A261C28A3004AA7C0 /* StarDictView.swift */; };
 		3A27F08C1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A27F08A1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift */; };
 		3A27F08E1FD9BE5800D84A57 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A27F08B1FD9BE5800D84A57 /* Extensions.swift */; };
 		3A27F09D1FD9C24A00D84A57 /* FRBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F051D397BE900D56699 /* FRBook.swift */; };
@@ -97,8 +105,6 @@
 		3A27F0C21FD9C25C00D84A57 /* PageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F241D397BE900D56699 /* PageViewController.swift */; };
 		3A27F0C31FD9C25C00D84A57 /* QuoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A65DDD41DA744410033C277 /* QuoteImage.swift */; };
 		3A27F0C41FD9C25C00D84A57 /* ScrollScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F901D397BE900D56699 /* ScrollScrubber.swift */; };
-		3A27F0C51FD9C31E00D84A57 /* Realm.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A65DDD01DA744190033C277 /* Realm.framework */; };
-		3A27F0C61FD9C31E00D84A57 /* RealmSwift.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1A65DDD11DA744190033C277 /* RealmSwift.framework */; };
 		3A27F0C71FD9C33A00D84A57 /* Highlight+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F211D397BE900D56699 /* Highlight+Helper.swift */; };
 		3A27F0C81FD9C33A00D84A57 /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A958F231D397BE900D56699 /* Highlight.swift */; };
 		3AD5EEB91D9433C100E42810 /* FolioReaderWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD5EEB81D9433C100E42810 /* FolioReaderWebView.swift */; };
@@ -108,10 +114,6 @@
 		B0D69CC81D0387F7003B4CCD /* HADiscreteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C441D0387F7003B4CCD /* HADiscreteSlider.swift */; };
 		B0D69CC91D0387F7003B4CCD /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C461D0387F7003B4CCD /* SMSegment.swift */; };
 		B0D69CCA1D0387F7003B4CCD /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */; };
-		B0D69CD11D0388EF003B4CCD /* AEXML.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0D69CCB1D0388EF003B4CCD /* AEXML.framework */; };
-		B0D69CD21D0388EF003B4CCD /* FontBlaster.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0D69CCC1D0388EF003B4CCD /* FontBlaster.framework */; };
-		B0D69CD51D0388EF003B4CCD /* ZFDragableModalTransition.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0D69CCF1D0388EF003B4CCD /* ZFDragableModalTransition.framework */; };
-		B0D69CD61D0388EF003B4CCD /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B0D69CD01D0388EF003B4CCD /* ZipArchive.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -126,9 +128,6 @@
 
 /* Begin PBXFileReference section */
 		1A41E8902031E22300A8F70C /* MediaType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
-		1A65DDCB1DA73F8D0033C277 /* MenuItemKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MenuItemKit.framework; path = Carthage/Build/iOS/MenuItemKit.framework; sourceTree = "<group>"; };
-		1A65DDD01DA744190033C277 /* Realm.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Realm.framework; path = Carthage/Build/iOS/Realm.framework; sourceTree = "<group>"; };
-		1A65DDD11DA744190033C277 /* RealmSwift.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = RealmSwift.framework; path = Carthage/Build/iOS/RealmSwift.framework; sourceTree = "<group>"; };
 		1A65DDD41DA744410033C277 /* QuoteImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuoteImage.swift; sourceTree = "<group>"; };
 		1A65DDD61DA7450A0033C277 /* FolioReaderQuoteShare.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderQuoteShare.swift; sourceTree = "<group>"; };
 		1A958F051D397BE900D56699 /* FRBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRBook.swift; sourceTree = "<group>"; };
@@ -179,6 +178,11 @@
 		1A9590141D397C1300D56699 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		1A9590161D397CAF00D56699 /* FolioReaderKit.podspec */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = FolioReaderKit.podspec; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
 		256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderAddHighlightNote.swift; sourceTree = "<group>"; };
+		2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZFModalTransitionAnimator.h; sourceTree = "<group>"; };
+		2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ZFDragableModalTransition.h; sourceTree = "<group>"; };
+		2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ZFModalTransitionAnimator.m; sourceTree = "<group>"; };
+		2ABB9099261C28A3004AA7C0 /* MDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDictView.swift; sourceTree = "<group>"; };
+		2ABB909A261C28A3004AA7C0 /* StarDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StarDictView.swift; sourceTree = "<group>"; };
 		3A27F08A1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderUserDefaults.swift; sourceTree = "<group>"; };
 		3A27F08B1FD9BE5800D84A57 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		3AD5EEB81D9433C100E42810 /* FolioReaderWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderWebView.swift; sourceTree = "<group>"; };
@@ -203,13 +207,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1A65DDCC1DA73F8E0033C277 /* MenuItemKit.framework in Frameworks */,
-				B0D69CD11D0388EF003B4CCD /* AEXML.framework in Frameworks */,
-				B0D69CD21D0388EF003B4CCD /* FontBlaster.framework in Frameworks */,
-				B0D69CD51D0388EF003B4CCD /* ZFDragableModalTransition.framework in Frameworks */,
-				B0D69CD61D0388EF003B4CCD /* ZipArchive.framework in Frameworks */,
-				1A65DDD21DA744190033C277 /* Realm.framework in Frameworks */,
-				1A65DDD31DA744190033C277 /* RealmSwift.framework in Frameworks */,
+				2ABB9044261C1750004AA7C0 /* MenuItemKit in Frameworks */,
+				2ABB903D261C15DF004AA7C0 /* RealmSwift in Frameworks */,
+				2ABB9050261C17CB004AA7C0 /* AEXML in Frameworks */,
+				2ABB903B261C15DF004AA7C0 /* Realm in Frameworks */,
+				2ABB9049261C178E004AA7C0 /* FontBlaster in Frameworks */,
+				2ABB905B261C1825004AA7C0 /* ZipArchive in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -217,8 +220,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3A27F0C51FD9C31E00D84A57 /* Realm.framework in Frameworks */,
-				3A27F0C61FD9C31E00D84A57 /* RealmSwift.framework in Frameworks */,
 				B0D699161D035FA2003B4CCD /* FolioReaderKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -229,43 +230,18 @@
 		1A65DDCA1DA73F8C0033C277 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				1A65DDD01DA744190033C277 /* Realm.framework */,
-				1A65DDD11DA744190033C277 /* RealmSwift.framework */,
-				1A65DDCB1DA73F8D0033C277 /* MenuItemKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		1A958F031D397BE900D56699 /* Source */ = {
+		1A958F031D397BE900D56699 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				1A958F041D397BE900D56699 /* EPUBCore */,
-				1A958F1D1D397BE900D56699 /* Models */,
+				2ABB90A4261C2A65004AA7C0 /* FolioReaderKit */,
+				2ABB9098261C28A3004AA7C0 /* DictView */,
 				1A958F251D397BE900D56699 /* Resources */,
-				3A27F08B1FD9BE5800D84A57 /* Extensions.swift */,
-				1A958F0F1D397BE900D56699 /* FolioReaderAudioPlayer.swift */,
-				1A958F101D397BE900D56699 /* FolioReaderCenter.swift */,
-				1A958F111D397BE900D56699 /* FolioReaderChapterList.swift */,
-				256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */,
-				1A958F121D397BE900D56699 /* FolioReaderChapterListCell.swift */,
-				1A958F131D397BE900D56699 /* FolioReaderConfig.swift */,
-				1A958F141D397BE900D56699 /* FolioReaderContainer.swift */,
-				1A958F151D397BE900D56699 /* FolioReaderFontsMenu.swift */,
-				1A958F161D397BE900D56699 /* FolioReaderHighlightList.swift */,
-				1A958F171D397BE900D56699 /* FolioReaderKit.h */,
-				1A958F181D397BE900D56699 /* FolioReaderKit.swift */,
-				1A958F191D397BE900D56699 /* FolioReaderPage.swift */,
-				1A958F1A1D397BE900D56699 /* FolioReaderPageIndicator.swift */,
-				1A958F1B1D397BE900D56699 /* FolioReaderPlayerMenu.swift */,
-				1A65DDD61DA7450A0033C277 /* FolioReaderQuoteShare.swift */,
-				1A958F1C1D397BE900D56699 /* FolioReaderSharingProvider.swift */,
-				3A27F08A1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift */,
-				3AD5EEB81D9433C100E42810 /* FolioReaderWebView.swift */,
-				1A958F241D397BE900D56699 /* PageViewController.swift */,
-				1A65DDD41DA744410033C277 /* QuoteImage.swift */,
-				1A958F901D397BE900D56699 /* ScrollScrubber.swift */,
 			);
-			path = Source;
+			path = Sources;
 			sourceTree = SOURCE_ROOT;
 		};
 		1A958F041D397BE900D56699 /* EPUBCore */ = {
@@ -360,10 +336,61 @@
 			path = Raleway;
 			sourceTree = "<group>";
 		};
+		2ABB9076261C2380004AA7C0 /* ZFDragableModalTransition */ = {
+			isa = PBXGroup;
+			children = (
+				2ABB9077261C2380004AA7C0 /* ZFModalTransitionAnimator.h */,
+				2ABB9078261C2380004AA7C0 /* ZFDragableModalTransition.h */,
+				2ABB9079261C2380004AA7C0 /* ZFModalTransitionAnimator.m */,
+			);
+			path = ZFDragableModalTransition;
+			sourceTree = "<group>";
+		};
+		2ABB9098261C28A3004AA7C0 /* DictView */ = {
+			isa = PBXGroup;
+			children = (
+				2ABB9099261C28A3004AA7C0 /* MDictView.swift */,
+				2ABB909A261C28A3004AA7C0 /* StarDictView.swift */,
+			);
+			path = DictView;
+			sourceTree = "<group>";
+		};
+		2ABB90A4261C2A65004AA7C0 /* FolioReaderKit */ = {
+			isa = PBXGroup;
+			children = (
+				3A27F08B1FD9BE5800D84A57 /* Extensions.swift */,
+				1A958F0F1D397BE900D56699 /* FolioReaderAudioPlayer.swift */,
+				1A958F101D397BE900D56699 /* FolioReaderCenter.swift */,
+				1A958F111D397BE900D56699 /* FolioReaderChapterList.swift */,
+				256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */,
+				1A958F121D397BE900D56699 /* FolioReaderChapterListCell.swift */,
+				1A958F131D397BE900D56699 /* FolioReaderConfig.swift */,
+				1A958F141D397BE900D56699 /* FolioReaderContainer.swift */,
+				1A958F151D397BE900D56699 /* FolioReaderFontsMenu.swift */,
+				1A958F161D397BE900D56699 /* FolioReaderHighlightList.swift */,
+				1A958F171D397BE900D56699 /* FolioReaderKit.h */,
+				1A958F181D397BE900D56699 /* FolioReaderKit.swift */,
+				1A958F191D397BE900D56699 /* FolioReaderPage.swift */,
+				1A958F1A1D397BE900D56699 /* FolioReaderPageIndicator.swift */,
+				1A958F1B1D397BE900D56699 /* FolioReaderPlayerMenu.swift */,
+				1A65DDD61DA7450A0033C277 /* FolioReaderQuoteShare.swift */,
+				1A958F1C1D397BE900D56699 /* FolioReaderSharingProvider.swift */,
+				3A27F08A1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift */,
+				3AD5EEB81D9433C100E42810 /* FolioReaderWebView.swift */,
+				1A958F241D397BE900D56699 /* PageViewController.swift */,
+				1A65DDD41DA744410033C277 /* QuoteImage.swift */,
+				1A958F901D397BE900D56699 /* ScrollScrubber.swift */,
+				1A958F041D397BE900D56699 /* EPUBCore */,
+				1A958F1D1D397BE900D56699 /* Models */,
+			);
+			path = FolioReaderKit;
+			sourceTree = "<group>";
+		};
 		B0D699011D035FA1003B4CCD = {
 			isa = PBXGroup;
 			children = (
 				1A9590161D397CAF00D56699 /* FolioReaderKit.podspec */,
+				1A958F031D397BE900D56699 /* Sources */,
 				B0D6990D1D035FA2003B4CCD /* FolioReaderKit */,
 				B0D699191D035FA2003B4CCD /* FolioReaderKitTests */,
 				B0D6990C1D035FA2003B4CCD /* Products */,
@@ -383,7 +410,6 @@
 		B0D6990D1D035FA2003B4CCD /* FolioReaderKit */ = {
 			isa = PBXGroup;
 			children = (
-				1A958F031D397BE900D56699 /* Source */,
 				B0D69C421D0387F7003B4CCD /* Vendor */,
 				B0D69B501D0365AC003B4CCD /* Frameworks */,
 				B0D6990E1D035FA2003B4CCD /* FolioReaderKit.h */,
@@ -417,6 +443,7 @@
 		B0D69C421D0387F7003B4CCD /* Vendor */ = {
 			isa = PBXGroup;
 			children = (
+				2ABB9076261C2380004AA7C0 /* ZFDragableModalTransition */,
 				B0D69C431D0387F7003B4CCD /* HAControls */,
 				B0D69C451D0387F7003B4CCD /* SMSegmentView */,
 			);
@@ -448,6 +475,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				1A958FA31D397BE900D56699 /* FolioReaderKit.h in Headers */,
+				2ABB907A261C2381004AA7C0 /* ZFModalTransitionAnimator.h in Headers */,
+				2ABB907B261C2381004AA7C0 /* ZFDragableModalTransition.h in Headers */,
 				B0D6990F1D035FA2003B4CCD /* FolioReaderKit.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -469,6 +498,14 @@
 			dependencies = (
 			);
 			name = FolioReaderKit;
+			packageProductDependencies = (
+				2ABB903A261C15DF004AA7C0 /* Realm */,
+				2ABB903C261C15DF004AA7C0 /* RealmSwift */,
+				2ABB9043261C1750004AA7C0 /* MenuItemKit */,
+				2ABB9048261C178E004AA7C0 /* FontBlaster */,
+				2ABB904F261C17CB004AA7C0 /* AEXML */,
+				2ABB905A261C1825004AA7C0 /* ZipArchive */,
+			);
 			productName = FolioReaderKit;
 			productReference = B0D6990B1D035FA2003B4CCD /* FolioReaderKit.framework */;
 			productType = "com.apple.product-type.framework";
@@ -513,13 +550,21 @@
 				};
 			};
 			buildConfigurationList = B0D699051D035FA1003B4CCD /* Build configuration list for PBXProject "FolioReaderKit" */;
-			compatibilityVersion = "Xcode 3.2";
+			compatibilityVersion = "Xcode 12.0";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 			);
 			mainGroup = B0D699011D035FA1003B4CCD;
+			packageReferences = (
+				2ABB9039261C15DF004AA7C0 /* XCRemoteSwiftPackageReference "realm-cocoa" */,
+				2ABB9042261C1750004AA7C0 /* XCRemoteSwiftPackageReference "MenuItemKit" */,
+				2ABB9047261C178E004AA7C0 /* XCRemoteSwiftPackageReference "FontBlaster" */,
+				2ABB904E261C17CB004AA7C0 /* XCRemoteSwiftPackageReference "AEXML" */,
+				2ABB9059261C1825004AA7C0 /* XCRemoteSwiftPackageReference "ZipArchive" */,
+			);
 			productRefGroup = B0D6990C1D035FA2003B4CCD /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -582,6 +627,7 @@
 				1A958FAB1D397BE900D56699 /* Highlight+Helper.swift in Sources */,
 				3AD5EEB91D9433C100E42810 /* FolioReaderWebView.swift in Sources */,
 				1A958FA41D397BE900D56699 /* FolioReaderKit.swift in Sources */,
+				2ABB909B261C28A3004AA7C0 /* MDictView.swift in Sources */,
 				1A65DDD71DA7450A0033C277 /* FolioReaderQuoteShare.swift in Sources */,
 				3A27F08C1FD9BE5800D84A57 /* FolioReaderUserDefaults.swift in Sources */,
 				1A958FA21D397BE900D56699 /* FolioReaderHighlightList.swift in Sources */,
@@ -593,10 +639,12 @@
 				1A958FAD1D397BE900D56699 /* Highlight.swift in Sources */,
 				1A958F981D397BE900D56699 /* FRSmils.swift in Sources */,
 				1A958F971D397BE900D56699 /* FRSmilElement.swift in Sources */,
+				2ABB909C261C28A3004AA7C0 /* StarDictView.swift in Sources */,
 				1A41E8912031E22300A8F70C /* MediaType.swift in Sources */,
 				3A27F08E1FD9BE5800D84A57 /* Extensions.swift in Sources */,
 				1A958F9D1D397BE900D56699 /* FolioReaderChapterList.swift in Sources */,
 				1A958F951D397BE900D56699 /* FRResource.swift in Sources */,
+				2ABB907C261C2381004AA7C0 /* ZFModalTransitionAnimator.m in Sources */,
 				1A958F9B1D397BE900D56699 /* FolioReaderAudioPlayer.swift in Sources */,
 				1A958F9E1D397BE900D56699 /* FolioReaderChapterListCell.swift in Sources */,
 				1A958F9A1D397BE900D56699 /* FRTocReference.swift in Sources */,
@@ -714,7 +762,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -768,10 +816,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -796,12 +845,19 @@
 				);
 				INFOPLIST_FILE = FolioReaderKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderKit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -821,12 +877,19 @@
 				);
 				INFOPLIST_FILE = FolioReaderKit/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderKit;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_VERSION = 4.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -839,7 +902,11 @@
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = FolioReaderKitTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
@@ -856,7 +923,11 @@
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
 				);
 				INFOPLIST_FILE = FolioReaderKitTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_SWIFT3_OBJC_INFERENCE = On;
@@ -895,6 +966,82 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2ABB9039261C15DF004AA7C0 /* XCRemoteSwiftPackageReference "realm-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.17.0;
+			};
+		};
+		2ABB9042261C1750004AA7C0 /* XCRemoteSwiftPackageReference "MenuItemKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cxa/MenuItemKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		2ABB9047261C178E004AA7C0 /* XCRemoteSwiftPackageReference "FontBlaster" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ArtSabintsev/FontBlaster.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.0;
+			};
+		};
+		2ABB904E261C17CB004AA7C0 /* XCRemoteSwiftPackageReference "AEXML" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tadija/AEXML.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.3.3;
+			};
+		};
+		2ABB9059261C1825004AA7C0 /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drearycold/ZipArchive.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.5;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2ABB903A261C15DF004AA7C0 /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB9039261C15DF004AA7C0 /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = Realm;
+		};
+		2ABB903C261C15DF004AA7C0 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB9039261C15DF004AA7C0 /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = RealmSwift;
+		};
+		2ABB9043261C1750004AA7C0 /* MenuItemKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB9042261C1750004AA7C0 /* XCRemoteSwiftPackageReference "MenuItemKit" */;
+			productName = MenuItemKit;
+		};
+		2ABB9048261C178E004AA7C0 /* FontBlaster */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB9047261C178E004AA7C0 /* XCRemoteSwiftPackageReference "FontBlaster" */;
+			productName = FontBlaster;
+		};
+		2ABB904F261C17CB004AA7C0 /* AEXML */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB904E261C17CB004AA7C0 /* XCRemoteSwiftPackageReference "AEXML" */;
+			productName = AEXML;
+		};
+		2ABB905A261C1825004AA7C0 /* ZipArchive */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2ABB9059261C1825004AA7C0 /* XCRemoteSwiftPackageReference "ZipArchive" */;
+			productName = ZipArchive;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B0D699021D035FA1003B4CCD /* Project object */;
 }
