@@ -9,12 +9,12 @@ import Foundation
 import UIKit
 import WebKit
 
-class MDictViewContainer : UIViewController, WKUIDelegate {
+open class MDictViewContainer : UIViewController, WKUIDelegate {
     var webView: WKWebView!
     var server = "http://peter-mdict.lan/"
     var word = ""
     
-    override func loadView() {
+    open override func loadView() {
         super.loadView()
         
         self.navigationItem.setLeftBarButton(UIBarButtonItem(title: "Close", style: .done, target: self, action: #selector(finishReading(sender:))), animated: true)
@@ -29,7 +29,7 @@ class MDictViewContainer : UIViewController, WKUIDelegate {
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         if let url = URL(string: server + "?word=" + word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!) {
             webView.load(URLRequest(url: url))

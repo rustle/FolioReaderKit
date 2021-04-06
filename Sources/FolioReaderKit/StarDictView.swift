@@ -9,11 +9,11 @@ import Foundation
 import UIKit
 import WebKit
 
-class StarDictViewContainer : UIViewController, WKUIDelegate {
+open class StarDictViewContainer : UIViewController, WKUIDelegate {
     var webView: WKWebView!
     var word = ""
     
-    override func loadView() {
+    open override func loadView() {
         super.loadView()
         
         let webConfiguration = WKWebViewConfiguration()
@@ -26,7 +26,7 @@ class StarDictViewContainer : UIViewController, WKUIDelegate {
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
+    open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         //\(word.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)!)
