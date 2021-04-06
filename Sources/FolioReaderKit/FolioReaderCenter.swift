@@ -506,6 +506,9 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         // Font Size
         classes += " \(folioReader.currentFontSize.cssIdentifier)"
 
+        // TODO block layout
+        classes += " justifiedBlockMode"
+        
         html = html.replacingOccurrences(of: "<html ", with: "<html class=\"\(classes)\"")
 
         // Let the delegate adjust the html string
