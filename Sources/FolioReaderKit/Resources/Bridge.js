@@ -15,10 +15,10 @@ document.addEventListener("DOMContentLoaded", function(event) {
 //    for (var i=0; i<lnk.length; i++) {
 //        lnk[i].setAttribute("onclick","return callVerseURL(this);");
 //    }
-    removeOuterTable()
-    removePSpace()
-    removeBodyClass()
-    reParagraph()
+    //removeOuterTable()
+    //removePSpace()
+    //removeBodyClass()
+    //reParagraph()
 });
 
 // Generate a GUID
@@ -806,4 +806,7 @@ var onClassBasedListenerClick = function(schemeName, attributeContent) {
 	window.location = schemeName + "://" + attributeContent + positionParameterString;
 }
 
-
+removeOuterTable()
+removePSpace()
+removeBodyClass()
+reParagraph()
