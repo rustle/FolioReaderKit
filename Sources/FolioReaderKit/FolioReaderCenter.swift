@@ -99,7 +99,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 
     init(withContainer readerContainer: FolioReaderContainer) {
         self.readerContainer = readerContainer
-        super.init(nibName: nil, bundle: Bundle.module)
+        super.init(nibName: nil, bundle: Bundle.frameworkBundle())
 
         self.initialization()
     }

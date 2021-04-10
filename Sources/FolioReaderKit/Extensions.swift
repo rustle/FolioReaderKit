@@ -71,7 +71,11 @@ func delay(_ delay:Double, closure:@escaping ()->()) {
 
 internal extension Bundle {
     class func frameworkBundle() -> Bundle {
+        #if SWIFT_PACKAGE
+        return Bundle.module
+        #else
         return Bundle(for: FolioReader.self)
+        #endif
     }
 }
 
@@ -336,7 +340,7 @@ internal extension String {
 internal extension UIImage {
     
     convenience init?(readerImageNamed: String) {
-        self.init(named: readerImageNamed, in: Bundle.module, compatibleWith: nil)
+        self.init(named: readerImageNamed, in: Bundle.frameworkBundle(), compatibleWith: nil)
     }
     
     /// Forces the image to be colored with Reader Config tintColor

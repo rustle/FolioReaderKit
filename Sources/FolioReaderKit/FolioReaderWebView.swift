@@ -240,21 +240,20 @@ open class FolioReaderWebView: WKWebView {
     }
 
     @objc func lookup(_ sender: UIMenuController?) {
-        guard let selectedText = js("getSelectedText()") else {
-            return
-        }
-        
-        self.setMenuVisible(false)
-        self.clearTextSelection()
-        
-        guard let readerContainer = readerContainer else { return }
-        mDictView.word = selectedText
-        
-        let nav = UINavigationController(rootViewController: mDictView)
-        nav.navigationBar.isTranslucent = false
+        js("getSelectedText()") { selectedText in
+            guard let selectedText = selectedText else { return }
 
-        readerContainer.show(nav, sender: nil)
-        
+            self.setMenuVisible(false)
+            self.clearTextSelection()
+
+            self.mDictView.word = selectedText
+            self.mDictView.view.tintColor = self.readerConfig.tintColor
+            let nav = UINavigationController(rootViewController: self.mDictView)
+            nav.navigationBar.isTranslucent = false
+
+            guard let readerContainer = self.readerContainer else { return }
+            readerContainer.show(nav, sender: nil)
+        }
     }
     
     @objc func play(_ sender: UIMenuController?) {
