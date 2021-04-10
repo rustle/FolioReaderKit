@@ -16,6 +16,14 @@ class FolioReaderScript: WKUserScript {
                    forMainFrameOnly: true)
     }
     
+    @available(iOS 14.0, *)
+    override init(source: String,
+        injectionTime: WKUserScriptInjectionTime,
+        forMainFrameOnly: Bool,
+        in contentWorld: WKContentWorld) {
+        super.init(source: source, injectionTime: injectionTime, forMainFrameOnly: forMainFrameOnly, in: contentWorld)
+    }
+    
     static let bridgeJS: FolioReaderScript = {
         let jsURL = Bundle.frameworkBundle().url(forResource: "Bridge", withExtension: "js")!
         let jsSource = try! String(contentsOf: jsURL)
