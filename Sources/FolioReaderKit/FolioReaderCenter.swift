@@ -272,12 +272,14 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         let closeIcon = UIImage(readerImageNamed: "icon-navbar-close")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let tocIcon = UIImage(readerImageNamed: "icon-navbar-toc")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let fontIcon = UIImage(readerImageNamed: "icon-navbar-font")?.ignoreSystemTint(withConfiguration: self.readerConfig)
+        let logoIcon = UIImage(readerImageNamed: "icon-logo")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let space = 70 as CGFloat
 
         let menu = UIBarButtonItem(image: closeIcon, style: .plain, target: self, action:#selector(closeReader(_:)))
         let toc = UIBarButtonItem(image: tocIcon, style: .plain, target: self, action:#selector(presentChapterList(_:)))
+        let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(gotoLastReadPosition(_:)))
 
-        navigationItem.leftBarButtonItems = [menu, toc]
+        navigationItem.leftBarButtonItems = [menu, toc, lrp]
 
         var rightBarIcons = [UIBarButtonItem]()
 
@@ -1354,6 +1356,18 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         present(nav, animated: true, completion: nil)
     }
 
+    @objc func gotoLastReadPosition(_ sender: UIBarButtonItem) {
+        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
+            let pageNumber = position["pageNumber"] as? Int
+            let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
+            let pageOffset = offset
+
+            if (self.currentPageNumber == pageNumber && pageOffset > 0) {
+                self.currentPage?.scrollPageToOffset(pageOffset!, animated: false)
+            }
+        }
+    }
+    
     /**
      Present fonts and settings menu
      */
