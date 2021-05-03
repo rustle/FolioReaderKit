@@ -132,13 +132,31 @@ open class FolioReaderConfig: NSObject {
     open var nightModeMenuBackground = UIColor(rgba: "#1E1E1E")
 
     // theme mode nav color
-    open var themeModeNavBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#131313")]
+    open var themeModeNavBackground = [
+        UIColor.white,
+        UIColor(rgba: "#FBF0D9"),
+        UIColor.green,
+        UIColor(rgba: "#000000"),
+        UIColor(rgba: "#131313")
+    ]
     
     /// theme mode background color
-    open var themeModeBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#131313")]
+    open var themeModeBackground = [
+        UIColor.white,
+        UIColor(rgba: "#FBF0D9"),
+        UIColor.green,
+        UIColor(rgba: "#000000"),
+        UIColor(rgba: "#131313")
+    ]
 
     /// theme mode menu background color
-    open var themeModeMenuBackground = [UIColor.white, UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#FBF0D9"), UIColor(rgba: "#1E1E1E")]
+    open var themeModeMenuBackground = [
+        UIColor.white,
+        UIColor(rgba: "#FBF0D9"),
+        UIColor.green,
+        UIColor(rgba: "#000000"),
+        UIColor(rgba: "#1E1E1E")
+    ]
 
     
     /// Night mode separator color
@@ -218,6 +236,7 @@ open class FolioReaderConfig: NSObject {
     open var localizedMDictMenu = NSLocalizedString("MDict", comment: "")
     open var localizedPlayMenu = NSLocalizedString("Play", comment: "")
     open var localizedPauseMenu = NSLocalizedString("Pause", comment: "")
+    open var localizedFontMenuDark = NSLocalizedString("Dark", comment: "")
     open var localizedFontMenuNight = NSLocalizedString("Night", comment: "")
     open var localizedPlayerMenuStyle = NSLocalizedString("Style", comment: "")
     open var localizedFontMenuDay = NSLocalizedString("Day", comment: "")

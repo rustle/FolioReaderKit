@@ -496,6 +496,9 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         case 2:
             classes += " greenMode"
             break
+        case 3:
+            classes += " darkMode"
+            break
         default:
             break
         }

@@ -229,6 +229,20 @@ html.nightMode, html.nightMode body {
     color: #848484 !important;
 }
 
+
+html.darkMode, html.darkMode body {
+    background-color: #000000 !important;
+}
+
+.darkMode p, .darkMode div, .darkMode span:not(.epub-media-overlay-playing) {
+    color: #B6B6B6 !important;
+    background-color: transparent !important;
+}
+
+.darkMode h1, .darkMode h2, .darkMode h3, .darkMode h4, .darkMode h5, .darkMode h6 {
+    color: #C4C4C4 !important;
+}
+
 html.nightMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
 html.nightMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
 html.nightMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}

@@ -209,6 +209,7 @@ function themeMode(mode) {
     removeClass(elm, "nightMode");
     removeClass(elm, "serpiaMode");
     removeClass(elm, "greenMode");
+    removeClass(elm, "darkMode");
     if( mode == 1) {
         addClass(elm, "serpiaMode");
     }
@@ -216,6 +217,9 @@ function themeMode(mode) {
         addClass(elm, "greenMode");
     }
     if( mode == 3) {
+        addClass(elm, "darkMode");
+    }
+    if( mode == 4) {
         addClass(elm, "nightMode");
     }
 }
