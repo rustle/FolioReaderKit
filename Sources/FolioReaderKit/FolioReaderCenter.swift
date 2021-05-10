@@ -1027,8 +1027,11 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         if total == 0 {
             return 0
         }
+        if current == 0 {
+            return 0
+        }
         
-        return 100.0 * Double(current) / Double(total)
+        return 100.0 * Double(current - 1) / Double(total)
     }
 
     public func getBookProgress() -> Double {
