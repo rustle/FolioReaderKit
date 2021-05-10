@@ -1469,6 +1469,8 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
             isFirstLoad = false
         }
 
+        updateCurrentPage(page)
+        
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
             currentPage.handleAnchor(fragmentID, avoidBeginningAnchors: true, animated: true)
