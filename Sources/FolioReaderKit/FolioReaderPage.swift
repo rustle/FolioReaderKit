@@ -399,7 +399,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let response = message.body as? String else { return }
         print(response)
         if response == "BridgeFinished" {
-            self.delegate?.pageDidLoad?(self)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                self.delegate?.pageDidLoad?(self)
+            }
         }
       }
     
