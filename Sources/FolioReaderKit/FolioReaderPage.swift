@@ -86,10 +86,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.scrollView.showsHorizontalScrollIndicator = false
             webView?.backgroundColor = .clear
             webView?.isHidden = true
+            webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
             self.contentView.addSubview(webView!)
         }
         webView?.navigationDelegate = self
-        webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
 
         if colorView == nil {
             colorView = UIView()
