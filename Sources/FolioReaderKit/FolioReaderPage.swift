@@ -398,6 +398,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         print(response)
+        if response == "BridgeFinished" {
+            self.delegate?.pageDidLoad?(self)
+        }
       }
     
     // MARK: Gesture recognizer
