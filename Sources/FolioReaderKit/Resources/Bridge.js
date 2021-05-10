@@ -814,3 +814,5 @@ removeOuterTable()
 removePSpace()
 removeBodyClass()
 reParagraph()
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");

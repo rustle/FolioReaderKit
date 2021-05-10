@@ -37,7 +37,7 @@ import WebKit
     @objc optional func pageTap(_ recognizer: UITapGestureRecognizer)
 }
 
-open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestureRecognizerDelegate {
+open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestureRecognizerDelegate, WKScriptMessageHandler {
     weak var delegate: FolioReaderPageDelegate?
     weak var readerContainer: FolioReaderContainer?
 
@@ -88,6 +88,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.contentView.addSubview(webView!)
         }
         webView?.navigationDelegate = self
+        webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
 
         if colorView == nil {
             colorView = UIView()
@@ -246,9 +247,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView.isColors = false
             self.webView?.createMenu(options: false)
         })
-        webView.js("document.readyState") { _ in
-            self.delegate?.pageDidLoad?(self)
-        }
+//        webView.js("document.readyState") { _ in
+//            self.delegate?.pageDidLoad?(self)
+//        }
+        
         let overlayColor = readerConfig.mediaOverlayColor!
         let colors = "\"\(overlayColor.hexString(false))\", \"\(overlayColor.highlightColor().hexString(false))\""
         webView.js("setMediaOverlayStyleColors(\(colors))")
@@ -390,6 +392,14 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         return nil
     }
 
+    // MARK: WKScriptMessageHandler
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        //This function handles the events coming from javascript. We'll configure the javascript side of this later.
+        //We can access properties through the message body, like this:
+        guard let response = message.body as? String else { return }
+        print(response)
+      }
+    
     // MARK: Gesture recognizer
 
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
