@@ -1460,6 +1460,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 if (self.currentPageNumber == pageNumber && pageOffset > 0) {
                     page.scrollPageToOffset(pageOffset!, animated: false)
                 }
+                page.webView?.isHidden = false
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
                 page.scrollPageToBottom()
             }

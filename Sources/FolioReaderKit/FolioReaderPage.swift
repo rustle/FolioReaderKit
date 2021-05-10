@@ -85,6 +85,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.scrollView.showsVerticalScrollIndicator = false
             webView?.scrollView.showsHorizontalScrollIndicator = false
             webView?.backgroundColor = .clear
+            webView?.isHidden = true
             self.contentView.addSubview(webView!)
         }
         webView?.navigationDelegate = self
@@ -399,7 +400,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let response = message.body as? String else { return }
         print(response)
         if response == "BridgeFinished" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.delegate?.pageDidLoad?(self)
             }
         }
