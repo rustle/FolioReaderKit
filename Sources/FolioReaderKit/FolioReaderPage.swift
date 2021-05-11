@@ -121,7 +121,16 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         super.layoutSubviews()
 
         webView?.setupScrollDirection()
-        webView?.frame = webViewFrame()
+        var webViewFrame = webViewFrame()
+        switch self.readerConfig.scrollDirection {
+        case .vertical, .defaultVertical, .horizontalWithVerticalContent:
+            
+            break
+        case .horizontal:
+            webViewFrame = webViewFrame.insetBy(dx: 10, dy: 80)
+            break
+        }
+        webView?.frame = webViewFrame
     }
 
     func webViewFrame() -> CGRect {
