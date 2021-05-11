@@ -440,7 +440,7 @@ open class FolioReaderWebView: WKWebView {
             scrollView.isPagingEnabled = true
             cssOverflowProperty = "-webkit-paged-x"
             scrollView.bounces = false
-            self.directionalLayoutMargins = .init(top: 50, leading: 50, bottom: 50, trailing: 50)
+            self.superview?.directionalLayoutMargins = .init(top: 50, leading: 50, bottom: 50, trailing: 50)
             break
         }
     }
