@@ -810,9 +810,21 @@ var onClassBasedListenerClick = function(schemeName, attributeContent) {
 	window.location = schemeName + "://" + attributeContent + positionParameterString;
 }
 
+window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML())
+
 removeOuterTable()
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeOuterTable " + getHTML())
+
 removePSpace()
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("After removePSpace " + getHTML())
+
 removeBodyClass()
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeBodyClass " + getHTML())
+
 reParagraph()
 
+window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
 window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");

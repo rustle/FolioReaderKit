@@ -404,11 +404,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //This function handles the events coming from javascript. We'll configure the javascript side of this later.
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
-        print(response)
         if response == "BridgeFinished" {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                 self.delegate?.pageDidLoad?(self)
             }
+        } else if self.readerConfig.debug > 0 {
+            print("userContentController response\n\(response)")
         }
       }
     

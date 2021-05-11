@@ -263,6 +263,8 @@ open class FolioReaderConfig: NSObject {
     open var localizedSave = NSLocalizedString("Save", comment: "")
     open var localizedHighlightNote = NSLocalizedString("Note", comment: "")
 
+    open var debug = 0
+    
     public convenience init(withIdentifier identifier: String) {
         self.init()
 

@@ -16,7 +16,7 @@ class MyFolioReaderCenterDelegate: FolioReaderCenterDelegate {
         
         
         let modified = regex.stringByReplacingMatches(in: htmlContent, options: [], range: NSMakeRange(0, htmlContent.count), withTemplate: "").replacingOccurrences(of: "<body ", with: "<body style=\"text-align: justify !important; display: block !important; \" ")
-        print(modified)
+        // print(modified)
         return modified
     }
 }
