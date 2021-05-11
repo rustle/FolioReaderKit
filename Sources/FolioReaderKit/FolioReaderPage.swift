@@ -127,7 +127,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             
             break
         case .horizontal:
-            webViewFrame = webViewFrame.insetBy(dx: 10, dy: 80)
+            webViewFrame = webViewFrame.insetBy(
+                dx: CGFloat((self.folioReader.currentMarginLeft + self.folioReader.currentMarginRight) / 2),
+                dy: CGFloat((self.folioReader.currentMarginTop + self.folioReader.currentMarginBottom) / 2))
+            webViewFrame = webViewFrame.offsetBy(
+                dx: CGFloat((self.folioReader.currentMarginLeft - self.folioReader.currentMarginRight) / 2),
+                dy: CGFloat((self.folioReader.currentMarginTop - self.folioReader.currentMarginBottom) / 2))
             break
         }
         webView?.frame = webViewFrame

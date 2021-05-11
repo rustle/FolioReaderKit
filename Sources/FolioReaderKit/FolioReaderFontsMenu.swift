@@ -97,7 +97,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         view.addGestureRecognizer(tapGesture)
 
         // Menu view
-        var visibleHeight: CGFloat = self.readerConfig.canChangeScrollDirection ? 222 : 170
+        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
         visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
         menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
         //menuView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, UIColor.white)
@@ -271,6 +271,41 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
             layoutDirection.selectSegmentAtIndex(FolioReaderScrollDirection.horizontal.rawValue)
         }
         menuView.addSubview(layoutDirection)
+        
+        // Sepatator 4
+        let line4 = UIView(frame: CGRect(x: 0, y: line3.frame.origin.y + 56, width: view.frame.width, height: 1))
+        line4.backgroundColor = self.readerConfig.nightModeSeparatorColor
+        menuView.addSubview(line4)
+        
+        let marginIncrease = UIImage(readerImageNamed: "icon-sun")
+        let marginDecrease = UIImage(readerImageNamed: "icon-moon")
+        
+        let marginMenu = SMSegmentView(
+            frame: CGRect(x: 0, y: line4.frame.origin.y, width: view.frame.width, height: 55),
+            separatorColour: self.readerConfig.nightModeSeparatorColor,
+            separatorWidth: 1,
+            segmentProperties: [
+                keySegmentTitleFont: UIFont(name: "Avenir-Light", size: 17)!,
+                keySegmentOnSelectionColour: UIColor.clear,
+                keySegmentOffSelectionColour: UIColor.clear,
+                keySegmentOnSelectionTextColour: selectedColor,
+                keySegmentOffSelectionTextColour: normalColor,
+                keyContentVerticalMargin: 17 as AnyObject
+            ])
+        marginMenu.delegate = self
+        marginMenu.tag = 4
+        marginMenu.addSegmentWithTitle("T-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenu.addSegmentWithTitle("T+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenu.addSegmentWithTitle("B-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenu.addSegmentWithTitle("B+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenu.addSegmentWithTitle("L-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenu.addSegmentWithTitle("L+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenu.addSegmentWithTitle("R-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenu.addSegmentWithTitle("R+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        
+        
+        
+        menuView.addSubview(marginMenu)
     }
 
     // MARK: - SMSegmentView delegate
@@ -299,6 +334,60 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
             }
 
             self.folioReader.currentScrollDirection = index
+        } else if segmentView.tag == 4 {
+            print("tag:4 index:\(index)")
+            switch index {
+            case 0:
+                self.folioReader.currentMarginTop -= 5
+                if self.folioReader.currentMarginTop < 0 {
+                    self.folioReader.currentMarginTop = 0
+                }
+                break;
+            case 1:
+                self.folioReader.currentMarginTop += 5
+                if self.folioReader.currentMarginTop > 100 {
+                    self.folioReader.currentMarginTop = 100
+                }
+                break;
+            case 2:
+                self.folioReader.currentMarginBottom -= 5
+                if self.folioReader.currentMarginBottom < 0 {
+                    self.folioReader.currentMarginBottom = 0
+                }
+                break;
+            case 3:
+                self.folioReader.currentMarginBottom += 5
+                if self.folioReader.currentMarginBottom > 100 {
+                    self.folioReader.currentMarginBottom = 100
+                }
+                break;
+            case 4:
+                self.folioReader.currentMarginLeft -= 5
+                if self.folioReader.currentMarginLeft < 0 {
+                    self.folioReader.currentMarginLeft = 0
+                }
+                break;
+            case 5:
+                self.folioReader.currentMarginLeft += 5
+                if self.folioReader.currentMarginLeft > 100 {
+                    self.folioReader.currentMarginLeft = 100
+                }
+                break;
+            case 6:
+                self.folioReader.currentMarginRight -= 5
+                if self.folioReader.currentMarginRight < 0 {
+                    self.folioReader.currentMarginRight = 0
+                }
+                break;
+            case 7:
+                self.folioReader.currentMarginRight += 5
+                if self.folioReader.currentMarginRight > 100 {
+                    self.folioReader.currentMarginRight = 100
+                }
+                break;
+            default:
+                break;
+            }
         }
     }
     

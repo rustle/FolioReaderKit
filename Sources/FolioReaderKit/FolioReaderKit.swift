@@ -21,6 +21,11 @@ internal let kCurrentScrollDirection = "com.folioreader.kCurrentScrollDirection"
 internal let kNightMode = "com.folioreader.kNightMode"
 internal let kThemeMode = "com.folioreader.kThemeMode"
 internal let kCurrentTOCMenu = "com.folioreader.kCurrentTOCMenu"
+internal let kCurrentMarginTop = "com.folioreader.kCurrentMarginTop"
+internal let kCurrentMarginBottom = "com.folioreader.kCurrentMarginBottom"
+internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
+internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
+
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
 
@@ -315,6 +320,42 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentTOCMenu) }
         set (value) {
             self.defaults.set(value, forKey: kCurrentTOCMenu)
+        }
+    }
+    
+    open var currentMarginTop: Int {
+        get { return self.defaults.integer(forKey: kCurrentMarginTop)}
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentMarginTop)
+            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+            self.readerCenter?.setScrollDirection(direction)
+        }
+    }
+
+    open var currentMarginBottom: Int {
+        get { return self.defaults.integer(forKey: kCurrentMarginBottom)}
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentMarginBottom)
+            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+            self.readerCenter?.setScrollDirection(direction)
+        }
+    }
+
+    open var currentMarginLeft: Int {
+        get { return self.defaults.integer(forKey: kCurrentMarginLeft)}
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentMarginLeft)
+            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+            self.readerCenter?.setScrollDirection(direction)
+        }
+    }
+
+    open var currentMarginRight: Int {
+        get { return self.defaults.integer(forKey: kCurrentMarginRight)}
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentMarginRight)
+            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+            self.readerCenter?.setScrollDirection(direction)
         }
     }
 
