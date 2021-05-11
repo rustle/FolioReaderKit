@@ -121,20 +121,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         super.layoutSubviews()
 
         webView?.setupScrollDirection()
-        var webViewFrame = webViewFrame()
-        switch self.readerConfig.scrollDirection {
-        case .vertical, .defaultVertical, .horizontalWithVerticalContent:
-            
-            break
-        case .horizontal:
-            webViewFrame = webViewFrame.insetBy(
-                dx: CGFloat((self.folioReader.currentMarginLeft + self.folioReader.currentMarginRight) / 2),
-                dy: CGFloat((self.folioReader.currentMarginTop + self.folioReader.currentMarginBottom) / 2))
-            webViewFrame = webViewFrame.offsetBy(
-                dx: CGFloat((self.folioReader.currentMarginLeft - self.folioReader.currentMarginRight) / 2),
-                dy: CGFloat((self.folioReader.currentMarginTop - self.folioReader.currentMarginBottom) / 2))
-            break
-        }
+        let webViewFrame = webViewFrame()
         webView?.frame = webViewFrame
     }
 
@@ -161,7 +148,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         height = bounds.height - navBarHeight - statusbarHeight
         
         var frame = CGRect(x:x, y:y, width: width, height: height)
-        
+        frame = frame.insetBy(
+            dx: CGFloat((self.folioReader.currentMarginLeft + self.folioReader.currentMarginRight) / 2),
+            dy: CGFloat((self.folioReader.currentMarginTop + self.folioReader.currentMarginBottom) / 2))
+        frame = frame.offsetBy(
+            dx: CGFloat((self.folioReader.currentMarginLeft - self.folioReader.currentMarginRight) / 2),
+            dy: CGFloat((self.folioReader.currentMarginTop - self.folioReader.currentMarginBottom) / 2))
         
         print("Frame \(frame)")
         
