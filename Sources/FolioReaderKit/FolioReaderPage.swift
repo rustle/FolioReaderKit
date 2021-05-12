@@ -405,7 +405,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            delay(1.0) {
                 self.delegate?.pageDidLoad?(self)
             }
         } else if self.readerConfig.debug > 0 {

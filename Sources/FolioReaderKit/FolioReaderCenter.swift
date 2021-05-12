@@ -1476,7 +1476,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 if (self.currentPageNumber == pageNumber && pageOffset > 0) {
                     page.scrollPageToOffset(pageOffset!, animated: false)
                 }
-                page.webView?.isHidden = false
+                
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
                 page.scrollPageToBottom()
             }
@@ -1486,6 +1486,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         }
 
         updateCurrentPage(page)
+        page.webView?.isHidden = false
         
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
