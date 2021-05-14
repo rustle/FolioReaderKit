@@ -71,7 +71,7 @@ open class FolioReaderWebView: WKWebView {
             if action == #selector(highlight(_:))
                 || action == #selector(highlightWithNote(_:))
                 || action == #selector(updateHighlightNote(_:))
-                || (action == #selector(define(_:)) && isOneWord)
+                || (action == #selector(define(_:)))
                 || (action == #selector(lookup(_:)))
                 || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
                 || (action == #selector(share(_:)) && readerConfig.allowSharing)
