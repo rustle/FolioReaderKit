@@ -91,11 +91,19 @@ class FolioReaderPageIndicator: UIView {
     fileprivate func reloadViewWithPage(_ page: Int) {
         let pagesRemaining = self.folioReader.needsRTLChange ? totalPages-(totalPages-page+1) : totalPages-page
 
+        var pagesLabelText = ""
         if pagesRemaining == 1 {
-            pagesLabel.text = " " + self.readerConfig.localizedReaderOnePageLeft
+            pagesLabelText = " " + self.readerConfig.localizedReaderOnePageLeft
         } else {
-            pagesLabel.text = " \(pagesRemaining) " + self.readerConfig.localizedReaderManyPagesLeft
+            pagesLabelText = " \(pagesRemaining) " + self.readerConfig.localizedReaderManyPagesLeft
         }
+        
+        let pagePercent = self.folioReader.readerCenter?.getCurrentPageProgress() ?? 0.0
+        let bookPercent = self.folioReader.readerCenter?.getBookProgress() ?? 0.0
+        
+        pagesLabelText += " \(String(format: "%.2f", pagePercent))% \(String(format: "%.2f", bookPercent))%"
+        
+        pagesLabel.text = pagesLabelText
 
         let minutesRemaining: Int
         if totalPages == 0 {
