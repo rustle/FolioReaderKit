@@ -810,6 +810,29 @@ var onClassBasedListenerClick = function(schemeName, attributeContent) {
 	window.location = schemeName + "://" + attributeContent + positionParameterString;
 }
 
+function setFolioStyle(styleTextEncoded) {
+    var styleText = window.atob(styleTextEncoded)
+    var head = document.head
+    var style = document.getElementById("style-folioreader-runtime")
+    if (style == null) {
+        style = document.createElement('style')
+        style.type = "text/css"
+        style.id = "style-folioreader-runtime"
+        head.appendChild(style)
+    }
+    while (style.firstChild) {
+        style.removeChild(style.firstChild)
+    }
+    style.appendChild(document.createTextNode(styleText))
+    
+    let para = document.querySelector('p')
+    let compStyles = window.getComputedStyle(para)
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + compStyles.cssText)
+
+}
+
+
 window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML())
 
 removeOuterTable()

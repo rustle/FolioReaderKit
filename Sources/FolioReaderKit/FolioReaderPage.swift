@@ -405,6 +405,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
+            self.webView?.js("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
             delay(1.0) {
                 self.delegate?.pageDidLoad?(self)
             }

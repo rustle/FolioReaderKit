@@ -231,42 +231,48 @@ extension FolioReader {
     }
 
     /// Check current font name. Default .andada
-    open var currentFont: FolioReaderFont {
+//    open var currentFont: FolioReaderFont {
+//        get {
+//            guard
+//                let rawValue = self.defaults.value(forKey: kCurrentFontFamily) as? Int,
+//                let font = FolioReaderFont(rawValue: rawValue) else {
+//                    return .andada
+//            }
+//
+//            return font
+//        }
+//        set (font) {
+//            self.defaults.set(font.rawValue, forKey: kCurrentFontFamily)
+//            _ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(font.cssIdentifier)')")
+//        }
+//    }
+    
+    open var currentFont: String {
         get {
-            guard
-                let rawValue = self.defaults.value(forKey: kCurrentFontFamily) as? Int,
-                let font = FolioReaderFont(rawValue: rawValue) else {
-                    return .andada
-            }
-
-            return font
+            let fontFamilyName = self.defaults.value(forKey: kCurrentFontFamily) as? String ?? "Georgia"
+            return fontFamilyName
         }
-        set (font) {
-            self.defaults.set(font.rawValue, forKey: kCurrentFontFamily)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(font.cssIdentifier)')")
+        set (fontFamilyName) {
+            self.defaults.set(fontFamilyName, forKey: kCurrentFontFamily)
+            //_ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(fontFamilyName)')")
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
 
     /// Check current font size. Default .m
-    open var currentFontSize: FolioReaderFontSize {
+    open var currentFontSize: String {
         get {
-            guard
-                let rawValue = self.defaults.value(forKey: kCurrentFontSize) as? Int,
-                let size = FolioReaderFontSize(rawValue: rawValue) else {
-                    return .m
-            }
-
-            return size
+            let fontSize = self.defaults.value(forKey: kCurrentFontSize) as? String ?? "20px"
+            return fontSize
         }
-        set (value) {
-            self.defaults.set(value.rawValue, forKey: kCurrentFontSize)
-
-            guard let currentPage = self.readerCenter?.currentPage else {
-                return
-            }
-
-            currentPage.webView?.js("setFontSize('\(currentFontSize.cssIdentifier)')")
+        set (fontSize) {
+            self.defaults.set(fontSize, forKey: kCurrentFontSize)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
+    }
+    
+    open var currentFontSizeOnly: Int {
+        return Int(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20
     }
 
     /// Check current audio rate, the speed of speech voice. Default 0
@@ -429,5 +435,18 @@ extension FolioReader {
         self.readerAudioPlayer?.stop(immediate: true)
         self.defaults.set(0, forKey: kCurrentTOCMenu)
         self.delegate?.folioReaderDidClose?(self)
+    }
+}
+
+// MARK: - CSS Style
+
+
+extension FolioReader {
+    
+    open func generateRuntimeStyle() -> String {
+        var style = ""
+        style += "p { font-family: \(currentFont) !important; font-size: \(currentFontSize) !important; } "
+        
+        return style
     }
 }

@@ -482,7 +482,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         html = html.replacingOccurrences(of: "</head>", with: toInject)
 
         // Font class name
-        var classes = folioReader.currentFont.cssIdentifier
+        var classes = ""
+//        folioReader.currentFont
         classes += " " + folioReader.currentMediaOverlayStyle.className()
 
         // Night mode
@@ -504,7 +505,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         }
 
         // Font Size
-        classes += " \(folioReader.currentFontSize.cssIdentifier)"
+//        classes += " \(folioReader.currentFontSize.cssIdentifier)"
 
         // TODO block layout
         classes += " justifiedBlockMode"
@@ -1394,7 +1395,14 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         folioReader.saveReaderState()
         hideBars()
 
-        let menu = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
+        let menuFontTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuFontTab.tabBarItem = .init(title: "General", image: nil, tag: 0)
+        
+        let menuFontStyleTab = FolioReaderFontStyleMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuFontStyleTab.tabBarItem = .init(title: "FontStyle", image: nil, tag: 1)
+        
+        let menu = UITabBarController()
+        menu.setViewControllers([menuFontTab, menuFontStyleTab], animated: true)
         menu.modalPresentationStyle = .custom
 
         animator = ZFModalTransitionAnimator(modalViewController: menu)

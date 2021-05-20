@@ -280,16 +280,16 @@ html.justifiedBlockMode, html.justifiedBlockMode body {
  *
  */
 
-.andada, .andada p, .andada span, .andada div { font-family: "Andada", sans-serif !important; }
-.lato, .lato p, .lato span, .lato div { font-family: "Lato", serif !important; }
-.lora, .lora p, .lora span, .lora div { font-family: "Lora", serif !important; }
-.raleway, .raleway p, .raleway span, .raleway div { font-family: "Raleway", sans-serif !important; }
+/*.andada, .andada p, .andada span, .andada div { font-family: "Andada", sans-serif !important; }*/
+/*.lato, .lato p, .lato span, .lato div { font-family: "Lato", serif !important; }*/
+/*.lora, .lora p, .lora span, .lora div { font-family: "Lora", serif !important; }*/
+/*.raleway, .raleway p, .raleway span, .raleway div { font-family: "Raleway", sans-serif !important; }*/
 
-html.textSizeOne, .textSizeOne body { font-size: 17px !important; }
-html.textSizeTwo, .textSizeTwo body { font-size: 20px !important; }
-html.textSizeThree, .textSizeThree body { font-size: 23px !important; }
-html.textSizeFour, .textSizeFour body { font-size: 26px !important; }
-html.textSizeFive, .textSizeFive body { font-size: 30px !important; }
+/*html.textSizeOne, .textSizeOne body { font-size: 17px !important; }*/
+/*html.textSizeTwo, .textSizeTwo body { font-size: 20px !important; }*/
+/*html.textSizeThree, .textSizeThree body { font-size: 23px !important; }*/
+/*html.textSizeFour, .textSizeFour body { font-size: 26px !important; }*/
+/*html.textSizeFive, .textSizeFive body { font-size: 30px !important; }*/
 
 h1 {
     font-size: 2em;
