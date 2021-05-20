@@ -828,6 +828,8 @@ function setFolioStyle(styleTextEncoded) {
     let para = document.querySelector('p')
     let compStyles = window.getComputedStyle(para)
     
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + style.outerHTML)
+
     window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + compStyles.cssText)
 
 }

@@ -445,7 +445,34 @@ extension FolioReader {
     
     open func generateRuntimeStyle() -> String {
         var style = ""
-        style += "p { font-family: \(currentFont) !important; font-size: \(currentFontSize) !important; } "
+        style += """
+        
+        p {
+            font-family: \(currentFont) !important;
+            font-size: \(currentFontSize) !important;
+        }
+        
+        """
+        
+        for fontName in UIFont.fontNames(forFamilyName: currentFont) {
+            if let fontURL = readerCenter?.userFonts[fontName] {
+                let ctFont = CTFontCreateWithName(fontName as CFString, CGFloat(currentFontSizeOnly), nil)
+                let ctFontTrait = CTFontGetSymbolicTraits(ctFont)
+                let isItalic = ctFontTrait.contains(.traitItalic)
+                let isBold = ctFontTrait.contains(.traitBold)
+                style += """
+                
+                @font-face {
+                    font-family: \(currentFont);
+                    font-style: \(isItalic ? "italic" : "normal");
+                    font-weight: \(isBold ? "bold" : "normal");
+                    src: url('\(fontURL.absoluteString)');
+                }
+                
+                """
+                
+            }
+        }
         
         return style
     }

@@ -80,6 +80,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     fileprivate var currentWebViewScrollPositions = [Int: CGPoint]()
     fileprivate var currentOrientation: UIInterfaceOrientation?
 
+    open var userFonts = [String: URL]()
+    
     fileprivate var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
         return readerContainer.readerConfig
@@ -125,6 +127,37 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         loadingView.hidesWhenStopped = true
         loadingView.startAnimating()
         self.view.addSubview(loadingView)
+        
+        // Load custom fonts
+        if let documentDirectory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false) {
+            let fontsDirectory = documentDirectory.appendingPathComponent("Fonts",  isDirectory: true)
+            if FileManager.default.fileExists(atPath: fontsDirectory.path),
+               let fontsEnumerator = FileManager.default.enumerator(atPath: fontsDirectory.path) {
+                while let file = fontsEnumerator.nextObject() as? String {
+                    print("FONTDIR \(file)")
+                    let fileURL = fontsDirectory.appendingPathComponent(file)
+                    if let data = try? Data(contentsOf: fileURL) {
+                        guard let provider = CGDataProvider(data: data as CFData) else {
+                            continue
+                        }
+                        
+                        guard let font = CGFont(provider) else {
+                            continue
+                        }
+                        
+                        guard let name = font.postScriptName else {
+                            continue
+                        }
+                        
+                        print("FONTDIR NAME \(name) \(font.italicAngle) \(font)")
+                    
+                        userFonts[name as String] = fileURL
+                        
+                        CTFontManagerRegisterFontsForURL(fileURL as CFURL, .process, nil)
+                    }
+                }
+            }
+        }
     }
 
     // MARK: - View life cicle
