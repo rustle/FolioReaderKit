@@ -25,8 +25,8 @@ internal let kCurrentMarginTop = "com.folioreader.kCurrentMarginTop"
 internal let kCurrentMarginBottom = "com.folioreader.kCurrentMarginBottom"
 internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
 internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
-internal let kCurrentLetterSpacingPercent = "com.folioreader.kCurrentLetterSpacingPercent"
-internal let kCurrentLineHeightPercent = "com.folioreader.kCurrentLineHeightPercent"
+internal let kCurrentLetterSpacing = "com.folioreader.kCurrentLetterSpacing"
+internal let kCurrentLineHeight = "com.folioreader.kCurrentLineHeight"
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
@@ -367,18 +367,18 @@ extension FolioReader {
         }
     }
     
-    open var currentLetterSpacingPercent: Int {
-        get { return self.defaults.integer(forKey: kCurrentLetterSpacingPercent) }
+    open var currentLetterSpacing: Int {
+        get { return self.defaults.integer(forKey: kCurrentLetterSpacing) }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentLetterSpacingPercent)
+            self.defaults.set(value, forKey: kCurrentLetterSpacing)
             _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
     
-    open var currentLineHeightPercent: Int {
-        get { return self.defaults.integer(forKey: kCurrentLineHeightPercent) }
+    open var currentLineHeight: Int {
+        get { return self.defaults.integer(forKey: kCurrentLineHeight) }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentLineHeightPercent)
+            self.defaults.set(value, forKey: kCurrentLineHeight)
             _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
@@ -463,8 +463,8 @@ extension FolioReader {
 extension FolioReader {
     
     open func generateRuntimeStyle() -> String {
-        let letterSpacing = Float(currentLetterSpacingPercent * currentFontSizeOnly) / Float(100)
-        let lineHeight = Float((currentLineHeightPercent+100) * currentFontSizeOnly) / Float(100)
+        let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
+        let lineHeight = Float((currentLineHeight * 3 + 100) * currentFontSizeOnly) / Float(100)
         
         var style = ""
         style += """

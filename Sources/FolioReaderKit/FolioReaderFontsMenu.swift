@@ -675,7 +675,7 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
         letterSpacingSlider.tintColor = self.readerConfig.nightModeSeparatorColor
         letterSpacingSlider.minimumValue = 0
         letterSpacingSlider.incrementValue = 1
-        letterSpacingSlider.value = CGFloat(self.folioReader.currentLetterSpacingPercent / 2)
+        letterSpacingSlider.value = CGFloat(self.folioReader.currentLetterSpacing)
         letterSpacingSlider.addTarget(self, action: #selector(FolioReaderParagraphMenu.letterSpacingSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
 
         // Force remove fill color
@@ -705,7 +705,7 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
         lineHeightSlider.backgroundColor = UIColor.clear
         lineHeightSlider.tintColor = self.readerConfig.nightModeSeparatorColor
         lineHeightSlider.minimumValue = 0
-        lineHeightSlider.value = CGFloat(self.folioReader.currentLineHeightPercent / 5)
+        lineHeightSlider.value = CGFloat(self.folioReader.currentLineHeight)
         lineHeightSlider.addTarget(self, action: #selector(FolioReaderParagraphMenu.lineHeightSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
 
         // Force remove fill color
@@ -718,12 +718,12 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
     
     // MARK: - Font slider changed
     
-    @objc func lineHeightSliderValueChanged(_ sender: HADiscreteSlider) {
-        self.folioReader.currentLineHeightPercent = Int(sender.value) * 5
-    }
-
     @objc func letterSpacingSliderValueChanged(_ sender: HADiscreteSlider) {
-        self.folioReader.currentLetterSpacingPercent = Int(sender.value) * 2
+        self.folioReader.currentLetterSpacing = Int(sender.value)
+    }
+    
+    @objc func lineHeightSliderValueChanged(_ sender: HADiscreteSlider) {
+        self.folioReader.currentLineHeight = Int(sender.value)
     }
     
     // MARK: - Gestures
