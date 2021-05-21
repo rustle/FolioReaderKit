@@ -44,6 +44,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     /// The index of the current page. Note: The index start at 1!
     open var pageNumber: Int!
     open var webView: FolioReaderWebView?
+    
+    open var contentURL: URL?
 
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true

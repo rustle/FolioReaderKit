@@ -550,6 +550,12 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
             html = modifiedHtmlContent
         }
 
+        let documentDirectory = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        cell.contentURL = URL(fileURLWithPath: resource.fullHref)
+        print("CONFIG \(cell.contentURL!) \(documentDirectory)")
+        cell.webView?.alpha = 0
+        cell.webView?.loadFileURL(cell.contentURL!, allowingReadAccessTo: documentDirectory)
+        
         cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
         return cell
     }

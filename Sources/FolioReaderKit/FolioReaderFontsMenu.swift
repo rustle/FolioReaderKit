@@ -565,6 +565,21 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
             name: self.folioReader.currentFont,
             size: CGFloat(self.folioReader.currentFontSizeOnly)
         )
+        
+//        if let currentPage = self.folioReader.readerCenter?.currentPage,
+//           let contentURL = currentPage.contentURL {
+//            let baseURL = contentURL.deletingLastPathComponent()
+//            for fontName in UIFont.fontNames(forFamilyName: self.folioReader.currentFont) {
+//                if let fontURL = self.folioReader.readerCenter?.userFonts[fontName] {
+//                    do {
+//                        let toURL = baseURL.appendingPathComponent(fontURL.lastPathComponent)
+//                        try FileManager.default.linkItem(at: fontURL, to: toURL)
+//                    } catch {
+//                        print("linkItem \(error)")
+//                    }
+//                }
+//            }
+//        }
     }
     
     // MARK: - Font slider changed
