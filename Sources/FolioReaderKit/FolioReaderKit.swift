@@ -25,6 +25,8 @@ internal let kCurrentMarginTop = "com.folioreader.kCurrentMarginTop"
 internal let kCurrentMarginBottom = "com.folioreader.kCurrentMarginBottom"
 internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
 internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
+internal let kCurrentLetterSpacingPercent = "com.folioreader.kCurrentLetterSpacingPercent"
+internal let kCurrentLineHeightPercent = "com.folioreader.kCurrentLineHeightPercent"
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
@@ -364,6 +366,23 @@ extension FolioReader {
             self.readerCenter?.setScrollDirection(direction)
         }
     }
+    
+    open var currentLetterSpacingPercent: Int {
+        get { return self.defaults.integer(forKey: kCurrentLetterSpacingPercent) }
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentLetterSpacingPercent)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+        }
+    }
+    
+    open var currentLineHeightPercent: Int {
+        get { return self.defaults.integer(forKey: kCurrentLineHeightPercent) }
+        set (value) {
+            self.defaults.set(value, forKey: kCurrentLineHeightPercent)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+        }
+    }
+    
 
     @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
@@ -444,12 +463,18 @@ extension FolioReader {
 extension FolioReader {
     
     open func generateRuntimeStyle() -> String {
+        let letterSpacing = Float(currentLetterSpacingPercent * currentFontSizeOnly) / Float(100)
+        let lineHeight = Float((currentLineHeightPercent+100) * currentFontSizeOnly) / Float(100)
+        
         var style = ""
         style += """
         
         p {
             font-family: \(currentFont) !important;
             font-size: \(currentFontSize) !important;
+            letter-spacing: \(letterSpacing)px !important;
+            line-height: \(lineHeight)px !important;
+            -webkit-hyphens: auto !important;
         }
         
         """

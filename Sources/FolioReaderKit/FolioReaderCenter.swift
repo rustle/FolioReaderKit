@@ -1434,8 +1434,11 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         let menuFontStyleTab = FolioReaderFontStyleMenu(folioReader: folioReader, readerConfig: readerConfig)
         menuFontStyleTab.tabBarItem = .init(title: "FontStyle", image: nil, tag: 1)
         
+        let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
+        
         let menu = UITabBarController()
-        menu.setViewControllers([menuFontTab, menuFontStyleTab], animated: true)
+        menu.setViewControllers([menuFontTab, menuFontStyleTab, menuParagraphTab], animated: true)
         menu.modalPresentationStyle = .custom
 
         animator = ZFModalTransitionAnimator(modalViewController: menu)

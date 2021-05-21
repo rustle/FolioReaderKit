@@ -313,7 +313,12 @@ function getBodyText() {
 
 // Method that returns only selected text plain
 var getSelectedText = function() {
-    return window.getSelection().toString();
+    var selObj = window.getSelection()
+    var selRange = selObj.getRangeAt(0)
+    var selContainer = selRange.startContainer
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("Selection Container " + selContainer.outerHTML)
+
+    return selObj.toString();
 }
 
 // Method that gets the Rect of current selected text

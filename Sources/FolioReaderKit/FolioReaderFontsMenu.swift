@@ -424,6 +424,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
     var menuView: UIView!
     var stylePicker: UIPickerView!
     var styleSlider: HADiscreteSlider!
+    var letterSpacingSlider: HADiscreteSlider!
     var stylePreview: UITextView!
     
     fileprivate var readerConfig: FolioReaderConfig
@@ -491,7 +492,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         menuView.addSubview(lineBeforeSizeSlider)
 
         // Font slider size
-        styleSlider = HADiscreteSlider(frame: CGRect(x: 60, y: lineBeforeSizeSlider.frame.origin.y+2, width: view.frame.width-120, height: 55))
+        styleSlider = HADiscreteSlider(frame: CGRect(x: 60, y: lineBeforeSizeSlider.frame.origin.y+2, width: view.frame.width-120, height: 40))
         styleSlider.tickStyle = ComponentStyle.rounded
         styleSlider.tickCount = 11
         styleSlider.tickSize = CGSize(width: 8, height: 8)
@@ -506,7 +507,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         styleSlider.tintColor = self.readerConfig.nightModeSeparatorColor
         styleSlider.minimumValue = 0
         styleSlider.value = CGFloat(fontSizes.index(of: self.folioReader.currentFontSize) ?? 4)
-        styleSlider.addTarget(self, action: #selector(FolioReaderFontStyleMenu.sliderValueChanged(_:)), for: UIControl.Event.valueChanged)
+        styleSlider.addTarget(self, action: #selector(FolioReaderFontStyleMenu.styleSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
 
         // Force remove fill color
         styleSlider.layer.sublayers?.forEach({ layer in
@@ -526,12 +527,19 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         fontBigView.contentMode = UIView.ContentMode.center
         menuView.addSubview(fontBigView)
         
-        stylePreview = UITextView(frame: CGRect(x: 0, y: styleSlider.frame.maxY + 5, width: view.frame.width, height: 60))
+        
+        stylePreview = UITextView(
+            frame: CGRect(
+                x: 0,
+                y: styleSlider.frame.maxY + 5,
+                width: view.frame.width,
+                height: 60))
         stylePreview.text = "Yet Another eBook Reader"
         stylePreview.font = UIFont(
             name: self.folioReader.currentFont,
             size: CGFloat(self.folioReader.currentFontSizeOnly)
         )
+        
         menuView.addSubview(stylePreview)
     }
     
@@ -561,7 +569,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
     
     // MARK: - Font slider changed
     
-    @objc func sliderValueChanged(_ sender: HADiscreteSlider) {
+    @objc func styleSliderValueChanged(_ sender: HADiscreteSlider) {
         self.folioReader.currentFontSize = fontSizes[Int(sender.value)]
         stylePreview.font = UIFont(
             name: self.folioReader.currentFont,
@@ -569,6 +577,155 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         )
     }
 
+    // MARK: - Gestures
+    @objc func tapGesture() {
+        dismiss()
+        
+        if (self.readerConfig.shouldHideNavigationOnTap == false) {
+            self.folioReader.readerCenter?.showBars()
+        }
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        if gestureRecognizer is UITapGestureRecognizer && touch.view == view {
+            return true
+        }
+        return false
+    }
+    
+    // MARK: - Status Bar
+    
+    override var prefersStatusBarHidden : Bool {
+        return (self.readerConfig.shouldHideNavigationOnTap == true)
+    }
+}
+
+class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
+    
+    var menuView: UIView!
+    var letterSpacingSlider: HADiscreteSlider!
+    var lineHeightSlider: HADiscreteSlider!
+    
+    fileprivate var readerConfig: FolioReaderConfig
+    fileprivate var folioReader: FolioReader
+    
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
+        self.readerConfig = readerConfig
+        self.folioReader = folioReader
+
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Do any additional setup after loading the view.
+        self.view.backgroundColor = UIColor.clear
+        
+        let normalColor = UIColor(white: 0.5, alpha: 0.7)
+        let selectedColor = self.readerConfig.tintColor
+        let fontSmall = UIImage(readerImageNamed: "icon-font-small")
+        let fontBig = UIImage(readerImageNamed: "icon-font-big")
+        let fontSmallNormal = fontSmall?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let fontBigNormal = fontBig?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        
+        // Tap gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderFontStyleMenu.tapGesture))
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
+        
+        // Menu view
+        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
+        visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
+        menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
+        menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+        menuView.autoresizingMask = .flexibleWidth
+        menuView.layer.shadowColor = UIColor.black.cgColor
+        menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        menuView.layer.shadowOpacity = 0.3
+        menuView.layer.shadowRadius = 6
+        menuView.layer.shadowPath = UIBezierPath(rect: menuView.bounds).cgPath
+        menuView.layer.rasterizationScale = UIScreen.main.scale
+        menuView.layer.shouldRasterize = true
+        view.addSubview(menuView)
+        
+        // Letter Spacing Slider
+        letterSpacingSlider = HADiscreteSlider(
+            frame: CGRect(
+                x: 60,
+                y: 5,
+                width: view.frame.width - 120,
+                height: 40))
+        letterSpacingSlider.tickStyle = ComponentStyle.rounded
+        letterSpacingSlider.tickCount = 11
+        letterSpacingSlider.tickSize = CGSize(width: 8, height: 8)
+
+        letterSpacingSlider.thumbStyle = ComponentStyle.rounded
+        letterSpacingSlider.thumbSize = CGSize(width: 28, height: 28)
+        letterSpacingSlider.thumbShadowOffset = CGSize(width: 0, height: 2)
+        letterSpacingSlider.thumbShadowRadius = 3
+        letterSpacingSlider.thumbColor = selectedColor
+
+        letterSpacingSlider.backgroundColor = UIColor.clear
+        letterSpacingSlider.tintColor = self.readerConfig.nightModeSeparatorColor
+        letterSpacingSlider.minimumValue = 0
+        letterSpacingSlider.incrementValue = 1
+        letterSpacingSlider.value = CGFloat(self.folioReader.currentLetterSpacingPercent / 2)
+        letterSpacingSlider.addTarget(self, action: #selector(FolioReaderParagraphMenu.letterSpacingSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
+
+        // Force remove fill color
+        letterSpacingSlider.layer.sublayers?.forEach({ layer in
+            layer.backgroundColor = UIColor.clear.cgColor
+        })
+
+        menuView.addSubview(letterSpacingSlider)
+        
+        // Font slider size
+        lineHeightSlider = HADiscreteSlider(
+            frame: CGRect(
+                x: 60,
+                y: letterSpacingSlider.frame.maxY+2,
+                width: view.frame.width-120,
+                height: 40))
+        lineHeightSlider.tickStyle = ComponentStyle.rounded
+        lineHeightSlider.tickCount = 11
+        lineHeightSlider.tickSize = CGSize(width: 8, height: 8)
+
+        lineHeightSlider.thumbStyle = ComponentStyle.rounded
+        lineHeightSlider.thumbSize = CGSize(width: 28, height: 28)
+        lineHeightSlider.thumbShadowOffset = CGSize(width: 0, height: 2)
+        lineHeightSlider.thumbShadowRadius = 3
+        lineHeightSlider.thumbColor = selectedColor
+
+        lineHeightSlider.backgroundColor = UIColor.clear
+        lineHeightSlider.tintColor = self.readerConfig.nightModeSeparatorColor
+        lineHeightSlider.minimumValue = 0
+        lineHeightSlider.value = CGFloat(self.folioReader.currentLineHeightPercent / 5)
+        lineHeightSlider.addTarget(self, action: #selector(FolioReaderParagraphMenu.lineHeightSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
+
+        // Force remove fill color
+        lineHeightSlider.layer.sublayers?.forEach({ layer in
+            layer.backgroundColor = UIColor.clear.cgColor
+        })
+
+        menuView.addSubview(lineHeightSlider)
+    }
+    
+    // MARK: - Font slider changed
+    
+    @objc func lineHeightSliderValueChanged(_ sender: HADiscreteSlider) {
+        self.folioReader.currentLineHeightPercent = Int(sender.value) * 5
+    }
+
+    @objc func letterSpacingSliderValueChanged(_ sender: HADiscreteSlider) {
+        self.folioReader.currentLetterSpacingPercent = Int(sender.value) * 2
+    }
+    
     // MARK: - Gestures
     @objc func tapGesture() {
         dismiss()
