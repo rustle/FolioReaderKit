@@ -156,6 +156,10 @@ open class FolioReaderContainer: UIViewController {
             self.errorOnLoad = true
             return
         }
+    }
+
+    override open func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
 
         DispatchQueue.global(qos: .userInitiated).async {
 
@@ -163,6 +167,10 @@ open class FolioReaderContainer: UIViewController {
                 let parsedBook = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
                 self.book = parsedBook
                 self.folioReader.isReaderOpen = true
+
+                if let position = self.readerConfig.savedPositionForCurrentBook {
+                    self.folioReader.savedPositionForCurrentBook = position
+                }
 
                 // Reload data
                 DispatchQueue.main.async {
@@ -179,11 +187,7 @@ open class FolioReaderContainer: UIViewController {
                 self.alert(message: error.localizedDescription)
             }
         }
-    }
-
-    override open func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-
+        
         if (self.errorOnLoad == true) {
             self.dismiss()
         }
