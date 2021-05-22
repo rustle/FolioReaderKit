@@ -161,30 +161,32 @@ open class FolioReaderContainer: UIViewController {
     override open func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        if !self.folioReader.isReaderOpen {
+            DispatchQueue.global(qos: .userInitiated).async {
 
-            do {
-                let parsedBook = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
-                self.book = parsedBook
-                self.folioReader.isReaderOpen = true
+                do {
+                    let parsedBook = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
+                    self.book = parsedBook
+                    self.folioReader.isReaderOpen = true
 
-                if let position = self.readerConfig.savedPositionForCurrentBook {
-                    self.folioReader.savedPositionForCurrentBook = position
-                }
-
-                // Reload data
-                DispatchQueue.main.async {
-                    // Add audio player if needed
-                    if self.book.hasAudio || self.readerConfig.enableTTS {
-                        self.addAudioPlayer()
+                    if let position = self.readerConfig.savedPositionForCurrentBook {
+                        self.folioReader.savedPositionForCurrentBook = position
                     }
-                    self.centerViewController?.reloadData()
-                    self.folioReader.isReaderReady = true
-                    self.folioReader.delegate?.folioReader?(self.folioReader, didFinishedLoading: self.book)
+
+                    // Reload data
+                    DispatchQueue.main.async {
+                        // Add audio player if needed
+                        if self.book.hasAudio || self.readerConfig.enableTTS {
+                            self.addAudioPlayer()
+                        }
+                        self.centerViewController?.reloadData()
+                        self.folioReader.isReaderReady = true
+                        self.folioReader.delegate?.folioReader?(self.folioReader, didFinishedLoading: self.book)
+                    }
+                } catch {
+                    self.errorOnLoad = true
+                    self.alert(message: error.localizedDescription)
                 }
-            } catch {
-                self.errorOnLoad = true
-                self.alert(message: error.localizedDescription)
             }
         }
         
