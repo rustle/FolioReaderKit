@@ -344,8 +344,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         self.setCollectionViewProgressiveDirection()
 
         if self.readerConfig.loadSavedPositionForCurrentBook {
-//            guard let position = folioReader.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
-            guard let position = self.readerConfig.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
+            guard let position = folioReader.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
+//            guard let position = self.readerConfig.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
                 self.currentPageNumber = 1
                 return
             }
@@ -551,11 +551,10 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         }
 
         let documentDirectory = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        cell.contentURL = URL(fileURLWithPath: resource.fullHref)
-        print("CONFIG \(cell.contentURL!) \(documentDirectory)")
-        cell.webView?.alpha = 0
-        cell.webView?.loadFileURL(cell.contentURL!, allowingReadAccessTo: documentDirectory)
-        
+        let contentURL = URL(fileURLWithPath: resource.fullHref)
+        print("CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(documentDirectory)")
+        cell.loadFileURLOnceOnly(contentURL, allowingReadAccessTo: documentDirectory)
+
         cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
         return cell
     }
@@ -615,7 +614,9 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
                     CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight),
                     CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight)
                 )
-                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
+                
+                // FIXME will cause wrong page content
+//                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
                 self.collectionView.collectionViewLayout.invalidateLayout()
 
                 // Adjust internal page offset
@@ -1512,9 +1513,9 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 extension FolioReaderCenter: FolioReaderPageDelegate {
 
     public func pageDidLoad(_ page: FolioReaderPage) {
-//        if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
-        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
-            folioReader.savedPositionForCurrentBook = position
+        if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
+//        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
+//            folioReader.savedPositionForCurrentBook = position
             let pageNumber = position["pageNumber"] as? Int
             let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
             let pageOffset = offset
