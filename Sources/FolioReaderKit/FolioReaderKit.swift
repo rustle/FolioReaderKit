@@ -14,6 +14,8 @@ import UIKit
 internal let kApplicationDocumentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
 internal let kCurrentFontFamily = "com.folioreader.kCurrentFontFamily"
 internal let kCurrentFontSize = "com.folioreader.kCurrentFontSize"
+internal let kCurrentFontWeight = "com.folioreader.kCurrentFontWeight"
+
 internal let kCurrentAudioRate = "com.folioreader.kCurrentAudioRate"
 internal let kCurrentHighlightStyle = "com.folioreader.kCurrentHighlightStyle"
 internal let kCurrentMediaOverlayStyle = "com.folioreader.kMediaOverlayStyle"
@@ -277,6 +279,17 @@ extension FolioReader {
         return Int(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20
     }
 
+    open var currentFontWeight: String {
+        get {
+            let fontSize = self.defaults.value(forKey: kCurrentFontWeight) as? String ?? "500"
+            return fontSize
+        }
+        set (fontSize) {
+            self.defaults.set(fontSize, forKey: kCurrentFontWeight)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+        }
+    }
+    
     /// Check current audio rate, the speed of speech voice. Default 0
     open var currentAudioRate: Int {
         get { return self.defaults.integer(forKey: kCurrentAudioRate) }
@@ -472,6 +485,7 @@ extension FolioReader {
         p {
             font-family: \(currentFont) !important;
             font-size: \(currentFontSize) !important;
+            font-weight: \(currentFontWeight) !important;
             letter-spacing: \(letterSpacing)px !important;
             line-height: \(lineHeight)px !important;
             -webkit-hyphens: auto !important;
@@ -482,15 +496,45 @@ extension FolioReader {
         for fontName in UIFont.fontNames(forFamilyName: currentFont) {
             if let fontURL = readerCenter?.userFonts[fontName] {
                 let ctFont = CTFontCreateWithName(fontName as CFString, CGFloat(currentFontSizeOnly), nil)
-                let ctFontTrait = CTFontGetSymbolicTraits(ctFont)
-                let isItalic = ctFontTrait.contains(.traitItalic)
-                let isBold = ctFontTrait.contains(.traitBold)
+                let ctFontSymbolicTrait = CTFontGetSymbolicTraits(ctFont)
+                let ctFontTraits = CTFontCopyTraits(ctFont)
+                
+                let isItalic = ctFontSymbolicTrait.contains(.traitItalic)
+                let isBold = ctFontSymbolicTrait.contains(.traitBold)
+                
+                var cssFontWeight = isBold ? "bold" : "normal"     //normal
+                
+                if let weightRef = CFDictionaryGetValue(
+                    ctFontTraits,
+                    unsafeBitCast(kCTFontWeightTrait, to: UnsafeRawPointer.self)) {
+                    let weightValue = (unsafeBitCast(weightRef, to: CFNumber.self) as NSNumber).decimalValue
+                    if weightValue < -0.49 {
+                        cssFontWeight = "100"   //thin
+                    } else if weightValue < -0.29 {
+                        cssFontWeight = "200"   //extralight
+                    } else if weightValue < -0.19 {
+                        cssFontWeight = "300"   //light
+                    } else if weightValue < 0.01 {
+                        cssFontWeight = "400"   //normal
+                    } else if weightValue < 0.21 {
+                        cssFontWeight = "500"   //medium
+                    } else if weightValue < 0.31 {
+                        cssFontWeight = "600"   //semibold
+                    } else if weightValue < 0.41 {
+                        cssFontWeight = "700"   //bold
+                    } else if weightValue < 0.61 {
+                        cssFontWeight = "800"   //extrabold
+                    } else {
+                        cssFontWeight = "900"   //heavy
+                    }
+                }
+                
                 style += """
                 
                 @font-face {
                     font-family: \(currentFont);
                     font-style: \(isItalic ? "italic" : "normal");
-                    font-weight: \(isBold ? "bold" : "normal");
+                    font-weight: \(cssFontWeight);
                     src: url('\(fontURL.absoluteString)');
                 }
                 
