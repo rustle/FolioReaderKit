@@ -80,7 +80,8 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     fileprivate var currentWebViewScrollPositions = [Int: CGPoint]()
     fileprivate var currentOrientation: UIInterfaceOrientation?
 
-    open var userFonts = [String: URL]()
+    // open var userFonts = [String: URL]()
+    open var userFontDescriptors = [String: CTFontDescriptor]()
     
     fileprivate var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
@@ -136,24 +137,43 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
                 while let file = fontsEnumerator.nextObject() as? String {
                     print("FONTDIR \(file)")
                     let fileURL = fontsDirectory.appendingPathComponent(file)
-                    if let data = try? Data(contentsOf: fileURL) {
-                        guard let provider = CGDataProvider(data: data as CFData) else {
-                            continue
-                        }
-                        
-                        guard let font = CGFont(provider) else {
-                            continue
-                        }
-                        
-                        guard let name = font.postScriptName else {
-                            continue
-                        }
-                        
-                        print("FONTDIR NAME \(name) \(font.italicAngle) \(font)")
+//                    if let data = try? Data(contentsOf: fileURL) {
+//                        guard let provider = CGDataProvider(data: data as CFData) else {
+//                            continue
+//                        }
+//
+//                        guard let font = CGFont(provider) else {
+//                            continue
+//                        }
+//
+//                        guard let name = font.postScriptName else {
+//                            continue
+//                        }
+//
+//                        print("FONTDIR NAME \(name) \(font.italicAngle) \(font)")
+//
+//                        userFonts[name as String] = fileURL
+//
+//                        CTFontManagerRegisterFontsForURL(fileURL as CFURL, .process, nil)
+//                    }
                     
-                        userFonts[name as String] = fileURL
-                        
-                        CTFontManagerRegisterFontsForURL(fileURL as CFURL, .process, nil)
+                    if let ctFontDescriptorArray = CTFontManagerCreateFontDescriptorsFromURL(fileURL as CFURL) {
+                        if #available(iOS 13.0, *) {
+                            CTFontManagerRegisterFontDescriptors(ctFontDescriptorArray, .process, true) { errors, done -> Bool in
+                                return true
+                            }
+                        } else {
+                            // Fallback on earlier versions
+                            CTFontManagerRegisterFontsForURL(fileURL as CFURL, .process, nil)
+                        }
+                        let count = CFArrayGetCount(ctFontDescriptorArray)
+                        for i in 0..<count {
+                            let valuePointer = CFArrayGetValueAtIndex(ctFontDescriptorArray, CFIndex(i))
+                            let ctFontDescriptor = unsafeBitCast(valuePointer, to: CTFontDescriptor.self)
+                            let ctFontName = unsafeBitCast(CTFontDescriptorCopyAttribute(ctFontDescriptor, kCTFontNameAttribute), to: CFString.self)
+                            print("CTFONT \(ctFontName) \(fileURL)")
+                            userFontDescriptors[ctFontName as String] = ctFontDescriptor
+                        }
                     }
                 }
             }
