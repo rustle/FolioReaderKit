@@ -45,11 +45,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open var pageNumber: Int!
     open var webView: FolioReaderWebView?
     
-    open var contentURL: URL?
-
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
     fileprivate var menuIsVisible = false
+    
+    var fileURLLoaded = false
 
     fileprivate var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
@@ -175,6 +175,16 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //        
 //        result = webView?.js("getHTML()")
 //        Logger().info("getHTML: \(result ?? "empty")")
+    }
+    
+    func loadFileURLOnceOnly(_ URL: URL, allowingReadAccessTo readAccessURL: URL) {
+        if fileURLLoaded {
+            return
+        }
+        
+        if (webView?.loadFileURL(URL, allowingReadAccessTo: readAccessURL)) != nil {
+            fileURLLoaded = true
+        }
     }
 
     // MARK: - Highlights
