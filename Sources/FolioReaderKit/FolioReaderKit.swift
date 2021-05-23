@@ -477,7 +477,8 @@ extension FolioReader {
     
     open func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
-        let lineHeight = Float((currentLineHeight * 3 + 100) * currentFontSizeOnly) / Float(100)
+        let lineHeight = (100 + (currentLineHeight - 2) * 5)    //90% ~ 160%
+        let textIndent = (Float(letterSpacing) + Float(currentFontSizeOnly)) * 2
         
         var style = ""
         style += """
@@ -487,8 +488,14 @@ extension FolioReader {
             font-size: \(currentFontSize) !important;
             font-weight: \(currentFontWeight) !important;
             letter-spacing: \(letterSpacing)px !important;
-            line-height: \(lineHeight)px !important;
+            line-height: \(lineHeight)% !important;
+            text-indent: \(textIndent)px !important;
             -webkit-hyphens: auto !important;
+        }
+        
+        p > span {
+            letter-spacing: \(letterSpacing)px !important;
+            line-height: \(lineHeight)% !important;
         }
         
         """

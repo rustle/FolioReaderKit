@@ -424,7 +424,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
     var menuView: UIView!
     var stylePicker: UIPickerView!
     var styleSlider: HADiscreteSlider!
-    var letterSpacingSlider: HADiscreteSlider!
+    var weightSlider: HADiscreteSlider!
     var stylePreview: UITextView!
     
     fileprivate var readerConfig: FolioReaderConfig
@@ -491,7 +491,7 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         lineBeforeSizeSlider.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(lineBeforeSizeSlider)
 
-        // Font slider size
+        // Font size slider
         styleSlider = HADiscreteSlider(frame: CGRect(x: 60, y: lineBeforeSizeSlider.frame.origin.y+2, width: view.frame.width-120, height: 40))
         styleSlider.tickStyle = ComponentStyle.rounded
         styleSlider.tickCount = 11
@@ -527,11 +527,52 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
         fontBigView.contentMode = UIView.ContentMode.center
         menuView.addSubview(fontBigView)
         
+        // Separator 3
+        let lineBeforeWeightSlider = UIView(
+            frame: CGRect(
+                x: 0,
+                y: styleSlider.frame.maxY,
+                width: view.frame.width,
+                height: 1))
+        lineBeforeWeightSlider.backgroundColor = self.readerConfig.nightModeSeparatorColor
+        menuView.addSubview(lineBeforeWeightSlider)
+
+        // Weeight slider
+        weightSlider = HADiscreteSlider(
+            frame: CGRect(
+                x: 60,
+                y: lineBeforeWeightSlider.frame.origin.y+2,
+                width: view.frame.width-120,
+                height: 40))
+        weightSlider.tickStyle = ComponentStyle.rounded
+        weightSlider.tickCount = 9
+        weightSlider.tickSize = CGSize(width: 8, height: 8)
+
+        weightSlider.thumbStyle = ComponentStyle.rounded
+        weightSlider.thumbSize = CGSize(width: 28, height: 28)
+        weightSlider.thumbShadowOffset = CGSize(width: 0, height: 2)
+        weightSlider.thumbShadowRadius = 3
+        weightSlider.thumbColor = selectedColor
+
+        weightSlider.backgroundColor = UIColor.clear
+        weightSlider.tintColor = self.readerConfig.nightModeSeparatorColor
+        weightSlider.minimumValue = 0
+        weightSlider.value = CGFloat(Int(self.folioReader.currentFontWeight)! / 100 - 1)
+        weightSlider.addTarget(self, action: #selector(FolioReaderFontStyleMenu.weightSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
+
+        // Force remove fill color
+        weightSlider.layer.sublayers?.forEach({ layer in
+            layer.backgroundColor = UIColor.clear.cgColor
+        })
+
+        menuView.addSubview(weightSlider)
+
         
+        // Font Preview
         stylePreview = UITextView(
             frame: CGRect(
                 x: 0,
-                y: styleSlider.frame.maxY + 5,
+                y: weightSlider.frame.maxY + 5,
                 width: view.frame.width,
                 height: 60))
         stylePreview.text = "Yet Another eBook Reader"
@@ -586,6 +627,14 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
     
     @objc func styleSliderValueChanged(_ sender: HADiscreteSlider) {
         self.folioReader.currentFontSize = fontSizes[Int(sender.value)]
+        stylePreview.font = UIFont(
+            name: self.folioReader.currentFont,
+            size: CGFloat(self.folioReader.currentFontSizeOnly)
+        )
+    }
+    
+    @objc func weightSliderValueChanged(_ sender: HADiscreteSlider) {
+        self.folioReader.currentFontWeight = ((Int(sender.value) + 1) * 100).description
         stylePreview.font = UIFont(
             name: self.folioReader.currentFont,
             size: CGFloat(self.folioReader.currentFontSizeOnly)
@@ -708,7 +757,7 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
                 width: view.frame.width-120,
                 height: 40))
         lineHeightSlider.tickStyle = ComponentStyle.rounded
-        lineHeightSlider.tickCount = 11
+        lineHeightSlider.tickCount = 15
         lineHeightSlider.tickSize = CGSize(width: 8, height: 8)
 
         lineHeightSlider.thumbStyle = ComponentStyle.rounded
