@@ -599,6 +599,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 
     override open func willRotate(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
         guard folioReader.isReaderReady else { return }
+        if self.readerConfig.canRotate { return }
 
         setPageSize(toInterfaceOrientation)
         updateCurrentPage()
@@ -651,6 +652,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         guard folioReader.isReaderReady == true, let currentPage = currentPage else {
             return
         }
+        if self.readerConfig.canRotate { return }
 
         // Update pages
         pagesForCurrentPage(currentPage)

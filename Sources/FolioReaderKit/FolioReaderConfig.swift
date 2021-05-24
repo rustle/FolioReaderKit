@@ -167,6 +167,8 @@ open class FolioReaderConfig: NSObject {
 
     // MARK: Custom actions
 
+    open var canRotate = false
+    
     /// hide the navigation bar and the bottom status view
     open var hideBars = false
 
