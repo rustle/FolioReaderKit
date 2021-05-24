@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import FolioReaderKit
+//import FolioReaderKit
 
 enum Epub: Int {
     case bookOne = 0
@@ -15,8 +15,8 @@ enum Epub: Int {
 
     var name: String {
         switch self {
-        case .bookOne:      return "The Silver Chair" // standard eBook
-        case .bookTwo:      return "The Adventures Of Sherlock Holmes - Adventure I" // audio-eBook
+        case .bookOne:      return "1984" // standard eBook
+        case .bookTwo:      return "The Silver Chair" // audio-eBook
         }
     }
 

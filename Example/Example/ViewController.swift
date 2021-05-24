@@ -7,13 +7,13 @@
 //
 
 import UIKit
-import FolioReaderKit
+//import FolioReaderKit
 
 class ViewController: UIViewController {
 
     @IBOutlet weak var bookOne: UIButton?
     @IBOutlet weak var bookTwo: UIButton?
-    let folioReader = FolioReader()
+    //let folioReader = FolioReader()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,6 +29,10 @@ class ViewController: UIViewController {
         let config = FolioReaderConfig(withIdentifier: epub.readerIdentifier)
         config.shouldHideNavigationOnTap = epub.shouldHideNavigationOnTap
         config.scrollDirection = epub.scrollDirection
+        //config.savedPositionForCurrentBook = ["pageNumber": Int(6), "pageOffsetX": CGFloat(6150), "pageOffsetY": CGFloat(0.0)]
+        config.allowSharing = true
+        config.enableTTS = false
+        config.debug = 1
 
         // See more at FolioReaderConfig.swift
 //        config.canChangeScrollDirection = false
@@ -64,7 +68,15 @@ class ViewController: UIViewController {
         }
 
         let readerConfiguration = self.readerConfiguration(forEpub: epub)
-        folioReader.presentReader(parentViewController: self, withEpubPath: bookPath, andConfig: readerConfiguration, shouldRemoveEpub: false)
+        let folioReader = FolioReader()
+        folioReader.presentReader(parentViewController: self, withEpubPath: bookPath, andConfig: readerConfiguration, shouldRemoveEpub: false, folioReaderCenterDelegate: MyFolioReaderCenterDelegate())
+        
+        //TEST
+        for fontFamilyName in UIFont.familyNames {
+            for fontName in UIFont.fontNames(forFamilyName: fontFamilyName) {
+                print("Font: \(fontFamilyName) \(fontName)")
+            }
+        }
     }
 
     private func setCover(_ button: UIButton?, index: Int) {

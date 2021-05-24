@@ -3,15 +3,65 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 46;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		13EEB9E592A80F9B0437B43C /* Pods_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0D6C7FEDB0C1CA1F769F87ED /* Pods_Example.framework */; };
 		1A42C28D1C0E3882000F2137 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A42C28C1C0E3882000F2137 /* AppDelegate.swift */; };
 		1A42C28F1C0E3882000F2137 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A42C28E1C0E3882000F2137 /* ViewController.swift */; };
 		1A42C2921C0E3883000F2137 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1A42C2901C0E3883000F2137 /* Main.storyboard */; };
 		1A42C2A21C0E3A8D000F2137 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1A42C2A01C0E3A8D000F2137 /* LaunchScreen.storyboard */; };
+		2A61345326219B8B0022FC04 /* 1984.epub in Resources */ = {isa = PBXBuildFile; fileRef = 2A61345226219B8B0022FC04 /* 1984.epub */; };
+		2AC34122264A583700A477ED /* FolioReaderPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340DB264A583700A477ED /* FolioReaderPage.swift */; };
+		2AC34123264A583700A477ED /* FolioReaderAddHighlightNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340DC264A583700A477ED /* FolioReaderAddHighlightNote.swift */; };
+		2AC34124264A583700A477ED /* MyFolioReaderCenterDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340DD264A583700A477ED /* MyFolioReaderCenterDelegate.swift */; };
+		2AC34125264A583700A477ED /* FolioReaderFontsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340DE264A583700A477ED /* FolioReaderFontsMenu.swift */; };
+		2AC34126264A583700A477ED /* Bridge.js in Resources */ = {isa = PBXBuildFile; fileRef = 2AC340E0264A583700A477ED /* Bridge.js */; };
+		2AC34127264A583700A477ED /* Style.css in Resources */ = {isa = PBXBuildFile; fileRef = 2AC340E1264A583700A477ED /* Style.css */; };
+		2AC34128264A583700A477ED /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2AC340E2264A583700A477ED /* Images.xcassets */; };
+		2AC34139264A583700A477ED /* FolioReaderSharingProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340F8264A583700A477ED /* FolioReaderSharingProvider.swift */; };
+		2AC3413A264A583700A477ED /* FolioReaderUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340F9264A583700A477ED /* FolioReaderUserDefaults.swift */; };
+		2AC3413B264A583700A477ED /* Highlight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340FB264A583700A477ED /* Highlight.swift */; };
+		2AC3413C264A583700A477ED /* Highlight+Helper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340FC264A583700A477ED /* Highlight+Helper.swift */; };
+		2AC3413D264A583700A477ED /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340FE264A583700A477ED /* Extensions.swift */; };
+		2AC3413E264A583700A477ED /* ScrollScrubber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC340FF264A583700A477ED /* ScrollScrubber.swift */; };
+		2AC3413F264A583700A477ED /* FolioReaderScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34100264A583700A477ED /* FolioReaderScript.swift */; };
+		2AC34140264A583700A477ED /* FolioReaderAudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34101264A583700A477ED /* FolioReaderAudioPlayer.swift */; };
+		2AC34141264A583700A477ED /* FolioReaderHighlightList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34102264A583700A477ED /* FolioReaderHighlightList.swift */; };
+		2AC34142264A583700A477ED /* FolioReaderChapterListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34103264A583700A477ED /* FolioReaderChapterListCell.swift */; };
+		2AC34143264A583700A477ED /* FolioReaderPlayerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34104264A583700A477ED /* FolioReaderPlayerMenu.swift */; };
+		2AC34144264A583700A477ED /* QuoteImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34105264A583700A477ED /* QuoteImage.swift */; };
+		2AC34145264A583700A477ED /* FolioReaderQuoteShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34106264A583700A477ED /* FolioReaderQuoteShare.swift */; };
+		2AC34146264A583700A477ED /* FREpubParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34108264A583700A477ED /* FREpubParser.swift */; };
+		2AC34147264A583700A477ED /* FRTocReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34109264A583700A477ED /* FRTocReference.swift */; };
+		2AC34148264A583700A477ED /* FRSpine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410A264A583700A477ED /* FRSpine.swift */; };
+		2AC34149264A583700A477ED /* FRBook.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410B264A583700A477ED /* FRBook.swift */; };
+		2AC3414A264A583700A477ED /* FRSmils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410C264A583700A477ED /* FRSmils.swift */; };
+		2AC3414B264A583700A477ED /* FRResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410D264A583700A477ED /* FRResources.swift */; };
+		2AC3414C264A583700A477ED /* MediaType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410E264A583700A477ED /* MediaType.swift */; };
+		2AC3414D264A583700A477ED /* FRResource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3410F264A583700A477ED /* FRResource.swift */; };
+		2AC3414E264A583700A477ED /* FRSmilElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34110264A583700A477ED /* FRSmilElement.swift */; };
+		2AC3414F264A583700A477ED /* FRMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34111264A583700A477ED /* FRMetadata.swift */; };
+		2AC34150264A583700A477ED /* FolioReaderConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34112264A583700A477ED /* FolioReaderConfig.swift */; };
+		2AC34151264A583700A477ED /* FolioReaderChapterList.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34113264A583700A477ED /* FolioReaderChapterList.swift */; };
+		2AC34152264A583700A477ED /* FolioReaderCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34114264A583700A477ED /* FolioReaderCenter.swift */; };
+		2AC34153264A583700A477ED /* FolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34115264A583700A477ED /* FolioReaderContainer.swift */; };
+		2AC34154264A583800A477ED /* PageViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34116264A583700A477ED /* PageViewController.swift */; };
+		2AC34155264A583800A477ED /* FolioReaderWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34117264A583700A477ED /* FolioReaderWebView.swift */; };
+		2AC34156264A583800A477ED /* MDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34118264A583700A477ED /* MDictView.swift */; };
+		2AC34157264A583800A477ED /* FolioReaderKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34119264A583700A477ED /* FolioReaderKit.swift */; };
+		2AC34158264A583800A477ED /* StarDictView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3411A264A583700A477ED /* StarDictView.swift */; };
+		2AC34159264A583800A477ED /* FolioReaderPageIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3411B264A583700A477ED /* FolioReaderPageIndicator.swift */; };
+		2AC3415A264A583800A477ED /* HADiscreteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3411E264A583700A477ED /* HADiscreteSlider.swift */; };
+		2AC3415B264A583800A477ED /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34120264A583700A477ED /* SMSegmentView.swift */; };
+		2AC3415C264A583800A477ED /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34121264A583700A477ED /* SMSegment.swift */; };
+		2AC3415F264A58FA00A477ED /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3415E264A58FA00A477ED /* ZipArchive */; };
+		2AC34162264A593400A477ED /* MenuItemKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34161264A593400A477ED /* MenuItemKit */; };
+		2AC34165264A594C00A477ED /* ZFDragableModalTransition in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34164264A594C00A477ED /* ZFDragableModalTransition */; };
+		2AC34168264A597300A477ED /* AEXML in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34167264A597300A477ED /* AEXML */; };
+		2AC3416B264A5A9200A477ED /* FontBlaster in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416A264A5A9200A477ED /* FontBlaster */; };
+		2AC3416E264A5AB900A477ED /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416D264A5AB900A477ED /* Realm */; };
+		2AC34170264A5AB900A477ED /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416F264A5AB900A477ED /* RealmSwift */; };
 		3A8E86F71E9F80CB00CD844C /* CodeExampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F21E9F80CB00CD844C /* CodeExampleViewController.swift */; };
 		3A8E86F81E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F41E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift */; };
 		3A8E86F91E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F51E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift */; };
@@ -32,17 +82,11 @@
 		3AAA8BA61E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
 		3AAA8BA71E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
 		3AAA8BA81E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
-		3AAA8BA91E9BBFAF00A47E5A /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E3C4A3E1C3C6708009CBC8C /* MediaPlayer.framework */; };
-		3AAA8BAA1E9BBFB700A47E5A /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E3C4A3E1C3C6708009CBC8C /* MediaPlayer.framework */; };
-		6E3C4A3F1C3C6708009CBC8C /* MediaPlayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E3C4A3E1C3C6708009CBC8C /* MediaPlayer.framework */; };
 		751F8CF61ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
 		751F8CF71ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
 		751F8CF81ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
-		C143E5BE0CD376A99AD08747 /* Pods_Storyboard_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 44C24A346E8730FB52DC197B /* Pods_Storyboard_Example.framework */; };
 		CA10C1341C572A4B0049165D /* FolioReaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA10C1331C572A4B0049165D /* FolioReaderTests.swift */; };
 		CAF233291C57E1F400CB930C /* SharingProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF233281C57E1F400CB930C /* SharingProviderTests.swift */; };
-		DB8597912791266AA602B5B1 /* Pods_FolioReaderTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 27131F41E20F15F72AAF7176 /* Pods_FolioReaderTests.framework */; };
-		DEF42BA2DD4348929475052F /* Pods_MultipleInstance_Example.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 843E2EEC2F784021400961A9 /* Pods_MultipleInstance_Example.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,22 +100,64 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		054F92EA4A92E2C8F69C82E1 /* Pods-MultipleInstance-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleInstance-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-MultipleInstance-Example/Pods-MultipleInstance-Example.debug.xcconfig"; sourceTree = "<group>"; };
-		0D6C7FEDB0C1CA1F769F87ED /* Pods_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		1A42C2891C0E3882000F2137 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A42C28C1C0E3882000F2137 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		1A42C28E1C0E3882000F2137 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		1A42C2911C0E3883000F2137 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		1A42C2981C0E3883000F2137 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1A42C2A11C0E3A8D000F2137 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		1D4790507F22E69298DC06E1 /* Pods-StoryboardExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StoryboardExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-StoryboardExample/Pods-StoryboardExample.release.xcconfig"; sourceTree = "<group>"; };
-		27131F41E20F15F72AAF7176 /* Pods_FolioReaderTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_FolioReaderTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		318E62E766AB854BE290FB53 /* Pods_StoryboardExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_StoryboardExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A61344D2621950C0022FC04 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A61345226219B8B0022FC04 /* 1984.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1984.epub; sourceTree = "<group>"; };
+		2AC340D42648D61400A477ED /* Storyboard-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Storyboard-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC340D52648D61400A477ED /* MultipleInstance-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MultipleInstance-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC340D62648D61400A477ED /* FolioReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FolioReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		2AC340DB264A583700A477ED /* FolioReaderPage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderPage.swift; sourceTree = "<group>"; };
+		2AC340DC264A583700A477ED /* FolioReaderAddHighlightNote.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderAddHighlightNote.swift; sourceTree = "<group>"; };
+		2AC340DD264A583700A477ED /* MyFolioReaderCenterDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyFolioReaderCenterDelegate.swift; sourceTree = "<group>"; };
+		2AC340DE264A583700A477ED /* FolioReaderFontsMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderFontsMenu.swift; sourceTree = "<group>"; };
+		2AC340E0264A583700A477ED /* Bridge.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Bridge.js; sourceTree = "<group>"; };
+		2AC340E1264A583700A477ED /* Style.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = Style.css; sourceTree = "<group>"; };
+		2AC340E2264A583700A477ED /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		2AC340F8264A583700A477ED /* FolioReaderSharingProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderSharingProvider.swift; sourceTree = "<group>"; };
+		2AC340F9264A583700A477ED /* FolioReaderUserDefaults.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderUserDefaults.swift; sourceTree = "<group>"; };
+		2AC340FB264A583700A477ED /* Highlight.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Highlight.swift; sourceTree = "<group>"; };
+		2AC340FC264A583700A477ED /* Highlight+Helper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Highlight+Helper.swift"; sourceTree = "<group>"; };
+		2AC340FD264A583700A477ED /* FolioReaderKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FolioReaderKit.h; sourceTree = "<group>"; };
+		2AC340FE264A583700A477ED /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		2AC340FF264A583700A477ED /* ScrollScrubber.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollScrubber.swift; sourceTree = "<group>"; };
+		2AC34100264A583700A477ED /* FolioReaderScript.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderScript.swift; sourceTree = "<group>"; };
+		2AC34101264A583700A477ED /* FolioReaderAudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderAudioPlayer.swift; sourceTree = "<group>"; };
+		2AC34102264A583700A477ED /* FolioReaderHighlightList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderHighlightList.swift; sourceTree = "<group>"; };
+		2AC34103264A583700A477ED /* FolioReaderChapterListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderChapterListCell.swift; sourceTree = "<group>"; };
+		2AC34104264A583700A477ED /* FolioReaderPlayerMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderPlayerMenu.swift; sourceTree = "<group>"; };
+		2AC34105264A583700A477ED /* QuoteImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QuoteImage.swift; sourceTree = "<group>"; };
+		2AC34106264A583700A477ED /* FolioReaderQuoteShare.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderQuoteShare.swift; sourceTree = "<group>"; };
+		2AC34108264A583700A477ED /* FREpubParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FREpubParser.swift; sourceTree = "<group>"; };
+		2AC34109264A583700A477ED /* FRTocReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRTocReference.swift; sourceTree = "<group>"; };
+		2AC3410A264A583700A477ED /* FRSpine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRSpine.swift; sourceTree = "<group>"; };
+		2AC3410B264A583700A477ED /* FRBook.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRBook.swift; sourceTree = "<group>"; };
+		2AC3410C264A583700A477ED /* FRSmils.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRSmils.swift; sourceTree = "<group>"; };
+		2AC3410D264A583700A477ED /* FRResources.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRResources.swift; sourceTree = "<group>"; };
+		2AC3410E264A583700A477ED /* MediaType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaType.swift; sourceTree = "<group>"; };
+		2AC3410F264A583700A477ED /* FRResource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRResource.swift; sourceTree = "<group>"; };
+		2AC34110264A583700A477ED /* FRSmilElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRSmilElement.swift; sourceTree = "<group>"; };
+		2AC34111264A583700A477ED /* FRMetadata.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FRMetadata.swift; sourceTree = "<group>"; };
+		2AC34112264A583700A477ED /* FolioReaderConfig.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderConfig.swift; sourceTree = "<group>"; };
+		2AC34113264A583700A477ED /* FolioReaderChapterList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderChapterList.swift; sourceTree = "<group>"; };
+		2AC34114264A583700A477ED /* FolioReaderCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderCenter.swift; sourceTree = "<group>"; };
+		2AC34115264A583700A477ED /* FolioReaderContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderContainer.swift; sourceTree = "<group>"; };
+		2AC34116264A583700A477ED /* PageViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PageViewController.swift; sourceTree = "<group>"; };
+		2AC34117264A583700A477ED /* FolioReaderWebView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderWebView.swift; sourceTree = "<group>"; };
+		2AC34118264A583700A477ED /* MDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MDictView.swift; sourceTree = "<group>"; };
+		2AC34119264A583700A477ED /* FolioReaderKit.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderKit.swift; sourceTree = "<group>"; };
+		2AC3411A264A583700A477ED /* StarDictView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StarDictView.swift; sourceTree = "<group>"; };
+		2AC3411B264A583700A477ED /* FolioReaderPageIndicator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderPageIndicator.swift; sourceTree = "<group>"; };
+		2AC3411E264A583700A477ED /* HADiscreteSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HADiscreteSlider.swift; sourceTree = "<group>"; };
+		2AC34120264A583700A477ED /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
+		2AC34121264A583700A477ED /* SMSegment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegment.swift; sourceTree = "<group>"; };
 		3A8E86F21E9F80CB00CD844C /* CodeExampleViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CodeExampleViewController.swift; sourceTree = "<group>"; };
 		3A8E86F41E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseExampleFolioReaderContainer.swift; sourceTree = "<group>"; };
 		3A8E86F51E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookOneExampleFolioReaderContainer.swift; sourceTree = "<group>"; };
 		3A8E86F61E9F80CB00CD844C /* BookTwoExampleFolioReaderContainer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BookTwoExampleFolioReaderContainer.swift; sourceTree = "<group>"; };
-		3AAA8B7A1E9BB78B00A47E5A /* MultipleInstance-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MultipleInstance-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AAA8B7E1E9BB8B700A47E5A /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3AAA8B811E9BB8B700A47E5A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3AAA8B831E9BB8B700A47E5A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -84,23 +170,10 @@
 		3AAA8B9C1E9BB94B00A47E5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3AAA8B9E1E9BB94B00A47E5A /* The Adventures Of Sherlock Holmes - Adventure I.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = "The Adventures Of Sherlock Holmes - Adventure I.epub"; sourceTree = "<group>"; };
 		3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = "The Silver Chair.epub"; sourceTree = "<group>"; };
-		3CE90B4095B5C7E6237EEBDD /* Pods-FolioReaderTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FolioReaderTests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-FolioReaderTests/Pods-FolioReaderTests.debug.xcconfig"; sourceTree = "<group>"; };
-		44C24A346E8730FB52DC197B /* Pods_Storyboard_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Storyboard_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		5C8EADB52E1D834750CD7D23 /* Pods-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.debug.xcconfig"; sourceTree = "<group>"; };
-		6E3C4A3E1C3C6708009CBC8C /* MediaPlayer.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MediaPlayer.framework; path = System/Library/Frameworks/MediaPlayer.framework; sourceTree = SDKROOT; };
-		751CA93A8AFDADE43FB75F6B /* Pods-Storyboard-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Storyboard-Example.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Storyboard-Example/Pods-Storyboard-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		751F8CF51ECD20110050A2CF /* Epub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Epub.swift; sourceTree = "<group>"; };
-		843E2EEC2F784021400961A9 /* Pods_MultipleInstance_Example.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MultipleInstance_Example.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		8E1BE6465444C567F5D1B8E6 /* Pods-FolioReaderTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-FolioReaderTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-FolioReaderTests/Pods-FolioReaderTests.release.xcconfig"; sourceTree = "<group>"; };
-		C4F8C36D75B15390CDB07BF1 /* Pods-MultipleInstance-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MultipleInstance-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-MultipleInstance-Example/Pods-MultipleInstance-Example.release.xcconfig"; sourceTree = "<group>"; };
-		C860A0C690322C01443DBA0C /* Pods-Storyboard-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Storyboard-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Storyboard-Example/Pods-Storyboard-Example.release.xcconfig"; sourceTree = "<group>"; };
-		CA10C1311C572A4B0049165D /* FolioReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FolioReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		CA10C1331C572A4B0049165D /* FolioReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolioReaderTests.swift; sourceTree = "<group>"; };
 		CA10C1351C572A4B0049165D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CAF233281C57E1F400CB930C /* SharingProviderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SharingProviderTests.swift; sourceTree = "<group>"; };
-		D12066631D65FABD006E1D18 /* Storyboard-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Storyboard-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		D7C82C879F323C6E960F882B /* Pods-StoryboardExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-StoryboardExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-StoryboardExample/Pods-StoryboardExample.debug.xcconfig"; sourceTree = "<group>"; };
-		F4CBB0C2C0FDFA3E1648DB43 /* Pods-Example.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Example.release.xcconfig"; path = "Pods/Target Support Files/Pods-Example/Pods-Example.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -108,8 +181,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6E3C4A3F1C3C6708009CBC8C /* MediaPlayer.framework in Frameworks */,
-				13EEB9E592A80F9B0437B43C /* Pods_Example.framework in Frameworks */,
+				2AC3416E264A5AB900A477ED /* Realm in Frameworks */,
+				2AC34168264A597300A477ED /* AEXML in Frameworks */,
+				2AC34170264A5AB900A477ED /* RealmSwift in Frameworks */,
+				2AC34165264A594C00A477ED /* ZFDragableModalTransition in Frameworks */,
+				2AC3415F264A58FA00A477ED /* ZipArchive in Frameworks */,
+				2AC34162264A593400A477ED /* MenuItemKit in Frameworks */,
+				2AC3416B264A5A9200A477ED /* FontBlaster in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -117,8 +195,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3AAA8BAA1E9BBFB700A47E5A /* MediaPlayer.framework in Frameworks */,
-				DEF42BA2DD4348929475052F /* Pods_MultipleInstance_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -126,7 +202,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DB8597912791266AA602B5B1 /* Pods_FolioReaderTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -134,8 +209,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3AAA8BA91E9BBFAF00A47E5A /* MediaPlayer.framework in Frameworks */,
-				C143E5BE0CD376A99AD08747 /* Pods_Storyboard_Example.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -145,26 +218,17 @@
 		1A42C2801C0E3882000F2137 = {
 			isa = PBXGroup;
 			children = (
+				2AC340D9264A583700A477ED /* Sources */,
 				3AAA8B9B1E9BB94B00A47E5A /* Shared */,
 				1A42C28B1C0E3882000F2137 /* Example */,
 				3AAA8B7D1E9BB8B700A47E5A /* Storyboard-Example */,
 				3AAA8B8C1E9BB8CD00A47E5A /* MultipleInstances-Example */,
 				CA10C1321C572A4B0049165D /* FolioReaderTests */,
-				1A42C28A1C0E3882000F2137 /* Products */,
-				D394FAB8B11D7C692E7BE00D /* Frameworks */,
-				4FAF8E8BF5565FFE2E47F8F7 /* Pods */,
+				2A61344D2621950C0022FC04 /* Example.app */,
+				2AC340D42648D61400A477ED /* Storyboard-Example.app */,
+				2AC340D52648D61400A477ED /* MultipleInstance-Example.app */,
+				2AC340D62648D61400A477ED /* FolioReaderTests.xctest */,
 			);
-			sourceTree = "<group>";
-		};
-		1A42C28A1C0E3882000F2137 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				1A42C2891C0E3882000F2137 /* Example.app */,
-				CA10C1311C572A4B0049165D /* FolioReaderTests.xctest */,
-				D12066631D65FABD006E1D18 /* Storyboard-Example.app */,
-				3AAA8B7A1E9BB78B00A47E5A /* MultipleInstance-Example.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 		1A42C28B1C0E3882000F2137 /* Example */ = {
@@ -177,6 +241,114 @@
 				1A42C2A01C0E3A8D000F2137 /* LaunchScreen.storyboard */,
 			);
 			path = Example;
+			sourceTree = "<group>";
+		};
+		2AC340D9264A583700A477ED /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				2AC340DA264A583700A477ED /* FolioReaderKit */,
+			);
+			name = Sources;
+			path = ../Sources;
+			sourceTree = "<group>";
+		};
+		2AC340DA264A583700A477ED /* FolioReaderKit */ = {
+			isa = PBXGroup;
+			children = (
+				2AC34107264A583700A477ED /* EPUBCore */,
+				2AC340FE264A583700A477ED /* Extensions.swift */,
+				2AC340DC264A583700A477ED /* FolioReaderAddHighlightNote.swift */,
+				2AC34101264A583700A477ED /* FolioReaderAudioPlayer.swift */,
+				2AC34114264A583700A477ED /* FolioReaderCenter.swift */,
+				2AC34113264A583700A477ED /* FolioReaderChapterList.swift */,
+				2AC34103264A583700A477ED /* FolioReaderChapterListCell.swift */,
+				2AC34112264A583700A477ED /* FolioReaderConfig.swift */,
+				2AC34115264A583700A477ED /* FolioReaderContainer.swift */,
+				2AC340DE264A583700A477ED /* FolioReaderFontsMenu.swift */,
+				2AC34102264A583700A477ED /* FolioReaderHighlightList.swift */,
+				2AC340FD264A583700A477ED /* FolioReaderKit.h */,
+				2AC34119264A583700A477ED /* FolioReaderKit.swift */,
+				2AC340DB264A583700A477ED /* FolioReaderPage.swift */,
+				2AC3411B264A583700A477ED /* FolioReaderPageIndicator.swift */,
+				2AC34104264A583700A477ED /* FolioReaderPlayerMenu.swift */,
+				2AC34106264A583700A477ED /* FolioReaderQuoteShare.swift */,
+				2AC34100264A583700A477ED /* FolioReaderScript.swift */,
+				2AC340F8264A583700A477ED /* FolioReaderSharingProvider.swift */,
+				2AC340F9264A583700A477ED /* FolioReaderUserDefaults.swift */,
+				2AC34117264A583700A477ED /* FolioReaderWebView.swift */,
+				2AC34118264A583700A477ED /* MDictView.swift */,
+				2AC340FA264A583700A477ED /* Models */,
+				2AC340DD264A583700A477ED /* MyFolioReaderCenterDelegate.swift */,
+				2AC34116264A583700A477ED /* PageViewController.swift */,
+				2AC34105264A583700A477ED /* QuoteImage.swift */,
+				2AC340DF264A583700A477ED /* Resources */,
+				2AC340FF264A583700A477ED /* ScrollScrubber.swift */,
+				2AC3411A264A583700A477ED /* StarDictView.swift */,
+				2AC3411C264A583700A477ED /* Vendor */,
+			);
+			path = FolioReaderKit;
+			sourceTree = "<group>";
+		};
+		2AC340DF264A583700A477ED /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				2AC340E0264A583700A477ED /* Bridge.js */,
+				2AC340E1264A583700A477ED /* Style.css */,
+				2AC340E2264A583700A477ED /* Images.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		2AC340FA264A583700A477ED /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				2AC340FB264A583700A477ED /* Highlight.swift */,
+				2AC340FC264A583700A477ED /* Highlight+Helper.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		2AC34107264A583700A477ED /* EPUBCore */ = {
+			isa = PBXGroup;
+			children = (
+				2AC34108264A583700A477ED /* FREpubParser.swift */,
+				2AC34109264A583700A477ED /* FRTocReference.swift */,
+				2AC3410A264A583700A477ED /* FRSpine.swift */,
+				2AC3410B264A583700A477ED /* FRBook.swift */,
+				2AC3410C264A583700A477ED /* FRSmils.swift */,
+				2AC3410D264A583700A477ED /* FRResources.swift */,
+				2AC3410E264A583700A477ED /* MediaType.swift */,
+				2AC3410F264A583700A477ED /* FRResource.swift */,
+				2AC34110264A583700A477ED /* FRSmilElement.swift */,
+				2AC34111264A583700A477ED /* FRMetadata.swift */,
+			);
+			path = EPUBCore;
+			sourceTree = "<group>";
+		};
+		2AC3411C264A583700A477ED /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				2AC3411D264A583700A477ED /* HAControls */,
+				2AC3411F264A583700A477ED /* SMSegmentView */,
+			);
+			path = Vendor;
+			sourceTree = "<group>";
+		};
+		2AC3411D264A583700A477ED /* HAControls */ = {
+			isa = PBXGroup;
+			children = (
+				2AC3411E264A583700A477ED /* HADiscreteSlider.swift */,
+			);
+			path = HAControls;
+			sourceTree = "<group>";
+		};
+		2AC3411F264A583700A477ED /* SMSegmentView */ = {
+			isa = PBXGroup;
+			children = (
+				2AC34120264A583700A477ED /* SMSegmentView.swift */,
+				2AC34121264A583700A477ED /* SMSegment.swift */,
+			);
+			path = SMSegmentView;
 			sourceTree = "<group>";
 		};
 		3A8E86F11E9F80CB00CD844C /* CodeExample */ = {
@@ -235,27 +407,11 @@
 		3AAA8B9D1E9BB94B00A47E5A /* Sample eBooks */ = {
 			isa = PBXGroup;
 			children = (
+				2A61345226219B8B0022FC04 /* 1984.epub */,
 				3AAA8B9E1E9BB94B00A47E5A /* The Adventures Of Sherlock Holmes - Adventure I.epub */,
 				3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */,
 			);
 			path = "Sample eBooks";
-			sourceTree = "<group>";
-		};
-		4FAF8E8BF5565FFE2E47F8F7 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				5C8EADB52E1D834750CD7D23 /* Pods-Example.debug.xcconfig */,
-				F4CBB0C2C0FDFA3E1648DB43 /* Pods-Example.release.xcconfig */,
-				3CE90B4095B5C7E6237EEBDD /* Pods-FolioReaderTests.debug.xcconfig */,
-				8E1BE6465444C567F5D1B8E6 /* Pods-FolioReaderTests.release.xcconfig */,
-				D7C82C879F323C6E960F882B /* Pods-StoryboardExample.debug.xcconfig */,
-				1D4790507F22E69298DC06E1 /* Pods-StoryboardExample.release.xcconfig */,
-				054F92EA4A92E2C8F69C82E1 /* Pods-MultipleInstance-Example.debug.xcconfig */,
-				C4F8C36D75B15390CDB07BF1 /* Pods-MultipleInstance-Example.release.xcconfig */,
-				751CA93A8AFDADE43FB75F6B /* Pods-Storyboard-Example.debug.xcconfig */,
-				C860A0C690322C01443DBA0C /* Pods-Storyboard-Example.release.xcconfig */,
-			);
-			name = Pods;
 			sourceTree = "<group>";
 		};
 		CA10C1321C572A4B0049165D /* FolioReaderTests */ = {
@@ -268,19 +424,6 @@
 			path = FolioReaderTests;
 			sourceTree = "<group>";
 		};
-		D394FAB8B11D7C692E7BE00D /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				6E3C4A3E1C3C6708009CBC8C /* MediaPlayer.framework */,
-				0D6C7FEDB0C1CA1F769F87ED /* Pods_Example.framework */,
-				27131F41E20F15F72AAF7176 /* Pods_FolioReaderTests.framework */,
-				318E62E766AB854BE290FB53 /* Pods_StoryboardExample.framework */,
-				843E2EEC2F784021400961A9 /* Pods_MultipleInstance_Example.framework */,
-				44C24A346E8730FB52DC197B /* Pods_Storyboard_Example.framework */,
-			);
-			name = Frameworks;
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -288,19 +431,26 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1A42C29B1C0E3883000F2137 /* Build configuration list for PBXNativeTarget "Example" */;
 			buildPhases = (
-				E8C32EEE8DF6A549273237C6 /* [CP] Check Pods Manifest.lock */,
 				1A42C2851C0E3882000F2137 /* Sources */,
 				1A42C2861C0E3882000F2137 /* Frameworks */,
 				1A42C2871C0E3882000F2137 /* Resources */,
-				4521900C899CED51BB10949C /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			name = Example;
+			packageProductDependencies = (
+				2AC3415E264A58FA00A477ED /* ZipArchive */,
+				2AC34161264A593400A477ED /* MenuItemKit */,
+				2AC34164264A594C00A477ED /* ZFDragableModalTransition */,
+				2AC34167264A597300A477ED /* AEXML */,
+				2AC3416A264A5A9200A477ED /* FontBlaster */,
+				2AC3416D264A5AB900A477ED /* Realm */,
+				2AC3416F264A5AB900A477ED /* RealmSwift */,
+			);
 			productName = Example;
-			productReference = 1A42C2891C0E3882000F2137 /* Example.app */;
+			productReference = 2A61344D2621950C0022FC04 /* Example.app */;
 			productType = "com.apple.product-type.application";
 		};
 		3AAA8B671E9BB78B00A47E5A /* MultipleInstance-Example */ = {
@@ -319,7 +469,7 @@
 			);
 			name = "MultipleInstance-Example";
 			productName = StoryboardExample;
-			productReference = 3AAA8B7A1E9BB78B00A47E5A /* MultipleInstance-Example.app */;
+			productReference = 2AC340D52648D61400A477ED /* MultipleInstance-Example.app */;
 			productType = "com.apple.product-type.application";
 		};
 		CA10C1301C572A4B0049165D /* FolioReaderTests */ = {
@@ -341,7 +491,7 @@
 			);
 			name = FolioReaderTests;
 			productName = FolioReaderTests;
-			productReference = CA10C1311C572A4B0049165D /* FolioReaderTests.xctest */;
+			productReference = 2AC340D62648D61400A477ED /* FolioReaderTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		D12066621D65FABD006E1D18 /* Storyboard-Example */ = {
@@ -360,7 +510,7 @@
 			);
 			name = "Storyboard-Example";
 			productName = StoryboardExample;
-			productReference = D12066631D65FABD006E1D18 /* Storyboard-Example.app */;
+			productReference = 2AC340D42648D61400A477ED /* Storyboard-Example.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -375,7 +525,6 @@
 				TargetAttributes = {
 					1A42C2881C0E3882000F2137 = {
 						CreatedOnToolsVersion = 7.1.1;
-						DevelopmentTeam = 32F2T8EJ6G;
 						LastSwiftMigration = 1010;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -407,11 +556,20 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
 			mainGroup = 1A42C2801C0E3882000F2137;
-			productRefGroup = 1A42C28A1C0E3882000F2137 /* Products */;
+			packageReferences = (
+				2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */,
+				2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */,
+				2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */,
+				2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */,
+				2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */,
+				2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */,
+			);
+			productRefGroup = 1A42C2801C0E3882000F2137;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -428,11 +586,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A61345326219B8B0022FC04 /* 1984.epub in Resources */,
+				2AC34128264A583700A477ED /* Images.xcassets in Resources */,
+				2AC34126264A583700A477ED /* Bridge.js in Resources */,
 				1A42C2A21C0E3A8D000F2137 /* LaunchScreen.storyboard in Resources */,
 				3AAA8BA31E9BB94B00A47E5A /* The Adventures Of Sherlock Holmes - Adventure I.epub in Resources */,
 				3AAA8BA61E9BB94B00A47E5A /* The Silver Chair.epub in Resources */,
 				3AAA8BA01E9BB94B00A47E5A /* Assets.xcassets in Resources */,
 				1A42C2921C0E3883000F2137 /* Main.storyboard in Resources */,
+				2AC34127264A583700A477ED /* Style.css in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -571,38 +733,6 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-MultipleInstance-Example/Pods-MultipleInstance-Example-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		4521900C899CED51BB10949C /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-Example/Pods-Example-frameworks.sh",
-				"${BUILT_PRODUCTS_DIR}/AEXML/AEXML.framework",
-				"${BUILT_PRODUCTS_DIR}/FolioReaderKit/FolioReaderKit.framework",
-				"${BUILT_PRODUCTS_DIR}/FontBlaster/FontBlaster.framework",
-				"${BUILT_PRODUCTS_DIR}/MenuItemKit/MenuItemKit.framework",
-				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
-				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
-				"${BUILT_PRODUCTS_DIR}/SSZipArchive/SSZipArchive.framework",
-				"${BUILT_PRODUCTS_DIR}/ZFDragableModalTransition/ZFDragableModalTransition.framework",
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/AEXML.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FolioReaderKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FontBlaster.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/MenuItemKit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SSZipArchive.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ZFDragableModalTransition.framework",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Example/Pods-Example-frameworks.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
 		ACD2A7368ACAFB17422DAA7F /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -686,24 +816,6 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-FolioReaderTests/Pods-FolioReaderTests-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		E8C32EEE8DF6A549273237C6 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-Example-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -711,9 +823,49 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AC34124264A583700A477ED /* MyFolioReaderCenterDelegate.swift in Sources */,
+				2AC34157264A583800A477ED /* FolioReaderKit.swift in Sources */,
+				2AC34154264A583800A477ED /* PageViewController.swift in Sources */,
 				751F8CF61ECD20110050A2CF /* Epub.swift in Sources */,
+				2AC34144264A583700A477ED /* QuoteImage.swift in Sources */,
+				2AC34152264A583700A477ED /* FolioReaderCenter.swift in Sources */,
+				2AC3413A264A583700A477ED /* FolioReaderUserDefaults.swift in Sources */,
+				2AC34125264A583700A477ED /* FolioReaderFontsMenu.swift in Sources */,
+				2AC3413B264A583700A477ED /* Highlight.swift in Sources */,
+				2AC3415A264A583800A477ED /* HADiscreteSlider.swift in Sources */,
+				2AC34151264A583700A477ED /* FolioReaderChapterList.swift in Sources */,
+				2AC34153264A583700A477ED /* FolioReaderContainer.swift in Sources */,
+				2AC34122264A583700A477ED /* FolioReaderPage.swift in Sources */,
+				2AC34145264A583700A477ED /* FolioReaderQuoteShare.swift in Sources */,
+				2AC3415B264A583800A477ED /* SMSegmentView.swift in Sources */,
+				2AC34140264A583700A477ED /* FolioReaderAudioPlayer.swift in Sources */,
+				2AC3414B264A583700A477ED /* FRResources.swift in Sources */,
+				2AC3414A264A583700A477ED /* FRSmils.swift in Sources */,
+				2AC3414D264A583700A477ED /* FRResource.swift in Sources */,
+				2AC34155264A583800A477ED /* FolioReaderWebView.swift in Sources */,
+				2AC34156264A583800A477ED /* MDictView.swift in Sources */,
+				2AC3413E264A583700A477ED /* ScrollScrubber.swift in Sources */,
+				2AC34149264A583700A477ED /* FRBook.swift in Sources */,
+				2AC3413C264A583700A477ED /* Highlight+Helper.swift in Sources */,
+				2AC34158264A583800A477ED /* StarDictView.swift in Sources */,
+				2AC34159264A583800A477ED /* FolioReaderPageIndicator.swift in Sources */,
+				2AC34142264A583700A477ED /* FolioReaderChapterListCell.swift in Sources */,
+				2AC34150264A583700A477ED /* FolioReaderConfig.swift in Sources */,
+				2AC34147264A583700A477ED /* FRTocReference.swift in Sources */,
+				2AC34141264A583700A477ED /* FolioReaderHighlightList.swift in Sources */,
+				2AC3414F264A583700A477ED /* FRMetadata.swift in Sources */,
+				2AC3413D264A583700A477ED /* Extensions.swift in Sources */,
+				2AC3414C264A583700A477ED /* MediaType.swift in Sources */,
+				2AC34139264A583700A477ED /* FolioReaderSharingProvider.swift in Sources */,
+				2AC3414E264A583700A477ED /* FRSmilElement.swift in Sources */,
+				2AC34123264A583700A477ED /* FolioReaderAddHighlightNote.swift in Sources */,
+				2AC34146264A583700A477ED /* FREpubParser.swift in Sources */,
+				2AC34143264A583700A477ED /* FolioReaderPlayerMenu.swift in Sources */,
 				1A42C28F1C0E3882000F2137 /* ViewController.swift in Sources */,
+				2AC34148264A583700A477ED /* FRSpine.swift in Sources */,
 				1A42C28D1C0E3882000F2137 /* AppDelegate.swift in Sources */,
+				2AC3413F264A583700A477ED /* FolioReaderScript.swift in Sources */,
+				2AC3415C264A583800A477ED /* SMSegment.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -910,7 +1062,8 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -919,15 +1072,18 @@
 		};
 		1A42C29C1C0E3883000F2137 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 5C8EADB52E1D834750CD7D23 /* Pods-Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 32F2T8EJ6G;
+				DEVELOPMENT_TEAM = L8WKJ3U7UT;
 				INFOPLIST_FILE = Example/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.Example;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.roswen9.FolioReaderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -937,15 +1093,18 @@
 		};
 		1A42C29D1C0E3883000F2137 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = F4CBB0C2C0FDFA3E1648DB43 /* Pods-Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = 32F2T8EJ6G;
+				DEVELOPMENT_TEAM = L8WKJ3U7UT;
 				INFOPLIST_FILE = Example/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.Example;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.roswen9.FolioReaderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -955,7 +1114,6 @@
 		};
 		3AAA8B781E9BB78B00A47E5A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 054F92EA4A92E2C8F69C82E1 /* Pods-MultipleInstance-Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -963,7 +1121,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "MultipleInstances-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.multipleinstances;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -974,7 +1135,6 @@
 		};
 		3AAA8B791E9BB78B00A47E5A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C4F8C36D75B15390CDB07BF1 /* Pods-MultipleInstance-Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -982,7 +1142,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "MultipleInstances-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.multipleinstances;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 2;
@@ -991,7 +1154,6 @@
 		};
 		CA10C1391C572A4B0049165D /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 3CE90B4095B5C7E6237EEBDD /* Pods-FolioReaderTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -999,7 +1161,11 @@
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = FolioReaderTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
@@ -1009,7 +1175,6 @@
 		};
 		CA10C13A1C572A4B0049165D /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8E1BE6465444C567F5D1B8E6 /* Pods-FolioReaderTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -1017,7 +1182,11 @@
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = FolioReaderTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
@@ -1027,7 +1196,6 @@
 		};
 		D12066721D65FABE006E1D18 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 751CA93A8AFDADE43FB75F6B /* Pods-Storyboard-Example.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1035,7 +1203,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "Storyboard-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.storyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1043,7 +1214,6 @@
 		};
 		D12066731D65FABE006E1D18 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = C860A0C690322C01443DBA0C /* Pods-Storyboard-Example.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = "$(inherited)";
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -1051,7 +1221,10 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "Storyboard-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.storyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1106,6 +1279,95 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drearycold/ZipArchive.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.2.5;
+			};
+		};
+		2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/cxa/MenuItemKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/drearycold/ZFDragableModalTransition.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.6.5;
+			};
+		};
+		2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/tadija/AEXML.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.6.0;
+			};
+		};
+		2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ArtSabintsev/FontBlaster.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.1.3;
+			};
+		};
+		2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-cocoa.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.21.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2AC3415E264A58FA00A477ED /* ZipArchive */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */;
+			productName = ZipArchive;
+		};
+		2AC34161264A593400A477ED /* MenuItemKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */;
+			productName = MenuItemKit;
+		};
+		2AC34164264A594C00A477ED /* ZFDragableModalTransition */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */;
+			productName = ZFDragableModalTransition;
+		};
+		2AC34167264A597300A477ED /* AEXML */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */;
+			productName = AEXML;
+		};
+		2AC3416A264A5A9200A477ED /* FontBlaster */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */;
+			productName = FontBlaster;
+		};
+		2AC3416D264A5AB900A477ED /* Realm */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = Realm;
+		};
+		2AC3416F264A5AB900A477ED /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */;
+			productName = RealmSwift;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1A42C2811C0E3882000F2137 /* Project object */;
 }
