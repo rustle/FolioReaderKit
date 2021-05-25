@@ -599,7 +599,6 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 
     override open func willRotate(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
         guard folioReader.isReaderReady else { return }
-        if self.readerConfig.canRotate { return }
 
         setPageSize(toInterfaceOrientation)
         updateCurrentPage()
@@ -636,8 +635,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
                     CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight)
                 )
                 
-                // FIXME will cause wrong page content
-//                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
+                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
                 self.collectionView.collectionViewLayout.invalidateLayout()
 
                 // Adjust internal page offset
@@ -652,7 +650,6 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         guard folioReader.isReaderReady == true, let currentPage = currentPage else {
             return
         }
-        if self.readerConfig.canRotate { return }
 
         // Update pages
         pagesForCurrentPage(currentPage)
