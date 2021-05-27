@@ -38,7 +38,7 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
 //            height: collectionView.frame.height
 //        )
         
-        print("FolioReaderCenterLayout PREPARE \(self.collectionViewContentSize) \(collectionView.frame) \(numberOfItems)")
+        print("PREPAREROTATE \(self.collectionViewContentSize) \(collectionView.frame) \(numberOfItems)")
         
         layoutAttributes.removeAll()
         
@@ -48,4 +48,14 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
 //
 //        return layoutAttributes[indexPath.row]
 //    }
+    
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint) -> CGPoint {
+        print("PROPOSEROTATE \(proposedContentOffset)")
+        return super.targetContentOffset(forProposedContentOffset: proposedContentOffset)
+    }
+    
+    override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
+        print("PROPOSEROTATE \(proposedContentOffset)")
+        return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
+    }
 }

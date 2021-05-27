@@ -603,80 +603,123 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         return size
     }
     
-    // MARK: - Device rotation
-
-    override open func willRotate(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
+    // MARK: - View Transition
+    override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        
+        super.viewWillTransition(to: size, with: coordinator)
+        print("TRANSROTATE \(size) \(coordinator)")
+        
         guard folioReader.isReaderReady else { return }
 
-        setPageSize(toInterfaceOrientation)
-        updateCurrentPage()
+        print("WILLTRANSROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width)")
 
-        if self.currentOrientation == nil || (self.currentOrientation?.isPortrait != toInterfaceOrientation.isPortrait) {
-            var pageIndicatorFrame = pageIndicatorView?.frame
+        setPageSize(UIDevice.current.orientation)
+        
+        updateCurrentPage()
+        guard let currentPage = self.currentPage else {
+            return
+        }
+        
+        print("WILLTRANS2ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
+
+
+        var pageIndicatorFrame = pageIndicatorView?.frame
+        var scrollScrubberFrame = scrollScrubber?.slider.frame
+        if self.currentOrientation == nil || (self.currentOrientation?.isPortrait != UIDevice.current.orientation.isPortrait) {
+            
             pageIndicatorFrame?.origin.y = ((screenBounds.size.height < screenBounds.size.width) ? (self.collectionView.frame.height - pageIndicatorHeight) : (self.collectionView.frame.width - pageIndicatorHeight))
             pageIndicatorFrame?.origin.x = 0
             pageIndicatorFrame?.size.width = ((screenBounds.size.height < screenBounds.size.width) ? (self.collectionView.frame.width) : (self.collectionView.frame.height))
             pageIndicatorFrame?.size.height = pageIndicatorHeight
 
-            var scrollScrubberFrame = scrollScrubber?.slider.frame;
+            
             scrollScrubberFrame?.origin.x = ((screenBounds.size.height < screenBounds.size.width) ? (screenBounds.size.width - 100) : (screenBounds.size.height + 10))
             scrollScrubberFrame?.size.height = ((screenBounds.size.height < screenBounds.size.width) ? (self.collectionView.frame.height - 100) : (self.collectionView.frame.width - 100))
 
-            self.collectionView.collectionViewLayout.invalidateLayout()
+//            self.collectionView.collectionViewLayout.invalidateLayout()
+        }
+        
+        print("WILLTRANS3ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
 
-            UIView.animate(withDuration: duration, animations: {
-                // Adjust page indicator view
-                if let pageIndicatorFrame = pageIndicatorFrame {
-                    self.pageIndicatorView?.frame = pageIndicatorFrame
-                    self.pageIndicatorView?.reloadView(updateShadow: true)
-                }
+        switch(UIDevice.current.orientation) {
+        case .landscapeLeft:
+            self.currentOrientation = .landscapeLeft
+            break;
+        case .landscapeRight:
+            self.currentOrientation = .landscapeRight
+            break;
+        case .portrait:
+            self.currentOrientation = .portrait
+            break;
+        case .portraitUpsideDown:
+            self.currentOrientation = .portraitUpsideDown
+            break;
+        default:
+            self.currentOrientation = .unknown
+            break
+        }
+        
+        coordinator.animate { _ in
+            if let pageIndicatorFrame = pageIndicatorFrame {
+                self.pageIndicatorView?.frame = pageIndicatorFrame
+                self.pageIndicatorView?.reloadView(updateShadow: true)
+            }
 
-                // Adjust scroll scrubber slider
-                if let scrollScrubberFrame = scrollScrubberFrame {
-                    self.scrollScrubber?.slider.frame = scrollScrubberFrame
-                }
+            // Adjust scroll scrubber slider
+            if let scrollScrubberFrame = scrollScrubberFrame {
+                self.scrollScrubber?.slider.frame = scrollScrubberFrame
+            }
 
-                // Adjust collectionView
-                // MARK: TODO
+            // Adjust collectionView
+            // MARK: TODO
 //                self.collectionView.contentSize = self.readerConfig.isDirection(
 //                    CGSize(width: self.pageWidth, height: self.pageHeight * CGFloat(self.totalPages)),
 //                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight),
 //                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight)
 //                )
 //
-//                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
-//                self.collectionView.collectionViewLayout.invalidateLayout()
+//            self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
+//            self.collectionView.collectionViewLayout.invalidateLayout()
 
-                // Adjust internal page offset
-                self.updatePageOffsetRate()
-            })
+            // Adjust internal page offset
+//            self.updatePageOffsetRate()
+        } completion: { _ in
+            //DID
+            print("DIDTRANSROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
+            self.collectionView.setContentOffset(
+                CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
+                        y: 0),
+                animated: false)
+            self.collectionView.collectionViewLayout.invalidateLayout()
+            
+            self.setPageSize(UIDevice.current.orientation)
+            
+            print("DIDTRANS2ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
+            
+            self.updateCurrentPage(currentPage)
+            print("DIDTRANS3ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
+
+            // Update pages
+            self.pagesForCurrentPage(currentPage)
+            currentPage.refreshPageMode()
+
+            self.scrollScrubber?.setSliderVal()
+
+            // After rotation fix internal page offset
+            var pageOffset = (currentPage.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * self.pageOffsetRate
+
+            // Fix the offset for paged scroll
+            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
+                let page = round(pageOffset / self.pageWidth)
+                pageOffset = page * self.pageWidth
+            }
+
+            let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
+            currentPage.webView?.scrollView.setContentOffset(pageOffsetPoint, animated: true)
+            
+            self.updatePageOffsetRate()
         }
 
-        self.currentOrientation = toInterfaceOrientation
-    }
-
-    override open func didRotate(from fromInterfaceOrientation: UIInterfaceOrientation) {
-        guard folioReader.isReaderReady == true, let currentPage = currentPage else {
-            return
-        }
-
-        // Update pages
-        pagesForCurrentPage(currentPage)
-        currentPage.refreshPageMode()
-
-        scrollScrubber?.setSliderVal()
-
-        // After rotation fix internal page offset
-        var pageOffset = (currentPage.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * pageOffsetRate
-
-        // Fix the offset for paged scroll
-        if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-            let page = round(pageOffset / self.pageWidth)
-            pageOffset = page * self.pageWidth
-        }
-
-        let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-        currentPage.webView?.scrollView.setContentOffset(pageOffsetPoint, animated: true)
     }
 
     override open func willAnimateRotation(to toInterfaceOrientation: UIInterfaceOrientation, duration: TimeInterval) {
@@ -695,6 +738,27 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     // MARK: - Page
 
     func setPageSize(_ orientation: UIInterfaceOrientation) {
+        guard orientation.isPortrait else {
+            if screenBounds.size.width > screenBounds.size.height {
+                self.pageWidth = screenBounds.size.width
+                self.pageHeight = screenBounds.size.height
+            } else {
+                self.pageWidth = screenBounds.size.height
+                self.pageHeight = screenBounds.size.width
+            }
+            return
+        }
+
+        if screenBounds.size.width < screenBounds.size.height {
+            self.pageWidth = screenBounds.size.width
+            self.pageHeight = screenBounds.size.height
+        } else {
+            self.pageWidth = screenBounds.size.height
+            self.pageHeight = screenBounds.size.width
+        }
+    }
+    
+    func setPageSize(_ orientation: UIDeviceOrientation) {
         guard orientation.isPortrait else {
             if screenBounds.size.width > screenBounds.size.height {
                 self.pageWidth = screenBounds.size.width
@@ -1534,6 +1598,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         
         present(nav, animated: true, completion: nil)
     }
+    
 }
 
 // MARK: FolioPageDelegate
