@@ -530,8 +530,15 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         
         // Inject viewport
         let viewportTag = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">"
+        let initialRuntimeStyleCss = folioReader.generateRuntimeStyle()
 
-        let toInject = "\n\(viewportTag)\n</head>"
+        let toInject = """
+            \(viewportTag)
+            <style id=\"style-folioreader-runtime\" type=\"text/css\">
+                \(initialRuntimeStyleCss)
+            </style>
+        </head>
+        """
         html = html.replacingOccurrences(of: "</head>", with: toInject)
 
         // Font class name
