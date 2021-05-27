@@ -82,6 +82,7 @@
 		3AAA8BA61E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
 		3AAA8BA71E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
 		3AAA8BA81E9BB94B00A47E5A /* The Silver Chair.epub in Resources */ = {isa = PBXBuildFile; fileRef = 3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */; };
+		6E9735FA265F3554001A2C6F /* FolioReaderCenterLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E9735F9265F3554001A2C6F /* FolioReaderCenterLayout.swift */; };
 		751F8CF61ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
 		751F8CF71ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
 		751F8CF81ECD20110050A2CF /* Epub.swift in Sources */ = {isa = PBXBuildFile; fileRef = 751F8CF51ECD20110050A2CF /* Epub.swift */; };
@@ -170,6 +171,7 @@
 		3AAA8B9C1E9BB94B00A47E5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3AAA8B9E1E9BB94B00A47E5A /* The Adventures Of Sherlock Holmes - Adventure I.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = "The Adventures Of Sherlock Holmes - Adventure I.epub"; sourceTree = "<group>"; };
 		3AAA8B9F1E9BB94B00A47E5A /* The Silver Chair.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = "The Silver Chair.epub"; sourceTree = "<group>"; };
+		6E9735F9265F3554001A2C6F /* FolioReaderCenterLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolioReaderCenterLayout.swift; sourceTree = "<group>"; };
 		751F8CF51ECD20110050A2CF /* Epub.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Epub.swift; sourceTree = "<group>"; };
 		CA10C1331C572A4B0049165D /* FolioReaderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolioReaderTests.swift; sourceTree = "<group>"; };
 		CA10C1351C572A4B0049165D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -260,6 +262,7 @@
 				2AC340DC264A583700A477ED /* FolioReaderAddHighlightNote.swift */,
 				2AC34101264A583700A477ED /* FolioReaderAudioPlayer.swift */,
 				2AC34114264A583700A477ED /* FolioReaderCenter.swift */,
+				6E9735F9265F3554001A2C6F /* FolioReaderCenterLayout.swift */,
 				2AC34113264A583700A477ED /* FolioReaderChapterList.swift */,
 				2AC34103264A583700A477ED /* FolioReaderChapterListCell.swift */,
 				2AC34112264A583700A477ED /* FolioReaderConfig.swift */,
@@ -858,6 +861,7 @@
 				2AC3414C264A583700A477ED /* MediaType.swift in Sources */,
 				2AC34139264A583700A477ED /* FolioReaderSharingProvider.swift in Sources */,
 				2AC3414E264A583700A477ED /* FRSmilElement.swift in Sources */,
+				6E9735FA265F3554001A2C6F /* FolioReaderCenterLayout.swift in Sources */,
 				2AC34123264A583700A477ED /* FolioReaderAddHighlightNote.swift in Sources */,
 				2AC34146264A583700A477ED /* FREpubParser.swift in Sources */,
 				2AC34143264A583700A477ED /* FolioReaderPlayerMenu.swift in Sources */,

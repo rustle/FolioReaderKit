@@ -34,7 +34,8 @@ import WebKit
 }
 
 /// The base reader class
-open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource
+                              /*, UICollectionViewDelegateFlowLayout*/ {
 
     /// This delegate receives the events from the current `FolioReaderPage`s delegate.
     open var delegate: FolioReaderCenterDelegate?
@@ -51,7 +52,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     /// The collection view with pages
     open var collectionView: UICollectionView!
     
-    let collectionViewLayout = UICollectionViewFlowLayout()
+    let collectionViewLayout = FolioReaderCenterLayout()
     var loadingView: UIActivityIndicatorView!
     var pages: [String]!
     var totalPages: Int = 0
@@ -636,14 +637,15 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
                 }
 
                 // Adjust collectionView
-                self.collectionView.contentSize = self.readerConfig.isDirection(
-                    CGSize(width: self.pageWidth, height: self.pageHeight * CGFloat(self.totalPages)),
-                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight),
-                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight)
-                )
-                
-                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
-                self.collectionView.collectionViewLayout.invalidateLayout()
+                // MARK: TODO
+//                self.collectionView.contentSize = self.readerConfig.isDirection(
+//                    CGSize(width: self.pageWidth, height: self.pageHeight * CGFloat(self.totalPages)),
+//                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight),
+//                    CGSize(width: self.pageWidth * CGFloat(self.totalPages), height: self.pageHeight)
+//                )
+//
+//                self.collectionView.setContentOffset(self.frameForPage(self.currentPageNumber).origin, animated: false)
+//                self.collectionView.collectionViewLayout.invalidateLayout()
 
                 // Adjust internal page offset
                 self.updatePageOffsetRate()

@@ -1,0 +1,51 @@
+//
+//  FolioReaderCenterLayout.swift
+//  Example
+//
+//  Created by liyi on 2021/5/27.
+//  Copyright © 2021 FolioReader. All rights reserved.
+//
+
+import Foundation
+import UIKit
+
+class FolioReaderCenterLayout : UICollectionViewFlowLayout {
+    
+    var contentSize = CGSize()
+
+    var layoutAttributes = [UICollectionViewLayoutAttributes]()
+    
+//    open override var collectionViewContentSize: CGSize {
+//        return contentSize
+//    }
+    
+    override func prepare() {
+        super.prepare()
+        
+        guard let collectionView = self.collectionView else { return }
+        
+        let numberOfItems = collectionView.numberOfItems(inSection: 0)
+        
+//        self.itemSize = collectionView.bounds.inset(by: collectionView.layoutMargins).size
+//        self.sectionInset = UIEdgeInsets(top: 0, left: self.minimumInteritemSpacing, bottom: 0, right: 0)
+//        self.sectionInsetReference = .fromSafeArea
+        self.itemSize = collectionView.bounds.size
+        
+        //self.scrollDirection = .horizontal
+        
+//        contentSize = CGSize(
+//            width: collectionView.frame.width * CGFloat(collectionView.numberOfItems(inSection: 0)),
+//            height: collectionView.frame.height
+//        )
+        
+        print("FolioReaderCenterLayout PREPARE \(self.collectionViewContentSize) \(collectionView.frame) \(numberOfItems)")
+        
+        layoutAttributes.removeAll()
+        
+    }
+    
+//    override func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
+//
+//        return layoutAttributes[indexPath.row]
+//    }
+}
