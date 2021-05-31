@@ -757,7 +757,7 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
                 width: view.frame.width-120,
                 height: 40))
         lineHeightSlider.tickStyle = ComponentStyle.rounded
-        lineHeightSlider.tickCount = 15
+        lineHeightSlider.tickCount = 11
         lineHeightSlider.tickSize = CGSize(width: 8, height: 8)
 
         lineHeightSlider.thumbStyle = ComponentStyle.rounded

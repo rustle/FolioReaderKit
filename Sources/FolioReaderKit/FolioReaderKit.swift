@@ -172,6 +172,7 @@ extension FolioReader {
     ///   - animated: Pass true to animate the presentation; otherwise, pass false.
     open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
         let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath, unzipPath: unzipPath, removeEpub: shouldRemoveEpub)
+        readerContainer.modalPresentationStyle = .fullScreen
         self.readerContainer = readerContainer
         
         parentViewController.present(readerContainer, animated: animated, completion: nil)
@@ -477,8 +478,11 @@ extension FolioReader {
     
     open func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
-        let lineHeight = (100 + (currentLineHeight - 2) * 5)    //90% ~ 160%
+        let lineHeight = Decimal((currentLineHeight + 10) * 5) / 100 + 1    //1.5 ~ 2.05
         let textIndent = (Float(letterSpacing) + Float(currentFontSizeOnly)) * 2
+        let marginTopEm = Decimal(1)
+        let marginBottonEm = lineHeight - 1
+        
         
         var style = ""
         style += """
@@ -488,14 +492,16 @@ extension FolioReader {
             font-size: \(currentFontSize) !important;
             font-weight: \(currentFontWeight) !important;
             letter-spacing: \(letterSpacing)px !important;
-            line-height: \(lineHeight)% !important;
+            line-height: \(lineHeight) !important;
             text-indent: \(textIndent)px !important;
+            text-align: justify !important;
+            margin: \(marginTopEm)em 0 \(marginBottonEm)em 0 !important;
             -webkit-hyphens: auto !important;
         }
         
         p > span {
             letter-spacing: \(letterSpacing)px !important;
-            line-height: \(lineHeight)% !important;
+            line-height: \(lineHeight) !important;
         }
         
         """

@@ -830,13 +830,11 @@ function setFolioStyle(styleTextEncoded) {
     }
     style.appendChild(document.createTextNode(styleText))
     
-    let para = document.querySelector('p')
-    let compStyles = window.getComputedStyle(para)
-    
     window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + style.outerHTML)
 
-    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + compStyles.cssText)
-
+    var para = document.querySelector('p')
+    var compStyles = window.getComputedStyle(para)
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle compStyles p " + compStyles.cssText)
 }
 
 
