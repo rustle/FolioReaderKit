@@ -185,6 +185,8 @@ open class FolioReaderConfig: NSObject {
     /// Allow sharing option, if `false` will hide all sharing icons and options
     open var allowSharing = true
 
+    open var allowCopy = true
+    
     /// Enable TTS (Text To Speech)
     open var enableTTS = true
     

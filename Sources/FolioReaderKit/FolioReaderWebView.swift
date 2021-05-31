@@ -63,10 +63,11 @@ open class FolioReaderWebView: WKWebView {
             return super.canPerformAction(action, withSender: sender)
         }
 
+        var result = false
         if isShare {
-            return false
+            result = false
         } else if isColors {
-            return false
+            result = false
         } else {
             if action == #selector(highlight(_:))
                 || action == #selector(highlightWithNote(_:))
@@ -75,16 +76,26 @@ open class FolioReaderWebView: WKWebView {
                 || (action == #selector(lookup(_:)))
                 || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
                 || (action == #selector(share(_:)) && readerConfig.allowSharing)
-                || (action == #selector(copy(_:)) && readerConfig.allowSharing) {
-                return true
+                || (action == #selector(copy(_:)) && readerConfig.allowCopy) {
+                result = true
             }
-            return false
         }
+        
+        if folioReader.readerContainer?.readerConfig.debug > 0 {
+            let menuItems = UIMenuController.shared.menuItems ?? [UIMenuItem]()
+            let menuItemTitle = menuItems.compactMap { $0.title }
+            
+            print("FRWV canPerformAction \(readerConfig.useReaderMenuController) \(isShare) \(isColors) \(result) \(action) \(menuItemTitle)")
+        }
+        
+        return result
     }
 
     // MARK: - UIMenuController - Actions
 
-    @objc func share(_ sender: UIMenuController) {
+    @objc func share(_ sender: UIMenuController?) {
+        guard let sender = sender else { return }
+        
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         let shareImage = UIAlertAction(title: self.readerConfig.localizedShareImageQuote, style: .default, handler: { (action) -> Void in
@@ -301,7 +312,8 @@ open class FolioReaderWebView: WKWebView {
             return
         }
 
-        isShare = options
+        //MARK: FIXME isShare is broken
+        // isShare = options
 
         let colors = UIImage(readerImageNamed: "colors-marker")
         let share = UIImage(readerImageNamed: "share-marker")
