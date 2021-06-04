@@ -577,12 +577,14 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         if let modifiedHtmlContent = self.delegate?.htmlContentForPage(cell, htmlContent: html) {
             html = modifiedHtmlContent
         }
-
-        let documentDirectory = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-        let contentURL = URL(fileURLWithPath: resource.fullHref)
-        print("CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(documentDirectory)")
-        cell.loadFileURLOnceOnly(contentURL, allowingReadAccessTo: documentDirectory)
-
+        
+        if let resourceBasePath = self.book.smils.basePath {
+            
+            let contentURL = URL(fileURLWithPath: resource.fullHref)
+            print("CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
+            cell.loadFileURLOnceOnly(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
+        }
+        
         cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
         return cell
     }

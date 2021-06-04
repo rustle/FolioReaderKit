@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         config.shouldHideNavigationOnTap = epub.shouldHideNavigationOnTap
         config.scrollDirection = epub.scrollDirection
         //config.savedPositionForCurrentBook = ["pageNumber": Int(6), "pageOffsetX": CGFloat(6150), "pageOffsetY": CGFloat(0.0)]
-        config.allowSharing = true
+        config.allowSharing = false //Broken as of now
         config.enableTTS = false
         config.debug = 1
 
@@ -67,9 +67,17 @@ class ViewController: UIViewController {
             return
         }
 
+        
+        
         let readerConfiguration = self.readerConfiguration(forEpub: epub)
         let folioReader = FolioReader()
-        folioReader.presentReader(parentViewController: self, withEpubPath: bookPath, andConfig: readerConfiguration, shouldRemoveEpub: false, folioReaderCenterDelegate: MyFolioReaderCenterDelegate())
+        folioReader.presentReader(
+            parentViewController: self,
+            withEpubPath: bookPath,
+            unzipPath: makeFolioReaderUnzipPath()?.path,
+            andConfig: readerConfiguration,
+            shouldRemoveEpub: false,
+            folioReaderCenterDelegate: MyFolioReaderCenterDelegate())
         
         //TEST
         for fontFamilyName in UIFont.familyNames {
@@ -94,6 +102,27 @@ class ViewController: UIViewController {
             print(error.localizedDescription)
         }
     }
+    
+    private func makeFolioReaderUnzipPath() -> URL? {
+        guard let cacheDirectory = try? FileManager.default.url(
+                for: .cachesDirectory,
+                in: .userDomainMask,
+                appropriateFor: nil,
+                create: true) else {
+            return nil
+        }
+        let folioReaderUnzipped = cacheDirectory.appendingPathComponent("FolioReaderUnzipped", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: folioReaderUnzipped.path) {
+            do {
+                try FileManager.default.createDirectory(at: folioReaderUnzipped, withIntermediateDirectories: true, attributes: nil)
+            } catch {
+                return nil
+            }
+        }
+        
+        return folioReaderUnzipped
+    }
+
 }
 
 // MARK: - IBAction

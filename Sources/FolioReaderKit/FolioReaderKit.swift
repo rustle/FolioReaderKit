@@ -508,76 +508,103 @@ extension FolioReader {
         
         for fontName in UIFont.fontNames(forFamilyName: currentFont) {
 //            if let fontURL = readerCenter?.userFonts[fontName] {
-            if let fontDescriptor = readerCenter?.userFontDescriptors[fontName] {
+            guard let fontDescriptor = readerCenter?.userFontDescriptors[fontName] else {
+                continue
+            }
 //                let ctFont = CTFontCreateWithName(fontName as CFString, CGFloat(currentFontSizeOnly), nil)
 //                let ctFontSymbolicTrait = CTFontGetSymbolicTraits(ctFont)
 //                let ctFontTraits = CTFontCopyTraits(ctFont)
 //                let ctFontURL = unsafeBitCast(CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute), to: CFURL.self)
-                guard let ctFontURL = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute),  CFGetTypeID(ctFontURL) == CFURLGetTypeID() else {
-                    continue
-                }
-                var isItalic = false
-                var isBold = false
-                
-                var cssFontWeight = "normal"
-                
-                if let ctFontTraits = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontTraitsAttribute), CFGetTypeID(ctFontTraits) == CFDictionaryGetTypeID() {
-                    if let ctFontSymbolicTrait = CFDictionaryGetValue(
-                        (ctFontTraits as! CFDictionary),
-                        unsafeBitCast(kCTFontSymbolicTrait, to: UnsafeRawPointer.self))  {
-                        
-                        var symTraitVal = UInt32()
-                        CFNumberGetValue(unsafeBitCast(ctFontSymbolicTrait, to: CFNumber.self), CFNumberType.intType, &symTraitVal)
-                        
-                        isItalic = symTraitVal & CTFontSymbolicTraits.traitItalic.rawValue > 0
-                        isBold = symTraitVal & CTFontSymbolicTraits.traitBold.rawValue > 0
-                        
-                        cssFontWeight = isBold ? "bold" : "normal"
-                    }
-    //                let isItalic = ctFontSymbolicTrait.contains(.traitItalic)
-    //                let isBold = ctFontSymbolicTrait.contains(.traitBold)
-                    
-                    
-                    if let weightRef = CFDictionaryGetValue(
-                        (ctFontTraits as! CFDictionary),
-                        unsafeBitCast(kCTFontWeightTrait, to: UnsafeRawPointer.self)) {
-                        
-                        var weightValue = Float()
-                        CFNumberGetValue(unsafeBitCast(weightRef, to: CFNumber.self), CFNumberType.floatType, &weightValue)
-                        if weightValue < -0.49 {
-                            cssFontWeight = "100"   //thin
-                        } else if weightValue < -0.29 {
-                            cssFontWeight = "200"   //extralight
-                        } else if weightValue < -0.19 {
-                            cssFontWeight = "300"   //light
-                        } else if weightValue < 0.01 {
-                            cssFontWeight = "400"   //normal
-                        } else if weightValue < 0.21 {
-                            cssFontWeight = "500"   //medium
-                        } else if weightValue < 0.31 {
-                            cssFontWeight = "600"   //semibold
-                        } else if weightValue < 0.41 {
-                            cssFontWeight = "700"   //bold
-                        } else if weightValue < 0.61 {
-                            cssFontWeight = "800"   //extrabold
-                        } else {
-                            cssFontWeight = "900"   //heavy
-                        }
-                    }
-                }
-                
-                style += """
-                
-                @font-face {
-                    font-family: \(currentFont);
-                    font-style: \(isItalic ? "italic" : "normal");
-                    font-weight: \(cssFontWeight);
-                    src: url('\(ctFontURL as! CFURL)');
-                }
-                
-                """
-                
+            guard let ctFontURL = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute),
+                  CFGetTypeID(ctFontURL) == CFURLGetTypeID(),
+                  let fontURL = ctFontURL as? URL else {
+                continue
             }
+            var isItalic = false
+            var isBold = false
+            
+            var cssFontWeight = "normal"
+            
+            if let ctFontTraits = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontTraitsAttribute), CFGetTypeID(ctFontTraits) == CFDictionaryGetTypeID() {
+                if let ctFontSymbolicTrait = CFDictionaryGetValue(
+                    (ctFontTraits as! CFDictionary),
+                    unsafeBitCast(kCTFontSymbolicTrait, to: UnsafeRawPointer.self))  {
+                    
+                    var symTraitVal = UInt32()
+                    CFNumberGetValue(unsafeBitCast(ctFontSymbolicTrait, to: CFNumber.self), CFNumberType.intType, &symTraitVal)
+                    
+                    isItalic = symTraitVal & CTFontSymbolicTraits.traitItalic.rawValue > 0
+                    isBold = symTraitVal & CTFontSymbolicTraits.traitBold.rawValue > 0
+                    
+                    cssFontWeight = isBold ? "bold" : "normal"
+                }
+//                let isItalic = ctFontSymbolicTrait.contains(.traitItalic)
+//                let isBold = ctFontSymbolicTrait.contains(.traitBold)
+                
+                
+                if let weightRef = CFDictionaryGetValue(
+                    (ctFontTraits as! CFDictionary),
+                    unsafeBitCast(kCTFontWeightTrait, to: UnsafeRawPointer.self)) {
+                    
+                    var weightValue = Float()
+                    CFNumberGetValue(unsafeBitCast(weightRef, to: CFNumber.self), CFNumberType.floatType, &weightValue)
+                    if weightValue < -0.49 {
+                        cssFontWeight = "100"   //thin
+                    } else if weightValue < -0.29 {
+                        cssFontWeight = "200"   //extralight
+                    } else if weightValue < -0.19 {
+                        cssFontWeight = "300"   //light
+                    } else if weightValue < 0.01 {
+                        cssFontWeight = "400"   //normal
+                    } else if weightValue < 0.21 {
+                        cssFontWeight = "500"   //medium
+                    } else if weightValue < 0.31 {
+                        cssFontWeight = "600"   //semibold
+                    } else if weightValue < 0.41 {
+                        cssFontWeight = "700"   //bold
+                    } else if weightValue < 0.61 {
+                        cssFontWeight = "800"   //extrabold
+                    } else {
+                        cssFontWeight = "900"   //heavy
+                    }
+                }
+            }
+            
+            //prepare font hardlink
+            guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
+                continue
+            }
+            print("generateRuntimeStyle \(resourceBasePath)")
+            
+            let folioResPath = resourceBasePath.appendingPathComponent("_folio_res")
+
+            let toFontPath = folioResPath.appendingPathComponent(fontURL.lastPathComponent)
+
+            do {
+                if !FileManager.default.fileExists(atPath: folioResPath) {
+                    try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
+                }
+                
+                print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+
+                if FileManager.default.fileExists(atPath: toFontPath) {
+                    try FileManager.default.removeItem(atPath: toFontPath)
+                }
+                try FileManager.default.linkItem(atPath: fontURL.path, toPath: toFontPath)
+            } catch {
+                continue
+            }
+            
+            style += """
+            
+            @font-face {
+                font-family: \(currentFont);
+                font-style: \(isItalic ? "italic" : "normal");
+                font-weight: \(cssFontWeight);
+                src: url('\(toFontPath)');
+            }
+            
+            """
         }
         
         return style
