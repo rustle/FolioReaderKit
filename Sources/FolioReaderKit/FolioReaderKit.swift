@@ -574,7 +574,9 @@ extension FolioReader {
             guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
                 continue
             }
-            print("generateRuntimeStyle \(resourceBasePath)")
+            if self.readerContainer?.readerConfig.debug > 0 {
+                print("generateRuntimeStyle \(resourceBasePath)")
+            }
             
             let folioResPath = resourceBasePath.appendingPathComponent("_folio_res")
 
@@ -585,7 +587,9 @@ extension FolioReader {
                     try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
                 }
                 
-                print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+                if self.readerContainer?.readerConfig.debug > 0 {
+                    print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+                }
 
                 if FileManager.default.fileExists(atPath: toFontPath) {
                     try FileManager.default.removeItem(atPath: toFontPath)

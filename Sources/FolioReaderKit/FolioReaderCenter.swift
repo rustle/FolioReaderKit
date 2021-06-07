@@ -210,6 +210,7 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.backgroundColor = background
         collectionView.decelerationRate = UIScrollView.DecelerationRate.fast
+        collectionView.contentInsetAdjustmentBehavior = .never
         enableScrollBetweenChapters(scrollEnabled: true)
         view.addSubview(collectionView)
         
@@ -609,10 +610,16 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
     override open func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         
         super.viewWillTransition(to: size, with: coordinator)
-        print("TRANSROTATE \(size) \(coordinator)")
+        print("BEGINTRANSROTATE fromBounds=\(collectionView.bounds) fromContentSize=\(collectionView.contentSize) fromItemSize=\(collectionViewLayout.itemSize) to=\(size) \(coordinator.debugDescription)")
         
         guard folioReader.isReaderReady else { return }
 
+//        self.collectionView.setContentOffset(
+//            CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
+//                    y: 0),
+//            animated: false)
+//        self.collectionView.collectionViewLayout.invalidateLayout()
+        
         print("WILLTRANSROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width)")
 
         setPageSize(UIDevice.current.orientation)
@@ -623,7 +630,6 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         }
         
         print("WILLTRANS2ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
-
 
         var pageIndicatorFrame = pageIndicatorView?.frame
         var scrollScrubberFrame = scrollScrubber?.slider.frame
@@ -643,6 +649,15 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
         
         print("WILLTRANS3ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
 
+        self.collectionViewLayout.itemSize = CGSize(width: size.width, height: size.height - 20)
+        self.collectionView.setContentOffset(
+            CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
+                    y: 0),
+            animated: false)
+        self.collectionViewLayout.invalidateLayout()
+        
+        print("WILLTRANS4ROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
+        
         switch(UIDevice.current.orientation) {
         case .landscapeLeft:
             self.currentOrientation = .landscapeLeft
@@ -685,14 +700,19 @@ open class FolioReaderCenter: UIViewController, UICollectionViewDelegate, UIColl
 
             // Adjust internal page offset
 //            self.updatePageOffsetRate()
+//            self.collectionView.setContentOffset(
+//                CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
+//                        y: 0),
+//                animated: false)
+//            self.collectionView.collectionViewLayout.invalidateLayout()
         } completion: { _ in
             //DID
             print("DIDTRANSROTATE \(self.currentPageNumber) \(self.collectionViewLayout.itemSize.width) \(currentPage.pageNumber)")
-            self.collectionView.setContentOffset(
-                CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
-                        y: 0),
-                animated: false)
-            self.collectionView.collectionViewLayout.invalidateLayout()
+//            self.collectionView.setContentOffset(
+//                CGPoint(x: CGFloat(self.currentPageNumber-1) * self.collectionViewLayout.itemSize.width,
+//                        y: 0),
+//                animated: false)
+//            self.collectionView.collectionViewLayout.invalidateLayout()
             
             self.setPageSize(UIDevice.current.orientation)
             

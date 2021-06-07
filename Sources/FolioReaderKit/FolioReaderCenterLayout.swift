@@ -38,7 +38,7 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
 //            height: collectionView.frame.height
 //        )
         
-        print("PREPAREROTATE \(self.collectionViewContentSize) \(collectionView.frame) \(numberOfItems)")
+        print("PREPAREROTATE collectionViewContentSize=\(collectionViewContentSize.debugDescription) w=\(collectionViewContentSize.width) h=\(collectionViewContentSize.height) collectionView.bounds=\(collectionView.bounds) w=\(collectionView.bounds.width) h=\(collectionView.bounds.height) collectionView.frame=\(collectionView.frame) numberOfItems=\(numberOfItems)")
         
         layoutAttributes.removeAll()
         
