@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 52;
+	objectVersion = 46;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -55,13 +55,6 @@
 		2AC3415A264A583800A477ED /* HADiscreteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC3411E264A583700A477ED /* HADiscreteSlider.swift */; };
 		2AC3415B264A583800A477ED /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34120264A583700A477ED /* SMSegmentView.swift */; };
 		2AC3415C264A583800A477ED /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AC34121264A583700A477ED /* SMSegment.swift */; };
-		2AC3415F264A58FA00A477ED /* ZipArchive in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3415E264A58FA00A477ED /* ZipArchive */; };
-		2AC34162264A593400A477ED /* MenuItemKit in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34161264A593400A477ED /* MenuItemKit */; };
-		2AC34165264A594C00A477ED /* ZFDragableModalTransition in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34164264A594C00A477ED /* ZFDragableModalTransition */; };
-		2AC34168264A597300A477ED /* AEXML in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC34167264A597300A477ED /* AEXML */; };
-		2AC3416B264A5A9200A477ED /* FontBlaster in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416A264A5A9200A477ED /* FontBlaster */; };
-		2AC3416E264A5AB900A477ED /* Realm in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416D264A5AB900A477ED /* Realm */; };
-		2AC34170264A5AB900A477ED /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 2AC3416F264A5AB900A477ED /* RealmSwift */; };
 		3A8E86F71E9F80CB00CD844C /* CodeExampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F21E9F80CB00CD844C /* CodeExampleViewController.swift */; };
 		3A8E86F81E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F41E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift */; };
 		3A8E86F91E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F51E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift */; };
@@ -185,13 +178,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2AC3416E264A5AB900A477ED /* Realm in Frameworks */,
-				2AC34168264A597300A477ED /* AEXML in Frameworks */,
-				2AC34170264A5AB900A477ED /* RealmSwift in Frameworks */,
-				2AC34165264A594C00A477ED /* ZFDragableModalTransition in Frameworks */,
-				2AC3415F264A58FA00A477ED /* ZipArchive in Frameworks */,
-				2AC34162264A593400A477ED /* MenuItemKit in Frameworks */,
-				2AC3416B264A5A9200A477ED /* FontBlaster in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,13 +433,6 @@
 			);
 			name = Example;
 			packageProductDependencies = (
-				2AC3415E264A58FA00A477ED /* ZipArchive */,
-				2AC34161264A593400A477ED /* MenuItemKit */,
-				2AC34164264A594C00A477ED /* ZFDragableModalTransition */,
-				2AC34167264A597300A477ED /* AEXML */,
-				2AC3416A264A5A9200A477ED /* FontBlaster */,
-				2AC3416D264A5AB900A477ED /* Realm */,
-				2AC3416F264A5AB900A477ED /* RealmSwift */,
 			);
 			productName = Example;
 			productReference = 2A61344D2621950C0022FC04 /* Example.app */;
@@ -531,6 +510,7 @@
 				TargetAttributes = {
 					1A42C2881C0E3882000F2137 = {
 						CreatedOnToolsVersion = 7.1.1;
+						DevelopmentTeam = L8WKJ3U7UT;
 						LastSwiftMigration = 1010;
 						ProvisioningStyle = Automatic;
 						SystemCapabilities = {
@@ -568,12 +548,6 @@
 			);
 			mainGroup = 1A42C2801C0E3882000F2137;
 			packageReferences = (
-				2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */,
-				2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */,
-				2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */,
-				2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */,
-				2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */,
-				2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */,
 			);
 			productRefGroup = 1A42C2801C0E3882000F2137;
 			projectDirPath = "";
@@ -1070,8 +1044,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
-				SWIFT_COMPILATION_MODE = wholemodule;
-				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				SWIFT_VERSION = 4.2;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -1087,10 +1060,7 @@
 				DEVELOPMENT_TEAM = L8WKJ3U7UT;
 				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roswen9.FolioReaderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1108,10 +1078,7 @@
 				DEVELOPMENT_TEAM = L8WKJ3U7UT;
 				INFOPLIST_FILE = Example/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 12.4;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.roswen9.FolioReaderExample;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1129,10 +1096,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "MultipleInstances-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.multipleinstances;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
@@ -1150,10 +1114,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "MultipleInstances-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.multipleinstances;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 2;
@@ -1169,11 +1130,7 @@
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = FolioReaderTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
@@ -1190,11 +1147,7 @@
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = FolioReaderTests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.FolioReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 4.2;
@@ -1211,10 +1164,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "Storyboard-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.storyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1229,10 +1179,7 @@
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				DEVELOPMENT_TEAM = 99AHAA343Q;
 				INFOPLIST_FILE = "Storyboard-Example/Info.plist";
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.folioreader.example.storyboard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -1287,95 +1234,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/drearycold/ZipArchive.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.2.5;
-			};
-		};
-		2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/cxa/MenuItemKit.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.0.0;
-			};
-		};
-		2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/drearycold/ZFDragableModalTransition.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.6.5;
-			};
-		};
-		2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/tadija/AEXML.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.6.0;
-			};
-		};
-		2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ArtSabintsev/FontBlaster.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.1.3;
-			};
-		};
-		2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/realm/realm-cocoa.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.21.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		2AC3415E264A58FA00A477ED /* ZipArchive */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC3415D264A58FA00A477ED /* XCRemoteSwiftPackageReference "ZipArchive" */;
-			productName = ZipArchive;
-		};
-		2AC34161264A593400A477ED /* MenuItemKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC34160264A593400A477ED /* XCRemoteSwiftPackageReference "MenuItemKit" */;
-			productName = MenuItemKit;
-		};
-		2AC34164264A594C00A477ED /* ZFDragableModalTransition */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC34163264A594C00A477ED /* XCRemoteSwiftPackageReference "ZFDragableModalTransition" */;
-			productName = ZFDragableModalTransition;
-		};
-		2AC34167264A597300A477ED /* AEXML */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC34166264A597300A477ED /* XCRemoteSwiftPackageReference "AEXML" */;
-			productName = AEXML;
-		};
-		2AC3416A264A5A9200A477ED /* FontBlaster */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC34169264A5A9200A477ED /* XCRemoteSwiftPackageReference "FontBlaster" */;
-			productName = FontBlaster;
-		};
-		2AC3416D264A5AB900A477ED /* Realm */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */;
-			productName = Realm;
-		};
-		2AC3416F264A5AB900A477ED /* RealmSwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2AC3416C264A5AB900A477ED /* XCRemoteSwiftPackageReference "realm-cocoa" */;
-			productName = RealmSwift;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 1A42C2811C0E3882000F2137 /* Project object */;
 }
