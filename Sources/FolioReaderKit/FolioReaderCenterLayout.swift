@@ -30,6 +30,7 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
 //        self.sectionInset = UIEdgeInsets(top: 0, left: self.minimumInteritemSpacing, bottom: 0, right: 0)
 //        self.sectionInsetReference = .fromSafeArea
         self.itemSize = collectionView.bounds.size
+//        self.itemSize = CGSize(width: itemSize.width, height: itemSize.height - 20)
         
         //self.scrollDirection = .horizontal
         
@@ -57,5 +58,27 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
     override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
         print("PROPOSEROTATE \(proposedContentOffset)")
         return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
+    }
+    
+    override func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
+        
+        guard let collectionView = collectionView else {
+            return false
+        }
+        
+        print("SHOULDTRANSROTATE oldBounds=\(collectionView.bounds) newBounds=\(newBounds)")
+        
+        let oldBounds = collectionView.bounds
+        guard oldBounds.size != newBounds.size else { return false }
+        
+        self.itemSize = newBounds.size
+        self.estimatedItemSize = newBounds.size
+        collectionView.setContentOffset(
+            CGPoint(
+                x: oldBounds.minX / oldBounds.width * newBounds.width,
+                y: oldBounds.minY / oldBounds.height * newBounds.height
+            ), animated: false)
+        
+        return true
     }
 }

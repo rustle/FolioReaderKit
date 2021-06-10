@@ -346,20 +346,34 @@ extension FolioReader {
     }
     
     open var currentMarginTop: Int {
-        get { return self.defaults.integer(forKey: kCurrentMarginTop)}
+        get {
+            if self.defaults.integer(forKey: kCurrentMarginTop) < 50 {
+                return self.defaults.integer(forKey: kCurrentMarginTop)
+            } else {
+                return 50
+            }
+        }
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginTop)
             let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
             self.readerCenter?.setScrollDirection(direction)
+//            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
 
     open var currentMarginBottom: Int {
-        get { return self.defaults.integer(forKey: kCurrentMarginBottom)}
+        get {
+            if self.defaults.integer(forKey: kCurrentMarginBottom) < 50 {
+                return self.defaults.integer(forKey: kCurrentMarginBottom)
+            } else {
+                return 50
+            }
+        }
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginBottom)
             let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
             self.readerCenter?.setScrollDirection(direction)
+//            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
 
@@ -367,8 +381,9 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentMarginLeft)}
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginLeft)
-            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-            self.readerCenter?.setScrollDirection(direction)
+//            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+//            self.readerCenter?.setScrollDirection(direction)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
 
@@ -376,8 +391,9 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentMarginRight)}
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginRight)
-            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-            self.readerCenter?.setScrollDirection(direction)
+//            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+//            self.readerCenter?.setScrollDirection(direction)
+            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
         }
     }
     
@@ -506,6 +522,27 @@ extension FolioReader {
         
         """
         
+        if let pageWidth = readerCenter?.pageWidth, let pageHeight = readerCenter?.pageHeight {
+            let marginTop = 0 //CGFloat(currentMarginTop) / 200 * pageHeight
+            let marginBottom = 0 //CGFloat(currentMarginBottom) / 200 * pageHeight
+            let marginLeft = CGFloat(currentMarginLeft) / 200 * pageWidth
+            let marginRight = CGFloat(currentMarginRight) / 200 * pageWidth
+            
+            style += """
+            
+            body {
+                padding: \(marginTop)px \(marginRight)px \(marginBottom)px \(marginLeft)px !important;
+                overflow: hidden !important;
+            }
+            
+            @page {
+                margin: \(marginTop)px \(marginRight)px \(marginBottom)px \(marginLeft)px !important;
+            }
+            
+            """
+        }
+        
+        
         for fontName in UIFont.fontNames(forFamilyName: currentFont) {
 //            if let fontURL = readerCenter?.userFonts[fontName] {
             guard let fontDescriptor = readerCenter?.userFontDescriptors[fontName] else {
@@ -574,7 +611,7 @@ extension FolioReader {
             guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
                 continue
             }
-            if self.readerContainer?.readerConfig.debug > 0 {
+            if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false {
                 print("generateRuntimeStyle \(resourceBasePath)")
             }
             
@@ -587,7 +624,7 @@ extension FolioReader {
                     try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
                 }
                 
-                if self.readerContainer?.readerConfig.debug > 0 {
+                if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false  {
                     print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
                 }
 

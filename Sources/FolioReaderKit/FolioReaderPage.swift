@@ -90,6 +90,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.isHidden = true
             webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
             self.contentView.addSubview(webView!)
+            if readerConfig.debug.contains(.borderHighlight) {
+                webView?.layer.borderWidth = 10
+                webView?.layer.borderColor = UIColor.magenta.cgColor
+            }
         }
         webView?.navigationDelegate = self
 
@@ -128,6 +132,51 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
 
     func webViewFrame() -> CGRect {
+        guard (self.readerConfig.hideBars == false) else {
+            return bounds
+        }
+        
+        let statusbarHeight = UIApplication.shared.statusBarFrame.size.height
+        let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
+        let topComponentTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : navBarHeight
+        let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
+        let paddingTop: CGFloat = CGFloat(self.folioReader.currentMarginTop) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0))
+        let paddingBottom: CGFloat = CGFloat(self.folioReader.currentMarginBottom) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0))
+        
+        return CGRect(
+            x: bounds.origin.x,
+            y: self.readerConfig.isDirection(
+                bounds.origin.y + topComponentTotal,
+                bounds.origin.y + topComponentTotal + paddingTop,
+                bounds.origin.y + topComponentTotal),
+            width: bounds.width,
+            height: self.readerConfig.isDirection(
+                bounds.height - topComponentTotal,
+                bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
+                bounds.height - topComponentTotal)
+        )
+    }
+    
+    func webViewFrameVanilla() -> CGRect {
+        guard (self.readerConfig.hideBars == false) else {
+            return bounds
+        }
+        
+        let statusbarHeight = UIApplication.shared.statusBarFrame.size.height
+        let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
+        let navTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : statusbarHeight + navBarHeight
+        let paddingTop: CGFloat = 20
+        let paddingBottom: CGFloat = 30
+        
+        return CGRect(
+            x: bounds.origin.x,
+            y: self.readerConfig.isDirection(bounds.origin.y + navTotal, bounds.origin.y + navTotal + paddingTop, bounds.origin.y + navTotal),
+            width: bounds.width,
+            height: self.readerConfig.isDirection(bounds.height - navTotal, bounds.height - navTotal - paddingTop - paddingBottom, bounds.height - navTotal)
+        )
+    }
+    
+    func webViewFramePeter() -> CGRect {
         guard (self.readerConfig.hideBars == false) else {
             return bounds
         }
@@ -421,7 +470,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             delay(1.0) {
                 self.delegate?.pageDidLoad?(self)
             }
-        } else if self.readerConfig.debug > 0 {
+        } else if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
         }
       }

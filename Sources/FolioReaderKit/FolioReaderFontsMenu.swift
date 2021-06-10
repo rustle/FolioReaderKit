@@ -339,7 +339,6 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
 
             self.folioReader.currentScrollDirection = index
         } else if segmentView.tag == 4 {
-            print("tag:4 index:\(index)")
             switch index {
             case 0:
                 self.folioReader.currentMarginTop -= 5
@@ -349,8 +348,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 1:
                 self.folioReader.currentMarginTop += 5
-                if self.folioReader.currentMarginTop > 100 {
-                    self.folioReader.currentMarginTop = 100
+                if self.folioReader.currentMarginTop > 25 {
+                    self.folioReader.currentMarginTop = 25
                 }
                 break;
             case 2:
@@ -361,8 +360,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 3:
                 self.folioReader.currentMarginBottom += 5
-                if self.folioReader.currentMarginBottom > 100 {
-                    self.folioReader.currentMarginBottom = 100
+                if self.folioReader.currentMarginBottom > 25 {
+                    self.folioReader.currentMarginBottom = 25
                 }
                 break;
             case 4:
@@ -373,8 +372,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 5:
                 self.folioReader.currentMarginLeft += 5
-                if self.folioReader.currentMarginLeft > 100 {
-                    self.folioReader.currentMarginLeft = 100
+                if self.folioReader.currentMarginLeft > 25 {
+                    self.folioReader.currentMarginLeft = 25
                 }
                 break;
             case 6:
@@ -385,8 +384,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 7:
                 self.folioReader.currentMarginRight += 5
-                if self.folioReader.currentMarginRight > 100 {
-                    self.folioReader.currentMarginRight = 100
+                if self.folioReader.currentMarginRight > 25 {
+                    self.folioReader.currentMarginRight = 25
                 }
                 break;
             default:

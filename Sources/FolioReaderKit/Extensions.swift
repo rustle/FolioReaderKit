@@ -534,3 +534,7 @@ extension Array {
         return indices ~= index ? self[index] : nil
     }
 }
+
+func folioLogger(_ logMessage: String, functionName: String = #function, lineNumber: Int = #line) {
+    print("\(functionName):\(lineNumber): \(logMessage)")
+}

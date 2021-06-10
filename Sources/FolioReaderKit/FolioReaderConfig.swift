@@ -265,7 +265,7 @@ open class FolioReaderConfig: NSObject {
     open var localizedSave = NSLocalizedString("Save", comment: "")
     open var localizedHighlightNote = NSLocalizedString("Note", comment: "")
 
-    open var debug = 0
+    public var debug = FolioReaderDebugOptions()
     
     public convenience init(withIdentifier identifier: String) {
         self.init()
@@ -300,5 +300,19 @@ open class FolioReaderConfig: NSObject {
         case .horizontal:                       return horizontal
         case .horizontalWithVerticalContent:    return horizontalContentVertical
         }
+    }
+}
+
+public struct FolioReaderDebugOptions: OptionSet {
+    public let rawValue: Int
+
+    public static let htmlStyling    = FolioReaderDebugOptions(rawValue: 1 << 0)
+    public static let viewTransition  = FolioReaderDebugOptions(rawValue: 1 << 1)
+    public static let borderHighlight   = FolioReaderDebugOptions(rawValue: 1 << 2)
+    public static let contentMenu = FolioReaderDebugOptions(rawValue: 1 << 3)
+    public static let functionTrace = FolioReaderDebugOptions(rawValue: 1 << 16)
+
+    public init(rawValue: Int) {
+        self.rawValue = rawValue
     }
 }

@@ -81,7 +81,7 @@ open class FolioReaderWebView: WKWebView {
             }
         }
         
-        if folioReader.readerContainer?.readerConfig.debug > 0 {
+        if folioReader.readerContainer?.readerConfig.debug.contains(.contentMenu) ?? false {
             let menuItems = UIMenuController.shared.menuItems ?? [UIMenuItem]()
             let menuItemTitle = menuItems.compactMap { $0.title }
             

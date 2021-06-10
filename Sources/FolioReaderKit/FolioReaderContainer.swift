@@ -135,12 +135,22 @@ open class FolioReaderContainer: UIViewController {
 
         if let rootViewController = self.centerViewController {
             self.centerNavigationController = UINavigationController(rootViewController: rootViewController)
+            if readerConfig.debug.contains(.borderHighlight) {
+                rootViewController.view.layer.borderWidth = 6
+                rootViewController.view.layer.borderColor = UIColor.green.cgColor
+            }
         }
 
         self.centerNavigationController?.setNavigationBarHidden(self.readerConfig.shouldHideNavigationOnTap, animated: false)
         if let _centerNavigationController = self.centerNavigationController {
             self.view.addSubview(_centerNavigationController.view)
             self.addChild(_centerNavigationController)
+            if readerConfig.debug.contains(.borderHighlight) {
+                _centerNavigationController.view.layer.borderWidth = 4
+                _centerNavigationController.view.layer.borderColor = UIColor.blue.cgColor
+                _centerNavigationController.navigationBar.layer.borderWidth = 6
+                _centerNavigationController.navigationBar.layer.borderColor = UIColor.yellow.cgColor
+            }
         }
         self.centerNavigationController?.didMove(toParent: self)
 
@@ -155,6 +165,11 @@ open class FolioReaderContainer: UIViewController {
             print("Epub path is nil.")
             self.errorOnLoad = true
             return
+        }
+        
+        if readerConfig.debug.contains(.borderHighlight) {
+            self.view.layer.borderWidth = 2
+            self.view.layer.borderColor = UIColor.red.cgColor
         }
     }
 
