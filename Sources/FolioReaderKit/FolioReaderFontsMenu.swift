@@ -155,79 +155,6 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         line.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(line)
 
-        // Fonts adjust
-//        let fontNameHeight: CGFloat = self.readerConfig.canChangeFontStyle ? 55: 0
-//        let fontName = SMSegmentView(frame: CGRect(x: 15, y: line.frame.height+line.frame.origin.y, width: view.frame.width-30, height: fontNameHeight),
-//                                     separatorColour: UIColor.clear,
-//                                     separatorWidth: 0,
-//                                     segmentProperties:  [
-//                                        keySegmentOnSelectionColour: UIColor.clear,
-//                                        keySegmentOffSelectionColour: UIColor.clear,
-//                                        keySegmentOnSelectionTextColour: selectedColor,
-//                                        keySegmentOffSelectionTextColour: normalColor,
-//                                        keyContentVerticalMargin: 17 as AnyObject
-//            ])
-//        fontName.delegate = self
-//        fontName.tag = 2
-//        let fontName = UIButton(frame: CGRect(x: 15, y: line.frame.height+line.frame.origin.y, width: view.frame.width-30, height: fontNameHeight))
-//        fontName.setTitle("Font", for: .normal)
-//        fontName.backgroundColor = .black
-//        fontName.addTarget(self, action: #selector(fontPicker(_:)), for: .primaryActionTriggered)
-
-//        fontName.addSegmentWithTitle("Andada", onSelectionImage: nil, offSelectionImage: nil)
-//        fontName.addSegmentWithTitle("Lato", onSelectionImage: nil, offSelectionImage: nil)
-//        fontName.addSegmentWithTitle("Lora", onSelectionImage: nil, offSelectionImage: nil)
-//        fontName.addSegmentWithTitle("Raleway", onSelectionImage: nil, offSelectionImage: nil)
-
-//        fontName.segments[0].titleFont = UIFont(name: "Andada-Regular", size: 18)!
-//        fontName.segments[1].titleFont = UIFont(name: "Lato-Regular", size: 18)!
-//        fontName.segments[2].titleFont = UIFont(name: "Lora-Regular", size: 18)!
-//        fontName.segments[3].titleFont = UIFont(name: "Raleway-Regular", size: 18)!
-        
-        //fontName.selectSegmentAtIndex(self.folioReader.currentFont.rawValue)
-//        menuView.addSubview(fontName)
-
-        // Separator 2
-//        let line2 = UIView(frame: CGRect(x: 0, y: dayNight.frame.height+dayNight.frame.origin.y, width: view.frame.width, height: 1))
-//        line2.backgroundColor = self.readerConfig.nightModeSeparatorColor
-//        menuView.addSubview(line2)
-//
-//        // Font slider size
-//        let slider = HADiscreteSlider(frame: CGRect(x: 60, y: line2.frame.origin.y+2, width: view.frame.width-120, height: 55))
-//        slider.tickStyle = ComponentStyle.rounded
-//        slider.tickCount = 5
-//        slider.tickSize = CGSize(width: 8, height: 8)
-//
-//        slider.thumbStyle = ComponentStyle.rounded
-//        slider.thumbSize = CGSize(width: 28, height: 28)
-//        slider.thumbShadowOffset = CGSize(width: 0, height: 2)
-//        slider.thumbShadowRadius = 3
-//        slider.thumbColor = selectedColor
-//
-//        slider.backgroundColor = UIColor.clear
-//        slider.tintColor = self.readerConfig.nightModeSeparatorColor
-//        slider.minimumValue = 0
-//        slider.value = CGFloat(self.folioReader.currentFontSize.rawValue)
-//        slider.addTarget(self, action: #selector(FolioReaderFontsMenu.sliderValueChanged(_:)), for: UIControl.Event.valueChanged)
-//
-//        // Force remove fill color
-//        slider.layer.sublayers?.forEach({ layer in
-//            layer.backgroundColor = UIColor.clear.cgColor
-//        })
-//
-//        menuView.addSubview(slider)
-//
-//        // Font icons
-//        let fontSmallView = UIImageView(frame: CGRect(x: 20, y: line2.frame.origin.y+14, width: 30, height: 30))
-//        fontSmallView.image = fontSmallNormal
-//        fontSmallView.contentMode = UIView.ContentMode.center
-//        menuView.addSubview(fontSmallView)
-//
-//        let fontBigView = UIImageView(frame: CGRect(x: view.frame.width-50, y: line2.frame.origin.y+14, width: 30, height: 30))
-//        fontBigView.image = fontBigNormal
-//        fontBigView.contentMode = UIView.ContentMode.center
-//        menuView.addSubview(fontBigView)
-
         // Only continues if user can change scroll direction
         guard (self.readerConfig.canChangeScrollDirection == true) else {
             return
@@ -277,15 +204,27 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         menuView.addSubview(layoutDirection)
         
         // Sepatator 4
-        let line4 = UIView(frame: CGRect(x: 0, y: line3.frame.origin.y + 56, width: view.frame.width, height: 1))
-        line4.backgroundColor = self.readerConfig.nightModeSeparatorColor
-        menuView.addSubview(line4)
+        let lineB4MarginV = UIView(
+            frame: CGRect(
+                x: 0,
+                y: line3.frame.origin.y + 56,
+                width: view.frame.width,
+                height: 1
+            )
+        )
+        lineB4MarginV.backgroundColor = self.readerConfig.nightModeSeparatorColor
+        menuView.addSubview(lineB4MarginV)
         
         let marginIncrease = UIImage(readerImageNamed: "icon-sun")
         let marginDecrease = UIImage(readerImageNamed: "icon-moon")
         
-        let marginMenu = SMSegmentView(
-            frame: CGRect(x: 0, y: line4.frame.origin.y, width: view.frame.width, height: 55),
+        let marginMenuV = SMSegmentView(
+            frame: CGRect(
+                x: 0,
+                y: lineB4MarginV.frame.origin.y,
+                width: view.frame.width,
+                height: 55
+            ),
             separatorColour: self.readerConfig.nightModeSeparatorColor,
             separatorWidth: 1,
             segmentProperties: [
@@ -296,26 +235,93 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 keySegmentOffSelectionTextColour: normalColor,
                 keyContentVerticalMargin: 17 as AnyObject
             ])
-        marginMenu.delegate = self
-        marginMenu.tag = 4
-        marginMenu.addSegmentWithTitle("T-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
-        marginMenu.addSegmentWithTitle("T+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
-        marginMenu.addSegmentWithTitle("B-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
-        marginMenu.addSegmentWithTitle("B+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
-        marginMenu.addSegmentWithTitle("L-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
-        marginMenu.addSegmentWithTitle("L+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
-        marginMenu.addSegmentWithTitle("R-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
-        marginMenu.addSegmentWithTitle("R+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenuV.delegate = self
+        marginMenuV.tag = 4
+        marginMenuV.addSegmentWithTitle("T-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuV.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
+        marginMenuV.addSegmentWithTitle("T+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenuV.addSegmentWithTitle("B-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuV.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
+        marginMenuV.addSegmentWithTitle("B+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
         
+        menuView.addSubview(marginMenuV)
+
+        let topMarginText = UITextView(
+            frame: CGRect(
+                x: view.frame.width / 6 + 2,
+                y: lineB4MarginV.frame.origin.y + 4,
+                width: view.frame.width / 6 - 4,
+                height: marginMenuV.frame.height - 3
+            )
+        )
+        topMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
+        topMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        topMarginText.textAlignment = .center
+        topMarginText.textColor = normalColor
+        topMarginText.tag = 400
+
+        menuView.addSubview(topMarginText)
+
+        let botMarginText = UITextView(
+            frame: CGRect(
+                x: view.frame.width - view.frame.width / 3 + 2,
+                y: lineB4MarginV.frame.origin.y + 4,
+                width: view.frame.width / 6 - 4,
+                height: marginMenuV.frame.height - 3
+            )
+        )
+        botMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
+        botMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        botMarginText.textAlignment = .center
+        botMarginText.textColor = normalColor
+        botMarginText.tag = 401
+
+        menuView.addSubview(botMarginText)
         
+        let lineB4MarginH = UIView(
+            frame: CGRect(
+                x: 0,
+                y: marginMenuV.frame.maxY,
+                width: view.frame.width,
+                height: 1
+            )
+        )
+        lineB4MarginH.backgroundColor = self.readerConfig.nightModeSeparatorColor
+        menuView.addSubview(lineB4MarginH)
         
-        menuView.addSubview(marginMenu)
+        let marginMenuH = SMSegmentView(
+            frame: CGRect(
+                x: 0,
+                y: lineB4MarginH.frame.maxY,
+                width: view.frame.width,
+                height: 55
+            ),
+            separatorColour: self.readerConfig.nightModeSeparatorColor,
+            separatorWidth: 1,
+            segmentProperties: [
+                keySegmentTitleFont: UIFont(name: "Avenir-Light", size: 17)!,
+                keySegmentOnSelectionColour: UIColor.clear,
+                keySegmentOffSelectionColour: UIColor.clear,
+                keySegmentOnSelectionTextColour: selectedColor,
+                keySegmentOffSelectionTextColour: normalColor,
+                keyContentVerticalMargin: 17 as AnyObject
+            ])
+        marginMenuH.delegate = self
+        marginMenuH.tag = 5
+        
+        marginMenuH.addSegmentWithTitle("L-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle("L+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenuH.addSegmentWithTitle("R-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle("R+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        
+        menuView.addSubview(marginMenuH)
     }
 
     // MARK: - SMSegmentView delegate
 
     func segmentView(_ segmentView: SMSegmentView, didSelectSegmentAtIndex index: Int) {
         guard (self.folioReader.readerCenter?.currentPage) != nil else { return }
+        guard self.folioReader.readerCenter?.layoutAdapting == false else { return }
 
         if segmentView.tag == 1 {   //Theme Mode
 
@@ -345,44 +351,61 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 if self.folioReader.currentMarginTop < 0 {
                     self.folioReader.currentMarginTop = 0
                 }
-                break;
-            case 1:
-                self.folioReader.currentMarginTop += 5
-                if self.folioReader.currentMarginTop > 25 {
-                    self.folioReader.currentMarginTop = 25
+                if let textView = menuView.viewWithTag(400) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
                 }
                 break;
             case 2:
+                self.folioReader.currentMarginTop += 5
+                if self.folioReader.currentMarginTop > 30 {
+                    self.folioReader.currentMarginTop = 30
+                }
+                if let textView = menuView.viewWithTag(400) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
+                }
+                break;
+            case 3:
                 self.folioReader.currentMarginBottom -= 5
                 if self.folioReader.currentMarginBottom < 0 {
                     self.folioReader.currentMarginBottom = 0
                 }
-                break;
-            case 3:
-                self.folioReader.currentMarginBottom += 5
-                if self.folioReader.currentMarginBottom > 25 {
-                    self.folioReader.currentMarginBottom = 25
+                if let textView = menuView.viewWithTag(401) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
                 }
                 break;
-            case 4:
+            case 5:
+                self.folioReader.currentMarginBottom += 5
+                if self.folioReader.currentMarginBottom > 30 {
+                    self.folioReader.currentMarginBottom = 30
+                }
+                if let textView = menuView.viewWithTag(401) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
+                }
+                break;
+            default:
+                break;
+            }
+        } else if segmentView.tag == 5 {
+            switch index {
+            case 0:
                 self.folioReader.currentMarginLeft -= 5
                 if self.folioReader.currentMarginLeft < 0 {
                     self.folioReader.currentMarginLeft = 0
                 }
                 break;
-            case 5:
+            case 1:
                 self.folioReader.currentMarginLeft += 5
                 if self.folioReader.currentMarginLeft > 25 {
                     self.folioReader.currentMarginLeft = 25
                 }
                 break;
-            case 6:
+            case 2:
                 self.folioReader.currentMarginRight -= 5
                 if self.folioReader.currentMarginRight < 0 {
                     self.folioReader.currentMarginRight = 0
                 }
                 break;
-            case 7:
+            case 3:
                 self.folioReader.currentMarginRight += 5
                 if self.folioReader.currentMarginRight > 25 {
                     self.folioReader.currentMarginRight = 25
@@ -397,7 +420,9 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
     // MARK: - Gestures
     
     @objc func tapGesture() {
-        dismiss()
+        dismiss() {
+            self.folioReader.readerCenter?.lastMenuSelectedIndex = 0
+        }
         
         if (self.readerConfig.shouldHideNavigationOnTap == false) {
             self.folioReader.readerCenter?.showBars()
@@ -627,7 +652,9 @@ class FolioReaderFontStyleMenu: UIViewController, UIGestureRecognizerDelegate, U
 
     // MARK: - Gestures
     @objc func tapGesture() {
-        dismiss()
+        dismiss() {
+            self.folioReader.readerCenter?.lastMenuSelectedIndex = 1
+        }
         
         if (self.readerConfig.shouldHideNavigationOnTap == false) {
             self.folioReader.readerCenter?.showBars()
@@ -776,7 +803,9 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
     
     // MARK: - Gestures
     @objc func tapGesture() {
-        dismiss()
+        dismiss() {
+            self.folioReader.readerCenter?.lastMenuSelectedIndex = 2
+        }
         
         if (self.readerConfig.shouldHideNavigationOnTap == false) {
             self.folioReader.readerCenter?.showBars()

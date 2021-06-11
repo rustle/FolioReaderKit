@@ -72,6 +72,8 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
     var currentPageNumber: Int = 0
     var pageWidth: CGFloat = 0.0
     var pageHeight: CGFloat = 0.0
+    var layoutAdapting = false
+    var lastMenuSelectedIndex = 0
 
     fileprivate var screenBounds: CGRect!
     fileprivate var pointNow = CGPoint.zero
@@ -487,6 +489,27 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         }
     }
 
+    func updateScrollPosition(delay bySecond: Double = 0.1, completion: (() -> Void)?) {
+        guard let currentPage = currentPage else { return }
+        // After rotation fix internal page offset
+        
+        self.updatePageOffsetRate()
+        delay(bySecond) {
+            var pageOffset = (currentPage.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * self.pageOffsetRate
+
+            // Fix the offset for paged scroll
+            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
+                let page = round(pageOffset / self.pageWidth)
+                pageOffset = page * self.pageWidth
+            }
+
+            let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
+            currentPage.webView?.scrollView.setContentOffset(pageOffsetPoint, animated: true)
+            
+            self.updatePageOffsetRate()
+            completion?()
+        }
+    }
     // MARK: Status bar and Navigation bar
 
     func hideBars() {
@@ -1220,7 +1243,7 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         let currentPageItem = getCurrentPageItemNumber()
         
         if totalPages > 0 {
-            var progress = Double(currentPageItem) * 100.0 / Double(totalPages)
+            var progress = Double(currentPageItem - 1) * 100.0 / Double(totalPages)
             
             if progress < 0 { progress = 0 }
             if progress > 100 { progress = 100 }
@@ -1790,10 +1813,10 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         hideBars()
 
         let menuFontTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontTab.tabBarItem = .init(title: "General", image: nil, tag: 0)
+        menuFontTab.tabBarItem = .init(title: "Page", image: nil, tag: 0)
         
         let menuFontStyleTab = FolioReaderFontStyleMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontStyleTab.tabBarItem = .init(title: "FontStyle", image: nil, tag: 1)
+        menuFontStyleTab.tabBarItem = .init(title: "Font", image: nil, tag: 1)
         
         let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
         menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
@@ -1801,12 +1824,13 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         let menu = UITabBarController()
         menu.setViewControllers([menuFontTab, menuFontStyleTab, menuParagraphTab], animated: true)
         menu.modalPresentationStyle = .custom
+        menu.selectedIndex = lastMenuSelectedIndex
 
         animator = ZFModalTransitionAnimator(modalViewController: menu)
         animator.isDragable = false
         animator.bounces = false
-        animator.behindViewAlpha = 0.4
-        animator.behindViewScale = 1
+        animator.behindViewAlpha = 1.0
+        animator.behindViewScale = 1.0
         animator.transitionDuration = 0.6
         animator.direction = ZFModalTransitonDirection.bottom
 

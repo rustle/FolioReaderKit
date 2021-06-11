@@ -260,7 +260,7 @@ extension FolioReader {
         set (fontFamilyName) {
             self.defaults.set(fontFamilyName, forKey: kCurrentFontFamily)
             //_ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(fontFamilyName)')")
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
 
@@ -272,7 +272,7 @@ extension FolioReader {
         }
         set (fontSize) {
             self.defaults.set(fontSize, forKey: kCurrentFontSize)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -287,7 +287,7 @@ extension FolioReader {
         }
         set (fontSize) {
             self.defaults.set(fontSize, forKey: kCurrentFontWeight)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -355,9 +355,7 @@ extension FolioReader {
         }
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginTop)
-            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-            self.readerCenter?.setScrollDirection(direction)
-//            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateViewerLayout(delay: 0.2)
         }
     }
 
@@ -371,9 +369,7 @@ extension FolioReader {
         }
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginBottom)
-            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-            self.readerCenter?.setScrollDirection(direction)
-//            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateViewerLayout(delay: 0.2)
         }
     }
 
@@ -381,9 +377,7 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentMarginLeft)}
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginLeft)
-//            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-//            self.readerCenter?.setScrollDirection(direction)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
 
@@ -391,9 +385,8 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentMarginRight)}
         set (value) {
             self.defaults.set(value, forKey: kCurrentMarginRight)
-//            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
-//            self.readerCenter?.setScrollDirection(direction)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
+
         }
     }
     
@@ -401,7 +394,7 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentLetterSpacing) }
         set (value) {
             self.defaults.set(value, forKey: kCurrentLetterSpacing)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -409,10 +402,9 @@ extension FolioReader {
         get { return self.defaults.integer(forKey: kCurrentLineHeight) }
         set (value) {
             self.defaults.set(value, forKey: kCurrentLineHeight)
-            _ = self.readerCenter?.currentPage?.webView?.js("setFolioStyle('\(generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            updateRuntimStyle(delay: 0.4)
         }
     }
-    
 
     @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
@@ -492,7 +484,39 @@ extension FolioReader {
 
 extension FolioReader {
     
-    open func generateRuntimeStyle() -> String {
+    func updateViewerLayout(delay bySecond: Double) {
+        guard let readerCenter = readerCenter else { return }
+        
+        readerCenter.layoutAdapting = true
+        
+        readerCenter.currentPage?.setNeedsLayout()
+        
+        readerCenter.updateScrollPosition(delay: bySecond) {
+            readerCenter.layoutAdapting = false
+        }
+    }
+    
+    func updateRuntimStyle(delay bySecond: Double) {
+        guard let readerCenter = readerCenter else { return }
+
+        readerCenter.layoutAdapting = true
+        
+        readerCenter.currentPage?.webView?.js(
+            """
+            setFolioStyle(
+            '\(generateRuntimeStyle()
+                .data(using: .utf8)!
+                .base64EncodedString())'
+            )
+            """
+        ) { _ in
+            readerCenter.updateScrollPosition(delay: bySecond) {
+                readerCenter.layoutAdapting = false
+            }
+        }
+    }
+    
+    func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
         let lineHeight = Decimal((currentLineHeight + 10) * 5) / 100 + 1    //1.5 ~ 2.05
         let textIndent = (Float(letterSpacing) + Float(currentFontSizeOnly)) * 2
