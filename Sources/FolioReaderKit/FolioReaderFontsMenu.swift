@@ -221,7 +221,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         let marginMenuV = SMSegmentView(
             frame: CGRect(
                 x: 0,
-                y: lineB4MarginV.frame.origin.y,
+                y: lineB4MarginV.frame.minY,
                 width: view.frame.width,
                 height: 55
             ),
@@ -248,9 +248,9 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
 
         let topMarginText = UITextView(
             frame: CGRect(
-                x: view.frame.width / 6 + 2,
-                y: lineB4MarginV.frame.origin.y + 4,
-                width: view.frame.width / 6 - 4,
+                x: marginMenuV.frame.width / 6 + 2,
+                y: marginMenuV.frame.minY + 4,
+                width: marginMenuV.frame.width / 6 - 4,
                 height: marginMenuV.frame.height - 3
             )
         )
@@ -264,9 +264,9 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
 
         let botMarginText = UITextView(
             frame: CGRect(
-                x: view.frame.width - view.frame.width / 3 + 2,
-                y: lineB4MarginV.frame.origin.y + 4,
-                width: view.frame.width / 6 - 4,
+                x: marginMenuV.frame.width - marginMenuV.frame.width / 3 + 2,
+                y: lineB4MarginV.frame.minY + 4,
+                width: marginMenuV.frame.width / 6 - 4,
                 height: marginMenuV.frame.height - 3
             )
         )
@@ -310,11 +310,45 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         marginMenuH.tag = 5
         
         marginMenuH.addSegmentWithTitle("L-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuH.addSegmentWithTitle("L+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
         marginMenuH.addSegmentWithTitle("R-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuH.addSegmentWithTitle("R+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
         
         menuView.addSubview(marginMenuH)
+        
+        let leftMarginText = UITextView(
+            frame: CGRect(
+                x: marginMenuH.frame.width / 6 + 2,
+                y: marginMenuH.frame.minY + 4,
+                width: marginMenuH.frame.width / 6 - 4,
+                height: marginMenuH.frame.height - 3
+            )
+        )
+        leftMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
+        leftMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        leftMarginText.textAlignment = .center
+        leftMarginText.textColor = normalColor
+        leftMarginText.tag = 402
+
+        menuView.addSubview(leftMarginText)
+
+        let rightMarginText = UITextView(
+            frame: CGRect(
+                x: marginMenuH.frame.width - marginMenuH.frame.width / 3 + 2,
+                y: marginMenuH.frame.minY + 4,
+                width: marginMenuH.frame.width / 6 - 4,
+                height: marginMenuV.frame.height - 3
+            )
+        )
+        rightMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
+        rightMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        rightMarginText.textAlignment = .center
+        rightMarginText.textColor = normalColor
+        rightMarginText.tag = 403
+
+        menuView.addSubview(rightMarginText)
     }
 
     // MARK: - SMSegmentView delegate
@@ -357,8 +391,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 2:
                 self.folioReader.currentMarginTop += 5
-                if self.folioReader.currentMarginTop > 30 {
-                    self.folioReader.currentMarginTop = 30
+                if self.folioReader.currentMarginTop > 50 {
+                    self.folioReader.currentMarginTop = 50
                 }
                 if let textView = menuView.viewWithTag(400) as? UITextView {
                     textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
@@ -375,8 +409,8 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 break;
             case 5:
                 self.folioReader.currentMarginBottom += 5
-                if self.folioReader.currentMarginBottom > 30 {
-                    self.folioReader.currentMarginBottom = 30
+                if self.folioReader.currentMarginBottom > 50 {
+                    self.folioReader.currentMarginBottom = 50
                 }
                 if let textView = menuView.viewWithTag(401) as? UITextView {
                     textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
@@ -392,23 +426,35 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
                 if self.folioReader.currentMarginLeft < 0 {
                     self.folioReader.currentMarginLeft = 0
                 }
-                break;
-            case 1:
-                self.folioReader.currentMarginLeft += 5
-                if self.folioReader.currentMarginLeft > 25 {
-                    self.folioReader.currentMarginLeft = 25
+                if let textView = menuView.viewWithTag(402) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
                 }
                 break;
             case 2:
+                self.folioReader.currentMarginLeft += 5
+                if self.folioReader.currentMarginLeft > 50 {
+                    self.folioReader.currentMarginLeft = 50
+                }
+                if let textView = menuView.viewWithTag(402) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
+                }
+                break;
+            case 3:
                 self.folioReader.currentMarginRight -= 5
                 if self.folioReader.currentMarginRight < 0 {
                     self.folioReader.currentMarginRight = 0
                 }
+                if let textView = menuView.viewWithTag(403) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
+                }
                 break;
-            case 3:
+            case 5:
                 self.folioReader.currentMarginRight += 5
-                if self.folioReader.currentMarginRight > 25 {
-                    self.folioReader.currentMarginRight = 25
+                if self.folioReader.currentMarginRight > 50 {
+                    self.folioReader.currentMarginRight = 50
+                }
+                if let textView = menuView.viewWithTag(403) as? UITextView {
+                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
                 }
                 break;
             default:
