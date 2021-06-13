@@ -7,9 +7,13 @@
 
 import Foundation
 
-class MyFolioReaderCenterDelegate: FolioReaderCenterDelegate {
+public class MyFolioReaderCenterDelegate: FolioReaderCenterDelegate {
     
-    @objc func htmlContentForPage(_ page: FolioReaderPage, htmlContent: String) -> String {
+    public init() {
+        
+    }
+    
+    @objc public func htmlContentForPage(_ page: FolioReaderPage, htmlContent: String) -> String {
         
         // print(htmlContent)
         let regex = try! NSRegularExpression(pattern: "background=\"[^\"]+\"", options: .caseInsensitive)

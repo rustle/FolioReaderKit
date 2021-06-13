@@ -7,7 +7,7 @@
 //
 
 import UIKit
-//import FolioReaderKit
+import FolioReaderKit
 
 class ViewController: UIViewController {
 
@@ -32,7 +32,7 @@ class ViewController: UIViewController {
         //config.savedPositionForCurrentBook = ["pageNumber": Int(6), "pageOffsetX": CGFloat(6150), "pageOffsetY": CGFloat(0.0)]
         config.allowSharing = false //Broken as of now
         config.enableTTS = false
-        config.debug = 1
+        config.debug.formUnion([.htmlStyling])
 
         // See more at FolioReaderConfig.swift
 //        config.canChangeScrollDirection = false
