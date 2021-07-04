@@ -539,7 +539,7 @@ extension FolioReader {
             -webkit-hyphens: auto !important;
         }
         
-        p > span {
+        span {
             letter-spacing: \(letterSpacing)px !important;
             line-height: \(lineHeight) !important;
         }
