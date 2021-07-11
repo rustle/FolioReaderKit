@@ -15,7 +15,10 @@ open class FolioReaderWebView: WKWebView {
     var isColors = false
     var isShare = false
     var isOneWord = false
-    var mDictView = MDictViewContainer()
+    
+    var mDictView : UIViewController?
+    
+    open var additionalMenuItems = [UIMenuItem]()
     
     fileprivate(set) var cssOverflowProperty = "scroll" {
         didSet {
@@ -43,8 +46,6 @@ open class FolioReaderWebView: WKWebView {
     init(frame: CGRect, readerContainer: FolioReaderContainer) {
         self.readerContainer = readerContainer
         
-        mDictView.loadViewIfNeeded()
-
         let configuration = WKWebViewConfiguration()
         configuration.dataDetectorTypes = .link
         super.init(frame: frame, configuration: configuration)
@@ -253,13 +254,14 @@ open class FolioReaderWebView: WKWebView {
     @objc func lookup(_ sender: UIMenuController?) {
         js("getSelectedText()") { selectedText in
             guard let selectedText = selectedText else { return }
+            guard let mDictView = self.mDictView else { return }
 
             self.setMenuVisible(false)
             self.clearTextSelection()
 
-            self.mDictView.word = selectedText
-            self.mDictView.view.tintColor = self.readerConfig.tintColor
-            let nav = UINavigationController(rootViewController: self.mDictView)
+            mDictView.title = selectedText
+            mDictView.view.tintColor = self.readerConfig.tintColor
+            let nav = UINavigationController(rootViewController: mDictView)
             nav.navigationBar.isTranslucent = false
 
             guard let readerContainer = self.readerContainer else { return }
@@ -273,6 +275,10 @@ open class FolioReaderWebView: WKWebView {
         self.clearTextSelection()
     }
 
+    open func setMDictView(mDictView: UIViewController) {
+        self.mDictView = mDictView
+    }
+    
     func setYellow(_ sender: UIMenuController?) {
         changeHighlightStyle(sender, style: .yellow)
     }

@@ -127,7 +127,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         super.layoutSubviews()
 
         webView?.setupScrollDirection()
-        let webViewFrame = webViewFrame()
+        let webViewFrame = self.webViewFrame()
         webView?.frame = webViewFrame
     }
 
