@@ -170,7 +170,10 @@ input, textarea, button, highlight, select, a {
 }
 
 /* Highlight styles */
-html .highlight-yellow {background:rgb(255, 235, 107)}
+html .highlight-yellow {
+    background-color:rgb(255, 235, 107) !important;
+    background:rgb(255, 235, 107) !important;
+}
 html .highlight-green {background:#C0ED72}
 html .highlight-blue {background:#ADD8FF}
 html .highlight-pink {background:#FFB0CA}
@@ -243,7 +246,10 @@ html.darkMode, html.darkMode body {
     color: #C4C4C4 !important;
 }
 
-html.nightMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
+html.nightMode .highlight-yellow {
+    background-color:rgba(255, 235, 107, 0.9) !important;
+    background:rgba(255, 235, 107, 0.9) !important;
+}
 html.nightMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
 html.nightMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
 html.nightMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}

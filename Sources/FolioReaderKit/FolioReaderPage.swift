@@ -212,11 +212,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
 
     func loadHTMLString(_ htmlContent: String!, baseURL: URL!) {
-        // Insert the stored highlights to the HTML
-        let tempHtmlContent = htmlContentWithInsertHighlights(htmlContent)
         // Load the html into the webview
         webView?.alpha = 0
-        webView?.loadHTMLString(tempHtmlContent, baseURL: baseURL)
+        webView?.loadHTMLString(htmlContent, baseURL: baseURL)
         
 //        var result = webView?.js("removeOuterTable()")
 //        Logger().info("removeOuterTable: \(result ?? "empty")")
@@ -234,45 +232,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         if (webView?.loadFileURL(URL, allowingReadAccessTo: readAccessURL)) != nil {
             fileURLLoaded = true
         }
-    }
-
-    // MARK: - Highlights
-
-    fileprivate func htmlContentWithInsertHighlights(_ htmlContent: String) -> String {
-        var tempHtmlContent = htmlContent as NSString
-        // Restore highlights
-        guard let bookId = (self.book.name as NSString?)?.deletingPathExtension else {
-            return tempHtmlContent as String
-        }
-
-        let highlights = Highlight.allByBookId(withConfiguration: self.readerConfig, bookId: bookId, andPage: pageNumber as NSNumber?)
-
-        if (highlights.count > 0) {
-            for item in highlights {
-                let style = HighlightStyle.classForStyle(item.type)
-                
-                var tag = ""
-                if let _ = item.noteForHighlight {
-                    tag = "<highlight id=\"\(item.highlightId!)\" onclick=\"callHighlightWithNoteURL(this);\" class=\"\(style)\">\(item.content!)</highlight>"
-                } else {
-                    tag = "<highlight id=\"\(item.highlightId!)\" onclick=\"callHighlightURL(this);\" class=\"\(style)\">\(item.content!)</highlight>"
-                }
-                
-                var locator = item.contentPre + item.content
-                locator += item.contentPost
-                locator = Highlight.removeSentenceSpam(locator) /// Fix for Highlights
-                
-                let range: NSRange = tempHtmlContent.range(of: locator, options: .literal)
-                
-                if range.location != NSNotFound {
-                    let newRange = NSRange(location: range.location + item.contentPre.count, length: item.content.count)
-                    tempHtmlContent = tempHtmlContent.replacingCharacters(in: newRange, with: tag) as NSString
-                } else {
-                    print("highlight range not found")
-                }
-            }
-        }
-        return tempHtmlContent as String
     }
 
     // MARK: - WKNavigation Delegate
@@ -347,7 +306,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             let index = decoded.index(decoded.startIndex, offsetBy: 12)
             let rect = NSCoder.cgRect(for: String(decoded[index...]))
 
-            webView.createMenu(options: true)
+            webView.createMenu(options: true, onHighlight: true)
             webView.setMenuVisible(true, andRect: rect)
             menuIsVisible = true
 
@@ -467,13 +426,36 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
             self.webView?.js("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            
+            
             delay(1.0) {
+                self.injectHighlights()
+
                 self.delegate?.pageDidLoad?(self)
             }
         } else if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
         }
-      }
+    }
+    
+    func injectHighlights() {
+        guard let bookId = (self.book.name as NSString?)?.deletingPathExtension else { return }
+        guard let highlights = self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?) else { return }
+        guard highlights.isEmpty == false else { return }
+        let encoder = JSONEncoder()
+
+        for item in highlights {
+            do {
+                let serializedData = try encoder.encode(item)
+                let encodedData = serializedData.base64EncodedString()
+                self.webView?.js("injectHighlight('\(encodedData)')") {_ in
+                    
+                }
+            } catch {
+                
+            }
+        }
+    }
     
     // MARK: Gesture recognizer
 

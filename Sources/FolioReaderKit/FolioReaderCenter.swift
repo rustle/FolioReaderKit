@@ -1891,6 +1891,22 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         present(nav, animated: true, completion: nil)
     }
     
+    func presentAddHighlightError(_ message: String) {
+        let textView = UITextView()
+        textView.text = message
+        
+        let vc = UIViewController()
+        vc.view = textView
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .formSheet
+        
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: FolioPageDelegate

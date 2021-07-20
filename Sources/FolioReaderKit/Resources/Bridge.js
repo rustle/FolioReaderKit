@@ -109,6 +109,40 @@ function getLeafNodes(master) {
     });
     return leafNodes;
 }
+/**
+ * Get an array containing the text nodes within a DOM node.
+ *
+ * From http://stackoverflow.com/a/4399718/843621
+ *
+ * For example get all text nodes from <body>
+ *
+ * var body = document.getElementsByTagName('body')[0];
+ *
+ * getTextNodesIn(body);
+ *
+ * @param node Any DOM node.
+ * @param [includeWhitespaceNodes=false] Whether to include whitespace-only nodes.
+ * @return An array containing TextNodes.
+ */
+
+function getTextNodesIn(node, includeWhitespaceNodes) {
+    var textNodes = [], whitespace = /^\s*$/;
+
+    function getTextNodes(node) {
+        if (node.nodeType == 3) {
+            if (includeWhitespaceNodes || !whitespace.test(node.nodeValue)) {
+                textNodes.push(node);
+            }
+        } else {
+            for (var i = 0, len = node.childNodes.length; i < len; ++i) {
+                getTextNodes(node.childNodes[i]);
+            }
+        }
+    }
+
+    getTextNodes(node);
+    return textNodes;
+}
 
 function removeOuterTable() {
     // table references the table DOM element
@@ -162,6 +196,135 @@ function removeOuterTable() {
     return handled
 }
 
+function injectHighlight(highlightJSONDataEncoded) {    //sample data
+//    var cfiStart = "/2/4/2/2/2/2/4/2/8/2/1:20";
+//    var cfiEnd = "/2/4/2/2/2/2/4/2/8/2/1:41";
+//    var cfiStart = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:20)"
+//    var cfiEnd   = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:42)"
+    
+    var sHighlightJson = window.atob(highlightJSONDataEncoded);
+    var oHighlight = JSON.parse(sHighlightJson);
+    oHighlight.content = decodeURIComponent(oHighlight.contentEncoded)
+    oHighlight.contentPost = decodeURIComponent(oHighlight.contentPostEncoded)
+    oHighlight.contentPre = decodeURIComponent(oHighlight.contentPreEncoded)
+
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight oHighlight " + JSON.stringify(oHighlight))
+    
+    var cfiStart = "epubcfi(" + oHighlight.cfiStart + ")"
+    var startNode = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiStart), document, [], ["highlight"], []).get(0)
+    var startTextInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(cfiStart), document, [], ["highlight"], [])
+    var startTextInfoOffset = startTextInfo.textOffset
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startNode " + startNode + " " + startNode.textContent)
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startTextInfo " + startTextInfo + " " + JSON.stringify(startTextInfo))
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startTextInfo " + startTextInfo.textNode.textContent)
+
+    var cfiEnd   = "epubcfi(" + oHighlight.cfiEnd + ")"
+    var endNode   = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiEnd),   document, [], ["highlight"], []).get(0)
+    var endTextInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(cfiEnd), document, [], ["highlight"], [])
+    var endTextInfoOffset = endTextInfo.textOffset
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endNode " + endNode + " " + endNode.textContent)
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endTextInfo " + endTextInfo + " " + JSON.stringify(endTextInfo))
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endTextInfo " + endTextInfo.textNode.textContent)
+    
+    var curTextLengthUptoStartNode = 0    //for locating actual startNode
+    while (curTextLengthUptoStartNode + startNode.textContent.length <= startTextInfoOffset) {
+        curTextLengthUptoStartNode += startNode.textContent.length
+        startNode = startNode.nextSibling
+        if (startNode == null)
+            break
+    }
+    if (startNode == null) {
+        return "startOffset exceeding content length"
+    }
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startNodeNew " + startNode + " " + startNode.textContent)
+    
+    var curTextLengthUptoEndNode = 0    //for locating actual endNode
+    while (curTextLengthUptoEndNode + endNode.textContent.length <= endTextInfoOffset) {
+        curTextLengthUptoEndNode += endNode.textContent.length
+        endNode = endNode.nextSibling
+        if (endNode == null)
+            break;
+        
+    }
+    if (endNode == null) {
+        return "endOffset exceeding content length"
+    }
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endNodeNew " + endNode + " " + endNode.textContent)
+    
+    var range = document.createRange()
+    range.setStart(startNode, startTextInfoOffset - curTextLengthUptoStartNode)
+    range.setEnd(endNode, endTextInfoOffset - curTextLengthUptoEndNode)
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight range " + range)
+
+    // check highlight overlapping
+    const highlightItems = [...document.getElementsByTagName("highlight")];
+    for (i=0; i<highlightItems.length; i++) {
+        if (range.intersectsNode(highlightItems[i])) {
+            return "Overlapping highlights are not supported"
+        }
+    }
+//    var overlapping = false
+//    highlightItems.forEach((item) => {
+//        window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight highlightItem " + item.outerHTML)
+//        var textNodes = getTextNodesIn(item)
+//        for (i=0; i<textNodes.length; i++) {
+//            overlapping = overlapping || range.intersectsNode(textNodes[i])
+//        }
+//    });
+//    if (overlapping) {
+//        return "Overlapping highlights are not supported"
+//    }
+    if (startNode != endNode) {
+        var ancestor = range.commonAncestorContainer
+        var textNodes = getTextNodesIn(ancestor)
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight ancestor " + ancestor.textContent)
+
+        var id_seq = 0
+        for (i=0; i<textNodes.length; i++) {
+            var intersects = range.intersectsNode(textNodes[i])
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight compareMask " + intersects + " " + textNodes[i].textContent)
+            if (intersects) {
+                var subrange = document.createRange()
+                if (textNodes[i] == startNode) {
+                    subrange.setStart(startNode, startTextInfoOffset - curTextLengthUptoStartNode)
+                    subrange.setEnd(startNode, startNode.textContent.length)
+                } else if (textNodes[i] == endNode) {
+                    subrange.setStart(endNode, 0)
+                    subrange.setEnd(endNode, endTextInfoOffset - curTextLengthUptoEndNode)
+                } else {
+                    subrange.setStart(textNodes[i], 0)
+                    subrange.setEnd(textNodes[i], textNodes[i].textContent.length)
+                }
+                var selectionContents = subrange.extractContents();
+                var elm = document.createElement("highlight");
+                var id = oHighlight.highlightId
+                
+                elm.appendChild(selectionContents);
+                elm.setAttribute("id", id + "." + id_seq.toString());
+                elm.setAttribute("onclick","callHighlightURL(this);");
+                elm.setAttribute("class", oHighlight.style);
+                
+                subrange.insertNode(elm);
+                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight subrange " + subrange + " " + elm)
+                id_seq ++
+            }
+        }
+    } else {
+        var selectionContents = range.extractContents();
+        var elm = document.createElement("highlight");
+        var id = oHighlight.highlightId
+        
+        elm.appendChild(selectionContents);
+        elm.setAttribute("id", id);
+        elm.setAttribute("onclick","callHighlightURL(this);");
+        elm.setAttribute("class", oHighlight.style);
+        
+        range.insertNode(elm);
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight finished " + range + " " + elm)
+    }
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight getHTML " + getHTML());
+}
 // Get All HTML
 function getHTML() {
     return document.documentElement.outerHTML;
@@ -260,6 +423,143 @@ function highlightString(style) {
     return JSON.stringify(params);
 }
 
+function highlightStringCFI(style) {
+    var range = window.getSelection().getRangeAt(0);
+    var startOffset = range.startOffset;
+    var endOffset = range.endOffset;
+
+    var startContainer = range.startContainer
+    var startContainerText = startContainer.textContent
+    
+    var endContainer = range.endContainer
+    var endContainerText = endContainer.textContent
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI startContainerText " + startContainerText);
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI endContainerText " + endContainerText);
+
+    //Text Location Assertion
+    var precedingStartOffset = startOffset - 20
+    if (precedingStartOffset < 0) {
+        precedingStartOffset = 0
+    }
+    var precedingText = startContainerText.substring(precedingStartOffset, startOffset)
+    
+    var followingEndOffset = endOffset + 20
+    if (followingEndOffset > endContainerText.length) {
+        followingEndOffset = endContainerText.length
+    }
+    var followingText = endContainerText.substring(endOffset, followingEndOffset)
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI precedingText " + precedingText);
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI followingText " + followingText);
+
+    var tmpNode = startContainer.previousSibling
+    var prevHighlightLengthStart = 0
+    while (tmpNode != null) {
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI tmpNodeName " + tmpNode.nodeName);
+
+        if (tmpNode.nodeName == "HIGHLIGHT") {
+            prevHighlightLengthStart += tmpNode.textContent.length
+        }
+        tmpNode = tmpNode.previousSibling
+    }
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI prevHighlightLengthStart " + prevHighlightLengthStart);
+
+    var tmpNode = endContainer.previousSibling
+    var prevHighlightLengthEnd = 0
+    while (tmpNode != null) {
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI tmpNodeName " + tmpNode.nodeName);
+
+        if (tmpNode.nodeName == "HIGHLIGHT") {
+            prevHighlightLengthEnd += tmpNode.textContent.length
+        }
+        tmpNode = tmpNode.previousSibling
+    }
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI prevHighlightLengthEnd " + prevHighlightLengthEnd);
+    
+    var cfiStart = window.EPUBcfi.generateCharacterOffsetCFIComponent(
+                        startContainer,startOffset,[],["highlight"],[])
+    var cfiEnd = window.EPUBcfi.generateCharacterOffsetCFIComponent(
+                        endContainer,endOffset,[],["highlight"],[])
+    
+    var params = [];
+    params.push({
+        id: guid(),
+        startOffset: startOffset.toString(),
+        endOffset: endOffset.toString(),
+        content: range.cloneContents().textContent,
+        contentPre: precedingText,
+        contentPost: followingText,
+        cfiStart: cfiStart,
+        cfiEnd: cfiEnd,
+        prevHighlightLengthStart: prevHighlightLengthStart.toString(),
+        prevHighlightLengthEnd: prevHighlightLengthEnd.toString()
+    });
+    
+    return JSON.stringify(params);
+}
+
+function highlightStringWithNoteCFI(style) {
+    var range = window.getSelection().getRangeAt(0);
+    var startOffset = range.startOffset;
+    var endOffset = range.endOffset;
+
+    var startContainer = range.startContainer
+    var startContainerText = startContainer.textContent
+    
+    var endContainer = range.endContainer
+    var endContainerText = endContainer.textContent
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI startContainerText " + startContainerText);
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI endContainerText " + endContainerText);
+
+    //Text Location Assertion
+    var precedingStartOffset = startOffset - 20
+    if (precedingStartOffset < 0) {
+        precedingStartOffset = 0
+    }
+    var precedingText = startContainerText.substring(precedingStartOffset, startOffset)
+    
+    var followingEndOffset = endOffset + 20
+    if (followingEndOffset > endContainerText.length) {
+        followingEndOffset = endContainerText.length
+    }
+    var followingText = endContainerText.substring(endOffset, followingEndOffset)
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI precedingText " + precedingText);
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI followingText " + followingText);
+
+    var cfiStart = window.EPUBcfi.generateCharacterOffsetCFIComponent(startContainer,startOffset,[],["highlight"],[])
+    var cfiEnd = window.EPUBcfi.generateCharacterOffsetCFIComponent(endContainer,endOffset,[],["highlight"],[])
+    
+    var selectionContents = range.extractContents();
+    var elm = document.createElement("highlight");
+    var id = guid();
+    
+    elm.appendChild(selectionContents);
+    elm.setAttribute("id", id);
+    elm.setAttribute("onclick","callHighlightWithNoteURL(this);");
+    elm.setAttribute("class", style);
+    
+    range.insertNode(elm);
+    thisHighlight = elm;
+    
+    var params = [];
+    params.push({
+        id: id,
+        rect: getRectForSelectedText(elm),
+        startOffset: startOffset.toString(),
+        endOffset: endOffset.toString(),
+        content: elm.textContent,
+        contentPre: precedingText,
+        contentPost: followingText,
+        cfiStart: cfiStart,
+        cfiEnd: cfiEnd
+    });
+    
+    return JSON.stringify(params);
+}
+
 function highlightStringWithNote(style) {
     var range = window.getSelection().getRangeAt(0);
     var startOffset = range.startOffset;
@@ -283,28 +583,70 @@ function highlightStringWithNote(style) {
 }
 
 function getHighlightId() {
-    return thisHighlight.id;
+    var id = thisHighlight.id
+    var indexOfDot = id.indexOf(".")
+    if (indexOfDot > 0) {
+        id = id.substring(0, indexOfDot)
+    }
+    return id;
 }
 
 // Menu colors
 function setHighlightStyle(style) {
-    thisHighlight.className = style;
-    return thisHighlight.id;
+    var id = thisHighlight.id
+    var indexOfDot = id.indexOf(".")
+    if (indexOfDot == -1) {
+        thisHighlight.className = style;
+    } else {
+        id = id.substring(0, indexOfDot)
+        const highlightItems = document.querySelectorAll('[id^="' + id + '."]');
+        highlightItems.forEach(function(item) {
+          item.className = style;
+        });
+    }
+    
+    return id;
 }
 
 function removeThisHighlight() {
-    thisHighlight.outerHTML = thisHighlight.innerHTML;
-    return thisHighlight.id;
+    var id = thisHighlight.id
+    var indexOfDot = id.indexOf(".")
+    if (indexOfDot == -1) {
+        thisHighlight.outerHTML = thisHighlight.innerHTML;
+    } else {
+        id = id.substring(0, indexOfDot)
+        removeHighlightById(id)
+    }
+    return id
 }
 
 function removeHighlightById(elmId) {
     var elm = document.getElementById(elmId);
-    elm.outerHTML = elm.innerHTML;
-    return elm.id;
+    if (elm != null) {
+        elm.outerHTML = elm.innerHTML;
+    } else {
+        const highlightItems = document.querySelectorAll('[id^="' + elmId + '."]');
+        highlightItems.forEach(function(item) {
+          item.outerHTML = item.innerHTML;
+        });
+    }
+    return elmId
 }
 
 function getHighlightContent() {
-    return thisHighlight.textContent
+    var id = thisHighlight.id
+    var indexOfDot = id.indexOf(".")
+    if (indexOfDot == -1) {
+        return thisHighlight.textContent
+    } else {
+        id = id.substring(0, indexOfDot)
+        var text = ""
+        const highlightItems = document.querySelectorAll('[id^="' + id + '."]');
+        highlightItems.forEach(function(item) {
+          text += item.textContent
+        });
+        return text
+    }
 }
 
 function getBodyText() {
@@ -837,22 +1179,58 @@ function setFolioStyle(styleTextEncoded) {
     window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle compStyles p " + compStyles.cssText)
 }
 
+//function injectHighlight() {    //sample data
+////    var cfiStart = "/2/4/2/2/2/2/4/2/8/2/1:20";
+////    var cfiEnd = "/2/4/2/2/2/2/4/2/8/2/1:41";
+////    var cfiStart = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:20)"
+////    var cfiEnd   = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:42)"
+//                var cfiStart = "epubcfi(/4/2/2/2/2/4/2/8/2/1)"
+//                var startNode = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiStart), document, [], [], []).get(0)
+//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startNode " + startNode + " " + startNode.outerHTML)
+//
+//    var cfiEnd   = "epubcfi(/4/2/2/2/2/4/2/8/2/1)"
+//    var endNode   = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiEnd),   document, [], [], []).get(0)
+//    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endNode " + endNode + " " + endNode.outerHTML)
+//
+//                var range = document.createRange()
+//                range.setStart(startNode, 20)
+//                range.setEnd(endNode, 42)
+//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight range " + range)
+//
+//                var selectionContents = range.extractContents();
+//                var elm = document.createElement("highlight");
+//                var id = guid();
+//
+//                elm.appendChild(selectionContents);
+//                elm.setAttribute("id", id);
+//                elm.setAttribute("onclick","callHighlightURL(this);");
+//                elm.setAttribute("class", "highlight-yellow");
+//
+//                range.insertNode(elm);
+//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight finished " + range + " " + elm)
+//
+//}
+                                                                
+                                                                
+window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML() + "\n" + "---------------------------------------\n")
 
-window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML())
-
-removeOuterTable()
-
-window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeOuterTable " + getHTML())
-
-removePSpace()
-
-window.webkit.messageHandlers.FolioReaderPage.postMessage("After removePSpace " + getHTML())
-
-removeBodyClass()
-
-window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeBodyClass " + getHTML())
-
-reParagraph()
-
-window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
+//removeOuterTable()
+//
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeOuterTable " + getHTML())
+//
+//removePSpace()
+//
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removePSpace " + getHTML())
+//
+//removeBodyClass()
+//
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeBodyClass " + getHTML())
+//
+//reParagraph()
+//
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
 window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");
+
+//injectHighlight()
+
+

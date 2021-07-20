@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import RealmSwift
 
 class FolioReaderAddHighlightNote: UIViewController {
 
@@ -166,17 +165,14 @@ class FolioReaderAddHighlightNote: UIViewController {
     
     @objc private func saveNote(_ sender: UIBarButtonItem) {
         if !textView.text.isEmpty {
+            highlight.noteForHighlight = textView.text
+            
             if isEditHighlight {
-                let realm = try! Realm(configuration: readerConfig.realmConfiguration)
-                realm.beginWrite()
-                highlight.noteForHighlight = textView.text
-                highlightSaved = true
-                try! realm.commitWrite()
+                folioReader.delegate?.folioReaderHighlight?(folioReader, saveNoteFor: highlight)
             } else {
-                highlight.noteForHighlight = textView.text
-                highlight.persist(withConfiguration: readerConfig)
-                highlightSaved = true
+                folioReader.delegate?.folioReaderHighlight?(folioReader, added: highlight, completion: nil)
             }
+            highlightSaved = true
         }
         
         dismiss()

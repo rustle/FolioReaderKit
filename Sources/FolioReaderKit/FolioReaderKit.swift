@@ -100,6 +100,54 @@ public enum MediaOverlayStyle: Int {
     /// Called when reader did closed.
     @available(*, deprecated, message: "Use 'folioReaderDidClose(_ folioReader: FolioReader)' instead.")
     @objc optional func folioReaderDidClosed()
+    
+    /// Save a Highlight with completion block
+    ///
+    /// - Parameters:
+    ///   - readerConfig: Current folio reader configuration.
+    ///   - completion: Completion block.
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, added highlight: Highlight, completion: Completion?)
+    
+    /// Remove a Highlight by ID
+    ///
+    /// - Parameters:
+    ///   - readerConfig: Current folio reader configuration.
+    ///   - highlightId: The ID to be removed
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, removedId highlightId: String)
+    
+    /// Update a Highlight by ID
+    ///
+    /// - Parameters:
+    ///   - readerConfig: Current folio reader configuration.
+    ///   - highlightId: The ID to be removed
+    ///   - type: The `HighlightStyle`
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, updateById highlightId: String, type style: HighlightStyle)
+    
+    /// Return a Highlight by ID
+    ///
+    /// - Parameter:
+    ///   - readerConfig: Current folio reader configuration.
+    ///   - highlightId: The ID to be removed
+    ///   - page: Page number
+    /// - Returns: Return a Highlight
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, getById highlightId: String) -> Highlight?
+    
+    /// Return a list of Highlights with a given ID
+    ///
+    /// - Parameters:
+    ///   - readerConfig: Current folio reader configuration.
+    ///   - bookId: Book ID
+    ///   - page: Page number
+    /// - Returns: Return a list of Highlights
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [Highlight]
+    
+    /// Return all Highlights
+    ///
+    /// - Parameter readerConfig: - readerConfig: Current folio reader configuration.
+    /// - Returns: Return all Highlights
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight]
+    
+    @objc optional func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight)
 }
 
 /// Main Library class with some useful constants and methods

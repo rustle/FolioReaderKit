@@ -30,6 +30,12 @@ class FolioReaderScript: WKUserScript {
         return FolioReaderScript(source: jsSource)
     }()
     
+    static let readiumCFIJS: FolioReaderScript = {
+        let jsURL = Bundle.frameworkBundle().url(forResource: "readium-cfi.umd", withExtension: "js")!
+        let jsSource = try! String(contentsOf: jsURL)
+        return FolioReaderScript(source: jsSource)
+    }()
+    
     static let cssInjection: FolioReaderScript = {
         let cssURL = Bundle.frameworkBundle().url(forResource: "Style", withExtension: "css")!
         let cssString = try! String(contentsOf: cssURL)
