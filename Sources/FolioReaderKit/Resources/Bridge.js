@@ -196,6 +196,19 @@ function removeOuterTable() {
     return handled
 }
 
+function tweakStyleOnly() {
+    var tables = [...document.getElementsByTagName('table')]
+    tables.forEach( (table) => {
+        table.removeAttribute("width")
+        table.removeAttribute("class")
+        table.setAttribute("border", "0")
+    } )
+    var tds = [...document.getElementsByTagName('td')]
+    tds.forEach((item) => {
+        item.removeAttribute("class")
+    })
+}
+
 function injectHighlight(highlightJSONDataEncoded) {    //sample data
 //    var cfiStart = "/2/4/2/2/2/2/4/2/8/2/1:20";
 //    var cfiEnd = "/2/4/2/2/2/2/4/2/8/2/1:41";
@@ -1229,6 +1242,9 @@ window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML(
 //reParagraph()
 //
 //window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
+tweakStyleOnly()
+window.webkit.messageHandlers.FolioReaderPage.postMessage("After tweakStyleOnly " + getHTML())
+                                                                
 window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");
 
 //injectHighlight()
