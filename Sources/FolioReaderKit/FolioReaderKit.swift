@@ -29,6 +29,8 @@ internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
 internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
 internal let kCurrentLetterSpacing = "com.folioreader.kCurrentLetterSpacing"
 internal let kCurrentLineHeight = "com.folioreader.kCurrentLineHeight"
+internal let kDoWrapPara = "com.folioreader.kDoWrapPara"
+internal let kDoClearClass = "com.folioreader.kDoClearClass"
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
@@ -454,6 +456,20 @@ extension FolioReader {
         }
     }
 
+    open var doWrapPara: Bool {
+        get { return self.defaults.bool(forKey: kDoWrapPara) }
+        set (value) {
+            self.defaults.set(value, forKey: kDoWrapPara)
+        }
+    }
+    
+    open var doClearClass: Bool {
+        get { return self.defaults.bool(forKey: kDoClearClass) }
+        set (value) {
+            self.defaults.set(value, forKey: kDoClearClass)
+        }
+    }
+    
     @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
             guard let bookId = self.readerContainer?.book.name else {

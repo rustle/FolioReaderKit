@@ -1821,8 +1821,11 @@ open class FolioReaderCenter: UIViewController, /*UICollectionViewDelegate,*/ UI
         let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
         menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
         
+        let menuStructureTab = FolioReaderStructureMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuStructureTab.tabBarItem = .init(title: "Structure", image: nil, tag: 3)
+        
         let menu = UITabBarController()
-        menu.setViewControllers([menuFontTab, menuFontStyleTab, menuParagraphTab], animated: true)
+        menu.setViewControllers([menuFontTab, menuFontStyleTab, menuParagraphTab, menuStructureTab], animated: true)
         menu.modalPresentationStyle = .custom
         menu.selectedIndex = lastMenuSelectedIndex
 

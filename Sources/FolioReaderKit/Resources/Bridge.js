@@ -1242,8 +1242,8 @@ window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML(
 //reParagraph()
 //
 //window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
-tweakStyleOnly()
-window.webkit.messageHandlers.FolioReaderPage.postMessage("After tweakStyleOnly " + getHTML())
+//tweakStyleOnly()
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("After tweakStyleOnly " + getHTML())
                                                                 
 window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");
 

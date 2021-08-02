@@ -425,13 +425,21 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
-            self.webView?.js("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())')")
+            var preprocessor = ""
+            if folioReader.doClearClass {
+                preprocessor.append("removeBodyClass();tweakStyleOnly();")
+            }
+            if folioReader.doWrapPara {
+                preprocessor.append("reParagraph();removePSpace();")
+            }
+            preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
             
-            
-            delay(1.0) {
-                self.injectHighlights()
+            self.webView?.js(preprocessor) {_ in
+                delay(1.0) {
+                    self.injectHighlights()
 
-                self.delegate?.pageDidLoad?(self)
+                    self.delegate?.pageDidLoad?(self)
+                }
             }
         } else if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")

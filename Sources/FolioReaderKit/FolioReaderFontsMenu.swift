@@ -256,6 +256,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         )
         topMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
         topMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        topMarginText.adjustsFontForContentSizeCategory = true
         topMarginText.textAlignment = .center
         topMarginText.textColor = normalColor
         topMarginText.tag = 400
@@ -272,6 +273,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         )
         botMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
         botMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        botMarginText.adjustsFontForContentSizeCategory = true
         botMarginText.textAlignment = .center
         botMarginText.textColor = normalColor
         botMarginText.tag = 401
@@ -328,6 +330,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         )
         leftMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
         leftMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        leftMarginText.adjustsFontForContentSizeCategory = true
         leftMarginText.textAlignment = .center
         leftMarginText.textColor = normalColor
         leftMarginText.tag = 402
@@ -344,6 +347,7 @@ class FolioReaderFontsMenu: UIViewController, SMSegmentViewDelegate, UIGestureRe
         )
         rightMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
         rightMarginText.font = UIFont(name: "Avenir-Heavy", size: 24)
+        rightMarginText.adjustsFontForContentSizeCategory = true
         rightMarginText.textAlignment = .center
         rightMarginText.textColor = normalColor
         rightMarginText.tag = 403
@@ -806,7 +810,7 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
 
         menuView.addSubview(letterSpacingSlider)
         
-        // Font slider size
+        // Line Spacing Slider
         lineHeightSlider = HADiscreteSlider(
             frame: CGRect(
                 x: 60,
@@ -835,6 +839,8 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
         })
 
         menuView.addSubview(lineHeightSlider)
+        
+        
     }
     
     // MARK: - Font slider changed
@@ -845,6 +851,156 @@ class FolioReaderParagraphMenu: UIViewController, UIGestureRecognizerDelegate{
     
     @objc func lineHeightSliderValueChanged(_ sender: HADiscreteSlider) {
         self.folioReader.currentLineHeight = Int(sender.value)
+    }
+    
+    @objc func paragraphSwitchValueChanged(_ sender: UISwitch) {
+        print("paragraphSwitchValueChanged \(sender.isOn)")
+    }
+    
+    // MARK: - Gestures
+    @objc func tapGesture() {
+        dismiss() {
+            self.folioReader.readerCenter?.lastMenuSelectedIndex = 2
+        }
+        
+        if (self.readerConfig.shouldHideNavigationOnTap == false) {
+            self.folioReader.readerCenter?.showBars()
+        }
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        if gestureRecognizer is UITapGestureRecognizer && touch.view == view {
+            return true
+        }
+        return false
+    }
+    
+    // MARK: - Status Bar
+    
+    override var prefersStatusBarHidden : Bool {
+        return (self.readerConfig.shouldHideNavigationOnTap == true)
+    }
+}
+
+class FolioReaderStructureMenu: UIViewController, UIGestureRecognizerDelegate {
+    
+    var menuView: UIView!
+    
+    var noticeLabel: UILabel!
+    var wrapParaLabel: UILabel!
+    var wrapParaSwitch: UISwitch!
+    
+    var clearClassLabel: UILabel!
+    var clearClassSwitch: UISwitch!
+    
+    fileprivate var readerConfig: FolioReaderConfig
+    fileprivate var folioReader: FolioReader
+    
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
+        self.readerConfig = readerConfig
+        self.folioReader = folioReader
+
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        // Do any additional setup after loading the view.
+        self.view.backgroundColor = UIColor.clear
+        
+        let normalColor = UIColor(white: 0.5, alpha: 0.7)
+        let selectedColor = self.readerConfig.tintColor
+        
+        // Tap gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderStructureMenu.tapGesture))
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
+        
+        // Menu view
+        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
+        visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
+        menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
+        menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+        menuView.autoresizingMask = .flexibleWidth
+        menuView.layer.shadowColor = UIColor.black.cgColor
+        menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
+        menuView.layer.shadowOpacity = 0.3
+        menuView.layer.shadowRadius = 6
+        menuView.layer.shadowPath = UIBezierPath(rect: menuView.bounds).cgPath
+        menuView.layer.rasterizationScale = UIScreen.main.scale
+        menuView.layer.shouldRasterize = true
+        view.addSubview(menuView)
+        
+        // notice label
+        noticeLabel = UILabel(
+            frame: CGRect(
+                x : 8, y: 8,
+                width: view.frame.width - 16,
+                height: 24
+            )
+        )
+        noticeLabel.text = "Note: please reopen reader to make following options take effect"
+        noticeLabel.adjustsFontSizeToFitWidth = true
+        noticeLabel.baselineAdjustment = .alignCenters
+        noticeLabel.textColor = .systemRed
+        menuView.addSubview(noticeLabel)
+        
+        // reformat switches
+        wrapParaLabel = UILabel(
+            frame: CGRect(
+                x: 16,
+                y: noticeLabel.frame.maxY,
+                width: view.frame.width - 32 - 48,
+                height: 32)
+            )
+        wrapParaLabel.text = "Wrap raw text inside <p>"
+        
+        wrapParaSwitch = UISwitch(
+            frame: CGRect(
+                x: wrapParaLabel.frame.maxX,
+                y: wrapParaLabel.frame.minY,
+                width: 48,
+                height: 32)
+        )
+        wrapParaSwitch.isOn = self.folioReader.doWrapPara
+        wrapParaSwitch.addTarget(self, action: #selector(FolioReaderStructureMenu.paragraphSwitchValueChanged(_:)), for: .valueChanged)
+        menuView.addSubview(wrapParaLabel)
+        menuView.addSubview(wrapParaSwitch)
+        
+        // clear body&table styles
+        clearClassLabel = UILabel(
+            frame: CGRect(
+                x: 16, y: wrapParaLabel.frame.maxY,
+                width: view.frame.width - 32 - 48, height: 32
+            )
+        )
+        clearClassLabel.text = "Remove unsuitable html styles"
+        
+        clearClassSwitch = UISwitch(
+            frame: CGRect(
+                x: clearClassLabel.frame.maxX,
+                y: clearClassLabel.frame.minY,
+                width: 48, height: 32
+            )
+        )
+        clearClassSwitch.isOn = self.folioReader.doClearClass
+        clearClassSwitch.addTarget(self, action: #selector(FolioReaderStructureMenu.clearClassSwitchValueChanged(_:)), for: .valueChanged)
+        menuView.addSubview(clearClassLabel)
+        menuView.addSubview(clearClassSwitch)
+    }
+    
+    @objc func paragraphSwitchValueChanged(_ sender: UISwitch) {
+        self.folioReader.doWrapPara = sender.isOn
+    }
+    
+    @objc func clearClassSwitchValueChanged(_ sender: UISwitch) {
+        self.folioReader.doClearClass = sender.isOn
     }
     
     // MARK: - Gestures
