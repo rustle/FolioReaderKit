@@ -16,6 +16,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var bookTwo: UIButton?
     //let folioReader = FolioReader()
 
+    var preferenceProvider: FolioReaderPreferenceProvider?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -265,6 +267,17 @@ extension ViewController: FolioReaderDelegate {
         }
         
     }
+    
+    func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider {
+        if let preferenceProvider = preferenceProvider {
+            return preferenceProvider
+        } else {
+            let preferenceProvider = FolioReaderUserDefaultsPreferenceProvider(folioReader)
+            self.preferenceProvider = preferenceProvider
+            
+            return preferenceProvider
+        }
+    }
 }
 open class HighlightRealm: Object {
     @objc open dynamic var bookId: String!
@@ -324,6 +337,270 @@ open class HighlightRealm: Object {
     }
 }
 
+class FolioReaderUserDefaultsPreferenceProvider: FolioReaderPreferenceProvider {
+    func folioReaderPreference(_ folioReader: FolioReader, nightMode defaults: Bool) -> Bool {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, themeMode defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentFont defaults: String) -> String {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentFontSize defaults: String) -> String {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentFontWeight defaults: String) -> String {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentAudioRate defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentHighlightStyle defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMediaOverlayStyle defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentScrollDirection defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMenuIndex defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMarginTop defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMarginBottom defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMarginLeft defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentMarginRight defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentLetterSpacing defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, currentLineHeight defaults: Int) -> Int {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, doWrapPara defaults: Bool) -> Bool {
+        return defaults
+    }
+    
+    func folioReaderPreference(_ folioReader: FolioReader, doClearClass defaults: Bool) -> Bool {
+        return defaults
+    }
+    
+    internal let kCurrentFontFamily = "com.folioreader.kCurrentFontFamily"
+    internal let kCurrentFontSize = "com.folioreader.kCurrentFontSize"
+    internal let kCurrentFontWeight = "com.folioreader.kCurrentFontWeight"
+
+    internal let kCurrentAudioRate = "com.folioreader.kCurrentAudioRate"
+    internal let kCurrentHighlightStyle = "com.folioreader.kCurrentHighlightStyle"
+    internal let kCurrentMediaOverlayStyle = "com.folioreader.kMediaOverlayStyle"
+    internal let kCurrentScrollDirection = "com.folioreader.kCurrentScrollDirection"
+    internal let kNightMode = "com.folioreader.kNightMode"
+    internal let kThemeMode = "com.folioreader.kThemeMode"
+    internal let kCurrentTOCMenu = "com.folioreader.kCurrentTOCMenu"
+    internal let kCurrentMarginTop = "com.folioreader.kCurrentMarginTop"
+    internal let kCurrentMarginBottom = "com.folioreader.kCurrentMarginBottom"
+    internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
+    internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
+    internal let kCurrentLetterSpacing = "com.folioreader.kCurrentLetterSpacing"
+    internal let kCurrentLineHeight = "com.folioreader.kCurrentLineHeight"
+    internal let kDoWrapPara = "com.folioreader.kDoWrapPara"
+    internal let kDoClearClass = "com.folioreader.kDoClearClass"
+    
+    let folioReader: FolioReader
+    
+    init(_ folioReader: FolioReader) {
+        self.folioReader = folioReader
+        
+        // Register initial defaults
+        register(defaults: [
+            kCurrentFontFamily: FolioReaderFont.andada.rawValue,
+            kNightMode: false,
+            kThemeMode: FolioReaderThemeMode.day.rawValue,
+            kCurrentFontSize: 2,
+            kCurrentAudioRate: 1,
+            kCurrentHighlightStyle: 0,
+            kCurrentTOCMenu: 0,
+            kCurrentMediaOverlayStyle: MediaOverlayStyle.default.rawValue,
+            kCurrentScrollDirection: FolioReaderScrollDirection.defaultVertical.rawValue
+            ])
+    }
+    
+    /// UserDefault for the current ePub file.
+    fileprivate var defaults: FolioReaderUserDefaults {
+        return FolioReaderUserDefaults(
+            withIdentifier: folioReader.readerCenter?.readerContainer?.readerConfig.identifier)
+    }
+
+    public func register(defaults: [String: Any]) {
+        self.defaults.register(defaults: defaults)
+    }
+
+    func preference(nightMode defaults: Bool) -> Bool {
+        return self.defaults.bool(forKey: kNightMode)
+    }
+    
+    func preference(setNightMode value: Bool){
+        self.defaults.set(value, forKey: kNightMode)
+    }
+    
+    func preference(themeMode defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kThemeMode)
+    }
+    func preference(setThemeMode value: Int) {
+        self.defaults.set(value, forKey: kThemeMode)
+    }
+    
+    func preference(currentFont defaults: String) -> String {
+        return self.defaults.value(forKey: kCurrentFontFamily) as? String ?? defaults
+    }
+    func preference(setCurrentFont value: String) {
+        self.defaults.set(value, forKey: kCurrentFontFamily)
+    }
+    
+    func preference(currentFontSize defaults: String) -> String {
+        return self.defaults.value(forKey: kCurrentFontSize) as? String ?? defaults
+    }
+    func preference(setCurrentFontSize value: String) {
+        self.defaults.set(value, forKey: kCurrentFontSize)
+    }
+    
+    func preference(currentFontWeight defaults: String) -> String {
+        return self.defaults.value(forKey: kCurrentFontWeight) as? String ?? defaults
+    }
+    func preference(setCurrentFontWeight value: String) {
+        self.defaults.set(value, forKey: kCurrentFontWeight)
+    }
+    
+    func preference(currentAudioRate defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentAudioRate)
+    }
+    func preference(setCurrentAudioRate value: Int) {
+        self.defaults.set(value, forKey: kCurrentAudioRate)
+    }
+    
+    func preference(currentHighlightStyle defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentHighlightStyle)
+    }
+    func preference(setCurrentHighlightStyle value: Int) {
+        self.defaults.set(value, forKey: kCurrentHighlightStyle)
+    }
+    
+    func preference(currentMediaOverlayStyle defaults: Int) -> Int {
+        return self.defaults.value(forKey: kCurrentMediaOverlayStyle) as? Int ?? defaults
+    }
+    func preference(setCurrentMediaOverlayStyle value: Int) {
+        self.defaults.set(value, forKey: kCurrentMediaOverlayStyle)
+    }
+    
+    func preference(currentScrollDirection defaults: Int) -> Int {
+        return self.defaults.value(forKey: kCurrentScrollDirection) as? Int ?? defaults
+    }
+    func preference(setCurrentScrollDirection value: Int) {
+        self.defaults.set(value, forKey: kCurrentScrollDirection)
+    }
+    
+    func preference(currentMenuIndex defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentTOCMenu)
+    }
+    func preference(setCurrentMenuIndex value: Int) {
+        self.defaults.set(value, forKey: kCurrentTOCMenu)
+    }
+    
+    func preference(currentMarginTop defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentMarginTop)
+    }
+    func preference(setCurrentMarginTop value: Int) {
+        self.defaults.set(value, forKey: kCurrentMarginTop)
+    }
+    
+    func preference(currentMarginBottom defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentMarginBottom)
+    }
+    func preference(setCurrentMarginBottom value: Int) {
+        self.defaults.set(value, forKey: kCurrentMarginBottom)
+    }
+    
+    func preference(currentMarginLeft defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentMarginLeft)
+    }
+    func preference(setCurrentMarginLeft value: Int) {
+        self.defaults.set(value, forKey: kCurrentMarginLeft)
+    }
+    
+    func preference(currentMarginRight defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentMarginRight)
+    }
+    func preference(setCurrentMarginRight value: Int) {
+        self.defaults.set(value, forKey: kCurrentMarginRight)
+    }
+    
+    func preference(currentLetterSpacing defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentLetterSpacing)
+    }
+    func preference(setCurrentLetterSpacing value: Int) {
+        self.defaults.set(value, forKey: kCurrentLetterSpacing)
+    }
+    
+    func preference(currentLineHeight defaults: Int) -> Int {
+        return self.defaults.integer(forKey: kCurrentLineHeight)
+    }
+    func preference(setCurrentLineHeight value: Int) {
+        self.defaults.set(value, forKey: kCurrentLineHeight)
+    }
+    
+    func preference(doWrapPara defaults: Bool) -> Bool {
+        return self.defaults.bool(forKey: kDoWrapPara)
+    }
+    func preference(setDoWrapPara value: Bool) {
+        self.defaults.set(value, forKey: kDoWrapPara)
+    }
+    
+    func preference(doClearClass defaults: Bool) -> Bool {
+        return self.defaults.bool(forKey: kDoClearClass)
+    }
+    func preference(setDoClearClass value: Bool) {
+        self.defaults.set(value, forKey: kDoClearClass)
+    }
+    
+    func preference(savedPosition defaults: [String: Any]?) -> [String: Any]? {
+        guard let bookId = folioReader.readerCenter?.readerContainer?.book.name else {
+            return defaults
+        }
+        return self.defaults.value(forKey: bookId) as? [String : Any]
+    }
+    
+    func preference(setSavedPosition value: [String: Any]) {
+        guard let bookId = folioReader.readerCenter?.readerContainer?.book.name else {
+            return
+        }
+        self.defaults.set(value, forKey: bookId)
+    }
+}
+
 extension Results {
     func toArray<T>(_ ofType: T.Type) -> [T] {
         return compactMap { $0 as? T }
@@ -342,3 +619,4 @@ extension ViewController {
         self.open(epub: epub)
     }
 }
+

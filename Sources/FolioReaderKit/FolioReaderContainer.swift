@@ -78,19 +78,6 @@ open class FolioReaderContainer: UIViewController {
     open func initialization() {
         // Register custom fonts
         FontBlaster.blast(bundle: Bundle.frameworkBundle())
-
-        // Register initial defaults
-        self.folioReader.register(defaults: [
-            kCurrentFontFamily: FolioReaderFont.andada.rawValue,
-            kNightMode: false,
-            kThemeMode: FolioReaderThemeMode.day.rawValue,
-            kCurrentFontSize: 2,
-            kCurrentAudioRate: 1,
-            kCurrentHighlightStyle: 0,
-            kCurrentTOCMenu: 0,
-            kCurrentMediaOverlayStyle: MediaOverlayStyle.default.rawValue,
-            kCurrentScrollDirection: FolioReaderScrollDirection.defaultVertical.rawValue
-            ])
     }
 
     /// Set the `FolioReaderConfig` and epubPath.

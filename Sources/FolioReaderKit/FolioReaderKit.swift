@@ -12,25 +12,6 @@ import UIKit
 // MARK: - Internal constants
 
 internal let kApplicationDocumentsDirectory = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-internal let kCurrentFontFamily = "com.folioreader.kCurrentFontFamily"
-internal let kCurrentFontSize = "com.folioreader.kCurrentFontSize"
-internal let kCurrentFontWeight = "com.folioreader.kCurrentFontWeight"
-
-internal let kCurrentAudioRate = "com.folioreader.kCurrentAudioRate"
-internal let kCurrentHighlightStyle = "com.folioreader.kCurrentHighlightStyle"
-internal let kCurrentMediaOverlayStyle = "com.folioreader.kMediaOverlayStyle"
-internal let kCurrentScrollDirection = "com.folioreader.kCurrentScrollDirection"
-internal let kNightMode = "com.folioreader.kNightMode"
-internal let kThemeMode = "com.folioreader.kThemeMode"
-internal let kCurrentTOCMenu = "com.folioreader.kCurrentTOCMenu"
-internal let kCurrentMarginTop = "com.folioreader.kCurrentMarginTop"
-internal let kCurrentMarginBottom = "com.folioreader.kCurrentMarginBottom"
-internal let kCurrentMarginLeft = "com.folioreader.kCurrentMarginLeft"
-internal let kCurrentMarginRight = "com.folioreader.kCurrentMarginRight"
-internal let kCurrentLetterSpacing = "com.folioreader.kCurrentLetterSpacing"
-internal let kCurrentLineHeight = "com.folioreader.kCurrentLineHeight"
-internal let kDoWrapPara = "com.folioreader.kDoWrapPara"
-internal let kDoClearClass = "com.folioreader.kDoClearClass"
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
@@ -150,6 +131,8 @@ public enum MediaOverlayStyle: Int {
     @objc optional func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight]
     
     @objc optional func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight)
+    
+    @objc optional func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider
 }
 
 /// Main Library class with some useful constants and methods
@@ -186,11 +169,6 @@ open class FolioReader: NSObject {
 
     func isNight<T>(_ f: T, _ l: T) -> T {
         return (self.nightMode == true ? f : l)
-    }
-
-    /// UserDefault for the current ePub file.
-    fileprivate var defaults: FolioReaderUserDefaults {
-        return FolioReaderUserDefaults(withIdentifier: self.readerContainer?.readerConfig.identifier)
     }
 
     // Add necessary observers
@@ -241,15 +219,13 @@ extension FolioReader {
 
 extension FolioReader {
 
-    public func register(defaults: [String: Any]) {
-        self.defaults.register(defaults: defaults)
-    }
-
     /// Check if current theme is Night mode
     open var nightMode: Bool {
-        get { return self.defaults.bool(forKey: kNightMode) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(nightMode: false) ?? false
+        }
         set (value) {
-            self.defaults.set(value, forKey: kNightMode)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setNightMode: value)
 
             if let readerCenter = self.readerCenter {
                 UIView.animate(withDuration: 0.6, animations: {
@@ -266,10 +242,12 @@ extension FolioReader {
     }
     
     open var themeMode: Int {
-        get { return self.defaults.integer(forKey: kThemeMode) }
+        get {
+            return delegate?.folioReaderPreferenceProvider?(self).preference(themeMode: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kThemeMode)
-
+            delegate?.folioReaderPreferenceProvider?(self).preference(setThemeMode: value)
+            
             if let readerCenter = self.readerCenter {
                 UIView.animate(withDuration: 0.6, animations: {
                     _ = readerCenter.currentPage?.webView?.js("themeMode(\(self.themeMode))")
@@ -285,31 +263,12 @@ extension FolioReader {
         }
     }
 
-    /// Check current font name. Default .andada
-//    open var currentFont: FolioReaderFont {
-//        get {
-//            guard
-//                let rawValue = self.defaults.value(forKey: kCurrentFontFamily) as? Int,
-//                let font = FolioReaderFont(rawValue: rawValue) else {
-//                    return .andada
-//            }
-//
-//            return font
-//        }
-//        set (font) {
-//            self.defaults.set(font.rawValue, forKey: kCurrentFontFamily)
-//            _ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(font.cssIdentifier)')")
-//        }
-//    }
-    
     open var currentFont: String {
         get {
-            let fontFamilyName = self.defaults.value(forKey: kCurrentFontFamily) as? String ?? "Georgia"
-            return fontFamilyName
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFont: "Georgia") ?? "Georgia"
         }
         set (fontFamilyName) {
-            self.defaults.set(fontFamilyName, forKey: kCurrentFontFamily)
-            //_ = self.readerCenter?.currentPage?.webView?.js("setFontName('\(fontFamilyName)')")
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFont: fontFamilyName)
             updateRuntimStyle(delay: 0.4)
         }
     }
@@ -317,11 +276,10 @@ extension FolioReader {
     /// Check current font size. Default .m
     open var currentFontSize: String {
         get {
-            let fontSize = self.defaults.value(forKey: kCurrentFontSize) as? String ?? "20px"
-            return fontSize
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: "20px") ?? "20px"
         }
         set (fontSize) {
-            self.defaults.set(fontSize, forKey: kCurrentFontSize)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontSize: fontSize)
             updateRuntimStyle(delay: 0.4)
         }
     }
@@ -332,56 +290,59 @@ extension FolioReader {
 
     open var currentFontWeight: String {
         get {
-            let fontSize = self.defaults.value(forKey: kCurrentFontWeight) as? String ?? "500"
-            return fontSize
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontWeight: "500") ?? "500"
         }
-        set (fontSize) {
-            self.defaults.set(fontSize, forKey: kCurrentFontWeight)
+        set (fontWeight) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontWeight: fontWeight)
             updateRuntimStyle(delay: 0.4)
         }
     }
     
     /// Check current audio rate, the speed of speech voice. Default 0
     open var currentAudioRate: Int {
-        get { return self.defaults.integer(forKey: kCurrentAudioRate) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentAudioRate: 1) ?? 1
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentAudioRate)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentAudioRate: value)
         }
     }
 
     /// Check the current highlight style.Default 0
     open var currentHighlightStyle: Int {
-        get { return self.defaults.integer(forKey: kCurrentHighlightStyle) }
+        get {
+            return delegate?.folioReaderPreferenceProvider?(self)
+                .preference(currentHighlightStyle: HighlightStyle.yellow.rawValue)
+                ?? HighlightStyle.yellow.rawValue
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentHighlightStyle)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentHighlightStyle: value)
         }
     }
 
     /// Check the current Media Overlay or TTS style
     open var currentMediaOverlayStyle: MediaOverlayStyle {
         get {
-            guard let rawValue = self.defaults.value(forKey: kCurrentMediaOverlayStyle) as? Int,
+            guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(currentMediaOverlayStyle: MediaOverlayStyle.default.rawValue),
                 let style = MediaOverlayStyle(rawValue: rawValue) else {
                 return MediaOverlayStyle.default
             }
             return style
         }
         set (value) {
-            self.defaults.set(value.rawValue, forKey: kCurrentMediaOverlayStyle)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMediaOverlayStyle: value.rawValue)
         }
     }
 
     /// Check the current scroll direction. Default .defaultVertical
     open var currentScrollDirection: Int {
         get {
-            guard let value = self.defaults.value(forKey: kCurrentScrollDirection) as? Int else {
-                return FolioReaderScrollDirection.defaultVertical.rawValue
-            }
-
-            return value
+            return delegate?.folioReaderPreferenceProvider?(self)
+                .preference(currentScrollDirection: FolioReaderScrollDirection.defaultVertical.rawValue)
+                ?? FolioReaderScrollDirection.defaultVertical.rawValue
         }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentScrollDirection)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentScrollDirection: value)
 
             let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
             self.readerCenter?.setScrollDirection(direction)
@@ -389,99 +350,100 @@ extension FolioReader {
     }
 
     open var currentMenuIndex: Int {
-        get { return self.defaults.integer(forKey: kCurrentTOCMenu) }
+        get {
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMenuIndex: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentTOCMenu)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: value)
         }
     }
     
     open var currentMarginTop: Int {
         get {
-            if self.defaults.integer(forKey: kCurrentMarginTop) < 50 {
-                return self.defaults.integer(forKey: kCurrentMarginTop)
-            } else {
-                return 50
-            }
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: 0) ?? 0
         }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentMarginTop)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
             updateViewerLayout(delay: 0.2)
         }
     }
 
     open var currentMarginBottom: Int {
         get {
-            if self.defaults.integer(forKey: kCurrentMarginBottom) < 50 {
-                return self.defaults.integer(forKey: kCurrentMarginBottom)
-            } else {
-                return 50
-            }
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: 0) ?? 0
         }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentMarginBottom)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
             updateViewerLayout(delay: 0.2)
         }
     }
 
     open var currentMarginLeft: Int {
-        get { return self.defaults.integer(forKey: kCurrentMarginLeft)}
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentMarginLeft)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
             updateRuntimStyle(delay: 0.4)
         }
     }
 
     open var currentMarginRight: Int {
-        get { return self.defaults.integer(forKey: kCurrentMarginRight)}
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentMarginRight)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
             updateRuntimStyle(delay: 0.4)
 
         }
     }
     
     open var currentLetterSpacing: Int {
-        get { return self.defaults.integer(forKey: kCurrentLetterSpacing) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentLetterSpacing: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentLetterSpacing)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLetterSpacing: value)
             updateRuntimStyle(delay: 0.4)
         }
     }
     
     open var currentLineHeight: Int {
-        get { return self.defaults.integer(forKey: kCurrentLineHeight) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentLineHeight: 0) ?? 0
+        }
         set (value) {
-            self.defaults.set(value, forKey: kCurrentLineHeight)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLineHeight: value)
             updateRuntimStyle(delay: 0.4)
         }
     }
 
     open var doWrapPara: Bool {
-        get { return self.defaults.bool(forKey: kDoWrapPara) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(doWrapPara: false) ?? false
+        }
         set (value) {
-            self.defaults.set(value, forKey: kDoWrapPara)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setDoWrapPara: value)
         }
     }
     
     open var doClearClass: Bool {
-        get { return self.defaults.bool(forKey: kDoClearClass) }
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(doClearClass: false) ?? false
+        }
         set (value) {
-            self.defaults.set(value, forKey: kDoClearClass)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setDoClearClass: value)
         }
     }
     
     @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
-            guard let bookId = self.readerContainer?.book.name else {
-                return nil
-            }
-            return self.defaults.value(forKey: bookId) as? [String : Any]
+            delegate?.folioReaderPreferenceProvider?(self).preference(savedPosition: nil)
         }
         set {
-            guard let bookId = self.readerContainer?.book.name else {
-                return
-            }
-            self.defaults.set(newValue, forKey: bookId)
+            guard let value = newValue else { return }
+            delegate?.folioReaderPreferenceProvider?(self).preference(setSavedPosition: value)
         }
     }
 }
@@ -538,7 +500,7 @@ extension FolioReader {
         self.isReaderOpen = false
         self.isReaderReady = false
         self.readerAudioPlayer?.stop(immediate: true)
-        self.defaults.set(0, forKey: kCurrentTOCMenu)
+        self.delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: 0)
         self.delegate?.folioReaderDidClose?(self)
     }
 }
@@ -738,4 +700,83 @@ extension FolioReader {
         
         return style
     }
+}
+
+@objc public protocol FolioReaderPreferenceProvider: class {
+    
+    @objc func preference(nightMode defaults: Bool) -> Bool
+    
+    @objc func preference(setNightMode value: Bool)
+    
+    @objc func preference(themeMode defaults: Int) -> Int
+    
+    @objc func preference(setThemeMode defaults: Int)
+
+    @objc func preference(currentFont defaults: String) -> String
+    
+    @objc func preference(setCurrentFont value: String)
+
+    @objc func preference(currentFontSize defaults: String) -> String
+
+    @objc func preference(setCurrentFontSize value: String)
+
+    @objc func preference(currentFontWeight defaults: String) -> String
+
+    @objc func preference(setCurrentFontWeight value: String)
+
+    @objc func preference(currentAudioRate defaults: Int) -> Int
+    
+    @objc func preference(setCurrentAudioRate value: Int)
+    
+    @objc func preference(currentHighlightStyle defaults: Int) -> Int
+    
+    @objc func preference(setCurrentHighlightStyle value: Int)
+    
+    @objc func preference(currentMediaOverlayStyle defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMediaOverlayStyle value: Int)
+    
+    @objc func preference(currentScrollDirection defaults: Int) -> Int
+    
+    @objc func preference(setCurrentScrollDirection value: Int)
+    
+    @objc func preference(currentMenuIndex defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMenuIndex value: Int)
+    
+    @objc func preference(currentMarginTop defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMarginTop value: Int)
+    
+    @objc func preference(currentMarginBottom defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMarginBottom value: Int)
+    
+    @objc func preference(currentMarginLeft defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMarginLeft value: Int)
+    
+    @objc func preference(currentMarginRight defaults: Int) -> Int
+    
+    @objc func preference(setCurrentMarginRight value: Int)
+    
+    @objc func preference(currentLetterSpacing defaults: Int) -> Int
+    
+    @objc func preference(setCurrentLetterSpacing value: Int)
+    
+    @objc func preference(currentLineHeight defaults: Int) -> Int
+    
+    @objc func preference(setCurrentLineHeight value: Int)
+    
+    @objc func preference(doWrapPara defaults: Bool) -> Bool
+    
+    @objc func preference(setDoWrapPara value: Bool)
+    
+    @objc func preference(doClearClass defaults: Bool) -> Bool
+
+    @objc func preference(setDoClearClass value: Bool)
+
+    @objc func preference(savedPosition defaults: [String: Any]?) -> [String: Any]?
+    
+    @objc func preference(setSavedPosition value: [String: Any])
 }

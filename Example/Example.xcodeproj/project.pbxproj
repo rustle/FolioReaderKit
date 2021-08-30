@@ -14,6 +14,7 @@
 		1A42C2921C0E3883000F2137 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1A42C2901C0E3883000F2137 /* Main.storyboard */; };
 		1A42C2A21C0E3A8D000F2137 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1A42C2A01C0E3A8D000F2137 /* LaunchScreen.storyboard */; };
 		2A61345326219B8B0022FC04 /* 1984.epub in Resources */ = {isa = PBXBuildFile; fileRef = 2A61345226219B8B0022FC04 /* 1984.epub */; };
+		2A73B8FB26DCBE2D004B001D /* FolioReaderUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A73B8FA26DCBE2D004B001D /* FolioReaderUserDefaults.swift */; };
 		3A8E86F71E9F80CB00CD844C /* CodeExampleViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F21E9F80CB00CD844C /* CodeExampleViewController.swift */; };
 		3A8E86F81E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F41E9F80CB00CD844C /* BaseExampleFolioReaderContainer.swift */; };
 		3A8E86F91E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A8E86F51E9F80CB00CD844C /* BookOneExampleFolioReaderContainer.swift */; };
@@ -64,6 +65,7 @@
 		260C4F2E01E1EABBC772D6D4 /* Pods-Storyboard-Example.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Storyboard-Example.debug.xcconfig"; path = "Target Support Files/Pods-Storyboard-Example/Pods-Storyboard-Example.debug.xcconfig"; sourceTree = "<group>"; };
 		2A61344D2621950C0022FC04 /* Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Example.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A61345226219B8B0022FC04 /* 1984.epub */ = {isa = PBXFileReference; lastKnownFileType = file; path = 1984.epub; sourceTree = "<group>"; };
+		2A73B8FA26DCBE2D004B001D /* FolioReaderUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolioReaderUserDefaults.swift; sourceTree = "<group>"; };
 		2AC340D42648D61400A477ED /* Storyboard-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Storyboard-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AC340D52648D61400A477ED /* MultipleInstance-Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "MultipleInstance-Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2AC340D62648D61400A477ED /* FolioReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FolioReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -172,6 +174,7 @@
 			isa = PBXGroup;
 			children = (
 				1A42C28C1C0E3882000F2137 /* AppDelegate.swift */,
+				2A73B8FA26DCBE2D004B001D /* FolioReaderUserDefaults.swift */,
 				1A42C28E1C0E3882000F2137 /* ViewController.swift */,
 				1A42C2901C0E3883000F2137 /* Main.storyboard */,
 				1A42C2981C0E3883000F2137 /* Info.plist */,
@@ -705,6 +708,7 @@
 				751F8CF61ECD20110050A2CF /* Epub.swift in Sources */,
 				1A42C28F1C0E3882000F2137 /* ViewController.swift in Sources */,
 				1A42C28D1C0E3882000F2137 /* AppDelegate.swift in Sources */,
+				2A73B8FB26DCBE2D004B001D /* FolioReaderUserDefaults.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
