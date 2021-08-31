@@ -135,7 +135,7 @@ open class FolioReaderConfig: NSObject {
     open var themeModeNavBackground = [
         UIColor.white,
         UIColor(rgba: "#FBF0D9"),
-        UIColor.green,
+        UIColor(rgba: "#BAD5C1"),
         UIColor(rgba: "#000000"),
         UIColor(rgba: "#131313")
     ]
@@ -144,7 +144,7 @@ open class FolioReaderConfig: NSObject {
     open var themeModeBackground = [
         UIColor.white,
         UIColor(rgba: "#FBF0D9"),
-        UIColor.green,
+        UIColor(rgba: "#BAD5C1"),
         UIColor(rgba: "#000000"),
         UIColor(rgba: "#131313")
     ]
@@ -153,7 +153,7 @@ open class FolioReaderConfig: NSObject {
     open var themeModeMenuBackground = [
         UIColor.white,
         UIColor(rgba: "#FBF0D9"),
-        UIColor.green,
+        UIColor(rgba: "#BAD5C1"),
         UIColor(rgba: "#000000"),
         UIColor(rgba: "#1E1E1E")
     ]

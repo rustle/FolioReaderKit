@@ -44,6 +44,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     /// The index of the current page. Note: The index start at 1!
     open var pageNumber: Int!
     open var webView: FolioReaderWebView?
+    open var panDeadZoneTop: UIView?
+    open var panDeadZoneBot: UIView?
     
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
@@ -97,6 +99,34 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
         webView?.navigationDelegate = self
 
+        if panDeadZoneTop == nil {
+            panDeadZoneTop = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            panDeadZoneTop?.autoresizingMask = []
+            panDeadZoneTop?.backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.folioReader.themeMode]
+            panDeadZoneTop?.isOpaque = false
+            
+            let panGeature = UIPanGestureRecognizer(target: self, action: nil)
+            panGeature.delegate = self
+            panDeadZoneTop?.addGestureRecognizer(panGeature)
+            
+            self.contentView.addSubview(panDeadZoneTop!)
+        }
+        
+        if panDeadZoneBot == nil {
+            panDeadZoneBot = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            panDeadZoneBot?.autoresizingMask = []
+            panDeadZoneBot?.backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.folioReader.themeMode]
+            panDeadZoneBot?.isOpaque = false
+            
+            let panGeature = UIPanGestureRecognizer(target: self, action: nil)
+            panGeature.delegate = self
+            panDeadZoneBot?.addGestureRecognizer(panGeature)
+            
+            self.contentView.addSubview(panDeadZoneBot!)
+        }
+        
+        
+        
         if colorView == nil {
             colorView = UIView()
             colorView.backgroundColor = self.readerConfig.nightModeBackground
@@ -129,6 +159,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView?.setupScrollDirection()
         let webViewFrame = self.webViewFrame()
         webView?.frame = webViewFrame
+        
+        let panDeadZoneTopFrame = CGRect(x: 0, y: 0, width: webViewFrame.width, height: webViewFrame.minY)
+        panDeadZoneTop?.frame = panDeadZoneTopFrame
+        
+        let panDeadZoneBotFrame = CGRect(x: 0, y: webViewFrame.maxY, width: webViewFrame.width, height: frame.maxY - webViewFrame.maxY)
+        panDeadZoneBot?.frame = panDeadZoneBotFrame
     }
 
     func webViewFrame() -> CGRect {
@@ -643,6 +679,14 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         for listener in self.readerConfig.classBasedOnClickListeners {
             self.webView?.js("addClassBasedOnClickListener(\"\(listener.schemeName)\", \"\(listener.querySelector)\", \"\(listener.attributeName)\", \"\(listener.selectAll)\")")
         }
+    }
+    
+    // MARK: - Deadzone Pan Gesture
+    open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        if gestureRecognizer.view == panDeadZoneTop || gestureRecognizer.view == panDeadZoneBot {
+            return true
+        }
+        return false
     }
     
 }

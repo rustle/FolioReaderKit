@@ -275,6 +275,26 @@ html.serpiaMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
 html.serpiaMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
 html.serpiaMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
 
+html.greenMode, html.greenMode body {
+    background-color: #BAD5C1 !important;  /*kindle greenish*/
+}
+
+.greenMode p, .greenMode div, .greenMode span:not(.epub-media-overlay-playing) {
+    color: #37453F !important;
+    background-color: transparent !important;
+}
+
+.greenMode h1, .greenMode h2, .greenMode h3, .greenMode h4, .greenMode h5, .greenMode h6 {
+    color: #37453F !important;
+}
+
+html.greenMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
+html.greenMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
+html.greenMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
+html.greenMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
+html.greenMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
+
+
 html.justifiedBlockMode, html.justifiedBlockMode body {
     text-align: justify !important;
     display: block !important;
