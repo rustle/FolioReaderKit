@@ -170,12 +170,12 @@ open class FolioReaderContainer: UIViewController {
                     self.book = parsedBook
                     self.folioReader.isReaderOpen = true
 
-                    if let position = self.readerConfig.savedPositionForCurrentBook {
-                        self.folioReader.savedPositionForCurrentBook = position
-                    }
-
                     // Reload data
                     DispatchQueue.main.async {
+                        if let position = self.readerConfig.savedPositionForCurrentBook {
+                            self.folioReader.savedPositionForCurrentBook = position
+                        }
+
                         // Add audio player if needed
                         if self.book.hasAudio || self.readerConfig.enableTTS {
                             self.addAudioPlayer()
