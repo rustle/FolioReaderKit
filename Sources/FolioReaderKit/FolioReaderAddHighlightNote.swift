@@ -168,9 +168,9 @@ class FolioReaderAddHighlightNote: UIViewController {
             highlight.noteForHighlight = textView.text
             
             if isEditHighlight {
-                folioReader.delegate?.folioReaderHighlight?(folioReader, saveNoteFor: highlight)
+                folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(folioReader, saveNoteFor: highlight)
             } else {
-                folioReader.delegate?.folioReaderHighlight?(folioReader, added: highlight, completion: nil)
+                folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(folioReader, added: highlight, completion: nil)
             }
             highlightSaved = true
         }

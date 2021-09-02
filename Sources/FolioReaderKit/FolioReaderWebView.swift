@@ -155,7 +155,7 @@ open class FolioReaderWebView: WKWebView {
     func remove(_ sender: UIMenuController?) {
         js("removeThisHighlight()") { removedId in
             guard let removedId = removedId else { return }
-            self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, removedId: removedId)
+            self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, removedId: removedId)
         }
         createMenu(options: false)
         setMenuVisible(false)
@@ -246,7 +246,7 @@ open class FolioReaderWebView: WKWebView {
                 if withNote {
                     self.folioReader.readerCenter?.presentAddHighlightNote(highlight, edit: false)
                 } else {
-                    self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, added: highlight) { error in
+                    self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
                         guard error == nil else {
                             self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)
                             return
@@ -267,7 +267,7 @@ open class FolioReaderWebView: WKWebView {
         js("getHighlightId()") { highlightId in
             guard
                 let highlightId = highlightId,
-                let highlightNote = self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, getById: highlightId)
+                let highlightNote = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, getById: highlightId)
             else { return }
             
             self.folioReader.readerCenter?.presentAddHighlightNote(highlightNote, edit: true)
@@ -342,7 +342,7 @@ open class FolioReaderWebView: WKWebView {
 
         js("setHighlightStyle('\(HighlightStyle.classForStyle(style.rawValue))')") { updateId in
             guard let updateId = updateId else { return }
-            self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, updateById: updateId, type: style)
+            self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, updateById: updateId, type: style)
         }
         
         //FIX: https://github.com/FolioReader/FolioReaderKit/issues/316
@@ -434,6 +434,10 @@ open class FolioReaderWebView: WKWebView {
     }
     
     open func setMenuVisible(_ menuVisible: Bool, animated: Bool = true, andRect rect: CGRect = CGRect.zero) {
+        if menuVisible == false {
+            UIMenuController.shared.setMenuVisible(menuVisible, animated: animated)
+        }
+        
         if !menuVisible && isShare || !menuVisible && isColors {
             isColors = false
             isShare = false

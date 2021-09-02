@@ -484,7 +484,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     
     func injectHighlights() {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension else { return }
-        guard let highlights = self.folioReader.delegate?.folioReaderHighlight?(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?) else { return }
+        guard let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?) else { return }
         guard highlights.isEmpty == false else { return }
         let encoder = JSONEncoder()
 
@@ -505,7 +505,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if gestureRecognizer.view is FolioReaderWebView {
-            if otherGestureRecognizer is UILongPressGestureRecognizer {
+            if otherGestureRecognizer is UILongPressGestureRecognizer || otherGestureRecognizer is UITapGestureRecognizer {
                 if UIMenuController.shared.isMenuVisible {
                     webView?.setMenuVisible(false)
                 }
