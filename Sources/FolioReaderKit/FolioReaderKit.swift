@@ -439,32 +439,42 @@ extension FolioReader {
 extension FolioReader {
 
     /// Save Reader state, book, page and scroll offset.
-    @objc open func saveReaderState() {
-        guard isReaderOpen else {
+    @objc open func saveReaderState(completion: (() -> Void)? = nil) {
+        guard isReaderOpen,
+              let currentPage = self.readerCenter?.currentPage,
+              let webView = currentPage.webView else {
+            completion?()
             return
         }
 
-        guard let currentPage = self.readerCenter?.currentPage, let webView = currentPage.webView else {
-            return
-        }
+        print("saveReaderState before getVisibleCFI \(Date())")
+        webView.js("getVisibleCFI()", completion: { cfi in
+            print("saveReaderState after getVisibleCFI \(Date())")
+            
+            let position = [
+                "pageNumber": (self.readerCenter?.currentPageNumber ?? 0),
+                "pageOffsetX": webView.scrollView.contentOffset.x,
+                "pageOffsetY": webView.scrollView.contentOffset.y,
+                "cfi": "/\((self.readerCenter?.currentPageNumber ?? 0) * 2)\(cfi ?? "")"
+                ] as [String : Any]
 
-        let position = [
-            "pageNumber": (self.readerCenter?.currentPageNumber ?? 0),
-            "pageOffsetX": webView.scrollView.contentOffset.x,
-            "pageOffsetY": webView.scrollView.contentOffset.y
-            ] as [String : Any]
+            print("saveReaderState position \(position)")
+            
+            self.savedPositionForCurrentBook = position
 
-        self.savedPositionForCurrentBook = position
+            completion?()
+        })
     }
 
     /// Closes and save the reader current instance.
     open func close() {
-        self.saveReaderState()
-        self.isReaderOpen = false
-        self.isReaderReady = false
-        self.readerAudioPlayer?.stop(immediate: true)
-        self.delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: 0)
-        self.delegate?.folioReaderDidClose?(self)
+        self.saveReaderState() {
+            self.isReaderOpen = false
+            self.isReaderReady = false
+            self.readerAudioPlayer?.stop(immediate: true)
+            self.delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: 0)
+            self.delegate?.folioReaderDidClose?(self)
+        }
     }
 }
 

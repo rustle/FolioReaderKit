@@ -17,6 +17,7 @@ class ViewController: UIViewController {
     //let folioReader = FolioReader()
 
     var preferenceProvider: FolioReaderPreferenceProvider?
+    var highlightProvider: FolioReaderHighlightProvider?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -128,146 +129,6 @@ class ViewController: UIViewController {
 
 extension ViewController: FolioReaderDelegate {
     
-    public func folioReaderHighlight(_ folioReader: FolioReader, added highlight: Highlight, completion: Completion?) {
-        print("highlight added \(highlight)")
-        
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
-        do {
-            let highlightRealm = HighlightRealm()
-            highlightRealm.fromHighlight(highlight)
-            
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            realm.beginWrite()
-            realm.add(highlightRealm, update: .all)
-            try realm.commitWrite()
-            completion?(nil)
-        } catch let error as NSError {
-            print("Error on persist highlight: \(error)")
-            completion?(error)
-        }
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, removedId highlightId: String) {
-        print("highlight removed \(highlightId)")
-        
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
-        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
-
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            guard let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first else { return }
-            try realm.write {
-                realm.delete(highlightRealm)
-            }
-        } catch let error as NSError {
-            print("Error on remove highlight by id: \(error)")
-        }
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, updateById highlightId: String, type style: HighlightStyle) {
-        print("highlight updated \(highlightId) \(style)")
-
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
-        var highlight: HighlightRealm?
-        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            highlight = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first
-            realm.beginWrite()
-
-            highlight?.type = style.rawValue
-
-            try realm.commitWrite()
-            
-        } catch let error as NSError {
-            print("Error on updateById: \(error)")
-        }
-
-    }
-
-    public func folioReaderHighlight(_ folioReader: FolioReader, getById highlightId: String) -> Highlight? {
-        print("highlight getById \(highlightId)")
-
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return nil }
-        
-        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
-
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
-                return highlightRealm.toHighlight()
-            }
-        } catch let error as NSError {
-            print("Error getting Highlight : \(error)")
-        }
-
-        return nil
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [Highlight] {
-        print("highlight allByBookId \(bookId) \(page ?? 0)")
-
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return [] }
-
-        var highlights: [Highlight]?
-        var predicate = NSPredicate(format: "bookId = %@", bookId)
-        if let page = page {
-            predicate = NSPredicate(format: "bookId = %@ && page = %@", bookId, page)
-        }
-
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            highlights = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).map {
-                $0.toHighlight()
-            }.sorted()
-            print("highlight allByBookId \(highlights ?? [])")
-
-            return (highlights ?? [])
-        } catch let error as NSError {
-            print("Error on fetch all by book Id: \(error)")
-            return []
-        }
-    }
-
-    public func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight] {
-        print("highlight all")
-        
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return [] }
-
-        var highlights: [Highlight]?
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            highlights = realm.objects(HighlightRealm.self).toArray(HighlightRealm.self).map {
-                $0.toHighlight()
-            }
-            print("highlight all \(highlights ?? [])")
-
-            return (highlights ?? [])
-        } catch let error as NSError {
-            print("Error on fetch all: \(error)")
-            return []
-        }
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight) {
-        print("highlight saveNoteFor \(highlight)")
-
-        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
-        do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
-            let predicate = NSPredicate(format:"highlightId = %@", highlight.highlightId)
-            if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
-                try realm.write {
-                    highlightRealm.noteForHighlight = highlight.noteForHighlight
-                    realm.add(highlightRealm, update: .modified)
-                }
-            }
-        } catch let error as NSError {
-            print("Error on updateById: \(error)")
-        }
-        
-    }
-    
     func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider {
         if let preferenceProvider = preferenceProvider {
             return preferenceProvider
@@ -276,6 +137,17 @@ extension ViewController: FolioReaderDelegate {
             self.preferenceProvider = preferenceProvider
             
             return preferenceProvider
+        }
+    }
+    
+    func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider {
+        if let highlightProvider = highlightProvider {
+            return highlightProvider
+        } else {
+            let highlightProvider = FolioReaderRealmHighlightProvider(folioReader)
+            self.highlightProvider = highlightProvider
+            
+            return highlightProvider
         }
     }
 }
@@ -527,6 +399,154 @@ class FolioReaderUserDefaultsPreferenceProvider: FolioReaderPreferenceProvider {
             return
         }
         self.defaults.set(value, forKey: bookId)
+    }
+}
+
+public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
+    let folioReader: FolioReader
+    
+    init(_ folioReader: FolioReader) {
+        self.folioReader = folioReader
+    }
+    
+    public func folioReaderHighlight(_ folioReader: FolioReader, added highlight: Highlight, completion: Completion?) {
+        print("highlight added \(highlight)")
+        
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
+        do {
+            let highlightRealm = HighlightRealm()
+            highlightRealm.fromHighlight(highlight)
+            
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            realm.beginWrite()
+            realm.add(highlightRealm, update: .all)
+            try realm.commitWrite()
+            completion?(nil)
+        } catch let error as NSError {
+            print("Error on persist highlight: \(error)")
+            completion?(error)
+        }
+    }
+    
+    public func folioReaderHighlight(_ folioReader: FolioReader, removedId highlightId: String) {
+        print("highlight removed \(highlightId)")
+        
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
+        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
+
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            guard let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first else { return }
+            try realm.write {
+                realm.delete(highlightRealm)
+            }
+        } catch let error as NSError {
+            print("Error on remove highlight by id: \(error)")
+        }
+    }
+    
+    public func folioReaderHighlight(_ folioReader: FolioReader, updateById highlightId: String, type style: HighlightStyle) {
+        print("highlight updated \(highlightId) \(style)")
+
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
+        var highlight: HighlightRealm?
+        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            highlight = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first
+            realm.beginWrite()
+
+            highlight?.type = style.rawValue
+
+            try realm.commitWrite()
+            
+        } catch let error as NSError {
+            print("Error on updateById: \(error)")
+        }
+
+    }
+
+    public func folioReaderHighlight(_ folioReader: FolioReader, getById highlightId: String) -> Highlight? {
+        print("highlight getById \(highlightId)")
+
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return nil }
+        
+        let predicate = NSPredicate(format:"highlightId = %@", highlightId)
+
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
+                return highlightRealm.toHighlight()
+            }
+        } catch let error as NSError {
+            print("Error getting Highlight : \(error)")
+        }
+
+        return nil
+    }
+    
+    public func folioReaderHighlight(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [Highlight] {
+        print("highlight allByBookId \(bookId) \(page ?? 0)")
+
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return [] }
+
+        var highlights: [Highlight]?
+        var predicate = NSPredicate(format: "bookId = %@", bookId)
+        if let page = page {
+            predicate = NSPredicate(format: "bookId = %@ && page = %@", bookId, page)
+        }
+
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            highlights = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).map {
+                $0.toHighlight()
+            }.sorted()
+            print("highlight allByBookId \(highlights ?? [])")
+
+            return (highlights ?? [])
+        } catch let error as NSError {
+            print("Error on fetch all by book Id: \(error)")
+            return []
+        }
+    }
+
+    public func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight] {
+        print("highlight all")
+        
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return [] }
+
+        var highlights: [Highlight]?
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            highlights = realm.objects(HighlightRealm.self).toArray(HighlightRealm.self).map {
+                $0.toHighlight()
+            }
+            print("highlight all \(highlights ?? [])")
+
+            return (highlights ?? [])
+        } catch let error as NSError {
+            print("Error on fetch all: \(error)")
+            return []
+        }
+    }
+    
+    public func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight) {
+        print("highlight saveNoteFor \(highlight)")
+
+        guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
+        do {
+            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let predicate = NSPredicate(format:"highlightId = %@", highlight.highlightId)
+            if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
+                try realm.write {
+                    highlightRealm.noteForHighlight = highlight.noteForHighlight
+                    realm.add(highlightRealm, update: .modified)
+                }
+            }
+        } catch let error as NSError {
+            print("Error on updateById: \(error)")
+        }
+        
     }
 }
 

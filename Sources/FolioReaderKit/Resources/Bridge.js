@@ -1135,6 +1135,31 @@ function wrappingSentencesWithinPTags(){
     guessSenetences();
 }
 
+function visible(elem) {
+    return !(elem.clientHeight === 0 || elem.clientWidth === 0)
+}
+
+function getVisibleCFI() {
+    let first;
+    let firstOffY;
+    //let allVisible = Array.from(document.querySelectorAll('body > *')).filter(visible)
+    let allVisible = getLeafNodes(document).filter(visible)
+    for(const elem of allVisible) {
+        //Calculate the offset to the document
+        //See: https://stackoverflow.com/a/18673641/7448536
+        const offY = elem.getBoundingClientRect().top + document.documentElement.scrollTop
+        if (first == null || offY < firstOffY) {
+            first = elem;
+            firstOffY = offY;
+        }
+    }
+    var cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
+
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI " + cfiStart + " " + first.outerHTML);
+    
+    return cfiStart
+}
+
 // Class based onClick listener
 
 function addClassBasedOnClickListener(schemeName, querySelector, attributeName, selectAll) {
