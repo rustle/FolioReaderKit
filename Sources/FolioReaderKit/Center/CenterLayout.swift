@@ -22,6 +22,10 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
     override func prepare() {
         super.prepare()
         
+        sectionInset = UIEdgeInsets.zero
+        minimumLineSpacing = 0
+        minimumInteritemSpacing = 0
+        
         guard let collectionView = self.collectionView else { return }
         
         let numberOfItems = collectionView.numberOfItems(inSection: 0)
@@ -29,10 +33,10 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
 //        self.itemSize = collectionView.bounds.inset(by: collectionView.layoutMargins).size
 //        self.sectionInset = UIEdgeInsets(top: 0, left: self.minimumInteritemSpacing, bottom: 0, right: 0)
 //        self.sectionInsetReference = .fromSafeArea
-        self.itemSize = collectionView.bounds.size
+//        self.itemSize = collectionView.bounds.size
 //        self.itemSize = CGSize(width: itemSize.width, height: itemSize.height - 20)
         
-        //self.scrollDirection = .horizontal
+//          self.scrollDirection = .horizontal
         
 //        contentSize = CGSize(
 //            width: collectionView.frame.width * CGFloat(collectionView.numberOfItems(inSection: 0)),
@@ -68,16 +72,16 @@ class FolioReaderCenterLayout : UICollectionViewFlowLayout {
         
         print("SHOULDTRANSROTATE oldBounds=\(collectionView.bounds) newBounds=\(newBounds)")
         
-        let oldBounds = collectionView.bounds
-        guard oldBounds.size != newBounds.size else { return false }
-        
-        self.itemSize = newBounds.size
-        self.estimatedItemSize = newBounds.size
-        collectionView.setContentOffset(
-            CGPoint(
-                x: oldBounds.minX / oldBounds.width * newBounds.width,
-                y: oldBounds.minY / oldBounds.height * newBounds.height
-            ), animated: false)
+//        let oldBounds = collectionView.bounds
+//        guard oldBounds.size != newBounds.size else { return false }
+//        
+//        self.itemSize = newBounds.size
+//        self.estimatedItemSize = newBounds.size
+//        collectionView.setContentOffset(
+//            CGPoint(
+//                x: oldBounds.minX / oldBounds.width * newBounds.width,
+//                y: oldBounds.minY / oldBounds.height * newBounds.height
+//            ), animated: false)
         
         return true
     }

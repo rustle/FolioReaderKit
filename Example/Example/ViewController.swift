@@ -404,6 +404,7 @@ class FolioReaderUserDefaultsPreferenceProvider: FolioReaderPreferenceProvider {
 
 public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
     let folioReader: FolioReader
+    var realmConfiguration = Realm.Configuration(schemaVersion: 2)
     
     init(_ folioReader: FolioReader) {
         self.folioReader = folioReader
@@ -417,7 +418,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
             let highlightRealm = HighlightRealm()
             highlightRealm.fromHighlight(highlight)
             
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             realm.beginWrite()
             realm.add(highlightRealm, update: .all)
             try realm.commitWrite()
@@ -435,7 +436,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
         let predicate = NSPredicate(format:"highlightId = %@", highlightId)
 
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             guard let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first else { return }
             try realm.write {
                 realm.delete(highlightRealm)
@@ -452,7 +453,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
         var highlight: HighlightRealm?
         let predicate = NSPredicate(format:"highlightId = %@", highlightId)
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             highlight = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first
             realm.beginWrite()
 
@@ -474,7 +475,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
         let predicate = NSPredicate(format:"highlightId = %@", highlightId)
 
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
                 return highlightRealm.toHighlight()
             }
@@ -497,7 +498,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
         }
 
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             highlights = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).map {
                 $0.toHighlight()
             }.sorted()
@@ -517,7 +518,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
 
         var highlights: [Highlight]?
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             highlights = realm.objects(HighlightRealm.self).toArray(HighlightRealm.self).map {
                 $0.toHighlight()
             }
@@ -535,7 +536,7 @@ public class FolioReaderRealmHighlightProvider: FolioReaderHighlightProvider {
 
         guard let readerConfig = folioReader.readerCenter?.readerContainer?.readerConfig else { return }
         do {
-            let realm = try Realm(configuration: readerConfig.realmConfiguration)
+            let realm = try Realm(configuration: realmConfiguration)
             let predicate = NSPredicate(format:"highlightId = %@", highlight.highlightId)
             if let highlightRealm = realm.objects(HighlightRealm.self).filter(predicate).toArray(HighlightRealm.self).first {
                 try realm.write {
