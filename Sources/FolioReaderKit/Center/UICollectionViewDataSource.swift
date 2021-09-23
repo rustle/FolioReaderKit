@@ -68,13 +68,8 @@ extension FolioReaderCenter: UICollectionViewDataSource {
 
         // Font class name
         var classes = ""
-//        folioReader.currentFont
         classes += " " + folioReader.currentMediaOverlayStyle.className()
 
-        // Night mode
-        if folioReader.nightMode {
-            classes += " nightMode"
-        }
         switch folioReader.themeMode {
         case 1:
             classes += " serpiaMode"
@@ -84,6 +79,9 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             break
         case 3:
             classes += " darkMode"
+            break
+        case 4:
+            classes += " nightMode"
             break
         default:
             break

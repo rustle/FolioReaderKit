@@ -39,24 +39,11 @@ extension FolioReaderCenter {
         folioReader.saveReaderState()
         hideBars()
 
-        let menuFontTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontTab.tabBarItem = .init(title: "Page", image: nil, tag: 0)
+        menuBarController.setViewControllers(menuTabs, animated: true)
+        menuBarController.modalPresentationStyle = .custom
+        menuBarController.selectedIndex = lastMenuSelectedIndex
         
-        let menuFontStyleTab = FolioReaderFontStyleMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontStyleTab.tabBarItem = .init(title: "Font", image: nil, tag: 1)
-        
-        let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
-        
-        let menuStructureTab = FolioReaderStructureMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuStructureTab.tabBarItem = .init(title: "Structure", image: nil, tag: 3)
-        
-        let menu = UITabBarController()
-        menu.setViewControllers([menuFontTab, menuFontStyleTab, menuParagraphTab, menuStructureTab], animated: true)
-        menu.modalPresentationStyle = .custom
-        menu.selectedIndex = lastMenuSelectedIndex
-
-        animator = ZFModalTransitionAnimator(modalViewController: menu)
+        animator = ZFModalTransitionAnimator(modalViewController: menuBarController)
         animator.isDragable = false
         animator.bounces = false
         animator.behindViewAlpha = 1.0
@@ -64,8 +51,9 @@ extension FolioReaderCenter {
         animator.transitionDuration = 0.6
         animator.direction = ZFModalTransitonDirection.bottom
 
-        menu.transitioningDelegate = animator
-        self.present(menu, animated: true, completion: nil)
+        menuBarController.transitioningDelegate = animator
+        
+        self.present(menuBarController, animated: true, completion: nil)
     }
 
     /**

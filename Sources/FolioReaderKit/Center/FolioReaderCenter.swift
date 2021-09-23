@@ -67,7 +67,10 @@ open class FolioReaderCenter: UIViewController {
 
     var tempCollectionViewInset: CGFloat = 0.0
     
-    open var userFontDescriptors = [String: CTFontDescriptor]()
+    var userFontDescriptors = [String: CTFontDescriptor]()
+    
+    var menuBarController = UITabBarController()
+    var menuTabs = [FolioReaderMenu]()
     
     var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
@@ -195,6 +198,24 @@ open class FolioReaderCenter: UIViewController {
         if let scrollScrubber = scrollScrubber {
             view.addSubview(scrollScrubber.slider)
         }
+        
+        // Menus
+        let menuFontTab = FolioReaderPageMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuFontTab.tabBarItem = .init(title: "Page", image: nil, tag: 0)
+        menuTabs.append(menuFontTab)
+        
+        let menuFontStyleTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuFontStyleTab.tabBarItem = .init(title: "Font", image: nil, tag: 1)
+        menuTabs.append(menuFontStyleTab)
+
+        let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
+        menuTabs.append(menuParagraphTab)
+
+        let menuStructureTab = FolioReaderStructureMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuStructureTab.tabBarItem = .init(title: "Advanced", image: nil, tag: 3)
+        menuTabs.append(menuStructureTab)
+
     }
 
     override open func viewWillAppear(_ animated: Bool) {

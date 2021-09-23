@@ -90,7 +90,7 @@ public enum MediaOverlayStyle: Int {
 }
 
 /// Main Library class with some useful constants and methods
-open class FolioReader: NSObject {
+public class FolioReader: NSObject {
 
     public override init() { }
 
@@ -200,29 +200,52 @@ extension FolioReader {
     
     open var themeMode: Int {
         get {
-            return delegate?.folioReaderPreferenceProvider?(self).preference(themeMode: 0) ?? 0
+            return delegate?.folioReaderPreferenceProvider?(self).preference(themeMode: 1) ?? 1
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setThemeMode: value)
             
-            if let readerCenter = self.readerCenter {
-                UIView.animate(withDuration: 0.6, animations: {
-                    _ = readerCenter.currentPage?.webView?.js("themeMode(\(self.themeMode))")
-                    readerCenter.pageIndicatorView?.reloadColors()
-                    readerCenter.configureNavBar()
-                    readerCenter.scrollScrubber?.reloadColors()
-                    //readerCenter.collectionView.backgroundColor = (self.themeMode == FolioReaderThemeMode.night.rawValue ? self.readerContainer?.readerConfig.nightModeBackground : UIColor.white)
-                    if let backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.themeMode] {
-                        readerCenter.collectionView.backgroundColor = backgroundColor
-                        if let page = readerCenter.currentPage {
-                            page.panDeadZoneTop?.backgroundColor = backgroundColor
-                            page.panDeadZoneBot?.backgroundColor = backgroundColor
-                        }
-                    }
-                }, completion: { (finished: Bool) in
-                    NotificationCenter.default.post(name: Notification.Name(rawValue: "needRefreshPageMode"), object: nil)
-                })
+            guard let readerCenter = self.readerCenter,
+                  let backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.themeMode] else { return }
+            
+            UIView.transition(
+                with: readerCenter.menuBarController.tabBar,
+                duration: 0.6,
+                options: .beginFromCurrentState.union(.transitionCrossDissolve),
+                animations: { () -> Void in
+                    readerCenter.menuBarController.tabBar.barTintColor = backgroundColor
+                },
+                completion: nil
+            )
+            
+            readerCenter.menuTabs.forEach { menu in
+                UIView.transition(
+                    with: menu.view,
+                    duration: 0.6,
+                    options: .beginFromCurrentState.union(.transitionCrossDissolve),
+                    animations: { () -> Void in
+                        menu.reloadColors()
+                    },
+                    completion: nil
+                )
             }
+            
+            UIView.animate(withDuration: 0.6, animations: {
+                _ = readerCenter.currentPage?.webView?.js("themeMode(\(self.themeMode))")
+                readerCenter.pageIndicatorView?.reloadColors()
+                readerCenter.configureNavBar()
+                readerCenter.scrollScrubber?.reloadColors()
+                
+                
+                readerCenter.collectionView.backgroundColor = backgroundColor
+                
+                if let page = readerCenter.currentPage {
+                    page.panDeadZoneTop?.backgroundColor = backgroundColor
+                    page.panDeadZoneBot?.backgroundColor = backgroundColor
+                }
+            }, completion: { (finished: Bool) in
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "needRefreshPageMode"), object: nil)
+            })
         }
     }
 
@@ -301,8 +324,8 @@ extension FolioReader {
     open var currentScrollDirection: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
-                .preference(currentScrollDirection: FolioReaderScrollDirection.defaultVertical.rawValue)
-                ?? FolioReaderScrollDirection.defaultVertical.rawValue
+                .preference(currentScrollDirection: FolioReaderScrollDirection.horizontal.rawValue)
+                ?? FolioReaderScrollDirection.horizontal.rawValue
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentScrollDirection: value)
@@ -323,7 +346,8 @@ extension FolioReader {
     
     open var currentMarginTop: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: 0) ?? 0
+            let defaults = self.readerCenter?.traitCollection.verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: defaults) ?? defaults
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
@@ -333,7 +357,8 @@ extension FolioReader {
 
     open var currentMarginBottom: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: 0) ?? 0
+            let defaults = self.readerCenter?.traitCollection.verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: defaults) ?? defaults
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
@@ -343,7 +368,8 @@ extension FolioReader {
 
     open var currentMarginLeft: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: 0) ?? 0
+            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: defaults) ?? defaults
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
@@ -353,7 +379,8 @@ extension FolioReader {
 
     open var currentMarginRight: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: 0) ?? 0
+            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: defaults) ?? defaults
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
@@ -364,24 +391,35 @@ extension FolioReader {
     
     open var currentLetterSpacing: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentLetterSpacing: 0) ?? 0
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentLetterSpacing: 2) ?? 2
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLetterSpacing: value)
-            updateRuntimStyle(delay: 0.4)
+            updateRuntimStyle(delay: 0.2)
         }
     }
     
     open var currentLineHeight: Int {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(currentLineHeight: 0) ?? 0
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentLineHeight: 3) ?? 3
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLineHeight: value)
-            updateRuntimStyle(delay: 0.4)
+            updateRuntimStyle(delay: 0.2)
         }
     }
 
+    //in em
+    open var currentTextIndent: Int {
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentTextIndent: 2) ?? 2
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentTextIndent: value)
+            updateRuntimStyle(delay: 0.2)
+        }
+    }
+    
     open var doWrapPara: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(doWrapPara: false) ?? false
@@ -393,7 +431,7 @@ extension FolioReader {
     
     open var doClearClass: Bool {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(doClearClass: false) ?? false
+            delegate?.folioReaderPreferenceProvider?(self).preference(doClearClass: true) ?? true
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setDoClearClass: value)
@@ -518,7 +556,7 @@ extension FolioReader {
     func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
         let lineHeight = Decimal((currentLineHeight + 10) * 5) / 100 + 1    //1.5 ~ 2.05
-        let textIndent = (Float(letterSpacing) + Float(currentFontSizeOnly)) * 2
+        let textIndent = (letterSpacing + Float(currentFontSizeOnly)) * Float(currentTextIndent)
         let marginTopEm = Decimal(1)
         let marginBottonEm = lineHeight - 1
         
@@ -673,351 +711,4 @@ extension FolioReader {
         
         return style
     }
-}
-
-@objc public protocol FolioReaderPreferenceProvider: class {
-    
-    @objc func preference(nightMode defaults: Bool) -> Bool
-    
-    @objc func preference(setNightMode value: Bool)
-    
-    @objc func preference(themeMode defaults: Int) -> Int
-    
-    @objc func preference(setThemeMode defaults: Int)
-
-    @objc func preference(currentFont defaults: String) -> String
-    
-    @objc func preference(setCurrentFont value: String)
-
-    @objc func preference(currentFontSize defaults: String) -> String
-
-    @objc func preference(setCurrentFontSize value: String)
-
-    @objc func preference(currentFontWeight defaults: String) -> String
-
-    @objc func preference(setCurrentFontWeight value: String)
-
-    @objc func preference(currentAudioRate defaults: Int) -> Int
-    
-    @objc func preference(setCurrentAudioRate value: Int)
-    
-    @objc func preference(currentHighlightStyle defaults: Int) -> Int
-    
-    @objc func preference(setCurrentHighlightStyle value: Int)
-    
-    @objc func preference(currentMediaOverlayStyle defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMediaOverlayStyle value: Int)
-    
-    @objc func preference(currentScrollDirection defaults: Int) -> Int
-    
-    @objc func preference(setCurrentScrollDirection value: Int)
-    
-    @objc func preference(currentMenuIndex defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMenuIndex value: Int)
-    
-    @objc func preference(currentMarginTop defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMarginTop value: Int)
-    
-    @objc func preference(currentMarginBottom defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMarginBottom value: Int)
-    
-    @objc func preference(currentMarginLeft defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMarginLeft value: Int)
-    
-    @objc func preference(currentMarginRight defaults: Int) -> Int
-    
-    @objc func preference(setCurrentMarginRight value: Int)
-    
-    @objc func preference(currentLetterSpacing defaults: Int) -> Int
-    
-    @objc func preference(setCurrentLetterSpacing value: Int)
-    
-    @objc func preference(currentLineHeight defaults: Int) -> Int
-    
-    @objc func preference(setCurrentLineHeight value: Int)
-    
-    @objc func preference(doWrapPara defaults: Bool) -> Bool
-    
-    @objc func preference(setDoWrapPara value: Bool)
-    
-    @objc func preference(doClearClass defaults: Bool) -> Bool
-
-    @objc func preference(setDoClearClass value: Bool)
-
-    @objc func preference(savedPosition defaults: [String: Any]?) -> [String: Any]?
-    
-    @objc func preference(setSavedPosition value: [String: Any])
-}
-
-public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
-    
-    let folioReader: FolioReader
-    
-    public init(_ folioReader: FolioReader) {
-        self.folioReader = folioReader
-    }
-
-    public func preference(nightMode defaults: Bool) -> Bool {
-        return defaults
-    }
-    
-    public func preference(setNightMode value: Bool) {
-        
-    }
-    
-    public func preference(themeMode defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setThemeMode defaults: Int) {
-        
-    }
-    
-    public func preference(currentFont defaults: String) -> String {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentFont value: String) {
-        
-    }
-    
-    public func preference(currentFontSize defaults: String) -> String {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentFontSize value: String) {
-        
-    }
-    
-    public func preference(currentFontWeight defaults: String) -> String {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentFontWeight value: String) {
-        
-    }
-    
-    public func preference(currentAudioRate defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentAudioRate value: Int) {
-        
-    }
-    
-    public func preference(currentHighlightStyle defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentHighlightStyle value: Int) {
-        
-    }
-    
-    public func preference(currentMediaOverlayStyle defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMediaOverlayStyle value: Int) {
-        
-    }
-    
-    public func preference(currentScrollDirection defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentScrollDirection value: Int) {
-        
-    }
-    
-    public func preference(currentMenuIndex defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMenuIndex value: Int) {
-        
-    }
-    
-    public func preference(currentMarginTop defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMarginTop value: Int) {
-        
-    }
-    
-    public func preference(currentMarginBottom defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMarginBottom value: Int) {
-        
-    }
-    
-    public func preference(currentMarginLeft defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMarginLeft value: Int) {
-        
-    }
-    
-    public func preference(currentMarginRight defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentMarginRight value: Int) {
-        
-    }
-    
-    public func preference(currentLetterSpacing defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentLetterSpacing value: Int) {
-        
-    }
-    
-    public func preference(currentLineHeight defaults: Int) -> Int {
-        return defaults
-
-    }
-    
-    public func preference(setCurrentLineHeight value: Int) {
-        
-    }
-    
-    public func preference(doWrapPara defaults: Bool) -> Bool {
-        return defaults
-
-    }
-    
-    public func preference(setDoWrapPara value: Bool) {
-        
-    }
-    
-    public func preference(doClearClass defaults: Bool) -> Bool {
-        return defaults
-
-    }
-    
-    public func preference(setDoClearClass value: Bool) {
-        
-    }
-    
-    public func preference(savedPosition defaults: [String : Any]?) -> [String : Any]? {
-        return defaults
-
-    }
-    
-    public func preference(setSavedPosition value: [String : Any]) {
-        
-    }
-    
-}
-
-@objc public protocol FolioReaderHighlightProvider: class {
-
-    /// Save a Highlight with completion block
-    ///
-    /// - Parameters:
-    ///   - readerConfig: Current folio reader configuration.
-    ///   - completion: Completion block.
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, added highlight: Highlight, completion: Completion?)
-    
-    /// Remove a Highlight by ID
-    ///
-    /// - Parameters:
-    ///   - readerConfig: Current folio reader configuration.
-    ///   - highlightId: The ID to be removed
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, removedId highlightId: String)
-    
-    /// Update a Highlight by ID
-    ///
-    /// - Parameters:
-    ///   - readerConfig: Current folio reader configuration.
-    ///   - highlightId: The ID to be removed
-    ///   - type: The `HighlightStyle`
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, updateById highlightId: String, type style: HighlightStyle)
-    
-    /// Return a Highlight by ID
-    ///
-    /// - Parameter:
-    ///   - readerConfig: Current folio reader configuration.
-    ///   - highlightId: The ID to be removed
-    ///   - page: Page number
-    /// - Returns: Return a Highlight
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, getById highlightId: String) -> Highlight?
-    
-    /// Return a list of Highlights with a given ID
-    ///
-    /// - Parameters:
-    ///   - readerConfig: Current folio reader configuration.
-    ///   - bookId: Book ID
-    ///   - page: Page number
-    /// - Returns: Return a list of Highlights
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [Highlight]
-    
-    /// Return all Highlights
-    ///
-    /// - Parameter readerConfig: - readerConfig: Current folio reader configuration.
-    /// - Returns: Return all Highlights
-    @objc func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight]
-    
-    @objc func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight)
-    
-}
-
-public class FolioReaderDummyHighlightProvider: FolioReaderHighlightProvider {
-    
-    public init() {
-        
-    }
-    public func folioReaderHighlight(_ folioReader: FolioReader, added highlight: Highlight, completion: Completion?) {
-        
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, removedId highlightId: String) {
-        
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, updateById highlightId: String, type style: HighlightStyle) {
-        
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, getById highlightId: String) -> Highlight? {
-        return nil
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [Highlight] {
-        return []
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader) -> [Highlight] {
-        return []
-    }
-    
-    public func folioReaderHighlight(_ folioReader: FolioReader, saveNoteFor highlight: Highlight) {
-        
-    }
-    
-
 }
