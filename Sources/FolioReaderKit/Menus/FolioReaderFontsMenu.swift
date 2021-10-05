@@ -33,6 +33,11 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         let fontSmallNormal = fontSmall?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         let fontBigNormal = fontBig?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
+        let fontNarrow = UIImage(readerImageNamed: "icon-font-weight-narrow")
+        let fontBlack = UIImage(readerImageNamed: "icon-font-weight-black")
+        let fontNarrowNormal = fontNarrow?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let fontBlackNormal = fontBlack?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        
         // Tap gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderFontsMenu.tapGesture))
         tapGesture.numberOfTapsRequired = 1
@@ -143,6 +148,15 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
 
         menuView.addSubview(weightSlider)
 
+        let fontNarrowView = UIImageView(frame: CGRect(x: 20, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
+        fontNarrowView.image = fontNarrowNormal
+        fontNarrowView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(fontNarrowView)
+
+        let fontBlackView = UIImageView(frame: CGRect(x: view.frame.width-50, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
+        fontBlackView.image = fontBlackNormal
+        fontBlackView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(fontBlackView)
         
         // Font Preview
         stylePreview = UITextView(
@@ -157,7 +171,7 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
             size: CGFloat(self.folioReader.currentFontSizeOnly)
         )
         
-        menuView.addSubview(stylePreview)
+        // menuView.addSubview(stylePreview)
         
         reloadColors()
     }

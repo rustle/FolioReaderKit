@@ -31,7 +31,8 @@ class FolioReaderMenu: UIViewController, UIGestureRecognizerDelegate {
         menuView.backgroundColor = backgroundColor
         menuView.subviews.forEach { subview in
             subview.backgroundColor = backgroundColor
-            if let label = subview as? UILabel {
+            if let label = subview as? UILabel,
+               label.textColor != .systemRed {
                 label.textColor = folioReader.isNight(UIColor.lightText, UIColor.darkText)
             }
         }

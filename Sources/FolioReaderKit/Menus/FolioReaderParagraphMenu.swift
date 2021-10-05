@@ -22,10 +22,18 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         
         let normalColor = UIColor(white: 0.5, alpha: 0.7)
         let selectedColor = self.readerConfig.tintColor
-        let fontSmall = UIImage(readerImageNamed: "icon-font-small")
-        let fontBig = UIImage(readerImageNamed: "icon-font-big")
-        let fontSmallNormal = fontSmall?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
-        let fontBigNormal = fontBig?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let charNarrow = UIImage(readerImageNamed: "icon-char-spacing-narrow")
+        let charWide = UIImage(readerImageNamed: "icon-char-spacing-wide")
+        let charNarrowNormal = charNarrow?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let charWideNormal = charWide?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        
+        let lineNarrow = UIImage(readerImageNamed: "icon-line-height-narrow")
+        let lineWide = UIImage(readerImageNamed: "icon-line-height-wide")
+        let lineNarrowNormal = lineNarrow?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let lineWideNormal = lineWide?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        
+        let firstIndent = UIImage(readerImageNamed: "icon-first-line-indent")
+        let firstIndentNormal = firstIndent?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
         // Tap gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderParagraphMenu.tapGesture))
@@ -79,11 +87,21 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
 
         menuView.addSubview(letterSpacingSlider)
         
+        let charNarrowView = UIImageView(frame: CGRect(x: 20, y: letterSpacingSlider.frame.origin.y+10, width: 30, height: 30))
+        charNarrowView.image = charNarrowNormal
+        charNarrowView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(charNarrowView)
+
+        let charWideView = UIImageView(frame: CGRect(x: view.frame.width-50, y: letterSpacingSlider.frame.origin.y+10, width: 30, height: 30))
+        charWideView.image = charWideNormal
+        charWideView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(charWideView)
+        
         // Line Spacing Slider
         lineHeightSlider = HADiscreteSlider(
             frame: CGRect(
                 x: 60,
-                y: letterSpacingSlider.frame.maxY+2,
+                y: letterSpacingSlider.frame.maxY+8,
                 width: view.frame.width-120,
                 height: 40))
         lineHeightSlider.tickStyle = ComponentStyle.rounded
@@ -109,11 +127,21 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
 
         menuView.addSubview(lineHeightSlider)
         
+        let lineNarrowView = UIImageView(frame: CGRect(x: 20, y: lineHeightSlider.frame.origin.y+6, width: 30, height: 30))
+        lineNarrowView.image = lineNarrowNormal
+        lineNarrowView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(lineNarrowView)
+
+        let lineWideView = UIImageView(frame: CGRect(x: view.frame.width-50, y: lineHeightSlider.frame.origin.y+6, width: 30, height: 30))
+        lineWideView.image = lineWideNormal
+        lineWideView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(lineWideView)
+        
         let textIndentLabel = UILabel(
             frame: CGRect(
-                x: 16,
-                y: lineHeightSlider.frame.maxY + 4,
-                width: view.frame.width - 192, height: 32
+                x: 64,
+                y: lineHeightSlider.frame.maxY + 16,
+                width: view.frame.width - 240, height: 32
             )
         )
         textIndentLabel.text = "First Line Indent"
@@ -122,6 +150,11 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         textIndentLabel.adjustsFontSizeToFitWidth = true
         
         menuView.addSubview(textIndentLabel)
+        
+        let firstIndentView = UIImageView(frame: CGRect(x: 20, y: textIndentLabel.frame.origin.y+2, width: 30, height: 30))
+        firstIndentView.image = firstIndentNormal
+        firstIndentView.contentMode = UIView.ContentMode.center
+        menuView.addSubview(firstIndentView)
         
         textIndentValue.frame = CGRect(
             x: textIndentLabel.frame.maxX + 4,

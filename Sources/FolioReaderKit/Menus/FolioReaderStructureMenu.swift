@@ -53,7 +53,7 @@ class FolioReaderStructureMenu: FolioReaderMenu {
                 height: 24
             )
         )
-        noticeLabel.text = "Note: please reopen reader to make following options take effect"
+        noticeLabel.text = "Note: please reopen reader for these options to take effect"
         noticeLabel.adjustsFontSizeToFitWidth = true
         noticeLabel.baselineAdjustment = .alignCenters
         noticeLabel.textColor = .systemRed

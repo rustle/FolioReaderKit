@@ -139,8 +139,11 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         lineB4MarginV.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(lineB4MarginV)
         
-        let marginIncrease = UIImage(readerImageNamed: "icon-sun")
-        let marginDecrease = UIImage(readerImageNamed: "icon-moon")
+        let topMarginIncrease = UIImage(readerImageNamed: "icon-top-margin-increase")
+        let topMarginDecrease = UIImage(readerImageNamed: "icon-top-margin-decrease")
+
+        let botMarginIncrease = UIImage(readerImageNamed: "icon-bot-margin-increase")
+        let botMarginDecrease = UIImage(readerImageNamed: "icon-bot-margin-decrease")
         
         let marginMenuV = SMSegmentView(
             frame: CGRect(
@@ -161,12 +164,15 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
             ])
         marginMenuV.delegate = self
         marginMenuV.tag = 4
-        marginMenuV.addSegmentWithTitle("T-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        // top margin decrease / text placeholder / increase
+        marginMenuV.addSegmentWithTitle(nil, onSelectionImage: topMarginDecrease, offSelectionImage: topMarginDecrease)
         marginMenuV.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
-        marginMenuV.addSegmentWithTitle("T+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
-        marginMenuV.addSegmentWithTitle("B-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuV.addSegmentWithTitle(nil, onSelectionImage: topMarginIncrease, offSelectionImage: topMarginIncrease)
+        
+        // bot margin decrease / text placeholder / increase
+        marginMenuV.addSegmentWithTitle(nil, onSelectionImage: botMarginDecrease, offSelectionImage: botMarginDecrease)
         marginMenuV.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
-        marginMenuV.addSegmentWithTitle("B+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenuV.addSegmentWithTitle(nil, onSelectionImage: botMarginIncrease, offSelectionImage: botMarginIncrease)
         
         menuView.addSubview(marginMenuV)
 
@@ -217,6 +223,12 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         lineB4MarginH.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(lineB4MarginH)
         
+        let leftMarginIncrease = UIImage(readerImageNamed: "icon-left-margin-increase")
+        let leftMarginDecrease = UIImage(readerImageNamed: "icon-left-margin-decrease")
+
+        let rightMarginIncrease = UIImage(readerImageNamed: "icon-right-margin-increase")
+        let rightMarginDecrease = UIImage(readerImageNamed: "icon-right-margin-decrease")
+        
         let marginMenuH = SMSegmentView(
             frame: CGRect(
                 x: 0,
@@ -237,12 +249,12 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         marginMenuH.delegate = self
         marginMenuH.tag = 5
         
-        marginMenuH.addSegmentWithTitle("L-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle(nil, onSelectionImage: leftMarginDecrease, offSelectionImage: leftMarginDecrease)
         marginMenuH.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
-        marginMenuH.addSegmentWithTitle("L+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
-        marginMenuH.addSegmentWithTitle("R-", onSelectionImage: marginDecrease, offSelectionImage: marginDecrease)
+        marginMenuH.addSegmentWithTitle(nil, onSelectionImage: leftMarginIncrease, offSelectionImage: leftMarginIncrease)
+        marginMenuH.addSegmentWithTitle(nil, onSelectionImage: rightMarginDecrease, offSelectionImage: rightMarginDecrease)
         marginMenuH.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
-        marginMenuH.addSegmentWithTitle("R+", onSelectionImage: marginIncrease, offSelectionImage: marginIncrease)
+        marginMenuH.addSegmentWithTitle(nil, onSelectionImage: rightMarginIncrease, offSelectionImage: rightMarginIncrease)
         
         menuView.addSubview(marginMenuH)
         

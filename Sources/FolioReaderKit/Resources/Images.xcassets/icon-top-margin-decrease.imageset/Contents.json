@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "icon-top-margin-decrease.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
