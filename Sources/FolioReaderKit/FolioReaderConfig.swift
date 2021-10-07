@@ -221,6 +221,8 @@ open class FolioReaderConfig: NSObject {
     /// Use the readers `UIMenuController` which enables the highlighting etc. The default is `true`. If set to false it's possible to modify the shared `UIMenuController` for yourself. Note: This doesn't disable the text selection in the web view.
     open var useReaderMenuController = true
 
+    open var enableMDictViewer = false
+    
     /// Used to distinguish between multiple or different reader instances. The content of the user defaults (font settings etc.) depends on this identifier. The default is `nil`.
     open var identifier: String?
 

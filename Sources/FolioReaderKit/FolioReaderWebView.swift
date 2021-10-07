@@ -418,7 +418,10 @@ open class FolioReaderWebView: WKWebView {
             menuItems = [yellowItem, greenItem, blueItem, pinkItem, underlineItem]
         } else {
             // default menu
-            menuItems = [highlightItem, defineItem, highlightNoteItem, mDictItem]
+            menuItems = [highlightItem, defineItem, highlightNoteItem]
+            if self.readerConfig.enableMDictViewer {
+                menuItems.append(mDictItem)
+            }
 
             if self.book.hasAudio || self.readerConfig.enableTTS {
                 menuItems.insert(playAudioItem, at: 0)
