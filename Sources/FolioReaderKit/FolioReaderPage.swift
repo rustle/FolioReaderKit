@@ -308,7 +308,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         UIView.animate(withDuration: 0.2, animations: {webView.alpha = 1}, completion: { finished in
             webView.isColors = false
-            self.webView?.createMenu(options: false)
+            self.webView?.createMenu(onHighlight: false)
         })
 //        webView.js("document.readyState") { _ in
 //            self.delegate?.pageDidLoad?(self)
@@ -342,7 +342,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             let index = decoded.index(decoded.startIndex, offsetBy: 12)
             let rect = NSCoder.cgRect(for: String(decoded[index...]))
 
-            webView.createMenu(options: true, onHighlight: true)
+            webView.createMenu(onHighlight: true)
             webView.setMenuVisible(true, andRect: rect)
             menuIsVisible = true
 
@@ -639,18 +639,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         if UIMenuController.shared.menuItems?.count == 0 {
             webView.isColors = false
-            webView.createMenu(options: false)
-        }
-
-        if !webView.isShare && !webView.isColors && false {
-            webView.js("getSelectedText()") { result in
-                guard let result = result, result.components(separatedBy: " ").count == 1 else {
-                    webView.isOneWord = false
-                    return
-                }
-                webView.isOneWord = true
-                webView.createMenu(options: false)
-            }
+            webView.createMenu(onHighlight: false)
         }
 
         return super.canPerformAction(action, withSender: sender)

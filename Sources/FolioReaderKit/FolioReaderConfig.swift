@@ -38,7 +38,8 @@ public enum FolioReaderScrollDirection: Int {
 public enum FolioReaderThemeMode: Int {
     case day
     case serpia
-    case forest
+    case grass
+    case dark
     case night
 }
 
@@ -210,14 +211,6 @@ open class FolioReaderConfig: NSObject {
     /// Enable or disable default Quote Image backgrounds
     open var quotePreserveDefaultBackgrounds = true
 
-    // MARK: Localized strings
-
-    /// Localizes Highlight title
-    open var localizedHighlightsTitle = NSLocalizedString("Highlights", comment: "")
-
-    /// Localizes Content title
-    open var localizedContentsTitle = NSLocalizedString("Contents", comment: "")
-
     /// Use the readers `UIMenuController` which enables the highlighting etc. The default is `true`. If set to false it's possible to modify the shared `UIMenuController` for yourself. Note: This doesn't disable the text selection in the web view.
     open var useReaderMenuController = true
 
@@ -225,6 +218,14 @@ open class FolioReaderConfig: NSObject {
     
     /// Used to distinguish between multiple or different reader instances. The content of the user defaults (font settings etc.) depends on this identifier. The default is `nil`.
     open var identifier: String?
+
+    // MARK: Localized strings
+
+    /// Localizes Highlight title
+    open var localizedHighlightsTitle = NSLocalizedString("Highlights", comment: "")
+
+    /// Localizes Content title
+    open var localizedContentsTitle = NSLocalizedString("Contents", comment: "")
 
     /// Localizes Highlight date format. This is a `dateFormat` from `NSDateFormatter`, so be careful 🤔
     open var localizedHighlightsDateFormat = "MMM dd, YYYY | HH:mm"

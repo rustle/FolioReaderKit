@@ -107,7 +107,10 @@ extension FolioReaderCenter {
         let toc = UIBarButtonItem(image: tocIcon, style: .plain, target: self, action:#selector(presentChapterList(_:)))
         let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(decreaseCollectionViewSize(_:)))
 
-        navigationItem.leftBarButtonItems = [menu, toc, lrp]
+        navigationItem.leftBarButtonItems = [menu, toc]
+        #if DEBUG
+        navigationItem.leftBarButtonItems?.append(lrp)
+        #endif
 
         var rightBarIcons = [UIBarButtonItem]()
 

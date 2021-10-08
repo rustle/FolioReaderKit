@@ -13,8 +13,7 @@ public typealias JSCallback = (String?) ->()
 /// The custom WebView used in each page
 open class FolioReaderWebView: WKWebView {
     var isColors = false
-    var isShare = false
-    var isOneWord = false
+    var isSharingHighlight = false
     
     var mDictView : UIViewController?
     
@@ -66,7 +65,7 @@ open class FolioReaderWebView: WKWebView {
         }
 
         var result = false
-        if isShare {
+        if isSharingHighlight {
             result = false
         } else if isColors {
             result = false
@@ -87,7 +86,7 @@ open class FolioReaderWebView: WKWebView {
             let menuItems = UIMenuController.shared.menuItems ?? [UIMenuItem]()
             let menuItemTitle = menuItems.compactMap { $0.title }
             
-            print("FRWV canPerformAction \(readerConfig.useReaderMenuController) \(isShare) \(isColors) \(result) \(action) \(menuItemTitle)")
+            print("FRWV canPerformAction \(readerConfig.useReaderMenuController) \(isSharingHighlight) \(isColors) \(result) \(action) \(menuItemTitle)")
         }
         
         return result
@@ -101,7 +100,7 @@ open class FolioReaderWebView: WKWebView {
         let alertController = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
 
         let shareImage = UIAlertAction(title: self.readerConfig.localizedShareImageQuote, style: .default, handler: { (action) -> Void in
-            if self.isShare {
+            if self.isSharingHighlight {
                 self.js("getHighlightContent()") { textToShare in
                     guard let textToShare = textToShare else { return }
                     self.folioReader.readerCenter?.presentQuoteShare(textToShare)
@@ -118,7 +117,7 @@ open class FolioReaderWebView: WKWebView {
         })
 
         let shareText = UIAlertAction(title: self.readerConfig.localizedShareTextQuote, style: .default) { (action) -> Void in
-            if self.isShare {
+            if self.isSharingHighlight {
                 self.js("getHighlightContent()") { textToShare in
                     guard let textToShare = textToShare else { return }
                     self.folioReader.readerCenter?.shareHighlight(textToShare, rect: sender.menuFrame)
@@ -148,7 +147,7 @@ open class FolioReaderWebView: WKWebView {
 
     func colors(_ sender: UIMenuController?) {
         isColors = true
-        createMenu(options: false)
+        createMenu(onHighlight: false)
         setMenuVisible(true)
     }
 
@@ -157,7 +156,7 @@ open class FolioReaderWebView: WKWebView {
             guard let removedId = removedId else { return }
             self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, removedId: removedId)
         }
-        createMenu(options: false)
+        createMenu(onHighlight: false)
         setMenuVisible(false)
     }
 
@@ -271,7 +270,7 @@ open class FolioReaderWebView: WKWebView {
             else { return }
             
             self.folioReader.readerCenter?.presentAddHighlightNote(highlightNote, edit: true)
-            self.createMenu(options: false, onHighlight: false)
+            self.createMenu(onHighlight: false)
         }
     }
 
@@ -351,13 +350,12 @@ open class FolioReaderWebView: WKWebView {
 
     // MARK: - Create and show menu
 
-    func createMenu(options: Bool, onHighlight: Bool = false) {
+    func createMenu(onHighlight: Bool) {
         guard (self.readerConfig.useReaderMenuController == true) else {
             return
         }
 
-        //MARK: FIXME isShare is broken
-        // isShare = options
+        isSharingHighlight = onHighlight
 
         let colors = UIImage(readerImageNamed: "colors-marker")
         let share = UIImage(readerImageNamed: "share-marker")
@@ -412,7 +410,6 @@ open class FolioReaderWebView: WKWebView {
                 menuItems.append(shareItem)
             }
             
-            isShare = false
         } else if isColors {
             // menu for selecting highlight color
             menuItems = [yellowItem, greenItem, blueItem, pinkItem, underlineItem]
@@ -441,9 +438,9 @@ open class FolioReaderWebView: WKWebView {
             UIMenuController.shared.setMenuVisible(menuVisible, animated: animated)
         }
         
-        if !menuVisible && isShare || !menuVisible && isColors {
+        if !menuVisible && isSharingHighlight || !menuVisible && isColors {
             isColors = false
-            isShare = false
+            isSharingHighlight = false
         }
         
         if menuVisible  {
@@ -451,7 +448,7 @@ open class FolioReaderWebView: WKWebView {
                 UIMenuController.shared.setTargetRect(rect, in: self)
             }
         } else {
-            self.createMenu(options: false, onHighlight: false)
+            self.createMenu(onHighlight: false)
         }
         
         UIMenuController.shared.setMenuVisible(menuVisible, animated: animated)

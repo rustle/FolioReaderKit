@@ -97,7 +97,7 @@ class FolioReaderQuoteShare: UIViewController {
 
         titleLabel = UILabel()
         titleLabel.text = bookTitle
-        titleLabel.font = UIFont(name: "Lato-Bold", size: 15)
+        titleLabel.font = UIFont(name: "AvenirNext-Bold", size: 15) ?? UIFont.boldSystemFont(ofSize: 15)
         titleLabel.textAlignment = .center
         titleLabel.textColor = UIColor.white
         titleLabel.numberOfLines = 1
@@ -108,10 +108,10 @@ class FolioReaderQuoteShare: UIViewController {
         filterImage.addSubview(titleLabel)
 
         // Attributed author
-        let attrs = [NSAttributedString.Key.font: UIFont(name: "Lato-Italic", size: 15)!]
+        let attrs = [NSAttributedString.Key.font: UIFont(name: "AvenirNext-Italic", size: 15) ?? UIFont.italicSystemFont(ofSize: 15)]
         let attributedString = NSMutableAttributedString(string:"\(self.readerConfig.localizedShareBy) ", attributes: attrs)
 
-        let attrs1 = [NSAttributedString.Key.font: UIFont(name: "Lato-Regular", size: 15)!]
+        let attrs1 = [NSAttributedString.Key.font: UIFont(name: "AvenirNext-Regular", size: 15) ?? UIFont.systemFont(ofSize: 15)]
         let boldString = NSMutableAttributedString(string: authorName, attributes:attrs1)
         attributedString.append(boldString)
 

@@ -19,7 +19,10 @@ extension FolioReaderCenter {
 
         currentPage.webView?.js("getBodyText()") { chapterText in
             guard let chapterText = chapterText else { return }
-            let htmlText = chapterText.replacingOccurrences(of: "[\\n\\r]+", with: "<br />", options: .regularExpression)
+            // let htmlText = chapterText.replacingOccurrences(of: "[\\n\\r]+", with: "<br />", options: .regularExpression)
+            let htmlText = chapterText.split(whereSeparator: \.isNewline).reduce("") { result, substring in
+                return result + "<p>\(substring)</p>"
+            }
             var subject = self.readerConfig.localizedShareChapterSubject
             var html = ""
             var text = ""
@@ -46,7 +49,7 @@ extension FolioReaderCenter {
 
             // Sharing html and text
             html = "<html><body>"
-            html += "<br /><hr> <p>\(htmlText)</p> <hr><br />"
+            html += "<hr><div>\(htmlText)</div><hr>"
             html += "<center><p style=\"color:gray\">"+self.readerConfig.localizedShareAllExcerptsFrom+"</p>"
             html += "<b>\(bookTitle)</b><br />"
             html += self.readerConfig.localizedShareBy+" <i>\(authorName)</i><br />"
@@ -63,7 +66,7 @@ extension FolioReaderCenter {
             shareItems.insert(contentsOf: [act, "" as AnyObject], at: 0)
 
             let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
-            activityViewController.excludedActivityTypes = [UIActivity.ActivityType.print, UIActivity.ActivityType.postToVimeo]
+            activityViewController.excludedActivityTypes = [.print, .postToVimeo]
 
             // Pop style on iPad
             if let actv = activityViewController.popoverPresentationController {

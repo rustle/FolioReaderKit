@@ -23,7 +23,7 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         }
 
         if let currentPage = currentPage {
-            currentPage.webView?.createMenu(options: true)
+            currentPage.webView?.createMenu(onHighlight: false)
             currentPage.webView?.setMenuVisible(false)
         }
 
