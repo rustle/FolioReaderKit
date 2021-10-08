@@ -63,7 +63,8 @@ extension FolioReaderCenter {
             text = "\(chapterName)\n\n“\(chapterText)” \n\n\(bookTitle) \n\(self.readerConfig.localizedShareBy) \(authorName)"
 
             let act = FolioReaderSharingProvider(subject: subject, text: text, html: html)
-            shareItems.insert(contentsOf: [act, "" as AnyObject], at: 0)
+//            shareItems.insert(contentsOf: [act, "" as AnyObject], at: 0)
+            shareItems.insert(contentsOf: [act], at: 0)
 
             let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
             activityViewController.excludedActivityTypes = [.print, .postToVimeo]
@@ -124,10 +125,11 @@ extension FolioReaderCenter {
         text = "\(chapterName)\n\n“\(string)” \n\n\(bookTitle) \n\(readerConfig.localizedShareBy) \(authorName)"
 
         let act = FolioReaderSharingProvider(subject: subject, text: text, html: html)
-        shareItems.insert(contentsOf: [act, "" as AnyObject], at: 0)
+        //shareItems.insert(contentsOf: [act, "" as AnyObject], at: 0)
+        shareItems.insert(contentsOf: [act], at: 0)
 
         let activityViewController = UIActivityViewController(activityItems: shareItems, applicationActivities: nil)
-        activityViewController.excludedActivityTypes = [UIActivity.ActivityType.print, UIActivity.ActivityType.postToVimeo]
+        activityViewController.excludedActivityTypes = [.print, .postToVimeo]
 
         // Pop style on iPad
         if let actv = activityViewController.popoverPresentationController {

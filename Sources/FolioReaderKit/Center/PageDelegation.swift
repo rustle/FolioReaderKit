@@ -39,6 +39,11 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         updateCurrentPage(page)
         page.webView?.isHidden = false
         
+        // UGLYFIX: to make share menu item appear on first attempt
+        page.webView?.scrollView.subviews.first?.becomeFirstResponder()
+        page.becomeFirstResponder()
+        page.webView?.createMenu(onHighlight: false)
+        
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
             currentPage.handleAnchor(fragmentID, avoidBeginningAnchors: true, animated: true)
