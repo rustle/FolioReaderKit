@@ -241,7 +241,7 @@ function injectHighlight(highlightJSONDataEncoded) {    //sample data
     window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endTextInfo " + endTextInfo.textNode.textContent)
     
     var curTextLengthUptoStartNode = 0    //for locating actual startNode
-    while (curTextLengthUptoStartNode + startNode.textContent.length <= startTextInfoOffset) {
+    while (curTextLengthUptoStartNode + startNode.textContent.length < startTextInfoOffset) {
         curTextLengthUptoStartNode += startNode.textContent.length
         startNode = startNode.nextSibling
         if (startNode == null)
@@ -253,12 +253,11 @@ function injectHighlight(highlightJSONDataEncoded) {    //sample data
     window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startNodeNew " + startNode + " " + startNode.textContent)
     
     var curTextLengthUptoEndNode = 0    //for locating actual endNode
-    while (curTextLengthUptoEndNode + endNode.textContent.length <= endTextInfoOffset) {
+    while (curTextLengthUptoEndNode + endNode.textContent.length < endTextInfoOffset) {
         curTextLengthUptoEndNode += endNode.textContent.length
         endNode = endNode.nextSibling
         if (endNode == null)
             break;
-        
     }
     if (endNode == null) {
         return "endOffset exceeding content length"
