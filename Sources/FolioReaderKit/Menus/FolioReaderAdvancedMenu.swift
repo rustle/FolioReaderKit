@@ -7,7 +7,9 @@
 
 import Foundation
 
-class FolioReaderStructureMenu: FolioReaderMenu {
+class FolioReaderAdvancedMenu: FolioReaderMenu {
+    let labelFontSize = CGFloat(16)
+    
     var noticeLabel: UILabel!
     var wrapParaLabel: UILabel!
     var wrapParaSwitch: UISwitch!
@@ -15,6 +17,9 @@ class FolioReaderStructureMenu: FolioReaderMenu {
     var clearClassLabel: UILabel!
     var clearClassSwitch: UISwitch!
     
+    var styleOverrideLabel: UILabel!
+    var styleOverrideSegment: UISegmentedControl!
+
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -25,7 +30,7 @@ class FolioReaderStructureMenu: FolioReaderMenu {
         let selectedColor = self.readerConfig.tintColor
         
         // Tap gesture
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderStructureMenu.tapGesture))
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderAdvancedMenu.tapGesture))
         tapGesture.numberOfTapsRequired = 1
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
@@ -68,7 +73,7 @@ class FolioReaderStructureMenu: FolioReaderMenu {
                 height: 32)
             )
         wrapParaLabel.text = "Wrap raw text inside <p>"
-        wrapParaLabel.font = .systemFont(ofSize: 20)
+        wrapParaLabel.font = .systemFont(ofSize: labelFontSize)
         wrapParaLabel.adjustsFontForContentSizeCategory = true
         wrapParaLabel.adjustsFontSizeToFitWidth = true
         
@@ -80,7 +85,7 @@ class FolioReaderStructureMenu: FolioReaderMenu {
                 height: 32)
         )
         wrapParaSwitch.isOn = self.folioReader.doWrapPara
-        wrapParaSwitch.addTarget(self, action: #selector(FolioReaderStructureMenu.paragraphSwitchValueChanged(_:)), for: .valueChanged)
+        wrapParaSwitch.addTarget(self, action: #selector(paragraphSwitchValueChanged), for: .valueChanged)
         menuView.addSubview(wrapParaLabel)
         menuView.addSubview(wrapParaSwitch)
         
@@ -92,7 +97,7 @@ class FolioReaderStructureMenu: FolioReaderMenu {
             )
         )
         clearClassLabel.text = "Remove unsuitable html styles"
-        clearClassLabel.font = .systemFont(ofSize: 20)
+        clearClassLabel.font = .systemFont(ofSize: labelFontSize)
         clearClassLabel.adjustsFontForContentSizeCategory = true
         clearClassLabel.adjustsFontSizeToFitWidth = true
         
@@ -104,9 +109,37 @@ class FolioReaderStructureMenu: FolioReaderMenu {
             )
         )
         clearClassSwitch.isOn = self.folioReader.doClearClass
-        clearClassSwitch.addTarget(self, action: #selector(FolioReaderStructureMenu.clearClassSwitchValueChanged(_:)), for: .valueChanged)
+        clearClassSwitch.addTarget(self, action: #selector(clearClassSwitchValueChanged), for: .valueChanged)
         menuView.addSubview(clearClassLabel)
         menuView.addSubview(clearClassSwitch)
+        
+        styleOverrideLabel = UILabel(
+            frame: CGRect(
+                x: 16, y: clearClassLabel.frame.maxY,
+                width: view.frame.width - 32 - 360, height: 32
+            )
+        )
+        styleOverrideLabel.text = "Styles to override"
+        styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)
+        styleOverrideLabel.adjustsFontForContentSizeCategory = true
+        styleOverrideLabel.adjustsFontSizeToFitWidth = true
+        
+        styleOverrideSegment = UISegmentedControl(
+            frame: CGRect(
+                x: styleOverrideLabel.frame.maxX,
+                y: styleOverrideLabel.frame.minY,
+                width: 360, height: 32
+            )
+        )
+        StyleOverrideTypes.allCases.forEach {
+            styleOverrideSegment.insertSegment(withTitle: $0.description, at: $0.rawValue, animated: false)
+        }
+        styleOverrideSegment.selectedSegmentIndex = self.folioReader.styleOverride.rawValue
+        styleOverrideSegment.addTarget(self, action: #selector(styleOverrideSegmentValueChanged), for: .valueChanged)
+        
+        
+        menuView.addSubview(styleOverrideLabel)
+        menuView.addSubview(styleOverrideSegment)
         
         reloadColors()
     }
@@ -117,6 +150,11 @@ class FolioReaderStructureMenu: FolioReaderMenu {
     
     @objc func clearClassSwitchValueChanged(_ sender: UISwitch) {
         self.folioReader.doClearClass = sender.isOn
+    }
+    
+    @objc func styleOverrideSegmentValueChanged(_ sender: UISegmentedControl) {
+        guard let styleOverride = StyleOverrideTypes(rawValue: sender.selectedSegmentIndex) else { return }
+        self.folioReader.styleOverride = styleOverride
     }
     
     // MARK: - Gestures

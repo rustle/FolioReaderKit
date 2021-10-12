@@ -8,8 +8,6 @@
 
 import UIKit
 
-
-
 class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerViewDelegate {
     
     var stylePicker: UIPickerView!
@@ -17,7 +15,7 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     var weightSlider: HADiscreteSlider!
     var stylePreview: UITextView!
     
-    let systemFontFamilyNames = UIFont.familyNames
+    var fontFamilies = [FontFamilyInfo]()
     let fontSizes = ["15.5px", "17px", "18.5px", "20px", "22px", "24px", "26px", "28px", "30.5px", "33px", "35.5px"]
 
     override func viewDidLoad() {
@@ -45,7 +43,7 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         view.addGestureRecognizer(tapGesture)
         
         // Menu view
-        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
+        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 + 200 /*margin*/
         visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
         menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
@@ -59,12 +57,10 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         menuView.layer.shouldRasterize = true
         view.addSubview(menuView)
         
-        stylePicker = UIPickerView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 120))
+        stylePicker = UIPickerView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 120 + 240))
         stylePicker.dataSource = self
         stylePicker.delegate = self
-        if let fontRow = systemFontFamilyNames.index(of: self.folioReader.currentFont) {
-            stylePicker.selectRow(fontRow, inComponent: 0, animated: false)
-        }
+        
         menuView.addSubview(stylePicker)
         
         // Separator 2
@@ -172,6 +168,23 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         )
         
         // menuView.addSubview(stylePreview)
+        fontFamilies.append(
+            contentsOf:
+                UIFont.familyNames.compactMap { familyName -> FontFamilyInfo? in
+                    guard let uiFont = UIFont(name: familyName, size: 20) else { return nil }
+                    let ctFont = CTFontCreateWithName(uiFont.fontName as CFString, 0, nil)
+                    let ctFontName = CTFontCopyLocalizedName(ctFont, kCTFontFamilyNameKey, nil) as String?
+                    
+                    return FontFamilyInfo(familyName: familyName, localizedName: ctFontName, regularFont: uiFont)
+                }
+                .sorted {
+                    $0.localizedName < $1.localizedName
+                }
+        )
+        
+        if let fontRow = fontFamilies.firstIndex(where: { $0.familyName == self.folioReader.currentFont }) {
+            stylePicker.selectRow(fontRow, inComponent: 0, animated: false)
+        }
         
         reloadColors()
     }
@@ -188,25 +201,26 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     }
     
     func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
-        return systemFontFamilyNames.count
+        return fontFamilies.count
     }
     
-    func pickerView(_ pickerView: UIPickerView, attributedTitleForRow row: Int, forComponent component: Int) -> NSAttributedString? {
-        let title = NSAttributedString(
-            string: systemFontFamilyNames[row],
-            attributes: [
-                NSAttributedString.Key.strokeColor:
-                    folioReader.nightMode ? UIColor.lightText : UIColor.darkText,
-                NSAttributedString.Key.foregroundColor:
-                    folioReader.nightMode ? UIColor.lightText : UIColor.darkText
-            ]
-        )
-        print("pickerView \(folioReader.nightMode)")
-        return title
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+//        if let label = view as? UILabel {
+//            label.textColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
+//            return label
+//        }
+        let fontFamilyInfo = fontFamilies[row]
+        
+        let pickerLabel = UILabel()
+        pickerLabel.textColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
+        pickerLabel.text = fontFamilyInfo.localizedName ?? fontFamilyInfo.familyName
+        pickerLabel.font = fontFamilyInfo.regularFont
+        pickerLabel.textAlignment = .center
+        return pickerLabel
     }
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
-        self.folioReader.currentFont = systemFontFamilyNames[row]
+        self.folioReader.currentFont = fontFamilies[row].familyName
         
         stylePreview.font = UIFont(
             name: self.folioReader.currentFont,

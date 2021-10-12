@@ -88,10 +88,13 @@ import Foundation
     @objc func preference(savedPosition defaults: [String: Any]?) -> [String: Any]?
     
     @objc func preference(setSavedPosition value: [String: Any])
+    
+    @objc func preference(styleOverride defaults: Int) -> Int
+    
+    @objc func preference(setStyleOverride value: Int)
 }
 
 public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
-    
     let folioReader: FolioReader
     
     public init(_ folioReader: FolioReader) {
@@ -272,6 +275,14 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
     }
     
     public func preference(setSavedPosition value: [String : Any]) {
+        
+    }
+    
+    public func preference(styleOverride defaults: Int) -> Int {
+        return defaults
+    }
+    
+    public func preference(setStyleOverride value: Int) {
         
     }
     

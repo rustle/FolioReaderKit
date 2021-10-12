@@ -163,7 +163,10 @@ open class FolioReaderConfig: NSObject {
 
     /// Media overlay or TTS selection color
     open lazy var mediaOverlayColor: UIColor! = self.tintColor
-
+    
+    // MARK: User Fonts
+    open var userFontDescriptors = [String: CTFontDescriptor]()
+    
     // MARK: Custom actions
     
     /// hide the navigation bar and the bottom status view

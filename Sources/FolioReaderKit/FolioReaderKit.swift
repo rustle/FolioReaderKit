@@ -65,6 +65,37 @@ public enum MediaOverlayStyle: Int {
     }
 }
 
+struct FontFamilyInfo {
+    let familyName: String
+    let localizedName: String?
+    let regularFont: UIFont
+}
+
+public enum StyleOverrideTypes: Int, CaseIterable {
+    case None
+    case PNode
+    case PlusTD
+    case PlusChildren
+    case AllText
+    
+    var description: String {
+        get {
+            switch(self) {
+            case .None:
+                return "none"
+            case .PNode:
+                return "only <p>"
+            case .PlusTD:
+                return "+ <td>"
+            case .PlusChildren:
+                return "+ <span>"
+            case .AllText:
+                return "all text"
+            }
+        }
+    }
+}
+
 /// FolioReader actions delegate
 @objc public protocol FolioReaderDelegate: class {
     
@@ -438,6 +469,19 @@ extension FolioReader {
         }
     }
     
+    open var styleOverride: StyleOverrideTypes {
+        get {
+            guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(styleOverride: StyleOverrideTypes.PNode.rawValue),
+                  let value = StyleOverrideTypes(rawValue: rawValue) else {
+                return StyleOverrideTypes.PNode
+            }
+            return value
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setStyleOverride: value.rawValue)
+        }
+    }
+    
     @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(savedPosition: nil)
@@ -562,27 +606,35 @@ extension FolioReader {
         
         
         var style = ""
+        if styleOverride != .None {
+            var tagSelector = "p"
+            if styleOverride.rawValue >= StyleOverrideTypes.PlusTD.rawValue {
+                tagSelector += ", td"
+            }
+            if styleOverride.rawValue >= StyleOverrideTypes.PlusChildren.rawValue {
+                tagSelector += ", td, span"
+            }
+            
         style += """
-        
-        p {
-            font-family: \(currentFont) !important;
-            font-size: \(currentFontSize) !important;
-            font-weight: \(currentFontWeight) !important;
-            letter-spacing: \(letterSpacing)px !important;
-            line-height: \(lineHeight) !important;
-            text-indent: \(textIndent)px !important;
-            text-align: justify !important;
-            margin: \(marginTopEm)em 0 \(marginBottonEm)em 0 !important;
-            -webkit-hyphens: auto !important;
+            \(tagSelector) {
+                font-family: \(currentFont) !important;
+                font-size: \(currentFontSize) !important;
+                font-weight: \(currentFontWeight) !important;
+                letter-spacing: \(letterSpacing)px !important;
+                line-height: \(lineHeight) !important;
+                text-indent: \(textIndent)px !important;
+                text-align: justify !important;
+                margin: \(marginTopEm)em 0 \(marginBottonEm)em 0 !important;
+                -webkit-hyphens: auto !important;
+            }
+            
+            span {
+                letter-spacing: \(letterSpacing)px !important;
+                line-height: \(lineHeight) !important;
+            }
+            
+            """
         }
-        
-        span {
-            letter-spacing: \(letterSpacing)px !important;
-            line-height: \(lineHeight) !important;
-        }
-        
-        """
-        
         if let pageWidth = readerCenter?.pageWidth, let pageHeight = readerCenter?.pageHeight {
             let marginTop = 0 //CGFloat(currentMarginTop) / 200 * pageHeight
             let marginBottom = 0 //CGFloat(currentMarginBottom) / 200 * pageHeight
@@ -606,7 +658,7 @@ extension FolioReader {
         
         for fontName in UIFont.fontNames(forFamilyName: currentFont) {
 //            if let fontURL = readerCenter?.userFonts[fontName] {
-            guard let fontDescriptor = readerCenter?.userFontDescriptors[fontName] else {
+            guard let fontDescriptor = readerConfig?.userFontDescriptors[fontName] else {
                 continue
             }
 //                let ctFont = CTFontCreateWithName(fontName as CFString, CGFloat(currentFontSizeOnly), nil)
