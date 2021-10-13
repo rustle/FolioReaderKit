@@ -17,7 +17,7 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
         
         if item < totalPages {
             let indexPath = IndexPath(row: item, section: 0)
-            changePageWith(indexPath: indexPath, animated: false, completion: { () -> Void in
+            changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
                 self.updateCurrentPage()
             })
             tempReference = reference
@@ -27,7 +27,9 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
     }
     
     func chapterList(didDismissedChapterList chapterList: FolioReaderChapterList) {
-        updateCurrentPage()
+        // MARK: should not need here
+        //updateCurrentPage()   
+        
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         // Move to #fragment

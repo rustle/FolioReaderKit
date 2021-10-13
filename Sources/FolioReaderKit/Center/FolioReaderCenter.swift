@@ -47,7 +47,11 @@ open class FolioReaderCenter: UIViewController {
     
     var nextPageNumber: Int = 0
     var previousPageNumber: Int = 0
-    var currentPageNumber: Int = 0
+    var currentPageNumber: Int = 0 {
+        didSet {
+            print("currentPageNumber \(oldValue) -> \(currentPageNumber)")
+        }
+    }
     var isLastPage: Bool {
         currentPageNumber == nextPageNumber
     }

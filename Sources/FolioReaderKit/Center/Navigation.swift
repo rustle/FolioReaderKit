@@ -170,11 +170,16 @@ extension FolioReaderCenter {
             completion?()
             return
         }
-
-        UIView.animate(withDuration: animated ? 0.3 : 0, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
+        
+        // MARK: TEMPFIX first time scrolling will fail mystically
+        UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
             self.collectionView.scrollToItem(at: indexPath, at: .direction(withConfiguration: self.readerConfig), animated: false)
         }) { (finished: Bool) -> Void in
-            completion?()
+            UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
+                self.collectionView.setContentOffset(self.frameForPage(indexPath.row + 1).origin, animated: false)
+            }) { (finished: Bool) -> Void in
+                completion?()
+            }
         }
     }
     
