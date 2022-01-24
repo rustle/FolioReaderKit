@@ -282,9 +282,11 @@ open class FolioReaderWebView: WKWebView {
             self.clearTextSelection()
 
             let vc = UIReferenceLibraryViewController(term: selectedText)
+            vc.view.backgroundColor = self.readerConfig.menuBackgroundColor
             vc.view.tintColor = self.readerConfig.tintColor
             guard let readerContainer = self.readerContainer else { return }
-            readerContainer.show(vc, sender: nil)
+            // readerContainer.show(vc, sender: nil)    // will close reader container
+            readerContainer.present(vc, animated: true, completion: nil)
         }
     }
 
