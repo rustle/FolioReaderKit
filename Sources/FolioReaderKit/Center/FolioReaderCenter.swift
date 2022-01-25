@@ -196,23 +196,6 @@ open class FolioReaderCenter: UIViewController {
             view.addSubview(scrollScrubber.slider)
         }
         
-        // Menus
-        let menuPageTab = FolioReaderPageMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuPageTab.tabBarItem = .init(title: "Page", image: nil, tag: 0)
-        menuTabs.append(menuPageTab)
-        
-        let menuFontStyleTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontStyleTab.tabBarItem = .init(title: "Font", image: nil, tag: 1)
-        menuTabs.append(menuFontStyleTab)
-
-        let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
-        menuTabs.append(menuParagraphTab)
-
-        let menuAdvancedTab = FolioReaderAdvancedMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuAdvancedTab.tabBarItem = .init(title: "Advanced", image: nil, tag: 3)
-        menuTabs.append(menuAdvancedTab)
-
     }
 
     override open func viewWillAppear(_ animated: Bool) {

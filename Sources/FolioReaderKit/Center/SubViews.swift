@@ -26,7 +26,15 @@ extension FolioReaderCenter {
 //            height: collectionViewFrame.size.height)
 //        self.collectionViewLayout.itemSize = itemSize
         self.collectionView.frame = collectionViewFrame
-        self.collectionView.setContentOffset(CGPoint(x: CGFloat(self.currentPageNumber-1) * pageWidth, y: 0), animated: false)
+
+        self.collectionView.setContentOffset(
+            self.readerConfig.isDirection(
+                CGPoint(x: 0, y: CGFloat(self.currentPageNumber-1) * pageHeight),
+                CGPoint(x: CGFloat(self.currentPageNumber-1) * pageWidth, y: 0),
+                CGPoint(x: CGFloat(self.currentPageNumber-1) * pageWidth, y: 0))
+            ,
+            animated: false
+        )
         self.collectionViewLayout.invalidateLayout()
     }
 
