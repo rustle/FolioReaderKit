@@ -472,6 +472,8 @@ function highlightStringCFI(style) {
 
         if (tmpNode.nodeName == "HIGHLIGHT") {
             prevHighlightLengthStart += tmpNode.textContent.length
+        } else if (tmpNode.nodeName != "#text") {
+            break
         }
         tmpNode = tmpNode.previousSibling
     }
@@ -484,6 +486,8 @@ function highlightStringCFI(style) {
 
         if (tmpNode.nodeName == "HIGHLIGHT") {
             prevHighlightLengthEnd += tmpNode.textContent.length
+        } else if (tmpNode.nodeName != "#text") {
+            break
         }
         tmpNode = tmpNode.previousSibling
     }
