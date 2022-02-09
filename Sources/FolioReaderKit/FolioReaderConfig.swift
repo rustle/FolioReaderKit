@@ -245,6 +245,8 @@ open class FolioReaderConfig: NSObject {
     open var localizedFontMenuGreen = NSLocalizedString("Green", comment: "")
     open var localizedLayoutHorizontal = NSLocalizedString("Horizontal", comment: "")
     open var localizedLayoutVertical = NSLocalizedString("Vertical", comment: "")
+    open var localizedLayoutHybrid = NSLocalizedString("Hybrid", comment: "")
+
     open var localizedReaderOnePageLeft = NSLocalizedString("1 page left", comment: "")
     open var localizedReaderManyPagesLeft = NSLocalizedString("pages left", comment: "")
     open var localizedReaderManyMinutes = NSLocalizedString("minutes", comment: "")

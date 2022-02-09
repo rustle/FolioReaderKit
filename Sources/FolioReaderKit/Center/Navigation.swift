@@ -108,7 +108,7 @@ extension FolioReaderCenter {
         return self.readerConfig.isDirection(
             CGRect(x: 0, y: self.pageHeight * CGFloat(page-1), width: self.pageWidth, height: self.pageHeight),
             CGRect(x: self.pageWidth * CGFloat(page-1), y: 0, width: self.pageWidth, height: self.pageHeight),
-            CGRect(x: 0, y: self.pageHeight * CGFloat(page-1), width: self.pageWidth, height: self.pageHeight)
+            CGRect(x: self.pageWidth * CGFloat(page-1), y: 0, width: self.pageWidth, height: self.pageHeight)
         )
     }
 
@@ -176,7 +176,9 @@ extension FolioReaderCenter {
             self.collectionView.scrollToItem(at: indexPath, at: .direction(withConfiguration: self.readerConfig), animated: false)
         }) { (finished: Bool) -> Void in
             UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
-                self.collectionView.setContentOffset(self.frameForPage(indexPath.row + 1).origin, animated: false)
+                let frameForPage = self.frameForPage(indexPath.row + 1)
+                print("changePageWith frameForPage origin=\(frameForPage.origin)")
+                self.collectionView.setContentOffset(frameForPage.origin, animated: false)
             }) { (finished: Bool) -> Void in
                 completion?()
             }

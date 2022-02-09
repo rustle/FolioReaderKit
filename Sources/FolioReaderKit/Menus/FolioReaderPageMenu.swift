@@ -91,10 +91,15 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
 
         let vertical = UIImage(readerImageNamed: "icon-menu-vertical")
         let horizontal = UIImage(readerImageNamed: "icon-menu-horizontal")
+        let hybrid = UIImage(readerImageNamed: "icon-menu-hybrid")
+        
         let verticalNormal = vertical?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         let horizontalNormal = horizontal?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        let hybridNormal = hybrid?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+
         let verticalSelected = vertical?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
         let horizontalSelected = horizontal?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
+        let hybridSelected = hybrid?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
 
         // Layout direction
         let layoutDirection = SMSegmentView(frame: CGRect(x: 0, y: line3.frame.origin.y, width: view.frame.width, height: 55),
@@ -112,6 +117,7 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         layoutDirection.tag = 3
         layoutDirection.addSegmentWithTitle(self.readerConfig.localizedLayoutVertical, onSelectionImage: verticalSelected, offSelectionImage: verticalNormal)
         layoutDirection.addSegmentWithTitle(self.readerConfig.localizedLayoutHorizontal, onSelectionImage: horizontalSelected, offSelectionImage: horizontalNormal)
+        layoutDirection.addSegmentWithTitle(self.readerConfig.localizedLayoutHybrid, onSelectionImage: hybridSelected, offSelectionImage: hybridNormal)
 
         var scrollDirection = FolioReaderScrollDirection(rawValue: self.folioReader.currentScrollDirection)
 
@@ -122,8 +128,10 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         switch scrollDirection ?? .vertical {
         case .vertical, .defaultVertical:
             layoutDirection.selectSegmentAtIndex(FolioReaderScrollDirection.vertical.rawValue)
-        case .horizontal, .horizontalWithVerticalContent:
+        case .horizontal:
             layoutDirection.selectSegmentAtIndex(FolioReaderScrollDirection.horizontal.rawValue)
+        case .horizontalWithVerticalContent:
+            layoutDirection.selectSegmentAtIndex(FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue)
         }
         menuView.addSubview(layoutDirection)
         
