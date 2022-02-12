@@ -13,10 +13,6 @@ extension FolioReaderCenter {
     func updateSubviewFrames() {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        self.pageIndicatorView?.frame = self.frameForPageIndicatorView(outerBounds: screenBounds)
-        self.scrollScrubber?.frame = self.frameForScrollScrubber(outerBounds: screenBounds)
-        
-        
         var collectionViewFrame = self.frameForCollectionView(outerBounds: screenBounds)
         collectionViewFrame = collectionViewFrame.insetBy(dx: tempCollectionViewInset, dy: tempCollectionViewInset)
         pageWidth = collectionViewFrame.width
@@ -27,6 +23,9 @@ extension FolioReaderCenter {
 //        self.collectionViewLayout.itemSize = itemSize
         self.collectionView.frame = collectionViewFrame
 
+        self.pageIndicatorView?.frame = self.frameForPageIndicatorView(outerBounds: screenBounds)
+        self.scrollScrubber?.frame = self.frameForScrollScrubber(outerBounds: screenBounds)
+        
         self.collectionView.setContentOffset(
             self.readerConfig.isDirection(
                 CGPoint(x: 0, y: CGFloat(self.currentPageNumber-1) * pageHeight),
