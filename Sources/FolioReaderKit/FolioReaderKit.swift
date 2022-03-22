@@ -355,8 +355,8 @@ extension FolioReader {
     open var currentScrollDirection: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
-                .preference(currentScrollDirection: FolioReaderScrollDirection.horizontal.rawValue)
-                ?? FolioReaderScrollDirection.horizontal.rawValue
+                .preference(currentScrollDirection: FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue)
+                ?? FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentScrollDirection: value)

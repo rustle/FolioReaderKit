@@ -8,39 +8,40 @@
 import Foundation
 
 class FolioReaderAdvancedMenu: FolioReaderMenu {
+    let safeAreaHeight = CGFloat(90)    //including padding between elements
+
     let labelFontSize = CGFloat(16)
     
-    var noticeLabel: UILabel!
-    var wrapParaLabel: UILabel!
-    var wrapParaSwitch: UISwitch!
+    let noticeLabel = UILabel()
+    let noticeLabelHeight = CGFloat(24)
     
-    var clearClassLabel: UILabel!
-    var clearClassSwitch: UISwitch!
+    let wrapParaLabel = UILabel()
+    let wrapParaLabelHeight = CGFloat(32)
+    let wrapParaSwitch = UISwitch()
     
-    var styleOverrideLabel: UILabel!
-    var styleOverrideSegment: UISegmentedControl!
+    let clearClassLabel = UILabel()
+    let clearClassLabelHeight = CGFloat(32)
+    let clearClassSwitch = UISwitch()
+    
+    let styleOverrideLabel = UILabel()
+    let styleOverrideLabelHeight = CGFloat(32)
+    
+    let styleOverrideSegment = UISegmentedControl()
+    let styleOverrideSegmentHeight = CGFloat(40)
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Do any additional setup after loading the view.
-        self.view.backgroundColor = UIColor.clear
-        
-        let normalColor = UIColor(white: 0.5, alpha: 0.7)
-        let selectedColor = self.readerConfig.tintColor
-        
+
         // Tap gesture
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderAdvancedMenu.tapGesture))
         tapGesture.numberOfTapsRequired = 1
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
         
-        // Menu view
-        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
-        visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
-        menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
+        let visibleHeight = noticeLabelHeight + wrapParaLabelHeight + clearClassLabelHeight + styleOverrideLabelHeight + styleOverrideSegmentHeight + safeAreaHeight
+        
+         // Menu view
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
-        menuView.autoresizingMask = .flexibleWidth
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
         menuView.layer.shadowOpacity = 0.3
@@ -48,100 +49,154 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         menuView.layer.shadowPath = UIBezierPath(rect: menuView.bounds).cgPath
         menuView.layer.rasterizationScale = UIScreen.main.scale
         menuView.layer.shouldRasterize = true
+        menuView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(menuView)
+        NSLayoutConstraint.activate([
+            menuView.topAnchor.constraint(equalTo: view.bottomAnchor, constant: -visibleHeight),
+            menuView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            menuView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            menuView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         
         // notice label
-        noticeLabel = UILabel(
-            frame: CGRect(
-                x : 8, y: 8,
-                width: view.frame.width - 16,
-                height: 24
-            )
-        )
+//        noticeLabel = UILabel(
+//            frame: CGRect(
+//                x : 8, y: 8,
+//                width: frame.width - 16,
+//                height: 24
+//            )
+//        )
         noticeLabel.text = "Note: please reopen reader for these options to take effect"
         noticeLabel.adjustsFontSizeToFitWidth = true
         noticeLabel.baselineAdjustment = .alignCenters
         noticeLabel.textColor = .systemRed
+        noticeLabel.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(noticeLabel)
+        NSLayoutConstraint.activate([
+            noticeLabel.topAnchor.constraint(equalTo: menuView.topAnchor, constant: 8),
+            noticeLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 8),
+            noticeLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: 8),
+            noticeLabel.heightAnchor.constraint(equalToConstant: noticeLabelHeight)
+        ])
         
         // reformat switches
-        wrapParaLabel = UILabel(
-            frame: CGRect(
-                x: 16,
-                y: noticeLabel.frame.maxY,
-                width: view.frame.width - 32 - 48,
-                height: 32)
-            )
+//        wrapParaLabel = UILabel(
+//            frame: CGRect(
+//                x: 16,
+//                y: noticeLabel.frame.maxY,
+//                width: frame.width - 32 - 48,
+//                height: 32)
+//            )
         wrapParaLabel.text = "Wrap raw text inside <p>"
         wrapParaLabel.font = .systemFont(ofSize: labelFontSize)
         wrapParaLabel.adjustsFontForContentSizeCategory = true
         wrapParaLabel.adjustsFontSizeToFitWidth = true
+        wrapParaLabel.translatesAutoresizingMaskIntoConstraints = false
         
-        wrapParaSwitch = UISwitch(
-            frame: CGRect(
-                x: wrapParaLabel.frame.maxX,
-                y: wrapParaLabel.frame.minY,
-                width: 48,
-                height: 32)
-        )
+//        wrapParaSwitch = UISwitch(
+//            frame: CGRect(
+//                x: wrapParaLabel.frame.maxX,
+//                y: wrapParaLabel.frame.minY,
+//                width: 48,
+//                height: 32)
+//        )
         wrapParaSwitch.isOn = self.folioReader.doWrapPara
         wrapParaSwitch.addTarget(self, action: #selector(paragraphSwitchValueChanged), for: .valueChanged)
+        wrapParaSwitch.translatesAutoresizingMaskIntoConstraints = false
+        
         menuView.addSubview(wrapParaLabel)
         menuView.addSubview(wrapParaSwitch)
         
+        NSLayoutConstraint.activate([
+            wrapParaLabel.topAnchor.constraint(equalTo: noticeLabel.bottomAnchor, constant: 4),
+            wrapParaLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            wrapParaLabel.trailingAnchor.constraint(equalTo: wrapParaSwitch.leadingAnchor, constant: 4),
+            wrapParaLabel.heightAnchor.constraint(equalToConstant: wrapParaLabelHeight),
+            wrapParaSwitch.centerYAnchor.constraint(equalTo: wrapParaLabel.centerYAnchor),
+            wrapParaSwitch.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            wrapParaSwitch.widthAnchor.constraint(equalToConstant: 48),
+            wrapParaSwitch.heightAnchor.constraint(equalTo: wrapParaLabel.heightAnchor)
+        ])
         // clear body&table styles
-        clearClassLabel = UILabel(
-            frame: CGRect(
-                x: 16, y: wrapParaLabel.frame.maxY,
-                width: view.frame.width - 32 - 48, height: 32
-            )
-        )
+//        clearClassLabel = UILabel(
+//            frame: CGRect(
+//                x: 16, y: wrapParaLabel.frame.maxY,
+//                width: frame.width - 32 - 48, height: 32
+//            )
+//        )
         clearClassLabel.text = "Remove unsuitable html styles"
         clearClassLabel.font = .systemFont(ofSize: labelFontSize)
         clearClassLabel.adjustsFontForContentSizeCategory = true
         clearClassLabel.adjustsFontSizeToFitWidth = true
-        
-        clearClassSwitch = UISwitch(
-            frame: CGRect(
-                x: clearClassLabel.frame.maxX,
-                y: clearClassLabel.frame.minY,
-                width: 48, height: 32
-            )
-        )
+        clearClassLabel.translatesAutoresizingMaskIntoConstraints = false
+//        clearClassSwitch = UISwitch(
+//            frame: CGRect(
+//                x: clearClassLabel.frame.maxX,
+//                y: clearClassLabel.frame.minY,
+//                width: 48, height: 32
+//            )
+//        )
         clearClassSwitch.isOn = self.folioReader.doClearClass
         clearClassSwitch.addTarget(self, action: #selector(clearClassSwitchValueChanged), for: .valueChanged)
+        clearClassSwitch.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(clearClassLabel)
         menuView.addSubview(clearClassSwitch)
         
-        styleOverrideLabel = UILabel(
-            frame: CGRect(
-                x: 16, y: clearClassLabel.frame.maxY,
-                width: view.frame.width - 32 - 360, height: 32
-            )
-        )
-        styleOverrideLabel.text = "Styles to override"
+        NSLayoutConstraint.activate([
+            clearClassLabel.topAnchor.constraint(equalTo: wrapParaLabel.bottomAnchor, constant: 4),
+            clearClassLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            clearClassLabel.trailingAnchor.constraint(equalTo: clearClassSwitch.leadingAnchor, constant: 4),
+            clearClassLabel.heightAnchor.constraint(equalToConstant: clearClassLabelHeight),
+            clearClassSwitch.centerYAnchor.constraint(equalTo: clearClassLabel.centerYAnchor),
+            clearClassSwitch.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            clearClassSwitch.widthAnchor.constraint(equalToConstant: 48),
+            clearClassSwitch.heightAnchor.constraint(equalTo: clearClassLabel.heightAnchor)
+        ])
+        
+//        styleOverrideLabel = UILabel(
+//            frame: CGRect(
+//                x: 16, y: clearClassLabel.frame.maxY,
+//                width: frame.width - 32 - 360, height: 32
+//            )
+//        )
+        styleOverrideLabel.text = "Style overriden intensity"
         styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)
         styleOverrideLabel.adjustsFontForContentSizeCategory = true
         styleOverrideLabel.adjustsFontSizeToFitWidth = true
-        
-        styleOverrideSegment = UISegmentedControl(
-            frame: CGRect(
-                x: styleOverrideLabel.frame.maxX,
-                y: styleOverrideLabel.frame.minY,
-                width: 360, height: 32
-            )
-        )
+        styleOverrideLabel.translatesAutoresizingMaskIntoConstraints = false
+//        styleOverrideSegment = UISegmentedControl(
+//            frame: CGRect(
+//                x: styleOverrideLabel.frame.maxX,
+//                y: styleOverrideLabel.frame.minY,
+//                width: 360, height: 32
+//            )
+//        )
         StyleOverrideTypes.allCases.forEach {
             styleOverrideSegment.insertSegment(withTitle: $0.description, at: $0.rawValue, animated: false)
         }
         styleOverrideSegment.selectedSegmentIndex = self.folioReader.styleOverride.rawValue
         styleOverrideSegment.addTarget(self, action: #selector(styleOverrideSegmentValueChanged), for: .valueChanged)
-        
+        styleOverrideSegment.translatesAutoresizingMaskIntoConstraints = false
         
         menuView.addSubview(styleOverrideLabel)
         menuView.addSubview(styleOverrideSegment)
         
+        NSLayoutConstraint.activate([
+            styleOverrideLabel.topAnchor.constraint(equalTo: clearClassLabel.bottomAnchor, constant: 4),
+            styleOverrideLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            styleOverrideLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            styleOverrideLabel.heightAnchor.constraint(equalToConstant: styleOverrideLabelHeight),
+            styleOverrideSegment.topAnchor.constraint(equalTo: styleOverrideLabel.bottomAnchor, constant: 4),
+            styleOverrideSegment.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            styleOverrideSegment.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            styleOverrideSegment.heightAnchor.constraint(equalToConstant: styleOverrideSegmentHeight)
+        ])
+        
         reloadColors()
+    }
+    
+    override func layoutSubviews(frame: CGRect) {
+        
     }
     
     @objc func paragraphSwitchValueChanged(_ sender: UISwitch) {

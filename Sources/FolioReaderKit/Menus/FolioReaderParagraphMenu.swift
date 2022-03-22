@@ -8,17 +8,25 @@
 import Foundation
 
 class FolioReaderParagraphMenu: FolioReaderMenu {
+    let safeAreaHeight = CGFloat(90)    //including padding between elements
+
+    let letterSpacingSlider = HADiscreteSlider()
+    let letterSpacingSliderHeight = CGFloat(40)
     
-    var letterSpacingSlider: HADiscreteSlider!
-    var lineHeightSlider: HADiscreteSlider!
+    let lineHeightSlider = HADiscreteSlider()
+    let lineHeightSliderHeight = CGFloat(40)
     
     let textIndentValue = UILabel()
+    let textIndentHeight = CGFloat(40)
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Do any additional setup after loading the view.
-        self.view.backgroundColor = UIColor.clear
+
+        // Tap gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderParagraphMenu.tapGesture))
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
         
         let normalColor = UIColor(white: 0.5, alpha: 0.7)
         let selectedColor = self.readerConfig.tintColor
@@ -35,18 +43,9 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         let firstIndent = UIImage(readerImageNamed: "icon-first-line-indent")
         let firstIndentNormal = firstIndent?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
-        // Tap gesture
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderParagraphMenu.tapGesture))
-        tapGesture.numberOfTapsRequired = 1
-        tapGesture.delegate = self
-        view.addGestureRecognizer(tapGesture)
-        
         // Menu view
-        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 /*margin*/
-        visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
-        menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
+        let visibleHeight = letterSpacingSliderHeight + lineHeightSliderHeight + textIndentHeight + safeAreaHeight
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
-        menuView.autoresizingMask = .flexibleWidth
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
         menuView.layer.shadowOpacity = 0.3
@@ -54,15 +53,16 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         menuView.layer.shadowPath = UIBezierPath(rect: menuView.bounds).cgPath
         menuView.layer.rasterizationScale = UIScreen.main.scale
         menuView.layer.shouldRasterize = true
+        menuView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(menuView)
+        NSLayoutConstraint.activate([
+            menuView.topAnchor.constraint(equalTo: view.bottomAnchor, constant: -visibleHeight),
+            menuView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            menuView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            menuView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         
         // Letter Spacing Slider
-        letterSpacingSlider = HADiscreteSlider(
-            frame: CGRect(
-                x: 60,
-                y: 5,
-                width: view.frame.width - 120,
-                height: 40))
         letterSpacingSlider.tickStyle = ComponentStyle.rounded
         letterSpacingSlider.tickCount = 11
         letterSpacingSlider.tickSize = CGSize(width: 8, height: 8)
@@ -84,26 +84,40 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         letterSpacingSlider.layer.sublayers?.forEach({ layer in
             layer.backgroundColor = UIColor.clear.cgColor
         })
-
+        letterSpacingSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(letterSpacingSlider)
+        NSLayoutConstraint.activate([
+            letterSpacingSlider.topAnchor.constraint(equalTo: menuView.topAnchor, constant: 10),
+            letterSpacingSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+            letterSpacingSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+            letterSpacingSlider.heightAnchor.constraint(equalToConstant: letterSpacingSliderHeight)
+        ])
         
-        let charNarrowView = UIImageView(frame: CGRect(x: 20, y: letterSpacingSlider.frame.origin.y+10, width: 30, height: 30))
+        let charNarrowView = UIImageView()
         charNarrowView.image = charNarrowNormal
         charNarrowView.contentMode = UIView.ContentMode.center
+        charNarrowView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(charNarrowView)
+        NSLayoutConstraint.activate([
+            charNarrowView.centerYAnchor.constraint(equalTo: letterSpacingSlider.centerYAnchor),
+            charNarrowView.leadingAnchor.constraint(equalTo: letterSpacingSlider.leadingAnchor, constant: -40),
+            charNarrowView.widthAnchor.constraint(equalToConstant: 30),
+            charNarrowView.heightAnchor.constraint(equalToConstant: 30)
+        ])
 
-        let charWideView = UIImageView(frame: CGRect(x: view.frame.width-50, y: letterSpacingSlider.frame.origin.y+10, width: 30, height: 30))
+        let charWideView = UIImageView()
         charWideView.image = charWideNormal
         charWideView.contentMode = UIView.ContentMode.center
+        charWideView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(charWideView)
+        NSLayoutConstraint.activate([
+            charWideView.centerYAnchor.constraint(equalTo: letterSpacingSlider.centerYAnchor),
+            charWideView.leadingAnchor.constraint(equalTo: letterSpacingSlider.trailingAnchor, constant: 10),
+            charWideView.widthAnchor.constraint(equalToConstant: 30),
+            charWideView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
         // Line Spacing Slider
-        lineHeightSlider = HADiscreteSlider(
-            frame: CGRect(
-                x: 60,
-                y: letterSpacingSlider.frame.maxY+8,
-                width: view.frame.width-120,
-                height: 40))
         lineHeightSlider.tickStyle = ComponentStyle.rounded
         lineHeightSlider.tickCount = 11
         lineHeightSlider.tickSize = CGSize(width: 8, height: 8)
@@ -124,58 +138,99 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         lineHeightSlider.layer.sublayers?.forEach({ layer in
             layer.backgroundColor = UIColor.clear.cgColor
         })
-
+        lineHeightSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(lineHeightSlider)
+        NSLayoutConstraint.activate([
+            lineHeightSlider.topAnchor.constraint(equalTo: letterSpacingSlider.bottomAnchor, constant: 8),
+            lineHeightSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+            lineHeightSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+            lineHeightSlider.heightAnchor.constraint(equalToConstant: lineHeightSliderHeight)
+        ])
         
-        let lineNarrowView = UIImageView(frame: CGRect(x: 20, y: lineHeightSlider.frame.origin.y+6, width: 30, height: 30))
+        
+        let lineNarrowView = UIImageView()
         lineNarrowView.image = lineNarrowNormal
         lineNarrowView.contentMode = UIView.ContentMode.center
+        lineNarrowView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(lineNarrowView)
-
-        let lineWideView = UIImageView(frame: CGRect(x: view.frame.width-50, y: lineHeightSlider.frame.origin.y+6, width: 30, height: 30))
+        NSLayoutConstraint.activate([
+            lineNarrowView.centerYAnchor.constraint(equalTo: lineHeightSlider.centerYAnchor),
+            lineNarrowView.leadingAnchor.constraint(equalTo: lineHeightSlider.leadingAnchor, constant: -40),
+            lineNarrowView.widthAnchor.constraint(equalToConstant: 30),
+            lineNarrowView.heightAnchor.constraint(equalToConstant: 30)
+        ])
+        
+        let lineWideView = UIImageView()
         lineWideView.image = lineWideNormal
         lineWideView.contentMode = UIView.ContentMode.center
+        lineWideView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(lineWideView)
+        NSLayoutConstraint.activate([
+            lineWideView.centerYAnchor.constraint(equalTo: lineHeightSlider.centerYAnchor),
+            lineWideView.leadingAnchor.constraint(equalTo: lineHeightSlider.trailingAnchor, constant: 10),
+            lineWideView.widthAnchor.constraint(equalToConstant: 30),
+            lineWideView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
-        let textIndentLabel = UILabel(
-            frame: CGRect(
-                x: 64,
-                y: lineHeightSlider.frame.maxY + 16,
-                width: view.frame.width - 240, height: 32
-            )
-        )
-        textIndentLabel.text = "First Line Indent"
-        textIndentLabel.font = .systemFont(ofSize: 20)
-        textIndentLabel.adjustsFontForContentSizeCategory = true
-        textIndentLabel.adjustsFontSizeToFitWidth = true
-        
-        menuView.addSubview(textIndentLabel)
-        
-        let firstIndentView = UIImageView(frame: CGRect(x: 20, y: textIndentLabel.frame.origin.y+2, width: 30, height: 30))
+        let firstIndentView = UIImageView()//frame: CGRect(x: 20, y: textIndentLabel.frame.origin.y+2, width: 30, height: 30))
         firstIndentView.image = firstIndentNormal
         firstIndentView.contentMode = UIView.ContentMode.center
+        firstIndentView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(firstIndentView)
+        NSLayoutConstraint.activate([
+            firstIndentView.topAnchor.constraint(equalTo: lineHeightSlider.bottomAnchor, constant: 20),
+            firstIndentView.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 20),
+            firstIndentView.widthAnchor.constraint(equalToConstant: 30),
+            firstIndentView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
-        textIndentValue.frame = CGRect(
-            x: textIndentLabel.frame.maxX + 4,
-            y: textIndentLabel.frame.minY,
-            width: 48,
-            height: 32
-        )
+        let textIndentLabel = UILabel()
+//            frame: CGRect(
+//                x: 64,
+//                y: lineHeightSlider.frame.maxY + 16,
+//                width: frame.width - 240, height: 32
+//            )
+//        )
+        textIndentLabel.text = "First Line Indent"
+        textIndentLabel.font = segmentFont
+        textIndentLabel.adjustsFontForContentSizeCategory = true
+        textIndentLabel.adjustsFontSizeToFitWidth = true
+        textIndentLabel.translatesAutoresizingMaskIntoConstraints = false
+        menuView.addSubview(textIndentLabel)
+        NSLayoutConstraint.activate([
+            textIndentLabel.centerYAnchor.constraint(equalTo: firstIndentView.centerYAnchor),
+            textIndentLabel.leadingAnchor.constraint(equalTo: firstIndentView.trailingAnchor, constant: 20),
+            textIndentLabel.widthAnchor.constraint(equalTo: menuView.widthAnchor, constant: -240),
+            textIndentLabel.heightAnchor.constraint(equalToConstant: 32)
+        ])
+        
+        
+//        textIndentValue.frame = CGRect(
+//            x: textIndentLabel.frame.maxX + 4,
+//            y: textIndentLabel.frame.minY,
+//            width: 48,
+//            height: 32
+//        )
         textIndentValue.textAlignment = .center
         textIndentValue.text = "\(folioReader.currentTextIndent)"
-        textIndentValue.font = .systemFont(ofSize: 22)
-        
+        textIndentValue.font = segmentFont
+        textIndentValue.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(textIndentValue)
+        NSLayoutConstraint.activate([
+            textIndentValue.centerYAnchor.constraint(equalTo: textIndentLabel.centerYAnchor),
+            textIndentValue.leadingAnchor.constraint(equalTo: textIndentLabel.trailingAnchor, constant: 4),
+            textIndentValue.widthAnchor.constraint(equalToConstant: 48),
+            textIndentValue.heightAnchor.constraint(equalToConstant: 32)
+        ])
         
-        let textIndentStepper = UIStepper(
-            frame: CGRect(
-                x: textIndentValue.frame.maxX + 4,
-                y: textIndentLabel.frame.minY,
-                width: view.frame.width - textIndentValue.frame.maxX - 4 - 4,
-                height: textIndentLabel.frame.height
-            )
-        )
+        let textIndentStepper = UIStepper()
+//            frame: CGRect(
+//                x: textIndentValue.frame.maxX + 4,
+//                y: textIndentLabel.frame.minY,
+//                width: frame.width - textIndentValue.frame.maxX - 4 - 4,
+//                height: textIndentLabel.frame.height
+//            )
+//        )
         textIndentStepper.isContinuous = false
         textIndentStepper.autorepeat = false
         textIndentStepper.wraps = false
@@ -187,11 +242,28 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             self,
             action: #selector(textIndentStepperValueChanged(_:)),
             for: .valueChanged)
-        
+        textIndentStepper.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(textIndentStepper)
+        NSLayoutConstraint.activate([
+            textIndentStepper.centerYAnchor.constraint(equalTo: textIndentValue.centerYAnchor),
+            textIndentStepper.leadingAnchor.constraint(equalTo: textIndentValue.trailingAnchor, constant: 4),
+            textIndentStepper.widthAnchor.constraint(equalToConstant: 96),
+            textIndentStepper.heightAnchor.constraint(equalTo: textIndentValue.heightAnchor)
+        ])
         
         reloadColors()
     }
+    
+    override func layoutSubviews(frame: CGRect) {
+//        letterSpacingSlider.frame = CGRect(x: 60, y: 10, width: frame.width - 120, height: 40)
+        letterSpacingSlider.frame.size = CGSize(width: frame.width - 120, height: letterSpacingSliderHeight)
+        letterSpacingSlider.layoutTrack()
+        
+//        lineHeightSlider.frame = CGRect(x: 60, y: letterSpacingSlider.frame.maxY + 8, width: frame.width - 120, height: 40)
+        lineHeightSlider.frame.size = CGSize(width: frame.width - 120, height: 40)
+        lineHeightSlider.layoutTrack()
+    }
+    
     
     // MARK: - Font slider changed
     

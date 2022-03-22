@@ -9,21 +9,29 @@
 import UIKit
 
 class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerViewDelegate {
+    let safeAreaHeight = CGFloat(70)    //including padding between elements
+
+    let stylePicker = UIPickerView()
+    let stylePickerHeight = CGFloat(300)
+   
+    let styleSlider = HADiscreteSlider()
+    let styleSliderHeight = CGFloat(40)
     
-    var stylePicker: UIPickerView!
-    var styleSlider: HADiscreteSlider!
-    var weightSlider: HADiscreteSlider!
-    var stylePreview: UITextView!
-    
+    let weightSlider = HADiscreteSlider()
+    let weightSliderHeight = CGFloat(40)
+
     var fontFamilies = [FontFamilyInfo]()
     let fontSizes = ["15.5px", "17px", "18.5px", "20px", "22px", "24px", "26px", "28px", "30.5px", "33px", "35.5px"]
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        // Do any additional setup after loading the view.
-        self.view.backgroundColor = UIColor.clear
-        
+
+        // Tap gesture
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderFontsMenu.tapGesture))
+        tapGesture.numberOfTapsRequired = 1
+        tapGesture.delegate = self
+        view.addGestureRecognizer(tapGesture)
+
         let normalColor = UIColor(white: 0.5, alpha: 0.7)
         let selectedColor = self.readerConfig.tintColor
         let fontSmall = UIImage(readerImageNamed: "icon-font-small")
@@ -36,18 +44,10 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         let fontNarrowNormal = fontNarrow?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         let fontBlackNormal = fontBlack?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
-        // Tap gesture
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(FolioReaderFontsMenu.tapGesture))
-        tapGesture.numberOfTapsRequired = 1
-        tapGesture.delegate = self
-        view.addGestureRecognizer(tapGesture)
-        
         // Menu view
-        var visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 100 + 200 /*margin*/
-        visibleHeight = self.readerConfig.canChangeFontStyle ? visibleHeight : visibleHeight - 55
-        menuView = UIView(frame: CGRect(x: 0, y: view.frame.height-visibleHeight, width: view.frame.width, height: view.frame.height))
+        let visibleHeight: CGFloat = stylePickerHeight + styleSliderHeight + weightSliderHeight + safeAreaHeight
+
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
-        menuView.autoresizingMask = .flexibleWidth
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
         menuView.layer.shadowOpacity = 0.3
@@ -55,21 +55,29 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         menuView.layer.shadowPath = UIBezierPath(rect: menuView.bounds).cgPath
         menuView.layer.rasterizationScale = UIScreen.main.scale
         menuView.layer.shouldRasterize = true
+        menuView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(menuView)
+        NSLayoutConstraint.activate([
+            menuView.topAnchor.constraint(equalTo: view.bottomAnchor, constant: -visibleHeight),
+            menuView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            menuView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            menuView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         
-        stylePicker = UIPickerView(frame: CGRect(x: 0, y: 0, width: view.frame.width, height: 120 + 240))
         stylePicker.dataSource = self
         stylePicker.delegate = self
         
+        stylePicker.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(stylePicker)
+        NSLayoutConstraint.activate([
+            stylePicker.topAnchor.constraint(equalTo: menuView.topAnchor),
+            stylePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            stylePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            stylePicker.heightAnchor.constraint(equalToConstant: stylePickerHeight)
+        ])
         
-        // Separator 2
-        let lineBeforeSizeSlider = UIView(frame: CGRect(x: 0, y: stylePicker.frame.maxY, width: view.frame.width, height: 1))
-        lineBeforeSizeSlider.backgroundColor = self.readerConfig.nightModeSeparatorColor
-        menuView.addSubview(lineBeforeSizeSlider)
-
+        
         // Font size slider
-        styleSlider = HADiscreteSlider(frame: CGRect(x: 60, y: lineBeforeSizeSlider.frame.origin.y+2, width: view.frame.width-120, height: 40))
         styleSlider.tickStyle = ComponentStyle.rounded
         styleSlider.tickCount = fontSizes.count
         styleSlider.tickSize = CGSize(width: 8, height: 8)
@@ -91,36 +99,40 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
             layer.backgroundColor = UIColor.clear.cgColor
         })
 
+        styleSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(styleSlider)
+        NSLayoutConstraint.activate([
+            styleSlider.topAnchor.constraint(equalTo: stylePicker.bottomAnchor),
+            styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+            styleSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+            styleSlider.heightAnchor.constraint(equalToConstant: styleSliderHeight)
+        ])
 
         // Font icons
-        let fontSmallView = UIImageView(frame: CGRect(x: 20, y: lineBeforeSizeSlider.frame.origin.y+14, width: 30, height: 30))
+        let fontSmallView = UIImageView()//frame: CGRect(x: 20, y: lineBeforeSizeSlider.frame.origin.y+14, width: 30, height: 30))
         fontSmallView.image = fontSmallNormal
         fontSmallView.contentMode = UIView.ContentMode.center
+        fontSmallView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(fontSmallView)
+        NSLayoutConstraint.activate([
+            fontSmallView.centerYAnchor.constraint(equalTo: styleSlider.centerYAnchor),
+            fontSmallView.leadingAnchor.constraint(equalTo: styleSlider.leadingAnchor, constant: -40),
+            fontSmallView.widthAnchor.constraint(equalToConstant: 30),
+            fontSmallView.heightAnchor.constraint(equalToConstant: 30)
+        ])
 
-        let fontBigView = UIImageView(frame: CGRect(x: view.frame.width-50, y: lineBeforeSizeSlider.frame.origin.y+14, width: 30, height: 30))
+        let fontBigView = UIImageView()//frame: CGRect(x: frame.width-50, y: lineBeforeSizeSlider.frame.origin.y+14, width: 30, height: 30))
         fontBigView.image = fontBigNormal
         fontBigView.contentMode = UIView.ContentMode.center
+        fontBigView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(fontBigView)
+        NSLayoutConstraint.activate([
+            fontBigView.centerYAnchor.constraint(equalTo: styleSlider.centerYAnchor),
+            fontBigView.leadingAnchor.constraint(equalTo: styleSlider.trailingAnchor, constant: 10),
+            fontBigView.widthAnchor.constraint(equalToConstant: 30),
+            fontBigView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
-        // Separator 3
-        let lineBeforeWeightSlider = UIView(
-            frame: CGRect(
-                x: 0,
-                y: styleSlider.frame.maxY,
-                width: view.frame.width,
-                height: 1))
-        lineBeforeWeightSlider.backgroundColor = self.readerConfig.nightModeSeparatorColor
-        menuView.addSubview(lineBeforeWeightSlider)
-
-        // Weeight slider
-        weightSlider = HADiscreteSlider(
-            frame: CGRect(
-                x: 60,
-                y: lineBeforeWeightSlider.frame.origin.y+2,
-                width: view.frame.width-120,
-                height: 40))
         weightSlider.tickStyle = ComponentStyle.rounded
         weightSlider.tickCount = 9
         weightSlider.tickSize = CGSize(width: 8, height: 8)
@@ -141,33 +153,39 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         weightSlider.layer.sublayers?.forEach({ layer in
             layer.backgroundColor = UIColor.clear.cgColor
         })
-
+        weightSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(weightSlider)
+        NSLayoutConstraint.activate([
+            weightSlider.topAnchor.constraint(equalTo: styleSlider.bottomAnchor, constant: 4),
+            weightSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+            weightSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+            weightSlider.heightAnchor.constraint(equalToConstant: weightSliderHeight)
+        ])
 
-        let fontNarrowView = UIImageView(frame: CGRect(x: 20, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
+        let fontNarrowView = UIImageView()//frame: CGRect(x: 20, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
         fontNarrowView.image = fontNarrowNormal
         fontNarrowView.contentMode = UIView.ContentMode.center
+        fontNarrowView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(fontNarrowView)
+        NSLayoutConstraint.activate([
+            fontNarrowView.centerYAnchor.constraint(equalTo: weightSlider.centerYAnchor),
+            fontNarrowView.leadingAnchor.constraint(equalTo: weightSlider.leadingAnchor, constant: -40),
+            fontNarrowView.widthAnchor.constraint(equalToConstant: 30),
+            fontNarrowView.heightAnchor.constraint(equalToConstant: 30)
+        ])
 
-        let fontBlackView = UIImageView(frame: CGRect(x: view.frame.width-50, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
+        let fontBlackView = UIImageView()//frame: CGRect(x: frame.width-50, y: lineBeforeWeightSlider.frame.origin.y+14, width: 30, height: 30))
         fontBlackView.image = fontBlackNormal
         fontBlackView.contentMode = UIView.ContentMode.center
+        fontBlackView.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(fontBlackView)
+        NSLayoutConstraint.activate([
+            fontBlackView.centerYAnchor.constraint(equalTo: weightSlider.centerYAnchor),
+            fontBlackView.leadingAnchor.constraint(equalTo: weightSlider.trailingAnchor, constant: 10),
+            fontBlackView.widthAnchor.constraint(equalToConstant: 30),
+            fontBlackView.heightAnchor.constraint(equalToConstant: 30)
+        ])
         
-        // Font Preview
-        stylePreview = UITextView(
-            frame: CGRect(
-                x: 0,
-                y: weightSlider.frame.maxY + 5,
-                width: view.frame.width,
-                height: 60))
-        stylePreview.text = "Yet Another eBook Reader"
-        stylePreview.font = UIFont(
-            name: self.folioReader.currentFont,
-            size: CGFloat(self.folioReader.currentFontSizeOnly)
-        )
-        
-        // menuView.addSubview(stylePreview)
         fontFamilies.append(
             contentsOf:
                 UIFont.familyNames.compactMap { familyName -> FontFamilyInfo? in
@@ -185,14 +203,24 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         if let fontRow = fontFamilies.firstIndex(where: { $0.familyName == self.folioReader.currentFont }) {
             stylePicker.selectRow(fontRow, inComponent: 0, animated: false)
         }
+    }
+    
+    override func layoutSubviews(frame: CGRect) {
+        //stylePicker.frame = CGRect(x: 0, y: 0, width: frame.width, height: stylePickerHeight)
+        //lineBeforeSizeSlider.frame = CGRect(x: 0, y: stylePicker.frame.maxY, width: frame.width, height: 1)
+        styleSlider.frame = CGRect(x: 60, y: stylePicker.frame.maxY, width: frame.width-120, height: styleSliderHeight)
+        styleSlider.layoutTrack()
+        styleSlider.layoutThumb()
         
-        reloadColors()
+        weightSlider.frame = CGRect(x: 60, y: styleSlider.frame.maxY + 4, width: frame.width-120, height: weightSliderHeight)
+        weightSlider.layoutTrack()
+        weightSlider.layoutThumb()
     }
     
     override func reloadColors() {
         super.reloadColors()
 
-        stylePicker?.reloadAllComponents()
+        stylePicker.reloadAllComponents()
     }
     
     // MARK: - Picker
@@ -221,29 +249,16 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         self.folioReader.currentFont = fontFamilies[row].familyName
-        
-        stylePreview.font = UIFont(
-            name: self.folioReader.currentFont,
-            size: CGFloat(self.folioReader.currentFontSizeOnly)
-        )
     }
     
     // MARK: - Font slider changed
     
     @objc func styleSliderValueChanged(_ sender: HADiscreteSlider) {
         self.folioReader.currentFontSize = fontSizes[Int(sender.value)]
-        stylePreview.font = UIFont(
-            name: self.folioReader.currentFont,
-            size: CGFloat(self.folioReader.currentFontSizeOnly)
-        )
     }
     
     @objc func weightSliderValueChanged(_ sender: HADiscreteSlider) {
         self.folioReader.currentFontWeight = ((Int(sender.value) + 1) * 100).description
-        stylePreview.font = UIFont(
-            name: self.folioReader.currentFont,
-            size: CGFloat(self.folioReader.currentFontSizeOnly)
-        )
     }
 
     // MARK: - Gestures
