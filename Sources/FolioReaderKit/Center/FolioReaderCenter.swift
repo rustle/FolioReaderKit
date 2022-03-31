@@ -34,6 +34,7 @@ open class FolioReaderCenter: UIViewController {
     var pages: [String]!
     var totalPages: Int = 0
     var tempFragment: String?
+    var tempOffset: CGPoint?
     var animator: ZFModalTransitionAnimator!
     var pageIndicatorView: FolioReaderPageIndicator?
     var pageIndicatorHeight: CGFloat = 20
@@ -68,6 +69,7 @@ open class FolioReaderCenter: UIViewController {
     var tempReference: FRTocReference?
     var isFirstLoad = true
     var currentWebViewScrollPositions = [Int: CGPoint]()
+    var navigateWebViewScrollPositions = Array<(Int, CGPoint)>()
 
     var tempCollectionViewInset: CGFloat = 0.0
     
@@ -533,8 +535,14 @@ open class FolioReaderCenter: UIViewController {
         }
     }
     
-    @objc func decreaseCollectionViewSize(_ sender: UIBarButtonItem) {
-        tempCollectionViewInset += 50.0
-        updateSubviewFrames()
+    @objc func logoButtonAction(_ sender: UIBarButtonItem) {
+        print("\(#function) \(self.navigateWebViewScrollPositions)")
+        
+        guard let position = self.navigateWebViewScrollPositions.popLast() else { return }
+        if position.0 == currentPageNumber {
+            self.currentPage?.webView?.scrollView.setContentOffset(position.1, animated: true)
+        } else {
+            self.changePageWith(page: position.0)     //depends on `currentWebViewScrollPositions` to in page reposition
+        }
     }
 }

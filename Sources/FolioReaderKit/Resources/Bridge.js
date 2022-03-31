@@ -738,6 +738,62 @@ var getAnchorOffset = function(target, horizontal) {
     return elem.offsetTop;
 }
 
+var getClickAnchorOffset = function(target) {
+    var elems = document.getElementsByTagName("a");
+    
+    var elem;
+    for (var i=0; i<elems.length; i++) {
+        var rect = elems[i].getBoundingClientRect();
+        var visible = (rect.top >= 0 && rect.left >= 0 &&
+            rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /* or $(window).height() */
+            rect.right <= (window.innerWidth || document.documentElement.clientWidth) /* or $(window).width() */);
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getClickAnchorOffset for " + elems[i].innerText + " " + rect);
+
+        if (!visible) {
+            continue
+        }
+        var href = elems[i].getAttribute("href");
+        if (href && href.endsWith("#" + target)) {
+            return rect.top;
+        }
+    }
+    
+    return ""
+}
+
+function highlightAnchorText(target, highlightStyle, seconds) {
+    var elem = document.getElementById(target);
+    
+    if (!elem) {
+        elem = document.getElementsByName(target)[0];
+    }
+    
+    while ( elem && elem.innerText.length == 0) {
+        elem = elem.parentNode
+    }
+    
+    if (!elem) {
+        return
+    }
+    
+    addClass(elem, highlightStyle)
+    var t = setTimeout(function(){
+        removeClass(elem, highlightStyle)
+    },(seconds*1000));
+//    var origcolor = elem.style.backgroundColor
+//    elem.style.backgroundColor = color;
+//    var t = setTimeout(function(){
+//        elem.style.backgroundColor = origcolor;
+//    },(seconds*1000));
+    
+//    var rule = "p { background-color: "+color+" !important; }"
+//    var stylesheet = document.styleSheets[document.styleSheets.length-1];
+//    stylesheet.insertRule(rule)
+    
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightAnchorText finished for " + elem.tagName + " " + elem.className);
+
+}
+
 function findElementWithID(node) {
     if( !node || node.tagName == "BODY")
         return null
@@ -1213,11 +1269,11 @@ function setFolioStyle(styleTextEncoded) {
     }
     style.appendChild(document.createTextNode(styleText))
     
-    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + style.outerHTML)
+//    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle " + style.outerHTML)
 
     var para = document.querySelector('p')
     var compStyles = window.getComputedStyle(para)
-    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle compStyles p " + compStyles.cssText)
+//    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle compStyles p " + compStyles.cssText)
 }
 
 //function injectHighlight() {    //sample data
@@ -1253,7 +1309,7 @@ function setFolioStyle(styleTextEncoded) {
 //}
                                                                 
                                                                 
-window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML() + "\n" + "---------------------------------------\n")
+//window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML() + "\n" + "---------------------------------------\n")
 
 //removeOuterTable()
 //

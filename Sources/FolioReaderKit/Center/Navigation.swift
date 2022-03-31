@@ -9,7 +9,7 @@
 import Foundation
 
 extension FolioReaderCenter {
-    func updateCurrentPage(_ page: FolioReaderPage? = nil, completion: (() -> Void)? = nil) {
+    func updateCurrentPage(_ page: FolioReaderPage? = nil, navigating to: IndexPath? = nil, completion: (() -> Void)? = nil) {
         if readerConfig.debug.contains(.functionTrace) {
             folioLogger("ENTER");
             Thread.callStackSymbols.forEach{print($0)}
@@ -20,7 +20,11 @@ extension FolioReaderCenter {
             self.previousPageNumber = page.pageNumber-1
             self.currentPageNumber = page.pageNumber
         } else {
-            let currentIndexPath = getCurrentIndexPath()
+            let currentIndexPath = getCurrentIndexPath(navigating: to)
+            if let to = to, currentIndexPath != to {
+                folioLogger("MISS MATCHING INDEX to=\(to) vs current=\(currentIndexPath)")
+                return
+            }
             currentPage = collectionView.cellForItem(at: currentIndexPath) as? FolioReaderPage
 
             self.previousPageNumber = currentIndexPath.row
@@ -71,10 +75,15 @@ extension FolioReaderCenter {
         return page
     }
 
-    func getCurrentIndexPath() -> IndexPath {
+    func getCurrentIndexPath(navigating to: IndexPath?) -> IndexPath {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         let indexPaths = collectionView.indexPathsForVisibleItems
+        folioLogger("\(indexPaths)")
+
+        if let to = to, indexPaths.contains(to) {
+            return to
+        }
         var indexPath = IndexPath()
 
         if indexPaths.count > 1 {
@@ -117,15 +126,13 @@ extension FolioReaderCenter {
 
         if (self.currentPageNumber == page) {
             if let currentPage = currentPage , fragment != "" {
-                currentPage.handleAnchor(fragment, avoidBeginningAnchors: true, animated: animated)
+                currentPage.handleAnchor(fragment, offsetInWindow: 0, avoidBeginningAnchors: true, animated: animated)
             }
             completion?()
         } else {
             tempFragment = fragment
             changePageWith(page: page, animated: animated, completion: { () -> Void in
-                self.updateCurrentPage {
-                    completion?()
-                }
+                completion?()
             })
         }
     }
@@ -136,7 +143,7 @@ extension FolioReaderCenter {
         let item = findPageByHref(href)
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: animated, completion: { () -> Void in
-            self.updateCurrentPage {
+            self.updateCurrentPage(navigating: indexPath) {
                 completion?()
             }
         })
@@ -153,7 +160,7 @@ extension FolioReaderCenter {
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: true) { () -> Void in
             if pageUpdateNeeded {
-                self.updateCurrentPage {
+                self.updateCurrentPage(navigating: indexPath) {
                     currentPage.audioMarkID(markID)
                 }
             } else {
@@ -171,18 +178,40 @@ extension FolioReaderCenter {
             return
         }
         
-        // MARK: TEMPFIX first time scrolling will fail mystically
-        UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
-            self.collectionView.scrollToItem(at: indexPath, at: .direction(withConfiguration: self.readerConfig), animated: false)
-        }) { (finished: Bool) -> Void in
-            UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
-                let frameForPage = self.frameForPage(indexPath.row + 1)
-                print("changePageWith frameForPage origin=\(frameForPage.origin)")
-                self.collectionView.setContentOffset(frameForPage.origin, animated: false)
-            }) { (finished: Bool) -> Void in
-                completion?()
+        folioLogger("\(indexPath)")
+        //self.collectionView.scrollToItem(at: indexPath, at: .direction(withConfiguration: self.readerConfig), animated: false)
+        let frameForPage = self.frameForPage(indexPath.row + 1)
+        print("changePageWith frameForPage origin=\(frameForPage.origin)")
+        self.collectionView.setContentOffset(frameForPage.origin, animated: false)
+        self.collectionViewLayout.invalidateLayout()
+        self.collectionView.layoutIfNeeded()
+        
+        delay(0.1) {
+            let indexPaths = self.collectionView.indexPathsForVisibleItems
+            if indexPaths.contains(indexPath) {
+                delay(0.2) {
+                    if let page = self.collectionView.cellForItem(at: indexPath) as? FolioReaderPage {
+                        page.delegate?.pageDidLoad?(page)
+                    }
+                    completion?()
+                }
+            } else {
+                self.changePageWith(indexPath: indexPath, animated: animated, completion: completion)
             }
         }
+        
+//        // MARK: TEMPFIX first time scrolling will fail mystically
+//        UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
+//            self.collectionView.scrollToItem(at: indexPath, at: .direction(withConfiguration: self.readerConfig), animated: false)
+//        }) { (finished: Bool) -> Void in
+//            UIView.animate(withDuration: animated ? 1.0 : 0.5, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
+//                let frameForPage = self.frameForPage(indexPath.row + 1)
+//                print("changePageWith frameForPage origin=\(frameForPage.origin)")
+//                self.collectionView.setContentOffset(frameForPage.origin, animated: false)
+//            }) { (finished: Bool) -> Void in
+//                completion?()
+//            }
+//        }
     }
     
     open func changePageWith(href: String, pageItem: Int, animated: Bool = false, completion: (() -> Void)? = nil) {
@@ -215,7 +244,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
             let contentOffset = cell.webView?.scrollView.contentOffset,
             let contentOffsetXLimit = cell.webView?.scrollView.contentSize.width else {
                 completion?()
@@ -292,7 +321,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
             let contentOffset = cell.webView?.scrollView.contentOffset else {
                 completion?()
                 return
@@ -316,7 +345,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
             let contentSize = cell.webView?.scrollView.contentSize else {
                 completion?()
                 return
@@ -344,7 +373,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
             let contentSize = cell.webView?.scrollView.contentSize else {
                 delegate?.pageItemChanged?(getCurrentPageItemNumber())
                 completion?()
@@ -508,7 +537,7 @@ extension FolioReaderCenter {
         if page > 0 && page-1 < totalPages {
             let indexPath = IndexPath(row: page-1, section: 0)
             changePageWith(indexPath: indexPath, animated: animated, completion: { () -> Void in
-                self.updateCurrentPage {
+                self.updateCurrentPage(navigating: indexPath) {
                     completion?()
                 }
             })

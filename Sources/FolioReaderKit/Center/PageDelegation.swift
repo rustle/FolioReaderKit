@@ -13,7 +13,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
     public func pageDidLoad(_ page: FolioReaderPage) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        guard getCurrentIndexPath().row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
+        guard getCurrentIndexPath(navigating: nil).row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
         
         if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
 //        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
@@ -48,13 +48,13 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
-            currentPage.handleAnchor(fragmentID, avoidBeginningAnchors: true, animated: true)
+            currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
             tempFragment = nil
-        }
-        
-        if (readerConfig.scrollDirection == .horizontalWithVerticalContent),
-            let offsetPoint = self.currentWebViewScrollPositions[page.pageNumber - 1] {
-            page.webView?.scrollView.setContentOffset(offsetPoint, animated: false)
+        } else {
+            if /*(readerConfig.scrollDirection == .horizontalWithVerticalContent),*/
+                let offsetPoint = self.currentWebViewScrollPositions[page.pageNumber - 1] {
+                page.webView?.scrollView.setContentOffset(offsetPoint, animated: false)
+            }
         }
         
         // Pass the event to the centers `pageDelegate`

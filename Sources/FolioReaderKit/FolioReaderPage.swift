@@ -261,9 +261,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
     
     func loadFileURLOnceOnly(_ URL: URL, allowingReadAccessTo readAccessURL: URL) {
-        if fileURLLoaded {
-            return
-        }
+//        if fileURLLoaded {
+//            return
+//        }
         
         if (webView?.loadFileURL(URL, allowingReadAccessTo: readAccessURL)) != nil {
             fileURLLoaded = true
@@ -327,6 +327,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     private func handlePolicy(for navigationAction: WKNavigationAction) -> Bool {
         let request = navigationAction.request
+        
         guard
             let webView = webView as? FolioReaderWebView,
             let scheme = request.url?.scheme else {
@@ -357,7 +358,13 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
             return false
         } else if scheme == "file" {
-
+            
+            if navigationAction.navigationType == .linkActivated,
+                let currentPageNumber = self.pageNumber,
+                let currentOffset = self.webView?.scrollView.contentOffset {
+                self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+            }
+            
             let anchorFromURL = url.fragment
 
             // Handle internal url
@@ -381,18 +388,30 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 if (hrefPage == pageNumber) {
                     // Handle internal #anchor
                     if anchorFromURL != nil {
-                        handleAnchor(anchorFromURL!, avoidBeginningAnchors: false, animated: true)
+                        handleAnchor(anchorFromURL!, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true)
                         return false
                     }
                 } else {
-                    self.folioReader.readerCenter?.changePageWith(href: href, animated: true)
+//                    self.folioReader.readerCenter?.tempFragment = anchorFromURL
+                    self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: hrefPage - 1)
+                    self.webView?.js("getClickAnchorOffset('\(anchorFromURL ?? "")')") { offset in
+                        print("getClickAnchorOffset offset=\(offset ?? "0")")
+                        self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
+                            if anchorFromURL != nil {
+                                delay(0.4) {
+                                    self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL!, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
+                                }
+                            }
+                        }
+                    }
+                    
                 }
                 return false
             }
 
             // Handle internal #anchor
             if anchorFromURL != nil {
-                handleAnchor(anchorFromURL!, avoidBeginningAnchors: false, animated: true)
+                handleAnchor(anchorFromURL!, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true)
                 return false
             }
 
@@ -471,10 +490,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
             
             self.webView?.js(preprocessor) {_ in
-                delay(1.0) {
-                    self.injectHighlights()
-
+                delay(0.1) {
                     self.delegate?.pageDidLoad?(self)
+                }
+                delay(0.5) {
+                    self.injectHighlights()
                 }
             }
         } else if self.readerConfig.debug.contains(.htmlStyling) {
@@ -578,21 +598,29 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
      - parameter avoidBeginningAnchors: Sometimes the anchor is on the beggining of the text, there is not need to scroll
      - parameter animated:              Enable or not scrolling animation
      */
-    open func handleAnchor(_ anchor: String,  avoidBeginningAnchors: Bool, animated: Bool) {
+    open func handleAnchor(_ anchor: String, offsetInWindow: CGFloat, avoidBeginningAnchors: Bool, animated: Bool) {
         if !anchor.isEmpty {
             getAnchorOffset(anchor) { offset in
                 switch self.readerConfig.scrollDirection {
-                case .vertical, .defaultVertical:
+                case .vertical, .defaultVertical, .horizontalWithVerticalContent:
                     let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
                     
+                    let voffset = offset > offsetInWindow ?
+                        offset - offsetInWindow : offset
+                    
+                    
                     if !avoidBeginningAnchors {
-                        self.scrollPageToOffset(offset, animated: animated)
+                        self.scrollPageToOffset(voffset, animated: animated)
                     } else if avoidBeginningAnchors && !isBeginning {
-                        self.scrollPageToOffset(offset, animated: animated)
+                        self.scrollPageToOffset(voffset, animated: animated)
                     }
-                case .horizontal, .horizontalWithVerticalContent:
+                case .horizontal:
                     self.scrollPageToOffset(offset, animated: animated)
                 }
+                
+                self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: self.pageNumber - 1)
+
+                self.webView?.js("highlightAnchorText('\(anchor)', 'highlight-yellow', 3)")
             }
         }
     }
@@ -607,7 +635,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
      */
     func getAnchorOffset(_ anchor: String, completion: @escaping ((CGFloat) -> ())) {
         let horizontal = self.readerConfig.scrollDirection == .horizontal
-        webView?.js("getAnchorOffset('\(anchor)', \(horizontal.description))") { strOffset in
+        self.webView?.js("getAnchorOffset(\"\(anchor)\", \(horizontal.description))") { strOffset in
             guard let strOffset = strOffset else {
                 completion(CGFloat(0))
                 return

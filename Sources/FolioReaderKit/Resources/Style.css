@@ -269,10 +269,10 @@ html.serpiaMode, html.serpiaMode body {
     color: #5F4B32 !important;
 }
 
-html.serpiaMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
-html.serpiaMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
-html.serpiaMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
-html.serpiaMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
+html.serpiaMode .highlight-yellow {background:rgba(255, 235, 107, 0.9) !important;}
+html.serpiaMode .highlight-green {background:rgba(192, 237, 114, 0.9) !important;}
+html.serpiaMode .highlight-blue {background:rgba(173, 216, 255, 0.9) !important;}
+html.serpiaMode .highlight-pink {background:rgba(255, 176, 202, 0.9) !important;}
 html.serpiaMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
 
 html.greenMode, html.greenMode body {
@@ -288,10 +288,10 @@ html.greenMode, html.greenMode body {
     color: #37453F !important;
 }
 
-html.greenMode .highlight-yellow {background:rgba(255, 235, 107, 0.9)}
-html.greenMode .highlight-green {background:rgba(192, 237, 114, 0.9)}
-html.greenMode .highlight-blue {background:rgba(173, 216, 255, 0.9)}
-html.greenMode .highlight-pink {background:rgba(255, 176, 202, 0.9)}
+html.greenMode .highlight-yellow {background:rgba(255, 235, 107, 0.9) !important;}
+html.greenMode .highlight-green {background:rgba(192, 237, 114, 0.9) !important;}
+html.greenMode .highlight-blue {background:rgba(173, 216, 255, 0.9) !important;}
+html.greenMode .highlight-pink {background:rgba(255, 176, 202, 0.9) !important;}
 html.greenMode .highlight-underline {border-bottom: 2px solid rgba(240, 40, 20, 0.6)}
 
 

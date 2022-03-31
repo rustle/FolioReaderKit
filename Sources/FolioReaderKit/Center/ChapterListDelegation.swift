@@ -18,7 +18,7 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
         if item < totalPages {
             let indexPath = IndexPath(row: item, section: 0)
             changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
-                self.updateCurrentPage()
+                self.updateCurrentPage(navigating: indexPath)
             })
             tempReference = reference
         } else {
@@ -35,7 +35,7 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
         // Move to #fragment
         if let reference = tempReference {
             if let fragmentID = reference.fragmentID, let currentPage = currentPage , fragmentID != "" {
-                currentPage.handleAnchor(reference.fragmentID!, avoidBeginningAnchors: true, animated: true)
+                currentPage.handleAnchor(reference.fragmentID!, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
             }
             tempReference = nil
         }
