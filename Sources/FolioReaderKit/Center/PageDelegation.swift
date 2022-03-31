@@ -17,8 +17,6 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         guard indexPath.row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
         
         if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
-//        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
-//            folioReader.savedPositionForCurrentBook = position
             let pageNumber = position["pageNumber"] as? Int
             let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
             let pageOffset = offset
@@ -29,10 +27,12 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
 
                 if (self.currentPageNumber == pageNumber && pageOffset > 0) {
                     page.scrollPageToOffset(pageOffset!, animated: false)
+                    self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
                 }
                 
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
                 page.scrollPageToBottom()
+                self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
             }
         } else if isFirstLoad {
             updateCurrentPage(page)
@@ -51,11 +51,8 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
             currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
             tempFragment = nil
-        } else {
-            if /*(readerConfig.scrollDirection == .horizontalWithVerticalContent),*/
-                let offsetPoint = self.currentWebViewScrollPositions[page.pageNumber - 1] {
-                page.webView?.scrollView.setContentOffset(offsetPoint, animated: false)
-            }
+        } else if let offsetPoint = self.currentWebViewScrollPositions[page.pageNumber - 1] {
+            page.webView?.scrollView.setContentOffset(offsetPoint, animated: false)
         }
         
         // Pass the event to the centers `pageDelegate`

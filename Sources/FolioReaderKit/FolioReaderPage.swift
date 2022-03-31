@@ -488,7 +488,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
         
         self.webView?.js(preprocessor) {_ in
-            delay(0.1) {
+            delay(0.2) {
                 self.delegate?.pageDidLoad?(self, navigating: nil)
             }
             delay(0.5) {
