@@ -190,8 +190,8 @@ extension FolioReaderCenter {
             let indexPaths = self.collectionView.indexPathsForVisibleItems
             if indexPaths.contains(indexPath) {
                 delay(0.2) {
-                    if let page = self.collectionView.cellForItem(at: indexPath) as? FolioReaderPage {
-                        page.delegate?.pageDidLoad?(page)
+                    if let page = self.collectionView.cellForItem(at: indexPath) as? FolioReaderPage, page.isHidden {
+                        page.delegate?.pageDidLoad?(page, navigating: indexPath)
                     }
                     completion?()
                 }

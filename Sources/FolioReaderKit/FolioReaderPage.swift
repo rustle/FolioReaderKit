@@ -27,7 +27,7 @@ import WebKit
 
      - parameter page: The loaded page
      */
-    @objc optional func pageDidLoad(_ page: FolioReaderPage)
+    @objc optional func pageDidLoad(_ page: FolioReaderPage, navigating to: IndexPath?)
     
     /**
      Notifies that page receive tap gesture.
@@ -259,16 +259,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //        result = webView?.js("getHTML()")
 //        Logger().info("getHTML: \(result ?? "empty")")
     }
-    
-    func loadFileURLOnceOnly(_ URL: URL, allowingReadAccessTo readAccessURL: URL) {
-//        if fileURLLoaded {
-//            return
-//        }
-        
-        if (webView?.loadFileURL(URL, allowingReadAccessTo: readAccessURL)) != nil {
-            fileURLLoaded = true
-        }
-    }
 
     // MARK: - WKNavigation Delegate
 
@@ -480,25 +470,30 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
-            var preprocessor = ""
-            if folioReader.doClearClass {
-                preprocessor.append("removeBodyClass();tweakStyleOnly();")
-            }
-            if folioReader.doWrapPara {
-                preprocessor.append("reParagraph();removePSpace();")
-            }
-            preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
-            
-            self.webView?.js(preprocessor) {_ in
-                delay(0.1) {
-                    self.delegate?.pageDidLoad?(self)
-                }
-                delay(0.5) {
-                    self.injectHighlights()
-                }
-            }
+            bridgeFinished()
         } else if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
+        }
+    }
+    
+    func bridgeFinished() {
+        print("\(#function) \(String(describing: pageNumber))")
+        var preprocessor = ""
+        if folioReader.doClearClass {
+            preprocessor.append("removeBodyClass();tweakStyleOnly();")
+        }
+        if folioReader.doWrapPara {
+            preprocessor.append("reParagraph();removePSpace();")
+        }
+        preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
+        
+        self.webView?.js(preprocessor) {_ in
+            delay(0.1) {
+                self.delegate?.pageDidLoad?(self, navigating: nil)
+            }
+            delay(0.5) {
+                self.injectHighlights()
+            }
         }
     }
     

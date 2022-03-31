@@ -10,10 +10,11 @@ import Foundation
 
 extension FolioReaderCenter: FolioReaderPageDelegate {
 
-    public func pageDidLoad(_ page: FolioReaderPage) {
+    public func pageDidLoad(_ page: FolioReaderPage, navigating to: IndexPath?) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        guard getCurrentIndexPath(navigating: nil).row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
+        let indexPath = getCurrentIndexPath(navigating: to)
+        guard indexPath.row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
         
         if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
 //        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
@@ -58,7 +59,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         }
         
         // Pass the event to the centers `pageDelegate`
-        pageDelegate?.pageDidLoad?(page)
+        pageDelegate?.pageDidLoad?(page, navigating: to)
     }
     
     public func pageWillLoad(_ page: FolioReaderPage) {

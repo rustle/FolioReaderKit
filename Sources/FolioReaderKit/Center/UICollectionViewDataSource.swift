@@ -101,10 +101,9 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         }
         
         if let resourceBasePath = self.book.smils.basePath {
-            
             let contentURL = URL(fileURLWithPath: resource.fullHref)
-            print("CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
-            cell.loadFileURLOnceOnly(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
+            print("\(#function) CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
+            cell.webView?.loadFileURL(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
         }
         
         cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
