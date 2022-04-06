@@ -107,17 +107,14 @@ extension FolioReaderCenter {
         let closeIcon = UIImage(readerImageNamed: "icon-navbar-close")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let tocIcon = UIImage(readerImageNamed: "icon-navbar-toc")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let fontIcon = UIImage(readerImageNamed: "icon-navbar-font")?.ignoreSystemTint(withConfiguration: self.readerConfig)
-        let logoIcon = UIImage(readerImageNamed: "icon-logo")?.ignoreSystemTint(withConfiguration: self.readerConfig)
+        let logoIcon = UIImage(readerImageNamed: "icon-button-back")?.ignoreSystemTint(withConfiguration: self.readerConfig)
         let space = 70 as CGFloat
 
         let menu = UIBarButtonItem(image: closeIcon, style: .plain, target: self, action:#selector(closeReader(_:)))
         let toc = UIBarButtonItem(image: tocIcon, style: .plain, target: self, action:#selector(presentChapterList(_:)))
         let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(logoButtonAction(_:)))
 
-        navigationItem.leftBarButtonItems = [menu, toc]
-        #if DEBUG
-        navigationItem.leftBarButtonItems?.append(lrp)
-        #endif
+        navigationItem.leftBarButtonItems = [menu, toc, lrp]
 
         var rightBarIcons = [UIBarButtonItem]()
 

@@ -45,8 +45,11 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         let fontBlackNormal = fontBlack?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
         // Menu view
-        let visibleHeight: CGFloat = stylePickerHeight + styleSliderHeight + weightSliderHeight + safeAreaHeight
-
+        let menuHeight: CGFloat = stylePickerHeight + styleSliderHeight + weightSliderHeight + 8
+        let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
+        let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
+        
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)

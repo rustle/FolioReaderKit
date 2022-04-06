@@ -42,19 +42,19 @@ extension FolioReaderCenter {
         menuTabs.removeAll()
         // Menus
         let menuPageTab = FolioReaderPageMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuPageTab.tabBarItem = .init(title: "Page", image: nil, tag: 0)
+        menuPageTab.tabBarItem = .init(title: "Page", image: UIImage(readerImageNamed: "icon-menu-page"), tag: 0)
         menuTabs.append(menuPageTab)
         
         let menuFontStyleTab = FolioReaderFontsMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuFontStyleTab.tabBarItem = .init(title: "Font", image: nil, tag: 1)
+        menuFontStyleTab.tabBarItem = .init(title: "Font", image: UIImage(readerImageNamed: "icon-menu-font"), tag: 1)
         menuTabs.append(menuFontStyleTab)
 
         let menuParagraphTab = FolioReaderParagraphMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: nil, tag: 2)
+        menuParagraphTab.tabBarItem = .init(title: "Paragraph", image: UIImage(readerImageNamed: "icon-menu-para"), tag: 2)
         menuTabs.append(menuParagraphTab)
 
         let menuAdvancedTab = FolioReaderAdvancedMenu(folioReader: folioReader, readerConfig: readerConfig)
-        menuAdvancedTab.tabBarItem = .init(title: "Advanced", image: nil, tag: 3)
+        menuAdvancedTab.tabBarItem = .init(title: "Advanced", image: UIImage(readerImageNamed: "icon-menu-adv"), tag: 3)
         menuTabs.append(menuAdvancedTab)
         
         menuBarController.setViewControllers(menuTabs, animated: true)

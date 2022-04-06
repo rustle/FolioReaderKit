@@ -38,7 +38,10 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
         
-        let visibleHeight = noticeLabelHeight + wrapParaLabelHeight + clearClassLabelHeight + styleOverrideLabelHeight + styleOverrideSegmentHeight + safeAreaHeight
+        let menuHeight: CGFloat = noticeLabelHeight + wrapParaLabelHeight + clearClassLabelHeight + styleOverrideLabelHeight + styleOverrideSegmentHeight + 8 + 4 + 4 + 4 + 8 + 8
+        let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
+        let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
         
          // Menu view
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]

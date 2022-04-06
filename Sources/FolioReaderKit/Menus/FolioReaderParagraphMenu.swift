@@ -12,12 +12,15 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
 
     let letterSpacingSlider = HADiscreteSlider()
     let letterSpacingSliderHeight = CGFloat(40)
+    let letterSpacingTopPadding = CGFloat(10)
     
     let lineHeightSlider = HADiscreteSlider()
     let lineHeightSliderHeight = CGFloat(40)
+    let lineHeightSliderTopPadding = CGFloat(8)
     
     let textIndentValue = UILabel()
-    let textIndentHeight = CGFloat(40)
+    let textIndentHeight = CGFloat(32)
+    let textIndentTopPadding = CGFloat(24)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -44,7 +47,11 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         let firstIndentNormal = firstIndent?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         
         // Menu view
-        let visibleHeight = letterSpacingSliderHeight + lineHeightSliderHeight + textIndentHeight + safeAreaHeight
+        let menuHeight = letterSpacingSliderHeight + lineHeightSliderHeight + textIndentHeight + letterSpacingTopPadding + lineHeightSliderTopPadding + textIndentTopPadding + 8
+        let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
+        let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
+        
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         menuView.layer.shadowColor = UIColor.black.cgColor
         menuView.layer.shadowOffset = CGSize(width: 0, height: 0)
@@ -87,7 +94,7 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         letterSpacingSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(letterSpacingSlider)
         NSLayoutConstraint.activate([
-            letterSpacingSlider.topAnchor.constraint(equalTo: menuView.topAnchor, constant: 10),
+            letterSpacingSlider.topAnchor.constraint(equalTo: menuView.topAnchor, constant: letterSpacingTopPadding),
             letterSpacingSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
             letterSpacingSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
             letterSpacingSlider.heightAnchor.constraint(equalToConstant: letterSpacingSliderHeight)
@@ -141,7 +148,7 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         lineHeightSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(lineHeightSlider)
         NSLayoutConstraint.activate([
-            lineHeightSlider.topAnchor.constraint(equalTo: letterSpacingSlider.bottomAnchor, constant: 8),
+            lineHeightSlider.topAnchor.constraint(equalTo: letterSpacingSlider.bottomAnchor, constant: lineHeightSliderTopPadding),
             lineHeightSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
             lineHeightSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
             lineHeightSlider.heightAnchor.constraint(equalToConstant: lineHeightSliderHeight)
@@ -201,7 +208,7 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             textIndentLabel.centerYAnchor.constraint(equalTo: firstIndentView.centerYAnchor),
             textIndentLabel.leadingAnchor.constraint(equalTo: firstIndentView.trailingAnchor, constant: 20),
             textIndentLabel.widthAnchor.constraint(equalTo: menuView.widthAnchor, constant: -240),
-            textIndentLabel.heightAnchor.constraint(equalToConstant: 32)
+            textIndentLabel.heightAnchor.constraint(equalToConstant: textIndentHeight)
         ])
         
         
@@ -220,7 +227,7 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             textIndentValue.centerYAnchor.constraint(equalTo: textIndentLabel.centerYAnchor),
             textIndentValue.leadingAnchor.constraint(equalTo: textIndentLabel.trailingAnchor, constant: 4),
             textIndentValue.widthAnchor.constraint(equalToConstant: 48),
-            textIndentValue.heightAnchor.constraint(equalToConstant: 32)
+            textIndentValue.heightAnchor.constraint(equalToConstant: textIndentHeight)
         ])
         
         let textIndentStepper = UIStepper()

@@ -39,8 +39,10 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
 
-        // Menu view
-        let visibleHeight: CGFloat = (self.readerConfig.canChangeScrollDirection ? 222 : 170) + 60 /*margin*/
+        let menuHeight: CGFloat = self.readerConfig.canChangeScrollDirection ? 220 : 170 + 8
+        let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
+        let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
+        let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
         
         //menuView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, UIColor.white)
         menuView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
