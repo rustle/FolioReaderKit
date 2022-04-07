@@ -539,6 +539,7 @@ open class FolioReaderCenter: UIViewController {
         print("\(#function) \(self.navigateWebViewScrollPositions)")
         
         guard let position = self.navigateWebViewScrollPositions.popLast() else { return }
+        self.navigationItem.leftBarButtonItems?[2].isEnabled = !self.navigateWebViewScrollPositions.isEmpty
         if position.0 == currentPageNumber {
             self.currentPage?.webView?.scrollView.setContentOffset(position.1, animated: true)
         } else {

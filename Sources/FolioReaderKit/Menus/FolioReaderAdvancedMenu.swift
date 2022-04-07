@@ -82,27 +82,40 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             noticeLabel.heightAnchor.constraint(equalToConstant: noticeLabelHeight)
         ])
         
+        styleOverrideLabel.text = "Style overriden intensity"
+        styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)
+        styleOverrideLabel.adjustsFontForContentSizeCategory = true
+        styleOverrideLabel.adjustsFontSizeToFitWidth = true
+        styleOverrideLabel.translatesAutoresizingMaskIntoConstraints = false
+
+        StyleOverrideTypes.allCases.forEach {
+            styleOverrideSegment.insertSegment(withTitle: $0.description, at: $0.rawValue, animated: false)
+        }
+        styleOverrideSegment.selectedSegmentIndex = self.folioReader.styleOverride.rawValue
+        styleOverrideSegment.addTarget(self, action: #selector(styleOverrideSegmentValueChanged), for: .valueChanged)
+        styleOverrideSegment.translatesAutoresizingMaskIntoConstraints = false
+        
+        menuView.addSubview(styleOverrideLabel)
+        menuView.addSubview(styleOverrideSegment)
+        
+        NSLayoutConstraint.activate([
+            styleOverrideLabel.topAnchor.constraint(equalTo: noticeLabel.bottomAnchor, constant: 4),
+            styleOverrideLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            styleOverrideLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            styleOverrideLabel.heightAnchor.constraint(equalToConstant: styleOverrideLabelHeight),
+            styleOverrideSegment.topAnchor.constraint(equalTo: styleOverrideLabel.bottomAnchor, constant: 4),
+            styleOverrideSegment.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            styleOverrideSegment.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            styleOverrideSegment.heightAnchor.constraint(equalToConstant: styleOverrideSegmentHeight)
+        ])
+        
         // reformat switches
-//        wrapParaLabel = UILabel(
-//            frame: CGRect(
-//                x: 16,
-//                y: noticeLabel.frame.maxY,
-//                width: frame.width - 32 - 48,
-//                height: 32)
-//            )
         wrapParaLabel.text = "Wrap raw text inside <p>"
         wrapParaLabel.font = .systemFont(ofSize: labelFontSize)
         wrapParaLabel.adjustsFontForContentSizeCategory = true
         wrapParaLabel.adjustsFontSizeToFitWidth = true
         wrapParaLabel.translatesAutoresizingMaskIntoConstraints = false
         
-//        wrapParaSwitch = UISwitch(
-//            frame: CGRect(
-//                x: wrapParaLabel.frame.maxX,
-//                y: wrapParaLabel.frame.minY,
-//                width: 48,
-//                height: 32)
-//        )
         wrapParaSwitch.isOn = self.folioReader.doWrapPara
         wrapParaSwitch.addTarget(self, action: #selector(paragraphSwitchValueChanged), for: .valueChanged)
         wrapParaSwitch.translatesAutoresizingMaskIntoConstraints = false
@@ -111,7 +124,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         menuView.addSubview(wrapParaSwitch)
         
         NSLayoutConstraint.activate([
-            wrapParaLabel.topAnchor.constraint(equalTo: noticeLabel.bottomAnchor, constant: 4),
+            wrapParaLabel.topAnchor.constraint(equalTo: styleOverrideSegment.bottomAnchor, constant: 4),
             wrapParaLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
             wrapParaLabel.trailingAnchor.constraint(equalTo: wrapParaSwitch.leadingAnchor, constant: 4),
             wrapParaLabel.heightAnchor.constraint(equalToConstant: wrapParaLabelHeight),
@@ -120,25 +133,14 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             wrapParaSwitch.widthAnchor.constraint(equalToConstant: 48),
             wrapParaSwitch.heightAnchor.constraint(equalTo: wrapParaLabel.heightAnchor)
         ])
+        
         // clear body&table styles
-//        clearClassLabel = UILabel(
-//            frame: CGRect(
-//                x: 16, y: wrapParaLabel.frame.maxY,
-//                width: frame.width - 32 - 48, height: 32
-//            )
-//        )
         clearClassLabel.text = "Remove unsuitable html styles"
         clearClassLabel.font = .systemFont(ofSize: labelFontSize)
         clearClassLabel.adjustsFontForContentSizeCategory = true
         clearClassLabel.adjustsFontSizeToFitWidth = true
         clearClassLabel.translatesAutoresizingMaskIntoConstraints = false
-//        clearClassSwitch = UISwitch(
-//            frame: CGRect(
-//                x: clearClassLabel.frame.maxX,
-//                y: clearClassLabel.frame.minY,
-//                width: 48, height: 32
-//            )
-//        )
+
         clearClassSwitch.isOn = self.folioReader.doClearClass
         clearClassSwitch.addTarget(self, action: #selector(clearClassSwitchValueChanged), for: .valueChanged)
         clearClassSwitch.translatesAutoresizingMaskIntoConstraints = false
@@ -154,45 +156,6 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             clearClassSwitch.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
             clearClassSwitch.widthAnchor.constraint(equalToConstant: 48),
             clearClassSwitch.heightAnchor.constraint(equalTo: clearClassLabel.heightAnchor)
-        ])
-        
-//        styleOverrideLabel = UILabel(
-//            frame: CGRect(
-//                x: 16, y: clearClassLabel.frame.maxY,
-//                width: frame.width - 32 - 360, height: 32
-//            )
-//        )
-        styleOverrideLabel.text = "Style overriden intensity"
-        styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)
-        styleOverrideLabel.adjustsFontForContentSizeCategory = true
-        styleOverrideLabel.adjustsFontSizeToFitWidth = true
-        styleOverrideLabel.translatesAutoresizingMaskIntoConstraints = false
-//        styleOverrideSegment = UISegmentedControl(
-//            frame: CGRect(
-//                x: styleOverrideLabel.frame.maxX,
-//                y: styleOverrideLabel.frame.minY,
-//                width: 360, height: 32
-//            )
-//        )
-        StyleOverrideTypes.allCases.forEach {
-            styleOverrideSegment.insertSegment(withTitle: $0.description, at: $0.rawValue, animated: false)
-        }
-        styleOverrideSegment.selectedSegmentIndex = self.folioReader.styleOverride.rawValue
-        styleOverrideSegment.addTarget(self, action: #selector(styleOverrideSegmentValueChanged), for: .valueChanged)
-        styleOverrideSegment.translatesAutoresizingMaskIntoConstraints = false
-        
-        menuView.addSubview(styleOverrideLabel)
-        menuView.addSubview(styleOverrideSegment)
-        
-        NSLayoutConstraint.activate([
-            styleOverrideLabel.topAnchor.constraint(equalTo: clearClassLabel.bottomAnchor, constant: 4),
-            styleOverrideLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
-            styleOverrideLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
-            styleOverrideLabel.heightAnchor.constraint(equalToConstant: styleOverrideLabelHeight),
-            styleOverrideSegment.topAnchor.constraint(equalTo: styleOverrideLabel.bottomAnchor, constant: 4),
-            styleOverrideSegment.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
-            styleOverrideSegment.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
-            styleOverrideSegment.heightAnchor.constraint(equalToConstant: styleOverrideSegmentHeight)
         ])
         
         reloadColors()

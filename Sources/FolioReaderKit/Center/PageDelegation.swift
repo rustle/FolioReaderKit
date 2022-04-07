@@ -18,21 +18,21 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         
         if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
             let pageNumber = position["pageNumber"] as? Int
-            let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
-            let pageOffset = offset
 
             if isFirstLoad {
                 updateCurrentPage(page)
                 isFirstLoad = false
 
-                if (self.currentPageNumber == pageNumber && pageOffset > 0) {
-                    page.scrollPageToOffset(pageOffset!, animated: false)
-                    self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
+                if self.currentPageNumber == pageNumber,
+                   let pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat,
+                   pageOffset > 0 {
+                    page.scrollPageToOffset(pageOffset, animated: false)
+                    //self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
                 }
                 
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
                 page.scrollPageToBottom()
-                self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
+                //self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
             }
         } else if isFirstLoad {
             updateCurrentPage(page)

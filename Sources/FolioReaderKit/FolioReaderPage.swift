@@ -353,6 +353,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 let currentPageNumber = self.pageNumber,
                 let currentOffset = self.webView?.scrollView.contentOffset {
                 self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+                self.folioReader.readerCenter?.navigationItem.leftBarButtonItems?[2].isEnabled = true
             }
             
             let anchorFromURL = url.fragment

@@ -113,6 +113,7 @@ extension FolioReaderCenter {
         let menu = UIBarButtonItem(image: closeIcon, style: .plain, target: self, action:#selector(closeReader(_:)))
         let toc = UIBarButtonItem(image: tocIcon, style: .plain, target: self, action:#selector(presentChapterList(_:)))
         let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(logoButtonAction(_:)))
+        lrp.isEnabled = false
 
         navigationItem.leftBarButtonItems = [menu, toc, lrp]
 
