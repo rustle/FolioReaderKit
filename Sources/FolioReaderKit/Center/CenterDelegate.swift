@@ -9,7 +9,7 @@
 import Foundation
 
 /// Protocol which is used from `FolioReaderCenter`s.
-@objc public protocol FolioReaderCenterDelegate: class {
+@objc public protocol FolioReaderCenterDelegate: AnyObject {
 
     /// Notifies that a page appeared. This is triggered when a page is chosen and displayed.
     ///

@@ -9,15 +9,15 @@
 import UIKit
 
 class FolioReaderQuoteShare: UIViewController {
-    var quoteText: String!
-    var filterImage: UIView!
-    var imageView: UIImageView!
-    var quoteLabel: UILabel!
-    var titleLabel: UILabel!
-    var authorLabel: UILabel!
-    var logoImageView: UIImageView!
-    var collectionView: UICollectionView!
+    var quoteText = ""
+    let filterImage = UIView()
+    let imageView = UIImageView()
+    let quoteLabel = UILabel()
+    let titleLabel = UILabel()
+    let authorLabel = UILabel()
+    let logoImageView = UIImageView()
     let collectionViewLayout = UICollectionViewFlowLayout()
+    let collectionView: UICollectionView
     let itemSize: CGFloat = 90
     var dataSource = [QuoteImage]()
     let imagePicker = UIImagePickerController()
@@ -34,6 +34,8 @@ class FolioReaderQuoteShare: UIViewController {
         self.readerConfig = readerConfig
         self.quoteText = shareText.stripLineBreaks().stripHtml()
         self.book = book
+        
+        self.collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.collectionViewLayout)
 
         super.init(nibName: nil, bundle: Bundle.frameworkBundle())
     }
@@ -64,14 +66,15 @@ class FolioReaderQuoteShare: UIViewController {
         }
         let screenBounds = (isPad == true ? preferredContentSize : UIScreen.main.bounds.size)
 
-        self.filterImage = UIView(frame: CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.width))
+//        self.filterImage = UIView(frame: CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.width))
+        self.filterImage.frame = CGRect(x: 0, y: 0, width: screenBounds.width, height: screenBounds.width)
         self.filterImage.backgroundColor = self.readerConfig.menuSeparatorColor
         view.addSubview(self.filterImage)
 
-        imageView = UIImageView(frame: filterImage.bounds)
+//        imageView = UIImageView(frame: filterImage.bounds)
+        imageView.frame = filterImage.bounds
         filterImage.addSubview(imageView)
 
-        quoteLabel = UILabel()
         quoteLabel.text = quoteText
         quoteLabel.textAlignment = .center
         quoteLabel.font = UIFont(name: "Andada-Regular", size: 26)
@@ -95,7 +98,6 @@ class FolioReaderQuoteShare: UIViewController {
             authorName = author.name
         }
 
-        titleLabel = UILabel()
         titleLabel.text = bookTitle
         titleLabel.font = UIFont(name: "AvenirNext-Bold", size: 15) ?? UIFont.boldSystemFont(ofSize: 15)
         titleLabel.textAlignment = .center
@@ -115,7 +117,6 @@ class FolioReaderQuoteShare: UIViewController {
         let boldString = NSMutableAttributedString(string: authorName, attributes:attrs1)
         attributedString.append(boldString)
 
-        authorLabel = UILabel()
         authorLabel.attributedText = attributedString
         authorLabel.textAlignment = .center
         authorLabel.textColor = UIColor.white
@@ -127,7 +128,8 @@ class FolioReaderQuoteShare: UIViewController {
 
         let logoImage = self.readerConfig.quoteCustomLogoImage
         let logoHeight = logoImage?.size.height ?? 0
-        logoImageView = UIImageView(image: logoImage)
+//        logoImageView = UIImageView(image: logoImage)
+        logoImageView.image = logoImage
         logoImageView.contentMode = .center
         logoImageView.translatesAutoresizingMaskIntoConstraints = false
         filterImage.addSubview(logoImageView)
@@ -164,7 +166,9 @@ class FolioReaderQuoteShare: UIViewController {
 
         // CollectionView
         let collectionFrame = CGRect(x: 0, y: filterImage.frame.height+15, width: screenBounds.width, height: itemSize)
-        collectionView = UICollectionView(frame: collectionFrame, collectionViewLayout: collectionViewLayout)
+//        collectionView = UICollectionView(frame: collectionFrame, collectionViewLayout: collectionViewLayout)
+        collectionView.frame = collectionFrame
+//        collectionView.collectionViewLayout = collectionViewLayout
         collectionView.delegate = self
         collectionView.dataSource = self
         collectionView.showsHorizontalScrollIndicator = false
@@ -177,7 +181,7 @@ class FolioReaderQuoteShare: UIViewController {
         }
 
         // Register cell classes
-        collectionView?.register(UICollectionViewCell.self, forCellWithReuseIdentifier: kReuseCellIdentifier)
+        collectionView.register(UICollectionViewCell.self, forCellWithReuseIdentifier: kReuseCellIdentifier)
 
         // Create images
         dataSource = self.readerConfig.quoteCustomBackgrounds

@@ -32,7 +32,7 @@ enum SegmentOrganiseMode: Int {
 }
 
 
-protocol SMSegmentViewDelegate: class {
+protocol SMSegmentViewDelegate: AnyObject {
     func segmentView(_ segmentView: SMSegmentView, didSelectSegmentAtIndex index: Int)
 }
 

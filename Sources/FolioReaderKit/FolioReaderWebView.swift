@@ -162,8 +162,10 @@ open class FolioReaderWebView: WKWebView {
 
     @objc func highlight(_ sender: UIMenuController?) {
         js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')") { highlightAndReturn in
+            guard let highlightAndReturn = highlightAndReturn else { return }
+            
             print(highlightAndReturn)
-            guard let jsonData = highlightAndReturn?.data(using: .utf8) else {
+            guard let jsonData = highlightAndReturn.data(using: .utf8) else {
                 return
             }
             self.handleHighlightReturn(jsonData)
@@ -172,8 +174,10 @@ open class FolioReaderWebView: WKWebView {
     
     @objc func highlightWithNote(_ sender: UIMenuController?) {
         js("highlightStringWithNoteCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')") { highlightAndReturn in
+            guard let highlightAndReturn = highlightAndReturn else { return }
+
             print(highlightAndReturn)
-            guard let jsonData = highlightAndReturn?.data(using: String.Encoding.utf8) else {
+            guard let jsonData = highlightAndReturn.data(using: String.Encoding.utf8) else {
                 return
             }
 
@@ -217,7 +221,7 @@ open class FolioReaderWebView: WKWebView {
 
             if prevHighlightLengthStartInt > 0,
                let cfiStart = highlight.cfiStart,
-               let idx = cfiStart.index(of: ":") {
+               let idx = cfiStart.firstIndex(of: ":") {
                 let offsetIdx = cfiStart.index(after: idx)
                 if let offset = Int(cfiStart[offsetIdx...]) {
                     highlight.cfiStart = String(cfiStart[..<offsetIdx]) + Int(offset + prevHighlightLengthStartInt).description
@@ -225,7 +229,7 @@ open class FolioReaderWebView: WKWebView {
             }
             if prevHighlightLengthEndInt > 0,
                let cfiEnd = highlight.cfiEnd,
-               let idx = cfiEnd.index(of: ":") {
+               let idx = cfiEnd.firstIndex(of: ":") {
                 let offsetIdx = cfiEnd.index(after: idx)
                 if let offset = Int(cfiEnd[offsetIdx...]) {
                     highlight.cfiEnd = String(cfiEnd[..<offsetIdx]) + Int(offset + prevHighlightLengthEndInt).description
@@ -471,7 +475,7 @@ open class FolioReaderWebView: WKWebView {
             } else {
                 output = nil
             }
-            if  let nsError = error as? NSError,
+            if  let nsError = error as NSError?,
                 let url = nsError.userInfo["WKJavaScriptExceptionSourceURL"] as? NSURL,
                 url.absoluteString == "undefined"
             {

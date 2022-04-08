@@ -13,7 +13,7 @@ import OSLog
 import WebKit
 
 /// Protocol which is used from `FolioReaderPage`s.
-@objc public protocol FolioReaderPageDelegate: class {
+@objc public protocol FolioReaderPageDelegate: AnyObject {
 
     /**
      Notify that the page will be loaded. Note: The webview content itself is already loaded at this moment. But some java script operations like the adding of class based on click listeners will happen right after this method. If you want to perform custom java script before this happens this method is the right choice. If you want to modify the html content (and not run java script) you have to use `htmlContentForPage()` from the `FolioReaderCenterDelegate`.
@@ -172,7 +172,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return bounds
         }
         
-        let statusbarHeight = UIApplication.shared.statusBarFrame.size.height
         let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
         let topComponentTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : navBarHeight
         let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
@@ -225,12 +224,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         print("boundsFrame \(bounds)")
         print("statusBarFrame \(UIApplication.shared.statusBarFrame)")
-        print("navigationBarFrame \(self.folioReader.readerCenter?.navigationController?.navigationBar.frame)")
+        print("navigationBarFrame \(String(describing: self.folioReader.readerCenter?.navigationController?.navigationBar.frame))")
         
-        var x = bounds.origin.x
+        let x = bounds.origin.x
         var y = self.readerConfig.isDirection(bounds.origin.y + navTotal, bounds.origin.y + navTotal + paddingTop, bounds.origin.y + navTotal)
         y = navBarHeight
-        var width = bounds.width
+        let width = bounds.width
         var height = self.readerConfig.isDirection(bounds.height - navTotal, bounds.height - navTotal - paddingTop - paddingBottom, bounds.height - navTotal)
         height = bounds.height - navBarHeight - statusbarHeight
         
@@ -263,7 +262,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     // MARK: - WKNavigation Delegate
 
     open func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        guard let webView = webView as? FolioReaderWebView else {
+        guard webView is FolioReaderWebView else {
             return
         }
 
@@ -319,7 +318,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         let request = navigationAction.request
         
         guard
-            let webView = webView as? FolioReaderWebView,
+            let webView = webView,
             let scheme = request.url?.scheme else {
                 return true
         }
@@ -438,7 +437,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             if isClassBasedOnClickListenerScheme == false {
                 // Try to open the url with the system if it wasn't a custom class based click listener
                 if UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.openURL(url)
+                    UIApplication.shared.open(url)
                     return false
                 }
             } else {
@@ -671,7 +670,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     // MARK: ColorView fix for horizontal layout
     @objc func refreshPageMode() {
-        guard let webView = webView else { return }
+        guard webView != nil else { return }
 
         if (self.folioReader.nightMode == true) {
             // omit create webView and colorView

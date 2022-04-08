@@ -7,7 +7,7 @@
 
 import Foundation
 
-@objc public protocol FolioReaderPreferenceProvider: class {
+@objc public protocol FolioReaderPreferenceProvider: AnyObject {
     
     @objc func preference(nightMode defaults: Bool) -> Bool
     

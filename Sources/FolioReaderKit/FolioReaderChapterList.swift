@@ -9,7 +9,7 @@
 import UIKit
 
 /// Table Of Contents delegate
-@objc protocol FolioReaderChapterListDelegate: class {
+@objc protocol FolioReaderChapterListDelegate: AnyObject {
     /**
      Notifies when the user selected some item on menu.
      */

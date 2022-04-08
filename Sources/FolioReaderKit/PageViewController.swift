@@ -116,7 +116,7 @@ extension PageViewController: UIPageViewControllerDataSource {
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
 
-        let index = viewList.index(of: viewController)!
+        let index = viewList.firstIndex(of: viewController)!
         if index == viewList.count - 1 {
             return nil
         }
@@ -127,7 +127,7 @@ extension PageViewController: UIPageViewControllerDataSource {
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
 
-        let index = viewList.index(of: viewController)!
+        let index = viewList.firstIndex(of: viewController)!
         if index == 0 {
             return nil
         }

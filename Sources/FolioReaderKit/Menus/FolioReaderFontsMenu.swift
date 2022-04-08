@@ -94,7 +94,7 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
         styleSlider.backgroundColor = UIColor.clear
         styleSlider.tintColor = self.readerConfig.nightModeSeparatorColor
         styleSlider.minimumValue = 0
-        styleSlider.value = CGFloat(fontSizes.index(of: self.folioReader.currentFontSize) ?? 4)
+        styleSlider.value = CGFloat(fontSizes.firstIndex(of: self.folioReader.currentFontSize) ?? 4)
         styleSlider.addTarget(self, action: #selector(FolioReaderFontsMenu.styleSliderValueChanged(_:)), for: UIControl.Event.valueChanged)
 
         // Force remove fill color

@@ -7,7 +7,7 @@
 
 import Foundation
 
-@objc public protocol FolioReaderHighlightProvider: class {
+@objc public protocol FolioReaderHighlightProvider: AnyObject {
 
     /// Save a Highlight with completion block
     ///

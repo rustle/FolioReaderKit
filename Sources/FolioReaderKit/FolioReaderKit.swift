@@ -97,7 +97,7 @@ public enum StyleOverrideTypes: Int, CaseIterable {
 }
 
 /// FolioReader actions delegate
-@objc public protocol FolioReaderDelegate: class {
+@objc public protocol FolioReaderDelegate: AnyObject {
     
     /// Did finished loading book.
     ///
@@ -636,7 +636,7 @@ extension FolioReader {
             
             """
         }
-        if let pageWidth = readerCenter?.pageWidth, let pageHeight = readerCenter?.pageHeight {
+        if let pageWidth = readerCenter?.pageWidth/*, let pageHeight = readerCenter?.pageHeight*/ {
             let marginTop = 0 //CGFloat(currentMarginTop) / 200 * pageHeight
             let marginBottom = 0 //CGFloat(currentMarginBottom) / 200 * pageHeight
             let marginLeft = CGFloat(currentMarginLeft) / 200 * pageWidth
