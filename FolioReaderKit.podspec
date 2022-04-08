@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "FolioReaderKit"
-  s.version          = "1.9.0"
+  s.version          = "2.0.0"
   s.summary          = "A Swift ePub reader and parser framework for iOS."
   s.description  = <<-DESC
                    Written in Swift.
@@ -13,7 +13,7 @@ Pod::Spec.new do |s|
   s.source           = { :git => "https://github.com/drearycold/FolioReaderKit.git", :tag => s.version.to_s }
   s.social_media_url = 'https://twitter.com/hebertialmeida'
 
-  s.swift_version = '4.2'
+  s.swift_version = '5.3'
   s.platform      = :ios, '12.0'
   s.requires_arc  = true
 
@@ -29,9 +29,9 @@ Pod::Spec.new do |s|
   s.public_header_files = 'Source/*.h'
 
   s.libraries  = "z"
-  s.dependency 'SSZipArchive', '2.1.1'
-  s.dependency 'MenuItemKit', '3.1.3'
-  s.dependency 'ZFDragableModalTransition', '0.6'
-  s.dependency 'AEXML', '4.3.3'
-  s.dependency 'FontBlaster', '4.1.0'
+  s.dependency 'SSZipArchive', '~> 2.0'
+  s.dependency 'MenuItemKit', '~> 4.0'
+  s.dependency 'ZFDragableModalTransition', '~> 0.6'
+  s.dependency 'AEXML', '~> 4.0'
+  s.dependency 'FontBlaster', '~> 5.0'
 end
