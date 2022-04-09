@@ -78,7 +78,18 @@ extension FolioReaderCenter {
     func getCurrentIndexPath(navigating to: IndexPath?) -> IndexPath {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        let indexPaths = collectionView.indexPathsForVisibleItems
+        let contentOffset = self.collectionView.contentOffset
+        let indexPaths = collectionView.indexPathsForVisibleItems.filter {
+            guard let layoutAttributes = self.collectionView.layoutAttributesForItem(at: $0) else { return false }
+            
+            folioLogger("offset=\(contentOffset) itemFrame=\(layoutAttributes.frame)")
+            //for horizontal
+            guard layoutAttributes.frame.maxX >= contentOffset.x,
+                  layoutAttributes.frame.minX <= contentOffset.x + self.collectionView.contentSize.width
+            else { return false }
+            return true
+        }
+        
         folioLogger("\(indexPaths)")
 
         if let to = to, indexPaths.contains(to) {
