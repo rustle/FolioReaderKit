@@ -23,16 +23,25 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 updateCurrentPage(page)
                 isFirstLoad = false
 
-                if self.currentPageNumber == pageNumber,
-                   let pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat,
-                   pageOffset > 0 {
-                    page.scrollPageToOffset(pageOffset, animated: false)
-                    //self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
+                if self.currentPageNumber == pageNumber {
+                    var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
+                    
+                    if let chapterProgress = position["chapterProgress"] as? CGFloat {
+                        var pageOffsetByProgress = (page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
+                        if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
+                            let page = floor(pageOffsetByProgress / self.pageWidth)
+                            pageOffsetByProgress = page * self.pageWidth
+                        }
+                        if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                            pageOffset = pageOffsetByProgress
+                        }
+                    }
+                    if pageOffset > 0 {
+                        page.scrollPageToOffset(pageOffset, animated: false)
+                    }
                 }
-                
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
                 page.scrollPageToBottom()
-                //self.currentWebViewScrollPositions[page.pageNumber - 1] = page.webView?.scrollView.contentOffset
             }
         } else if isFirstLoad {
             updateCurrentPage(page)
