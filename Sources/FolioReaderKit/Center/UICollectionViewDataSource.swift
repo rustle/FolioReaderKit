@@ -34,6 +34,10 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             return UICollectionViewCell()
         }
         
+        if cell.pageNumber == indexPath.row + 1 {
+            return cell
+        }
+        
         cell.setup(withReaderContainer: readerContainer)
         cell.pageNumber = indexPath.row+1
         cell.webView?.scrollView.delegate = self
