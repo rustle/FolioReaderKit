@@ -563,9 +563,22 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
      - parameter offset:   The offset to scroll
      - parameter animated: Enable or not scrolling animation
      */
-    open func scrollPageToOffset(_ offset: CGFloat, animated: Bool) {
+    open func scrollPageToOffset(_ offset: CGFloat, animated: Bool, retry: Int = 5) {
+        guard let webView = webView else {
+            return
+        }
+
         let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: offset), CGPoint(x: offset, y: 0), CGPoint(x: 0, y: offset))
-        webView?.scrollView.setContentOffset(pageOffsetPoint, animated: animated)
+        webView.scrollView.setContentOffset(pageOffsetPoint, animated: animated)
+        
+        if retry > 0 {
+            delay(0.1) {
+                if pageOffsetPoint != webView.scrollView.contentOffset {
+                    self.scrollPageToOffset(offset, animated: animated, retry: retry - 1)
+                }
+            }
+            
+        }
     }
 
     /**
