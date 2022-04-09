@@ -26,18 +26,20 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 if self.currentPageNumber == pageNumber {
                     var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
                     
-                    if let chapterProgress = position["chapterProgress"] as? CGFloat {
-                        var pageOffsetByProgress = (page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
-                        if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                            let page = floor(pageOffsetByProgress / self.pageWidth)
-                            pageOffsetByProgress = page * self.pageWidth
+                    delay(0.3) {
+                        if let chapterProgress = position["chapterProgress"] as? CGFloat {
+                            var pageOffsetByProgress = (page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
+                            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
+                                let page = floor(pageOffsetByProgress / self.pageWidth)
+                                pageOffsetByProgress = page * self.pageWidth
+                            }
+                            if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                                pageOffset = pageOffsetByProgress - self.pageHeight / 2
+                            }
                         }
-                        if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                            pageOffset = pageOffsetByProgress
+                        if pageOffset > 0 {
+                            page.scrollPageToOffset(pageOffset, animated: false)
                         }
-                    }
-                    if pageOffset > 0 {
-                        page.scrollPageToOffset(pageOffset, animated: false)
                     }
                 }
             } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
