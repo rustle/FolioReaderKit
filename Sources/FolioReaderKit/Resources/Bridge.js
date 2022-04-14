@@ -768,10 +768,12 @@ function highlightAnchorText(target, highlightStyle, seconds) {
         elem = document.getElementsByName(target)[0];
     }
     
-    while ( elem && elem.innerText.length == 0) {
+    while ( elem && elem.innerText.length <= 5 && elem.parentNode && elem.parentNode.childElementCount <= 5 ) {
         elem = elem.parentNode
     }
-    
+    while ( elem && elem.innerText.length <= 5 && elem.nextElementSibling ) {
+        elem = elem.nextElementSibling
+    }
     if (!elem) {
         return
     }

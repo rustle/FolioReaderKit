@@ -355,7 +355,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 self.folioReader.readerCenter?.navigationItem.leftBarButtonItems?[2].isEnabled = true
             }
             
-            let anchorFromURL = url.fragment
+            guard let anchorFromURL = url.fragment else { return true }
 
             // Handle internal url
             if !url.pathExtension.isEmpty {
@@ -377,20 +377,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
                 if (hrefPage == pageNumber) {
                     // Handle internal #anchor
-                    if anchorFromURL != nil {
-                        handleAnchor(anchorFromURL!, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true)
+                        self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                            print("getClickAnchorOffset offset=\(offset ?? "0")")
+                            self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
+
+                        }
                         return false
-                    }
                 } else {
 //                    self.folioReader.readerCenter?.tempFragment = anchorFromURL
                     self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: hrefPage - 1)
-                    self.webView?.js("getClickAnchorOffset('\(anchorFromURL ?? "")')") { offset in
+                    self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
                         print("getClickAnchorOffset offset=\(offset ?? "0")")
                         self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
-                            if anchorFromURL != nil {
-                                delay(0.4) {
-                                    self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL!, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
-                                }
+                            delay(0.4) {
+                                self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
                             }
                         }
                     }
@@ -400,12 +400,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             }
 
             // Handle internal #anchor
-            if anchorFromURL != nil {
-                handleAnchor(anchorFromURL!, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true)
-                return false
+            self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                print("getClickAnchorOffset offset=\(offset ?? "0")")
+                self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
             }
-
-            return true
+            return false
         } else if scheme == "mailto" {
             print("Email")
             return true
@@ -613,9 +612,13 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 case .vertical, .defaultVertical, .horizontalWithVerticalContent:
                     let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
                     
-                    let voffset = offset > offsetInWindow ?
+                    var voffset = offset > offsetInWindow ?
                         offset - offsetInWindow : offset
                     
+                    if let contentHeight = self.webView?.scrollView.contentSize.height,
+                        voffset + (self.folioReader.readerCenter?.pageHeight ?? 0) - (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0) > contentHeight {
+                        voffset = contentHeight - (self.folioReader.readerCenter?.pageHeight ?? 0) + (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0)
+                    }
                     
                     if !avoidBeginningAnchors {
                         self.scrollPageToOffset(voffset, animated: animated)
