@@ -67,17 +67,25 @@ open class FolioReaderWebView: WKWebView {
         var result = false
         if isSharingHighlight {
             result = false
+            let canPerform = action == #selector(updateHighlightNote(_:))
+            
+            print("\(#function) canPerform=\(canPerform) action=\(action)")
+            if canPerform {
+                result = true
+            }
         } else if isColors {
             result = false
         } else {
-            if action == #selector(highlight(_:))
+            let canPerform = action == #selector(highlight(_:))
                 || action == #selector(highlightWithNote(_:))
                 || action == #selector(updateHighlightNote(_:))
                 || (action == #selector(define(_:)))
                 || (action == #selector(lookup(_:)) && self.mDictView != nil)
                 || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
                 || (action == #selector(share(_:)) && readerConfig.allowSharing)
-                || (action == #selector(copy(_:)) && readerConfig.allowCopy) {
+                || (action == #selector(copy(_:)) && readerConfig.allowCopy)
+            print("\(#function) canPerform=\(canPerform) action=\(action)")
+            if canPerform {
                 result = true
             }
         }
@@ -161,7 +169,7 @@ open class FolioReaderWebView: WKWebView {
     }
 
     @objc func highlight(_ sender: UIMenuController?) {
-        js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')") { highlightAndReturn in
+        js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', false)") { highlightAndReturn in
             guard let highlightAndReturn = highlightAndReturn else { return }
             
             print(highlightAndReturn)
@@ -173,11 +181,11 @@ open class FolioReaderWebView: WKWebView {
     }
     
     @objc func highlightWithNote(_ sender: UIMenuController?) {
-        js("highlightStringWithNoteCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))')") { highlightAndReturn in
+        js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', true)") { highlightAndReturn in
             guard let highlightAndReturn = highlightAndReturn else { return }
 
             print(highlightAndReturn)
-            guard let jsonData = highlightAndReturn.data(using: String.Encoding.utf8) else {
+            guard let jsonData = highlightAndReturn.data(using: .utf8) else {
                 return
             }
 

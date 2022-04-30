@@ -435,7 +435,7 @@ function highlightString(style) {
     return JSON.stringify(params);
 }
 
-function highlightStringCFI(style) {
+function highlightStringCFI(style, withNote) {
     var range = window.getSelection().getRangeAt(0);
     var startOffset = range.startOffset;
     var endOffset = range.endOffset;
@@ -497,6 +497,22 @@ function highlightStringCFI(style) {
                         startContainer,startOffset,[],["highlight"],[])
     var cfiEnd = window.EPUBcfi.generateCharacterOffsetCFIComponent(
                         endContainer,endOffset,[],["highlight"],[])
+    var id = guid();
+    
+    if (withNote) {
+        var selectionContents = range.extractContents();
+        var elm = document.createElement("highlight");
+        
+        elm.appendChild(selectionContents);
+        elm.setAttribute("id", id);
+        elm.setAttribute("onclick","callHighlightWithNoteURL(this);");
+        elm.setAttribute("class", style);
+        
+        range.insertNode(elm);
+        thisHighlight = elm;
+        
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("highlightStringCFI thisHighlight " + thisHighlight.outerHTML);
+    }
     
     var params = [];
     params.push({
@@ -1035,6 +1051,15 @@ function wrappingSentencesWithinPTags(){
     sentenceEnd.push(new RegExp("(?![^\\{]*?\\})"));
     sentenceEnd.push(new RegExp("(?![^\\|]*?\\|)"));
     sentenceEnd.push(new RegExp("(?![^\\\\]*?\\\\)"));
+    
+    //chinese edition (not working)
+    sentenceEnd.push(new RegExp("[^\\d][。！？]+"));
+    sentenceEnd.push(new RegExp("(?=([^“”]*“[^”]*”)*[^“”]*?$)"));
+    sentenceEnd.push(new RegExp("(?![^（]*?）)"));
+    sentenceEnd.push(new RegExp("(?![^【]*?】)"));
+    sentenceEnd.push(new RegExp("(?![^［]*?］)"));
+    sentenceEnd.push(new RegExp("(?![^｜]*?｜)"));
+    
     //sentenceEnd.push(new RegExp("(?![^\\/.]*\\/)")); // all could be a problem, but this one is problematic
     
     rxIndex = new RegExp(sentenceEnd.reduce(function (previousValue, currentValue) {
