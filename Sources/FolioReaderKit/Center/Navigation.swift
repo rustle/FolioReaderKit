@@ -477,33 +477,25 @@ extension FolioReaderCenter {
      */
     public func getCurrentChapterProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        let total = totalPages
-        let current = currentPageNumber
         
-        if total == 0 {
-            return 0
-        }
-        if current == 0 {
-            return 0
-        }
+        guard book.spine.size > 0 else { return 0 }
+        guard currentPageNumber > 0 else { return 0 }
         
-        return 100.0 * Double(current - 1) / Double(total)
+        let total = book.spine.size
+        let current = book.spine.spineReferences[currentPageNumber - 1].sizeUpTo
+        
+        return 100.0 * Double(current) / Double(total)
     }
 
     public func getBookProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
+        
+        guard book.spine.size > 0 else { return 0 }
+        
         let chapterProgress = getCurrentChapterProgress()
         let pageProgress = getCurrentPageProgress()
         
-        let total = totalPages
-        
-        if total == 0 {
-            return 0
-        }
-        
-        return chapterProgress + Double(pageProgress) / Double(total)
+        return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(book.spine.size)
     }
     
     /**

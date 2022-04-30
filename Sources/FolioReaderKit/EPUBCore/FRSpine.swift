@@ -11,16 +11,19 @@ import UIKit
 struct Spine {
     var linear: Bool
     var resource: FRResource
+    var sizeUpTo: Int
 
-    init(resource: FRResource, linear: Bool = true) {
+    init(resource: FRResource, linear: Bool = true, sizeUpto: Int = 0) {
         self.resource = resource
         self.linear = linear
+        self.sizeUpTo = sizeUpto
     }
 }
 
 class FRSpine: NSObject {
     var pageProgressionDirection: String?
     var spineReferences = [Spine]()
+    var size = 0
 
     var isRtl: Bool {
         if let pageProgressionDirection = pageProgressionDirection , pageProgressionDirection == "rtl" {

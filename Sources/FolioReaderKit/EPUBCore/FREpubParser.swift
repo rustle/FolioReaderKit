@@ -162,7 +162,9 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
             resource.fullHref = resourcesBasePath.appendingPathComponent(resource.href).removingPercentEncoding
             resource.mediaType = MediaType.by(name: $0.attributes["media-type"] ?? "", fileName: resource.href)
             resource.mediaOverlay = $0.attributes["media-overlay"]
-
+            
+            resource.size = try? FileManager.default.attributesOfItem(atPath: resource.fullHref)[.size] as? Int
+            
             // if a .smil file is listed in resources, go parse that file now and save it on book model
             if (resource.mediaType != nil && resource.mediaType == .smil) {
                 readSmilFile(resource)
@@ -453,6 +455,7 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
     fileprivate func readSpine(_ tags: [AEXMLElement]) -> FRSpine {
         let spine = FRSpine()
 
+        var sizeUpto = 0
         for tag in tags {
             guard let idref = tag.attributes["idref"] else { continue }
             var linear = true
@@ -463,9 +466,12 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
 
             if book.resources.containsById(idref) {
                 guard let resource = book.resources.findById(idref) else { continue }
-                spine.spineReferences.append(Spine(resource: resource, linear: linear))
+                spine.spineReferences.append(Spine(resource: resource, linear: linear, sizeUpto: sizeUpto))
+                sizeUpto += resource.size ?? 0
             }
         }
+        spine.size = sizeUpto
+        
         return spine
     }
 
