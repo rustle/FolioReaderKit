@@ -51,7 +51,6 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         }
 
         updateCurrentPage(page)
-        page.webView?.isHidden = false
         
         // UGLYFIX: to make share menu item appear on first attempt
         page.webView?.scrollView.subviews.first?.becomeFirstResponder()

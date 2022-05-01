@@ -1334,30 +1334,4 @@ function setFolioStyle(styleTextEncoded) {
 //                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight finished " + range + " " + elm)
 //
 //}
-                                                                
-                                                                
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("Original " + getHTML() + "\n" + "---------------------------------------\n")
-
-//removeOuterTable()
-//
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeOuterTable " + getHTML())
-//
-//removePSpace()
-//
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removePSpace " + getHTML())
-//
-//removeBodyClass()
-//
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("After removeBodyClass " + getHTML())
-//
-//reParagraph()
-//
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("After reParagraph " + getHTML())
-//tweakStyleOnly()
-//window.webkit.messageHandlers.FolioReaderPage.postMessage("After tweakStyleOnly " + getHTML())
-                                                                
-window.webkit.messageHandlers.FolioReaderPage.postMessage("BridgeFinished");
-
-//injectHighlight()
-
 

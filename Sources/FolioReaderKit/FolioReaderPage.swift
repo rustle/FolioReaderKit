@@ -273,7 +273,14 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let webView = webView as? FolioReaderWebView else {
             return
         }
-
+        
+        webView.js("""
+            var bridgeFinished = 1
+        """) { _ in
+            self.bridgeFinished()
+            webView.isHidden = false
+        }
+        
         // Add the custom class based onClick listener
         self.setupClassBasedOnClickListeners()
 
@@ -469,7 +476,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
         if response == "BridgeFinished" {
-            bridgeFinished()
+            
         } else if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
         }
