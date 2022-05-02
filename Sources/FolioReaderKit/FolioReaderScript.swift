@@ -43,9 +43,21 @@ class FolioReaderScript: WKUserScript {
     }()
     
     static func cssInjection(overflow: String) -> FolioReaderScript {
-        var cssString = "html{overflow:\(overflow)}"
+        var cssString = "html { overflow:\(overflow) }"
         if overflow == "-webkit-paged-x" {
-            cssString = "html { overflow:-webkit-paged-x;margin-top: 20px !important;margin-bottom: 20px !important; } @page { margin: 5em }"
+            cssString =
+            """
+            html {
+                overflow:-webkit-paged-x;
+                /*margin-top: 20px !important;margin-bottom: 20px !important;*/
+            }
+            body {
+                min-height: 100vh;
+            }
+            @page {
+                margin: 5em
+            }
+            """
         }
         return FolioReaderScript(source: cssInjectionSource(for: cssString))
     }

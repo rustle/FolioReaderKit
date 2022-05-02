@@ -57,6 +57,13 @@ extension FolioReaderCenter {
         let pageSize = self.readerConfig.isDirection(pageHeight, self.pageWidth, pageHeight)
         let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
         self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
+        if let totalPages = self.pageIndicatorView?.totalPages, totalPages > 0, self.readerConfig.scrollDirection == .horizontal {
+            page.webView?.js(
+                """
+                document.body.style.minHeight = "\(totalPages * 100)vh"
+                """
+            )
+        }
 
         let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
         let webViewPage = pageForOffset(pageOffSet, pageHeight: pageSize)
@@ -82,10 +89,11 @@ extension FolioReaderCenter {
         let indexPaths = collectionView.indexPathsForVisibleItems.filter {
             guard let layoutAttributes = self.collectionView.layoutAttributesForItem(at: $0) else { return false }
             
-            folioLogger("offset=\(contentOffset) itemFrame=\(layoutAttributes.frame)")
+            folioLogger("offset=\(contentOffset) layoutSize=\(layoutAttributes.size) itemFrame=\(layoutAttributes.frame)")
             //for horizontal
+            
             guard layoutAttributes.frame.maxX >= contentOffset.x,
-                  layoutAttributes.frame.minX <= contentOffset.x + self.collectionView.contentSize.width
+                  layoutAttributes.frame.minX <= contentOffset.x + layoutAttributes.size.width
             else { return false }
             return true
         }

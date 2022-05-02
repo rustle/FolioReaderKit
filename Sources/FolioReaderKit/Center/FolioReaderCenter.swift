@@ -326,7 +326,7 @@ open class FolioReaderCenter: UIViewController {
             }
 
             let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-            currentPage.webView?.scrollView.setContentOffset(pageOffsetPoint, animated: true)
+            currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
             
             updateCurrentPage()
             updatePageOffsetRate()
@@ -362,7 +362,7 @@ open class FolioReaderCenter: UIViewController {
         guard let position = self.navigateWebViewScrollPositions.popLast() else { return }
         self.navigationItem.leftBarButtonItems?[2].isEnabled = !self.navigateWebViewScrollPositions.isEmpty
         if position.0 == currentPageNumber {
-            self.currentPage?.webView?.scrollView.setContentOffset(position.1, animated: true)
+            self.currentPage?.setScrollViewContentOffset(position.1, animated: true)
         } else {
             self.changePageWith(page: position.0)     //depends on `currentWebViewScrollPositions` to in page reposition
         }

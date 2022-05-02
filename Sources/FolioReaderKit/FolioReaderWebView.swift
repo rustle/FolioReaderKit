@@ -246,10 +246,9 @@ open class FolioReaderWebView: WKWebView {
             
             highlight.encodeContents()
             
-            let encoder = JSONEncoder()
-            let serializedData = try encoder.encode(highlight)
+            let serializedData = try JSONEncoder().encode([highlight])
             let encodedData = serializedData.base64EncodedString()
-            self.js("injectHighlight('\(encodedData)')") { result in
+            self.js("injectHighlights('\(encodedData)')") { result in
                 guard result == nil else {
                     self.folioReader.readerCenter?.presentAddHighlightError(result!)
                     return

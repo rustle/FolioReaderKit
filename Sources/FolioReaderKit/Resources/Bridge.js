@@ -209,14 +209,16 @@ function tweakStyleOnly() {
     })
 }
 
-function injectHighlight(highlightJSONDataEncoded) {    //sample data
-//    var cfiStart = "/2/4/2/2/2/2/4/2/8/2/1:20";
-//    var cfiEnd = "/2/4/2/2/2/2/4/2/8/2/1:41";
-//    var cfiStart = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:20)"
-//    var cfiEnd   = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:42)"
+function injectHighlights(highlightJSONDataEncodedArray) {
+    var sHighlightJsonArray = window.atob(highlightJSONDataEncodedArray);
+    var oHighlightArray = JSON.parse(sHighlightJsonArray);
     
-    var sHighlightJson = window.atob(highlightJSONDataEncoded);
-    var oHighlight = JSON.parse(sHighlightJson);
+    oHighlightArray.forEach( (oHighlight) => {
+        injectHighlight(oHighlight)
+    } )
+}
+
+function injectHighlight(oHighlight) {
     oHighlight.content = decodeURIComponent(oHighlight.contentEncoded)
     oHighlight.contentPost = decodeURIComponent(oHighlight.contentPostEncoded)
     oHighlight.contentPre = decodeURIComponent(oHighlight.contentPreEncoded)
@@ -794,10 +796,12 @@ function highlightAnchorText(target, highlightStyle, seconds) {
         return
     }
     
-    addClass(elem, highlightStyle)
-    var t = setTimeout(function(){
-        removeClass(elem, highlightStyle)
-    },(seconds*1000));
+    if (hasClass(elem, highlightStyle) == false) {
+        addClass(elem, highlightStyle)
+        var t = setTimeout(function(){
+            removeClass(elem, highlightStyle)
+        },(seconds*1000));
+    }
 //    var origcolor = elem.style.backgroundColor
 //    elem.style.backgroundColor = color;
 //    var t = setTimeout(function(){

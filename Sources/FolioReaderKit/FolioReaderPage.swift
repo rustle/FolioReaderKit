@@ -275,7 +275,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
         
         webView.js("""
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
             var bridgeFinished = 1
+            bridgeFinished
         """) { _ in
             self.bridgeFinished()
             webView.isHidden = false
@@ -315,6 +317,14 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView.js("setMediaOverlayStyleColors(\(colors))")
     }
 
+    open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
+        webView?.scrollView.setContentOffset(contentOffset, animated: animated)
+        if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
+            let currentIndexPathRow = pageNumber - 1
+            self.folioReader.readerCenter?.currentWebViewScrollPositions[currentIndexPathRow] = contentOffset
+        }
+    }
+    
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         let handledAction = handlePolicy(for: navigationAction)
         let policy: WKNavigationActionPolicy = handledAction ? .allow : .cancel
@@ -475,9 +485,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         //This function handles the events coming from javascript. We'll configure the javascript side of this later.
         //We can access properties through the message body, like this:
         guard let response = message.body as? String else { return }
-        if response == "BridgeFinished" {
-            
-        } else if self.readerConfig.debug.contains(.htmlStyling) {
+        if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
         }
     }
@@ -494,31 +502,24 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
         
         self.webView?.js(preprocessor) {_ in
-            delay(0.2) {
+            self.injectHighlights() {
                 self.delegate?.pageDidLoad?(self, navigating: nil)
-            }
-            delay(0.5) {
-                self.injectHighlights()
             }
         }
     }
     
-    func injectHighlights() {
-        guard let bookId = (self.book.name as NSString?)?.deletingPathExtension else { return }
-        guard let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?) else { return }
-        guard highlights.isEmpty == false else { return }
-        let encoder = JSONEncoder()
-
-        for item in highlights {
-            do {
-                let serializedData = try encoder.encode(item)
-                let encodedData = serializedData.base64EncodedString()
-                self.webView?.js("injectHighlight('\(encodedData)')") {_ in
-                    
-                }
-            } catch {
-                
-            }
+    func injectHighlights(completion: (() -> Void)? = nil) {
+        guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
+              let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?),
+              highlights.isEmpty == false
+        else {
+            completion?()
+            return
+        }
+        let encodedData = ((try? JSONEncoder().encode(highlights)) ?? .init()).base64EncodedString()
+        
+        self.webView?.js("injectHighlights('\(encodedData)')") {_ in
+            completion?()
         }
     }
     
@@ -575,7 +576,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
 
         let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: offset), CGPoint(x: offset, y: 0), CGPoint(x: 0, y: offset))
-        webView.scrollView.setContentOffset(pageOffsetPoint, animated: animated)
+        setScrollViewContentOffset(pageOffsetPoint, animated: animated)
         
         if retry > 0 {
             delay(0.1) {
@@ -600,7 +601,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         if bottomOffset.forDirection(withConfiguration: self.readerConfig) >= 0 {
             DispatchQueue.main.async {
-                self.webView?.scrollView.setContentOffset(bottomOffset, animated: false)
+                self.setScrollViewContentOffset(bottomOffset, animated: false)
             }
         }
     }

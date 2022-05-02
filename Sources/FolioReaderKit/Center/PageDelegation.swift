@@ -62,7 +62,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
             currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
             tempFragment = nil
         } else if let offsetPoint = self.currentWebViewScrollPositions[page.pageNumber - 1] {
-            page.webView?.scrollView.setContentOffset(offsetPoint, animated: false)
+            page.setScrollViewContentOffset(offsetPoint, animated: false)
         }
         
         // Pass the event to the centers `pageDelegate`

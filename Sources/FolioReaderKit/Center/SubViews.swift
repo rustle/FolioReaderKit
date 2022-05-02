@@ -187,8 +187,6 @@ extension FolioReaderCenter {
             return
         }
 
-        let pageScrollView = webView.scrollView
-
         // Get internal page offset before layout change
         self.updatePageOffsetRate()
         // Change layout
@@ -208,7 +206,7 @@ extension FolioReaderCenter {
          *  so the delay wait until layout finished the changes.
          */
         delay(0.1) {
-            var pageOffset = (pageScrollView.contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate)
+            var pageOffset = (webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate)
 
             // Fix the offset for paged scroll
             if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
@@ -217,7 +215,7 @@ extension FolioReaderCenter {
             }
 
             let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-            pageScrollView.setContentOffset(pageOffsetPoint, animated: true)
+            currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
         }
     }
 
@@ -236,7 +234,7 @@ extension FolioReaderCenter {
             }
 
             let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-            currentPage.webView?.scrollView.setContentOffset(pageOffsetPoint, animated: true)
+            currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
             
             self.updatePageOffsetRate()
             completion?()

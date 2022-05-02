@@ -180,7 +180,14 @@ class FolioReaderHighlightList: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         guard let highlight = highlights[safe: indexPath.row] else { return }
-
+        guard let readerCenter = self.folioReader.readerCenter else { return }
+        
+        if let currentPageNumber = readerCenter.currentPage?.pageNumber,
+            let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
+            self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+            self.folioReader.readerCenter?.navigationItem.leftBarButtonItems?[2].isEnabled = true
+        }
+        
         self.folioReader.readerCenter?.changePageWith(page: highlight.page, andFragment: highlight.highlightId)
         self.dismiss()
     }

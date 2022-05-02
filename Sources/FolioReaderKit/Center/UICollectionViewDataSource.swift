@@ -97,7 +97,7 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         // TODO block layout
         classes += " justifiedBlockMode"
         
-        html = html.replacingOccurrences(of: "<html ", with: "<html class=\"\(classes)\"")
+        html = html.replacingOccurrences(of: "<html ", with: "<html class=\"\(classes)\" ")
 
         // Let the delegate adjust the html string
         if let modifiedHtmlContent = self.delegate?.htmlContentForPage(cell, htmlContent: html) {
