@@ -275,7 +275,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
         
         webView.js("""
-            window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
+            /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
+            document.body.style.minHeight = null
             var bridgeFinished = 1
             bridgeFinished
         """) { _ in

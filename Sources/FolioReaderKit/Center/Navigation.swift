@@ -57,7 +57,11 @@ extension FolioReaderCenter {
         let pageSize = self.readerConfig.isDirection(pageHeight, self.pageWidth, pageHeight)
         let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
         self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-        if let totalPages = self.pageIndicatorView?.totalPages, totalPages > 0, self.readerConfig.scrollDirection == .horizontal {
+        if self.readerConfig.scrollDirection == .horizontal {
+            var totalPages = self.pageIndicatorView?.totalPages ?? 1
+            if totalPages < 1 {
+                totalPages = 1
+            }
             page.webView?.js(
                 """
                 document.body.style.minHeight = "\(totalPages * 100)vh"
