@@ -1288,11 +1288,11 @@ var onClassBasedListenerClick = function(schemeName, attributeContent) {
 function setFolioStyle(styleTextEncoded) {
     var styleText = window.atob(styleTextEncoded)
     var head = document.head
-    var style = document.getElementById("style-folioreader-runtime")
+    var style = document.getElementById("folio_style_runtime")
     if (style == null) {
         style = document.createElement('style')
         style.type = "text/css"
-        style.id = "style-folioreader-runtime"
+        style.id = "folio_style_runtime"
         head.appendChild(style)
     }
     while (style.firstChild) {

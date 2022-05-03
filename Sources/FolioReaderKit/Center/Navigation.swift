@@ -54,25 +54,27 @@ extension FolioReaderCenter {
 
         guard let page = page, let webView = page.webView else { return }
 
-        let pageSize = self.readerConfig.isDirection(pageHeight, self.pageWidth, pageHeight)
-        let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
-        self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-        if self.readerConfig.scrollDirection == .horizontal {
-            var totalPages = self.pageIndicatorView?.totalPages ?? 1
-            if totalPages < 1 {
-                totalPages = 1
+        delay(0.2) {
+            let pageSize = self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight)
+            let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
+            self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
+            if self.readerConfig.scrollDirection == .horizontal {
+                var totalPages = self.pageIndicatorView?.totalPages ?? 1
+                if totalPages < 1 {
+                    totalPages = 1
+                }
+                page.webView?.js(
+                    """
+                    document.body.style.minHeight = "\(totalPages * 100)vh"
+                    """
+                )
             }
-            page.webView?.js(
-                """
-                document.body.style.minHeight = "\(totalPages * 100)vh"
-                """
-            )
+
+            let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
+            let webViewPage = self.pageForOffset(pageOffSet, pageHeight: pageSize)
+
+            self.pageIndicatorView?.currentPage = webViewPage
         }
-
-        let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
-        let webViewPage = pageForOffset(pageOffSet, pageHeight: pageSize)
-
-        self.pageIndicatorView?.currentPage = webViewPage
     }
 
     func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {

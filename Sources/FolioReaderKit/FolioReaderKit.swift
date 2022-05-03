@@ -290,10 +290,13 @@ extension FolioReader {
         }
     }
 
+    static let FontSizes = ["15.5px", "17px", "18.5px", "20px", "22px", "24px", "26px", "28px", "30.5px", "33px", "35.5px"]
+    static let defaultFontSize = FolioReader.FontSizes[3]
+    
     /// Check current font size. Default .m
     open var currentFontSize: String {
         get {
-            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: "20px") ?? "20px"
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: FolioReader.defaultFontSize) ?? FolioReader.defaultFontSize
         }
         set (fontSize) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontSize: fontSize)
@@ -579,7 +582,7 @@ extension FolioReader {
     }
     
     func updateRuntimStyle(delay bySecond: Double) {
-        guard let readerCenter = readerCenter else { return }
+        guard let readerCenter = readerCenter, let webView = readerCenter.currentPage?.webView else { return }
 
         readerCenter.layoutAdapting = true
         
@@ -590,6 +593,15 @@ extension FolioReader {
                 .data(using: .utf8)!
                 .base64EncodedString())'
             )
+            {
+                let pList = document.getElementsByTagName('p')
+                for (let i = 0; i < pList.length; i++) {
+                    removeClass(pList[i], 'folioFontSize\\\\d+px')
+                    addClass(pList[i], 'folioFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+                }
+            }
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
+            1
             """
         ) { _ in
             readerCenter.updateScrollPosition(delay: bySecond) {
@@ -619,7 +631,7 @@ extension FolioReader {
         style += """
             \(tagSelector) {
                 font-family: \(currentFont) !important;
-                font-size: \(currentFontSize) !important;
+                /*font-size: \(currentFontSize) !important;*/
                 font-weight: \(currentFontWeight) !important;
                 letter-spacing: \(letterSpacing)px !important;
                 line-height: \(lineHeight) !important;

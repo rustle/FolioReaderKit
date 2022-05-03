@@ -500,7 +500,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         if folioReader.doWrapPara {
             preprocessor.append("reParagraph();removePSpace();")
         }
-        preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
+//        preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
         
         self.webView?.js(preprocessor) {_ in
             self.injectHighlights() {

@@ -19,12 +19,23 @@ open class FolioReaderWebView: WKWebView {
     
     open var additionalMenuItems = [UIMenuItem]()
     
+    let cssOverflowPropertyID = "folio_style_html_overflow"
     fileprivate(set) var cssOverflowProperty = "scroll" {
         didSet {
-            FolioReaderScript.cssInjection(overflow: cssOverflowProperty).addIfNeeded(to: self)
+            FolioReaderScript.cssInjection(overflow: cssOverflowProperty, id: cssOverflowPropertyID).addIfNeeded(to: self)
         }
     }
 
+    let cssRuntimePropertyID = "folio_style_runtime"
+    var cssRuntimeProperty = "" {
+        didSet {
+            FolioReaderScript(
+                source: FolioReaderScript.cssInjectionSource(for: cssRuntimeProperty, id: cssRuntimePropertyID)
+            ).addIfNeeded(to: self)
+        }
+    }
+
+    
     fileprivate weak var readerContainer: FolioReaderContainer?
 
     fileprivate var readerConfig: FolioReaderConfig {

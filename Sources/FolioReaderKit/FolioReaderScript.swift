@@ -38,36 +38,37 @@ class FolioReaderScript: WKUserScript {
     
     static let cssInjection: FolioReaderScript = {
         let cssURL = Bundle.frameworkBundle().url(forResource: "Style", withExtension: "css")!
-        let cssString = try! String(contentsOf: cssURL)
-        return FolioReaderScript(source: cssInjectionSource(for: cssString))
+        var cssStrings = [String]()
+        cssStrings.append(try! String(contentsOf: cssURL))
+        cssStrings.append(contentsOf: FolioReader.FontSizes.map {
+            return ".folioFontSize\($0.replacingOccurrences(of: ".", with: "")) { font-size: \($0) !important; }"
+        })
+        
+        let cssString = cssStrings.joined(separator: "\n")
+        
+        return FolioReaderScript(source: cssInjectionSource(for: cssString, id: "folio_bundle_style"))
     }()
     
-    static func cssInjection(overflow: String) -> FolioReaderScript {
-        var cssString = "html { overflow:\(overflow) }"
+    static func cssInjection(overflow: String, id: String) -> FolioReaderScript {
+        var cssString = "html { overflow: \(overflow) }"
         if overflow == "-webkit-paged-x" {
             cssString =
             """
-            html {
-                overflow:-webkit-paged-x;
-                /*margin-top: 20px !important;margin-bottom: 20px !important;*/
-            }
-            body {
-                min-height: 100vh;
-            }
-            @page {
-                margin: 5em
-            }
+            html { overflow: -webkit-paged-x; /*margin-top: 20px !important;margin-bottom: 20px !important;*/ }
+            body { min-height: 100vh; }
             """
         }
-        return FolioReaderScript(source: cssInjectionSource(for: cssString))
+        return FolioReaderScript(source: cssInjectionSource(for: cssString, id: id))
     }
     
-    private static func cssInjectionSource(for content: String) -> String {
-        let oneLineContent = content.components(separatedBy: .newlines).joined()
+    static func cssInjectionSource(for content: String, id: String) -> String {
+        let oneLineContent = content.components(separatedBy: .newlines).joined(separator: " ")
         let source = """
         var style = document.createElement('style');
-        style.type = 'text/css'
+        style.id = '\(id)';
+        style.type = 'text/css';
         style.innerHTML = '\(oneLineContent)';
+        
         document.head.appendChild(style);
         """
         return source
