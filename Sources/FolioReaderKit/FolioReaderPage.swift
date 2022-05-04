@@ -281,7 +281,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             bridgeFinished
         """) { _ in
             self.bridgeFinished()
-            webView.isHidden = false
         }
         
         // Add the custom class based onClick listener
@@ -502,10 +501,17 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
 //        preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
         
+        preprocessor.append("1;")
         self.webView?.js(preprocessor) {_ in
-            self.injectHighlights() {
-                self.delegate?.pageDidLoad?(self, navigating: nil)
+            print("\(#function) bridgeFinished size=\(self.book.spine.spineReferences[self.pageNumber-1].resource.size)")
+            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
+            self.folioReader.updateRuntimStyle(delay: 0.2 + 0.1 * Double(fileSize / 51200)) {
+                self.webView?.isHidden = false
+                self.injectHighlights() {
+                    self.delegate?.pageDidLoad?(self, navigating: nil)
+                }
             }
+            
         }
     }
     

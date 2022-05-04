@@ -40,8 +40,42 @@ class FolioReaderScript: WKUserScript {
         let cssURL = Bundle.frameworkBundle().url(forResource: "Style", withExtension: "css")!
         var cssStrings = [String]()
         cssStrings.append(try! String(contentsOf: cssURL))
-        cssStrings.append(contentsOf: FolioReader.FontSizes.map {
-            return ".folioFontSize\($0.replacingOccurrences(of: ".", with: "")) { font-size: \($0) !important; }"
+        
+        cssStrings.append(
+            contentsOf: FolioReader.FontSizes.map {
+                [
+                    ".folioStyleFontSize\($0.replacingOccurrences(of: ".", with: "")) p { font-size: \($0) !important; }",
+                    ".folioStyleL2FontSize\($0.replacingOccurrences(of: ".", with: "")) td { font-size: \($0) !important; }",
+                    ".folioStyleL3FontSize\($0.replacingOccurrences(of: ".", with: "")) span { font-size: \($0) !important; }"
+                ]
+            }.flatMap{$0}
+        )
+        
+        cssStrings.append(contentsOf: (1...9).map {
+            ".folioStyleFontWeight\($0*100) p { font-weight: \($0*100) !important; }"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleLetterSpacing\($0) p, .folioStyleLetterSpacing\($0) span { letter-spacing: \(Double($0) / 50.0)em !important; --letter-spacing: \(Double($0) / 50.0)em }"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map { //1.5 ~ 2.05
+            [
+                ".folioStyleLineHeight\($0) p, .folioStyleLineHeight\($0) span { line-height: \(Decimal(($0 + 10) * 5) / 100 + 1) !important; }",
+                ".folioStyleMargin\($0) p { margin: 1em 0 \((Decimal($0 + 10) * 5) / 100)em 0 !important; }"
+            ]
+        }.flatMap{$0})
+        
+        cssStrings.append(contentsOf: (0...8).map {     //-4 ~ 4
+            ".folioStyleTextIndent\($0) p { text-indent: calc( (var(--letter-spacing) + 1em) * \(abs($0-4)) ) \($0<4 ? "hanging" : "") !important; text-align: justify !important; -webkit-hyphens: auto !important; }"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingLeft\($0) { padding-left: \(Double($0) * 2.5)vw !important; overflow: hidden !important; }"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingRight\($0) { padding-right: \(Double($0) * 2.5)vw !important; overflow: hidden !important; }"
         })
         
         let cssString = cssStrings.joined(separator: "\n")

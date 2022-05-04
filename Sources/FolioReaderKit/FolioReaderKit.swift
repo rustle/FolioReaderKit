@@ -72,11 +72,11 @@ struct FontFamilyInfo {
 }
 
 public enum StyleOverrideTypes: Int, CaseIterable {
-    case None
-    case PNode
-    case PlusTD
-    case PlusChildren
-    case AllText
+    case None           //0
+    case PNode          //1
+    case PlusTD         //2
+    case PlusSPAN       //3
+    case AllText        //4
     
     var description: String {
         get {
@@ -87,7 +87,7 @@ public enum StyleOverrideTypes: Int, CaseIterable {
                 return "only <p>"
             case .PlusTD:
                 return "+ <td>"
-            case .PlusChildren:
+            case .PlusSPAN:
                 return "+ <span>"
             case .AllText:
                 return "all text"
@@ -581,31 +581,83 @@ extension FolioReader {
         }
     }
     
-    func updateRuntimStyle(delay bySecond: Double) {
+    func updateRuntimStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
         guard let readerCenter = readerCenter, let webView = readerCenter.currentPage?.webView else { return }
 
         readerCenter.layoutAdapting = true
         
         readerCenter.currentPage?.webView?.js(
-            """
-            setFolioStyle(
-            '\(generateRuntimeStyle()
-                .data(using: .utf8)!
-                .base64EncodedString())'
-            )
-            {
-                let pList = document.getElementsByTagName('p')
-                for (let i = 0; i < pList.length; i++) {
-                    removeClass(pList[i], 'folioFontSize\\\\d+px')
-                    addClass(pList[i], 'folioFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-                }
-            }
-            window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
-            1
-            """
+"""
+/*
+setFolioStyle(
+'\(generateRuntimeStyle()
+    .data(using: .utf8)!
+    .base64EncodedString())'
+)
+*/
+{
+    let styleOverride = \(styleOverride.rawValue)
+
+    /*
+    let pList = document.getElementsByTagName('p')
+    for (let i = 0; i < pList.length; i++) {
+        removeClasses(pList[i], 'folioStyle\\\\w+')
+        addClass(pList[i], 'folioStyleFontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
+        addClass(pList[i], 'folioStyleFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+        addClass(pList[i], 'folioStyleFontWeight\(currentFontWeight)')
+        addClass(pList[i], 'folioStyleLetterSpacing\(currentLetterSpacing)')
+        addClass(pList[i], 'folioStyleLineHeight\(currentLineHeight)')
+        addClass(pList[i], 'folioStyleMargin\(currentLineHeight)')
+        addClass(pList[i], 'folioStyleTextIndent\(currentTextIndent+4)')
+    }
+    
+
+    let spanList = document.getElementsByTagName('span')
+    for (let i = 0; i < spanList.length; i++) {
+        removeClasses(spanList[i], 'folioStyle\\\\w+')
+        addClass(spanList[i], 'folioStyleLetterSpacing\(currentLetterSpacing)')
+        addClass(spanList[i], 'folioStyleLineHeight\(currentLineHeight)')
+    }
+    */
+
+    removeClasses(document.body, 'folioStyle\\\\w+')
+    addClass(document.body, 'folioStyleBodyPaddingLeft\(currentMarginLeft/5)')
+    addClass(document.body, 'folioStyleBodyPaddingRight\(currentMarginRight/5)')
+    addClass(document.body, 'folioStyleFontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
+    addClass(document.body, 'folioStyleFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+    addClass(document.body, 'folioStyleFontWeight\(currentFontWeight)')
+    addClass(document.body, 'folioStyleLetterSpacing\(currentLetterSpacing)')
+    addClass(document.body, 'folioStyleLineHeight\(currentLineHeight)')
+    addClass(document.body, 'folioStyleMargin\(currentLineHeight)')
+    addClass(document.body, 'folioStyleTextIndent\(currentTextIndent+4)')
+
+    if (styleOverride > 1) {
+        addClass(document.body, 'folioStyleL2FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
+        addClass(document.body, 'folioStyleL2FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+        addClass(document.body, 'folioStyleL2FontWeight\(currentFontWeight)')
+        addClass(document.body, 'folioStyleL2LetterSpacing\(currentLetterSpacing)')
+        addClass(document.body, 'folioStyleL2LineHeight\(currentLineHeight)')
+        addClass(document.body, 'folioStyleL2Margin\(currentLineHeight)')
+        addClass(document.body, 'folioStyleL2TextIndent\(currentTextIndent+4)')
+    }
+
+    if (styleOverride > 2) {
+        addClass(document.body, 'folioStyleL3FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
+        addClass(document.body, 'folioStyleL3FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+        addClass(document.body, 'folioStyleL3FontWeight\(currentFontWeight)')
+        addClass(document.body, 'folioStyleL3LetterSpacing\(currentLetterSpacing)')
+        addClass(document.body, 'folioStyleL3LineHeight\(currentLineHeight)')
+        addClass(document.body, 'folioStyleL3Margin\(currentLineHeight)')
+        addClass(document.body, 'folioStyleL3TextIndent\(currentTextIndent+4)')
+    }
+}
+/*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
+1
+"""
         ) { _ in
             readerCenter.updateScrollPosition(delay: bySecond) {
                 readerCenter.layoutAdapting = false
+                completion?()
             }
         }
     }
@@ -624,26 +676,26 @@ extension FolioReader {
             if styleOverride.rawValue >= StyleOverrideTypes.PlusTD.rawValue {
                 tagSelector += ", td"
             }
-            if styleOverride.rawValue >= StyleOverrideTypes.PlusChildren.rawValue {
+            if styleOverride.rawValue >= StyleOverrideTypes.PlusSPAN.rawValue {
                 tagSelector += ", td, span"
             }
             
         style += """
             \(tagSelector) {
-                font-family: \(currentFont) !important;
+                /*font-family: \(currentFont) !important;*/
                 /*font-size: \(currentFontSize) !important;*/
-                font-weight: \(currentFontWeight) !important;
-                letter-spacing: \(letterSpacing)px !important;
-                line-height: \(lineHeight) !important;
-                text-indent: \(textIndent)px !important;
-                text-align: justify !important;
-                margin: \(marginTopEm)em 0 \(marginBottonEm)em 0 !important;
-                -webkit-hyphens: auto !important;
+                /*font-weight: \(currentFontWeight) !important;*/
+                /*letter-spacing: \(letterSpacing)px !important;*/
+                /*line-height: \(lineHeight) !important;*/
+                /*text-indent: \(textIndent)px !important;*/
+                /*text-align: justify !important;*/
+                /*margin: \(marginTopEm)em 0 \(marginBottonEm)em 0 !important;*/
+                /*-webkit-hyphens: auto !important;*/
             }
             
             span {
-                letter-spacing: \(letterSpacing)px !important;
-                line-height: \(lineHeight) !important;
+                /*letter-spacing: \(letterSpacing)px !important;*/
+                /*line-height: \(lineHeight) !important;*/
             }
             
             """
@@ -656,20 +708,21 @@ extension FolioReader {
             
             style += """
             
-            body {
+            /*body {
                 padding: \(marginTop)px \(marginRight)px \(marginBottom)px \(marginLeft)px !important;
                 overflow: hidden !important;
             }
             
             @page {
                 margin: \(marginTop)px \(marginRight)px \(marginBottom)px \(marginLeft)px !important;
-            }
+            }*/
             
             """
         }
         
         
         for fontName in UIFont.fontNames(forFamilyName: currentFont) {
+            continue
 //            if let fontURL = readerCenter?.userFonts[fontName] {
             guard let fontDescriptor = readerConfig?.userFontDescriptors[fontName] else {
                 continue
@@ -775,5 +828,115 @@ extension FolioReader {
         }
         
         return style
+    }
+    
+    func cssFontFamilies() -> String {
+        UIFont.familyNames.map {
+            ".folioStyleFontFamily\($0.replacingOccurrences(of: " ", with: "_")) p { font-family: \"\($0)\" !important; }"
+        }.joined(separator: " ")
+    }
+    
+    func cssUserFontFaces() -> String {
+        guard let readerConfig = readerConfig else { return "" }
+        
+        return readerConfig.userFontDescriptors.compactMap { fontName, fontDescriptor -> String? in
+//                let ctFont = CTFontCreateWithName(fontName as CFString, CGFloat(currentFontSizeOnly), nil)
+//                let ctFontSymbolicTrait = CTFontGetSymbolicTraits(ctFont)
+//                let ctFontTraits = CTFontCopyTraits(ctFont)
+//                let ctFontURL = unsafeBitCast(CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute), to: CFURL.self)
+            guard let ctFontURL = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontURLAttribute),
+                  CFGetTypeID(ctFontURL) == CFURLGetTypeID(),
+                  let fontURL = ctFontURL as? URL else {
+                      return nil
+                  }
+            
+            guard let ctFontFamilyName = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontFamilyNameAttribute),
+                  CFGetTypeID(ctFontFamilyName) == CFStringGetTypeID(),
+                  let fontFamilyName = ctFontFamilyName as? String else {
+                      return nil
+                  }
+            
+            var isItalic = false
+            var isBold = false
+            
+            var cssFontWeight = "normal"
+            
+            if let ctFontTraits = CTFontDescriptorCopyAttribute(fontDescriptor, kCTFontTraitsAttribute), CFGetTypeID(ctFontTraits) == CFDictionaryGetTypeID() {
+                if let ctFontSymbolicTrait = CFDictionaryGetValue(
+                    (ctFontTraits as! CFDictionary),
+                    unsafeBitCast(kCTFontSymbolicTrait, to: UnsafeRawPointer.self))  {
+                    
+                    var symTraitVal = UInt32()
+                    CFNumberGetValue(unsafeBitCast(ctFontSymbolicTrait, to: CFNumber.self), CFNumberType.intType, &symTraitVal)
+                    
+                    isItalic = symTraitVal & CTFontSymbolicTraits.traitItalic.rawValue > 0
+                    isBold = symTraitVal & CTFontSymbolicTraits.traitBold.rawValue > 0
+                    
+                    cssFontWeight = isBold ? "bold" : "normal"
+                }
+//                let isItalic = ctFontSymbolicTrait.contains(.traitItalic)
+//                let isBold = ctFontSymbolicTrait.contains(.traitBold)
+                
+                
+                if let weightRef = CFDictionaryGetValue(
+                    (ctFontTraits as! CFDictionary),
+                    unsafeBitCast(kCTFontWeightTrait, to: UnsafeRawPointer.self)) {
+                    
+                    var weightValue = Float()
+                    CFNumberGetValue(unsafeBitCast(weightRef, to: CFNumber.self), CFNumberType.floatType, &weightValue)
+                    if weightValue < -0.49 {
+                        cssFontWeight = "100"   //thin
+                    } else if weightValue < -0.29 {
+                        cssFontWeight = "200"   //extralight
+                    } else if weightValue < -0.19 {
+                        cssFontWeight = "300"   //light
+                    } else if weightValue < 0.01 {
+                        cssFontWeight = "400"   //normal
+                    } else if weightValue < 0.21 {
+                        cssFontWeight = "500"   //medium
+                    } else if weightValue < 0.31 {
+                        cssFontWeight = "600"   //semibold
+                    } else if weightValue < 0.41 {
+                        cssFontWeight = "700"   //bold
+                    } else if weightValue < 0.61 {
+                        cssFontWeight = "800"   //extrabold
+                    } else {
+                        cssFontWeight = "900"   //heavy
+                    }
+                }
+            }
+            
+            //prepare font hardlink
+            guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
+                return nil
+            }
+            if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false {
+                print("generateRuntimeStyle \(resourceBasePath)")
+            }
+            
+            let folioResPath = resourceBasePath.appendingPathComponent("_folio_res")
+
+            let toFontPath = folioResPath.appendingPathComponent(fontURL.lastPathComponent)
+
+            do {
+                if !FileManager.default.fileExists(atPath: folioResPath) {
+                    try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
+                }
+                
+                if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false  {
+                    print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+                }
+
+                if FileManager.default.fileExists(atPath: toFontPath) {
+                    try FileManager.default.removeItem(atPath: toFontPath)
+                }
+                try FileManager.default.linkItem(atPath: fontURL.path, toPath: toFontPath)
+            } catch {
+                return ""
+            }
+            
+            return "@font-face { font-family: \"\(fontFamilyName)\"; font-style: \(isItalic ? "italic" : "normal"); font-weight: \(cssFontWeight); src: url(\"\(toFontPath)\");} "
+            
+        }.joined(separator: " ")
     }
 }

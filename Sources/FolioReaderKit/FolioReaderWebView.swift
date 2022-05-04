@@ -62,6 +62,12 @@ open class FolioReaderWebView: WKWebView {
         FolioReaderScript.cssInjection.addIfNeeded(to: self)
         FolioReaderScript.readiumCFIJS.addIfNeeded(to: self)
         FolioReaderScript.bridgeJS.addIfNeeded(to: self)
+        FolioReaderScript(
+            source: FolioReaderScript.cssInjectionSource(for: folioReader.cssUserFontFaces(), id: "folio_style_user_font_faces")
+        ).addIfNeeded(to: self)
+        FolioReaderScript(
+            source: FolioReaderScript.cssInjectionSource(for: folioReader.cssFontFamilies(), id: "folio_style_font_families")
+        ).addIfNeeded(to: self)
     }
 
     required public init?(coder aDecoder: NSCoder) {

@@ -44,7 +44,7 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         if #available(iOS 11.0, *) {
             cell.webView?.scrollView.contentInsetAdjustmentBehavior = .never
         }
-        cell.webView?.cssRuntimeProperty = self.folioReader.generateRuntimeStyle()
+        //cell.webView?.cssRuntimeProperty = self.folioReader.generateRuntimeStyle()
         cell.webView?.setupScrollDirection()
         cell.webView?.frame = cell.webViewFrame()
         cell.delegate = self

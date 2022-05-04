@@ -359,7 +359,12 @@ function removeClass(ele,cls) {
     ele.className=ele.className.replace(reg,' ');
   }
 }
-
+function removeClasses(ele,cls) {
+  var reg = new RegExp('(\\s+|^)'+cls+'(\\s+|$)');
+  while (hasClass(ele,cls)) {
+    ele.className=ele.className.replace(reg,' ');
+  }
+}
 // Font name class
 function setFontName(cls) {
     var elm = document.documentElement;
