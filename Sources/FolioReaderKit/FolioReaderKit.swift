@@ -482,6 +482,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setStyleOverride: value.rawValue)
+            updateRuntimStyle(delay: 0.2)
         }
     }
     
@@ -596,7 +597,7 @@ setFolioStyle(
 )
 */
 {
-    let styleOverride = \(styleOverride.rawValue)
+    var styleOverride = \(styleOverride.rawValue)
 
     /*
     let pList = document.getElementsByTagName('p')
@@ -621,35 +622,20 @@ setFolioStyle(
     */
 
     removeClasses(document.body, 'folioStyle\\\\w+')
-    addClass(document.body, 'folioStyleBodyPaddingLeft\(currentMarginLeft/5)')
-    addClass(document.body, 'folioStyleBodyPaddingRight\(currentMarginRight/5)')
-    addClass(document.body, 'folioStyleFontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
-    addClass(document.body, 'folioStyleFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-    addClass(document.body, 'folioStyleFontWeight\(currentFontWeight)')
-    addClass(document.body, 'folioStyleLetterSpacing\(currentLetterSpacing)')
-    addClass(document.body, 'folioStyleLineHeight\(currentLineHeight)')
-    addClass(document.body, 'folioStyleMargin\(currentLineHeight)')
-    addClass(document.body, 'folioStyleTextIndent\(currentTextIndent+4)')
-
-    if (styleOverride > 1) {
-        addClass(document.body, 'folioStyleL2FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
-        addClass(document.body, 'folioStyleL2FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-        addClass(document.body, 'folioStyleL2FontWeight\(currentFontWeight)')
-        addClass(document.body, 'folioStyleL2LetterSpacing\(currentLetterSpacing)')
-        addClass(document.body, 'folioStyleL2LineHeight\(currentLineHeight)')
-        addClass(document.body, 'folioStyleL2Margin\(currentLineHeight)')
-        addClass(document.body, 'folioStyleL2TextIndent\(currentTextIndent+4)')
+    while (styleOverride > 0) {
+        var folioStyleLevel = 'folioStyleL' + styleOverride
+        addClass(document.body, folioStyleLevel + 'BodyPaddingLeft\(currentMarginLeft/5)')
+        addClass(document.body, folioStyleLevel + 'BodyPaddingRight\(currentMarginRight/5)')
+        addClass(document.body, folioStyleLevel + 'FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
+        addClass(document.body, folioStyleLevel + 'FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
+        addClass(document.body, folioStyleLevel + 'FontWeight\(currentFontWeight)')
+        addClass(document.body, folioStyleLevel + 'LetterSpacing\(currentLetterSpacing)')
+        addClass(document.body, folioStyleLevel + 'LineHeight\(currentLineHeight)')
+        addClass(document.body, folioStyleLevel + 'Margin\(currentLineHeight)')
+        addClass(document.body, folioStyleLevel + 'TextIndent\(currentTextIndent+4)')
+        styleOverride -= 1
     }
-
-    if (styleOverride > 2) {
-        addClass(document.body, 'folioStyleL3FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
-        addClass(document.body, 'folioStyleL3FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-        addClass(document.body, 'folioStyleL3FontWeight\(currentFontWeight)')
-        addClass(document.body, 'folioStyleL3LetterSpacing\(currentLetterSpacing)')
-        addClass(document.body, 'folioStyleL3LineHeight\(currentLineHeight)')
-        addClass(document.body, 'folioStyleL3Margin\(currentLineHeight)')
-        addClass(document.body, 'folioStyleL3TextIndent\(currentTextIndent+4)')
-    }
+    
 }
 /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
 1
@@ -830,10 +816,17 @@ setFolioStyle(
         return style
     }
     
+    static let CssLevelTags : [StyleOverrideTypes: String] = [.PNode: "p", .PlusTD: "td", .PlusSPAN: "span", .AllText: " "]
+    static func CssLevels(type: String, def: String) -> [String] {
+        CssLevelTags.map {
+            ".folioStyleL\($0.rawValue)\(type) \($1) { \(def) }"
+        }.sorted()
+    }
+    
     func cssFontFamilies() -> String {
         UIFont.familyNames.map {
-            ".folioStyleFontFamily\($0.replacingOccurrences(of: " ", with: "_")) p { font-family: \"\($0)\" !important; }"
-        }.joined(separator: " ")
+            FolioReader.CssLevels(type: "FontFamily\($0.replacingOccurrences(of: " ", with: "_"))", def: "font-family: \"\($0)\" !important;")
+        }.flatMap { $0 }.joined(separator: "\n")
     }
     
     func cssUserFontFaces() -> String {

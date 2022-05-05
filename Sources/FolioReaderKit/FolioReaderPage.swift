@@ -280,6 +280,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             var bridgeFinished = 1
             bridgeFinished
         """) { _ in
+            self.webView?.isHidden = false
+
             self.bridgeFinished()
         }
         
@@ -506,7 +508,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             print("\(#function) bridgeFinished size=\(self.book.spine.spineReferences[self.pageNumber-1].resource.size)")
             let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
             self.folioReader.updateRuntimStyle(delay: 0.2 + 0.1 * Double(fileSize / 51200)) {
-                self.webView?.isHidden = false
                 self.injectHighlights() {
                     self.delegate?.pageDidLoad?(self, navigating: nil)
                 }
