@@ -16,40 +16,6 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         let indexPath = getCurrentIndexPath(navigating: to)
         guard indexPath.row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
         
-        if self.readerConfig.loadSavedPositionForCurrentBook, let position = folioReader.savedPositionForCurrentBook {
-            let pageNumber = position["pageNumber"] as? Int
-
-            if isFirstLoad {
-                updateCurrentPage(page)
-                isFirstLoad = false
-
-                if self.currentPageNumber == pageNumber {
-                    var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
-                    
-                    delay(0.3) {
-                        if let chapterProgress = position["chapterProgress"] as? CGFloat {
-                            var pageOffsetByProgress = (page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
-                            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                                let page = floor(pageOffsetByProgress / self.pageWidth)
-                                pageOffsetByProgress = page * self.pageWidth
-                            }
-                            if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                                pageOffset = pageOffsetByProgress - self.pageHeight / 2
-                            }
-                        }
-                        if pageOffset > 0 {
-                            page.scrollPageToOffset(pageOffset, animated: false)
-                        }
-                    }
-                }
-            } else if (self.isScrolling == false && folioReader.needsRTLChange == true) {
-                page.scrollPageToBottom()
-            }
-        } else if isFirstLoad {
-            updateCurrentPage(page)
-            isFirstLoad = false
-        }
-
         updateCurrentPage(page)
         
         // UGLYFIX: to make share menu item appear on first attempt

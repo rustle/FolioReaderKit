@@ -261,12 +261,12 @@ open class FolioReaderCenter: UIViewController {
         self.setCollectionViewProgressiveDirection()
 
         if self.readerConfig.loadSavedPositionForCurrentBook {
-            guard let position = folioReader.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
-//            guard let position = self.readerConfig.savedPositionForCurrentBook, let pageNumber = position["pageNumber"] as? Int, pageNumber > 0 else {
-                self.currentPageNumber = 1
-                return
-            }
-
+            guard let position = folioReader.savedPositionForCurrentBook,
+                  let pageNumber = position["pageNumber"] as? Int,
+                  pageNumber > 0 else {
+                      self.currentPageNumber = 1
+                      return
+                  }
             self.changePageWith(page: pageNumber)
             self.currentPageNumber = pageNumber
         }

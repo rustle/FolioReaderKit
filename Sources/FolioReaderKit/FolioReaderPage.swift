@@ -293,6 +293,36 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 self.injectHighlights() {
                     self.webView?.isHidden = false
                     self.folioReader.readerCenter?.updateCurrentPage()
+                    
+                    guard let readerCenter = self.folioReader.readerCenter else { return }
+                    if readerCenter.isFirstLoad {
+                        
+                        if self.readerConfig.loadSavedPositionForCurrentBook,
+                           let position = self.folioReader.savedPositionForCurrentBook,
+                           self.pageNumber == position["pageNumber"] as? Int {
+                            var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
+                            
+                            delay(0.2) {
+                                if let chapterProgress = position["chapterProgress"] as? CGFloat {
+                                    var pageOffsetByProgress = (self.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
+                                    if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
+                                        let page = floor(pageOffsetByProgress / readerCenter.pageWidth)
+                                        pageOffsetByProgress = page * readerCenter.pageWidth
+                                    }
+                                    if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                                        pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2
+                                    }
+                                }
+                                if pageOffset > 0 {
+                                    self.scrollPageToOffset(pageOffset, animated: false)
+                                }
+                                readerCenter.isFirstLoad = false
+                            }
+                        }
+                    } else if readerCenter.isScrolling == false, self.folioReader.needsRTLChange {
+                        self.scrollPageToBottom()
+                    }
+
                 }
             }
         }
