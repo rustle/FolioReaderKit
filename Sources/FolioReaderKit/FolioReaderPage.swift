@@ -302,7 +302,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                            self.pageNumber == position["pageNumber"] as? Int {
                             var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
                             
-                            delay(0.2) {
+                            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
+                            let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
+                            delay(delaySec) {
                                 if let chapterProgress = position["chapterProgress"] as? CGFloat {
                                     var pageOffsetByProgress = (self.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
                                     if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
