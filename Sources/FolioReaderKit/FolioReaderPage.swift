@@ -125,8 +125,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.contentView.addSubview(panDeadZoneBot!)
         }
         
-        
-        
         if colorView == nil {
             colorView = UIView()
             colorView.backgroundColor = self.readerConfig.nightModeBackground
@@ -274,17 +272,31 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return
         }
         
-        webView.js("""
-            /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
-            document.body.style.minHeight = null
-            var bridgeFinished = 1
-            bridgeFinished
-        """) { _ in
-            self.webView?.isHidden = false
-
-            self.bridgeFinished()
+        print("\(#function) bridgeFinished pageNumber=\(String(describing: pageNumber))")
+        var preprocessor = ""
+        if folioReader.doClearClass {
+            preprocessor.append("removeBodyClass();tweakStyleOnly();")
+        }
+        if folioReader.doWrapPara {
+            preprocessor.append("reParagraph();removePSpace();")
         }
         
+        preprocessor.append("document.body.style.minHeight = null;")
+        
+        self.webView?.js(preprocessor) {_ in
+            print("\(#function) bridgeFinished size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
+            self.delegate?.pageDidLoad?(self, navigating: nil)
+            
+            self.updateRuntimStyle(delay: 0.2) {
+                print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
+                
+                self.injectHighlights() {
+                    self.webView?.isHidden = false
+                    self.folioReader.readerCenter?.updateCurrentPage()
+                }
+            }
+        }
+    
         // Add the custom class based onClick listener
         self.setupClassBasedOnClickListeners()
 
@@ -333,6 +345,46 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         decisionHandler(policy)
     }
 
+    func updateRuntimStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
+        guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
+
+        readerCenter.layoutAdapting = true
+        
+        webView.js(
+"""
+{
+    var styleOverride = \(folioReader.styleOverride.rawValue)
+
+    removeClasses(document.body, 'folioStyle\\\\w+')
+    addClass(document.body, 'folioStyleBodyPaddingLeft\(folioReader.currentMarginLeft/5)')
+    addClass(document.body, 'folioStyleBodyPaddingRight\(folioReader.currentMarginRight/5)')
+    while (styleOverride > 0) {
+        var folioStyleLevel = 'folioStyleL' + styleOverride
+        addClass(document.body, folioStyleLevel + 'FontFamily\(folioReader.currentFont.replacingOccurrences(of: " ", with: "_"))')
+        addClass(document.body, folioStyleLevel + 'FontSize\(folioReader.currentFontSize.replacingOccurrences(of: ".", with: ""))')
+        addClass(document.body, folioStyleLevel + 'FontWeight\(folioReader.currentFontWeight)')
+        addClass(document.body, folioStyleLevel + 'LetterSpacing\(folioReader.currentLetterSpacing)')
+        addClass(document.body, folioStyleLevel + 'LineHeight\(folioReader.currentLineHeight)')
+        addClass(document.body, folioStyleLevel + 'Margin\(folioReader.currentLineHeight)')
+        addClass(document.body, folioStyleLevel + 'TextIndent\(folioReader.currentTextIndent+4)')
+        styleOverride -= 1
+    }
+    
+}
+/*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
+1
+"""
+        ) { _ in
+            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
+            let delaySec = bySecond + 0.1 * Double(fileSize / 51200)
+            readerCenter.updateScrollPosition(delay: delaySec) {
+                readerCenter.updateCurrentPage()
+                readerCenter.layoutAdapting = false
+                completion?()
+            }
+        }
+    }
+    
     private func handlePolicy(for navigationAction: WKNavigationAction) -> Bool {
         let request = navigationAction.request
         
@@ -489,30 +541,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let response = message.body as? String else { return }
         if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
-        }
-    }
-    
-    func bridgeFinished() {
-        print("\(#function) \(String(describing: pageNumber))")
-        var preprocessor = ""
-        if folioReader.doClearClass {
-            preprocessor.append("removeBodyClass();tweakStyleOnly();")
-        }
-        if folioReader.doWrapPara {
-            preprocessor.append("reParagraph();removePSpace();")
-        }
-//        preprocessor.append("setFolioStyle('\(self.folioReader.generateRuntimeStyle().data(using: .utf8)!.base64EncodedString())');")
-        
-        preprocessor.append("1;")
-        self.webView?.js(preprocessor) {_ in
-            print("\(#function) bridgeFinished size=\(self.book.spine.spineReferences[self.pageNumber-1].resource.size)")
-            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
-            self.folioReader.updateRuntimStyle(delay: 0.2 + 0.1 * Double(fileSize / 51200)) {
-                self.injectHighlights() {
-                    self.delegate?.pageDidLoad?(self, navigating: nil)
-                }
-            }
-            
         }
     }
     

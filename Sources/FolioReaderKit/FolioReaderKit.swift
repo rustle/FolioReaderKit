@@ -286,7 +286,7 @@ extension FolioReader {
         }
         set (fontFamilyName) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFont: fontFamilyName)
-            updateRuntimStyle(delay: 0.4)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
 
@@ -300,7 +300,7 @@ extension FolioReader {
         }
         set (fontSize) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontSize: fontSize)
-            updateRuntimStyle(delay: 0.4)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -314,7 +314,7 @@ extension FolioReader {
         }
         set (fontWeight) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontWeight: fontWeight)
-            updateRuntimStyle(delay: 0.4)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -407,7 +407,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
-            updateRuntimStyle(delay: 0.4)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
 
@@ -418,7 +418,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
-            updateRuntimStyle(delay: 0.4)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
 
         }
     }
@@ -429,7 +429,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLetterSpacing: value)
-            updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
         }
     }
     
@@ -439,7 +439,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLineHeight: value)
-            updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
         }
     }
 
@@ -450,7 +450,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentTextIndent: value)
-            updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
         }
     }
     
@@ -482,7 +482,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setStyleOverride: value.rawValue)
-            updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
         }
     }
     
@@ -579,72 +579,6 @@ extension FolioReader {
         
         readerCenter.updateScrollPosition(delay: bySecond) {
             readerCenter.layoutAdapting = false
-        }
-    }
-    
-    func updateRuntimStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
-        guard let readerCenter = readerCenter, let webView = readerCenter.currentPage?.webView else { return }
-
-        readerCenter.layoutAdapting = true
-        
-        readerCenter.currentPage?.webView?.js(
-"""
-/*
-setFolioStyle(
-'\(generateRuntimeStyle()
-    .data(using: .utf8)!
-    .base64EncodedString())'
-)
-*/
-{
-    var styleOverride = \(styleOverride.rawValue)
-
-    /*
-    let pList = document.getElementsByTagName('p')
-    for (let i = 0; i < pList.length; i++) {
-        removeClasses(pList[i], 'folioStyle\\\\w+')
-        addClass(pList[i], 'folioStyleFontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
-        addClass(pList[i], 'folioStyleFontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-        addClass(pList[i], 'folioStyleFontWeight\(currentFontWeight)')
-        addClass(pList[i], 'folioStyleLetterSpacing\(currentLetterSpacing)')
-        addClass(pList[i], 'folioStyleLineHeight\(currentLineHeight)')
-        addClass(pList[i], 'folioStyleMargin\(currentLineHeight)')
-        addClass(pList[i], 'folioStyleTextIndent\(currentTextIndent+4)')
-    }
-    
-
-    let spanList = document.getElementsByTagName('span')
-    for (let i = 0; i < spanList.length; i++) {
-        removeClasses(spanList[i], 'folioStyle\\\\w+')
-        addClass(spanList[i], 'folioStyleLetterSpacing\(currentLetterSpacing)')
-        addClass(spanList[i], 'folioStyleLineHeight\(currentLineHeight)')
-    }
-    */
-
-    removeClasses(document.body, 'folioStyle\\\\w+')
-    while (styleOverride > 0) {
-        var folioStyleLevel = 'folioStyleL' + styleOverride
-        addClass(document.body, folioStyleLevel + 'BodyPaddingLeft\(currentMarginLeft/5)')
-        addClass(document.body, folioStyleLevel + 'BodyPaddingRight\(currentMarginRight/5)')
-        addClass(document.body, folioStyleLevel + 'FontFamily\(currentFont.replacingOccurrences(of: " ", with: "_"))')
-        addClass(document.body, folioStyleLevel + 'FontSize\(currentFontSize.replacingOccurrences(of: ".", with: ""))')
-        addClass(document.body, folioStyleLevel + 'FontWeight\(currentFontWeight)')
-        addClass(document.body, folioStyleLevel + 'LetterSpacing\(currentLetterSpacing)')
-        addClass(document.body, folioStyleLevel + 'LineHeight\(currentLineHeight)')
-        addClass(document.body, folioStyleLevel + 'Margin\(currentLineHeight)')
-        addClass(document.body, folioStyleLevel + 'TextIndent\(currentTextIndent+4)')
-        styleOverride -= 1
-    }
-    
-}
-/*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
-1
-"""
-        ) { _ in
-            readerCenter.updateScrollPosition(delay: bySecond) {
-                readerCenter.layoutAdapting = false
-                completion?()
-            }
         }
     }
     
