@@ -101,6 +101,11 @@ extension FolioReaderCenter {
             guard layoutAttributes.frame.maxX >= contentOffset.x,
                   layoutAttributes.frame.minX <= contentOffset.x + layoutAttributes.size.width
             else { return false }
+            
+            guard layoutAttributes.frame.maxY >= contentOffset.y,
+                  layoutAttributes.frame.minY <= contentOffset.y + layoutAttributes.size.height
+            else { return false }
+            
             return true
         }
         

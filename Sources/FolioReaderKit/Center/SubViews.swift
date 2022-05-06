@@ -211,7 +211,7 @@ extension FolioReaderCenter {
                 var pageOffset = (webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate)
                 // Fix the offset for paged scroll
                 if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                    let page = round(pageOffset / self.pageWidth)
+                    let page = floor(pageOffset / self.pageWidth)
                     pageOffset = (page * self.pageWidth)
                 }
 
