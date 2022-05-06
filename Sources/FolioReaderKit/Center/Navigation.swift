@@ -68,6 +68,12 @@ extension FolioReaderCenter {
                     document.body.style.minHeight = "\(totalPages * 100)vh"
                     """
                 )
+            } else {
+                page.webView?.js(
+                    """
+                    document.body.style.minHeight = "100vh"
+                    """
+                )
             }
 
             let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)

@@ -291,7 +291,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
                 
                 self.injectHighlights() {
-                    self.webView?.isHidden = false
+                    webView.isHidden = false
                     self.folioReader.readerCenter?.updateCurrentPage()
                     
                     guard let readerCenter = self.folioReader.readerCenter else { return }
@@ -450,6 +450,31 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         style.appendChild( document.createTextNode(cssText) )
     }
 
+    {
+        var viewport = document.querySelector("meta[name=viewport]");
+        if (viewport) {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+        } else {
+            var metaTag=document.createElement('meta');
+            metaTag.name = "viewport"
+            metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+            document.head.appendChild(metaTag);
+        }
+    }
+
+    {
+        var charset = document.querySelector("meta[charset]");
+        if (charset) {
+            charset.setAttribute('charset', 'utf-8');
+        } else {
+            var metaTag=document.createElement('meta');
+            metaTag.setAttribute("charset", "utf-8")
+            document.head.appendChild(metaTag);
+        }
+    }
+
+    themeMode(\(folioReader.themeMode))
+
     var styleOverride = \(folioReader.styleOverride.rawValue)
 
     removeClasses(document.body, 'folioStyle\\\\w+')
@@ -466,17 +491,22 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         addClass(document.body, folioStyleLevel + 'TextIndent\(folioReader.currentTextIndent+4)')
         styleOverride -= 1
     }
+
+    document.body.style.minHeight = "100vh";
 }
-/*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
+window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
 1
 """
         ) { _ in
             let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
             let delaySec = bySecond + 0.1 * Double(fileSize / 51200)
-            readerCenter.updateScrollPosition(delay: delaySec) {
-                readerCenter.updateCurrentPage()
-                readerCenter.layoutAdapting = false
-                completion?()
+            readerCenter.updateCurrentPage() {
+                readerCenter.updateScrollPosition(delay: delaySec) {
+                    readerCenter.updateCurrentPage() {
+                        readerCenter.layoutAdapting = false
+                        completion?()
+                    }
+                }
             }
         }
     }

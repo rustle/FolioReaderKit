@@ -59,7 +59,8 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         }
         
         // Inject viewport
-        let viewportTag = "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">"
+        if (false) {
+        let viewportTag = ""  //  "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0, shrink-to-fit=no\">"
         let initialRuntimeStyleCss = ""//folioReader.generateRuntimeStyle()
 
         let toInject = """
@@ -70,7 +71,9 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         </head>
         """
         html = html.replacingOccurrences(of: "</head>", with: toInject)
+        }
 
+        if (false) {
         // Font class name
         var classes = ""
         classes += " " + folioReader.currentMediaOverlayStyle.className()
@@ -99,7 +102,7 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         classes += " justifiedBlockMode"
         
         html = html.replacingOccurrences(of: "<html ", with: "<html class=\"\(classes)\" ")
-
+        }
         // Let the delegate adjust the html string
         if let modifiedHtmlContent = self.delegate?.htmlContentForPage(cell, htmlContent: html) {
             html = modifiedHtmlContent
@@ -111,7 +114,9 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             cell.webView?.loadFileURL(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
         }
         
-        cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
+        if (false) {
+            cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))
+        }
         return cell
     }
 
