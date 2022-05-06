@@ -8,6 +8,7 @@
 
 import Foundation
 import UIKit
+import GCDWebServer
 
 // MARK: - Internal constants
 
@@ -127,8 +128,11 @@ public class FolioReader: NSObject {
 
     deinit {
         removeObservers()
+        webServer.stop()
     }
 
+    let webServer = GCDWebServer()
+    
     /// Custom unzip path
     open var unzipPath: String?
 
@@ -865,5 +869,25 @@ extension FolioReader {
             return "@font-face { font-family: \"\(fontFamilyName)\"; font-style: \(isItalic ? "italic" : "normal"); font-weight: \(cssFontWeight); src: url(\"\(toFontPath)\");} "
             
         }.joined(separator: " ")
+    }
+}
+
+extension FolioReader {
+    open func initializeWebServer() -> Void {
+        webServer.addDefaultHandler(forMethod: "GET", request: GCDWebServerRequest.self) { request in
+            let path = request.path
+            print("\(#function) GCDREQUEST path=\(path)")
+            guard let fileResponse = GCDWebServerFileResponse(file: path) else { return GCDWebServerDataResponse(html:"<html><body><p>ERROR</p><p>Path: \(path)</body></html>") }
+            
+            if fileResponse.contentType.contains("text/") {
+                fileResponse.contentType += ";charset=utf-8"
+            }
+            return fileResponse
+        }
+        
+        try? webServer.start(options: [
+            GCDWebServerOption_BindToLocalhost: true,
+            GCDWebServerOption_AutomaticallySuspendInBackground: false
+        ])
     }
 }

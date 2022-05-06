@@ -610,6 +610,8 @@ window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + ge
             safariVC.view.tintColor = self.readerConfig.tintColor
             self.folioReader.readerCenter?.present(safariVC, animated: true, completion: nil)
             return false
+        } else if url.scheme == "http", url.host == "localhost", url.port == folioReader.webServer.port {
+            return true
         } else {
             // Check if the url is a custom class based onClick listerner
             var isClassBasedOnClickListenerScheme = false

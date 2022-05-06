@@ -111,7 +111,17 @@ extension FolioReaderCenter: UICollectionViewDataSource {
         if let resourceBasePath = self.book.smils.basePath {
             let contentURL = URL(fileURLWithPath: resource.fullHref)
             print("\(#function) CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
-            cell.webView?.loadFileURL(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
+//            cell.webView?.loadFileURL(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
+            var urlComponents = URLComponents()
+            urlComponents.scheme = "http"
+            urlComponents.host = "localhost"
+            urlComponents.port = Int(folioReader.webServer.port)
+            urlComponents.path = contentURL.path
+            if let url = urlComponents.url {
+                cell.webView?.load(URLRequest(url: url))
+            } else {
+                
+            }
         }
         
         if (false) {
