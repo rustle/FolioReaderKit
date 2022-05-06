@@ -215,9 +215,14 @@ function injectHighlights(highlightJSONDataEncodedArray) {
     
     oHighlightArray.forEach( (oHighlight) => {
         try {
+            var id = oHighlight.highlightId
+            var elem = document.getElementById(id)
+            if (elem) {
+                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception duplicate " + JSON.stringify(oHighlight))
+            }
             injectHighlight(oHighlight)
         } catch (e) {
-            window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception " + JSON.stringify(oHighlight) + " " + e)
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception " + e + " " + JSON.stringify(oHighlight))
         }
     } )
 }

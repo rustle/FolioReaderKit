@@ -211,15 +211,10 @@ extension FolioReaderCenter {
         self.collectionViewLayout.invalidateLayout()
         self.collectionView.layoutIfNeeded()
         
-        delay(0.1) {
+        delay(0.4) {
             let indexPaths = self.collectionView.indexPathsForVisibleItems
             if indexPaths.contains(indexPath) {
-                delay(0.2) {
-                    if let page = self.collectionView.cellForItem(at: indexPath) as? FolioReaderPage, page.isHidden {
-                        page.delegate?.pageDidLoad?(page, navigating: indexPath)
-                    }
-                    completion?()
-                }
+                completion?()
             } else {
                 self.changePageWith(indexPath: indexPath, animated: animated, completion: completion)
             }

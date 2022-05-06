@@ -284,7 +284,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         preprocessor.append("document.body.style.minHeight = null;")
         
         self.webView?.js(preprocessor) {_ in
-            print("\(#function) bridgeFinished size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
+            print("\(#function) bridgeFinished pageNumber=\(String(describing: self.pageNumber)) size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
             self.delegate?.pageDidLoad?(self, navigating: nil)
             
             self.updateRuntimStyle(delay: 0.2) {
