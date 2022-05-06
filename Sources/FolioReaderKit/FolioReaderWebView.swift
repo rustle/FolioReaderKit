@@ -22,7 +22,7 @@ open class FolioReaderWebView: WKWebView {
     let cssOverflowPropertyID = "folio_style_html_overflow"
     fileprivate(set) var cssOverflowProperty = "scroll" {
         didSet {
-            FolioReaderScript.cssInjection(overflow: cssOverflowProperty, id: cssOverflowPropertyID).addIfNeeded(to: self)
+//            FolioReaderScript.cssInjection(overflow: cssOverflowProperty, id: cssOverflowPropertyID).addIfNeeded(to: self)
         }
     }
 

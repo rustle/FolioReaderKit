@@ -214,7 +214,11 @@ function injectHighlights(highlightJSONDataEncodedArray) {
     var oHighlightArray = JSON.parse(sHighlightJsonArray);
     
     oHighlightArray.forEach( (oHighlight) => {
-        injectHighlight(oHighlight)
+        try {
+            injectHighlight(oHighlight)
+        } catch (e) {
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception " + JSON.stringify(oHighlight) + " " + e)
+        }
     } )
 }
 

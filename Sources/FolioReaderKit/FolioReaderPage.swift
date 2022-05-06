@@ -377,6 +377,46 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         decisionHandler(policy)
     }
 
+    func updateOverflowStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
+        guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
+        
+        readerCenter.layoutAdapting = true
+        
+        webView.js(
+"""
+    {
+        var overflow = "\(webView.cssOverflowProperty)"
+        var head = document.head
+        var style = document.getElementById("folio_style_overflow")
+        if (style == null) {
+            style = document.createElement('style')
+            style.type = "text/css"
+            style.id = "folio_style_overflow"
+            head.appendChild(style)
+        }
+        while (style.firstChild) {
+            style.removeChild(style.firstChild)
+        }
+        
+        var cssText = "html { overflow: " + overflow + " !important; }"
+        if (overflow == "-webkit-paged-x") {
+            cssText += " body { min-height: 100vh; !important; }"
+        }
+        style.appendChild( document.createTextNode(cssText) )
+
+        document.body.style.minHeight = null;
+    }
+/*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
+1
+"""
+        ) { _ in
+            delay(bySecond) {
+                readerCenter.layoutAdapting = false
+                completion?()
+            }
+        }
+    }
+    
     func updateRuntimStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
         guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
 
@@ -385,6 +425,27 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView.js(
 """
 {
+    {
+        var overflow = "\(webView.cssOverflowProperty)"
+        var head = document.head
+        var style = document.getElementById("folio_style_overflow")
+        if (style == null) {
+            style = document.createElement('style')
+            style.type = "text/css"
+            style.id = "folio_style_overflow"
+            head.appendChild(style)
+        }
+        while (style.firstChild) {
+            style.removeChild(style.firstChild)
+        }
+        
+        var cssText = "html { overflow: " + overflow + " !important; }"
+        if (overflow == "-webkit-paged-x") {
+            cssText += " body { min-height: 100vh; !important; }"
+        }
+        style.appendChild( document.createTextNode(cssText) )
+    }
+
     var styleOverride = \(folioReader.styleOverride.rawValue)
 
     removeClasses(document.body, 'folioStyle\\\\w+')
@@ -401,7 +462,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         addClass(document.body, folioStyleLevel + 'TextIndent\(folioReader.currentTextIndent+4)')
         styleOverride -= 1
     }
-    
 }
 /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
 1
