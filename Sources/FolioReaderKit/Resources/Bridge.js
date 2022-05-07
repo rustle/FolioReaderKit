@@ -207,6 +207,11 @@ function tweakStyleOnly() {
     tds.forEach((item) => {
         item.removeAttribute("class")
     })
+    
+    var fonts = [...document.getElementsByTagName('font')]
+    fonts.forEach((item) => {
+        item.removeAttribute("size")
+    })
 }
 
 function injectHighlights(highlightJSONDataEncodedArray) {
