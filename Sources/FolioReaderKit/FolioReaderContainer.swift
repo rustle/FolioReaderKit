@@ -169,7 +169,8 @@ open class FolioReaderContainer: UIViewController {
                     let parsedBook = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
                     self.book = parsedBook
                     self.folioReader.isReaderOpen = true
-
+                    self.folioReader.initializeWebServer()
+                    
                     // Reload data
                     DispatchQueue.main.async {
                         if let position = self.readerConfig.savedPositionForCurrentBook {

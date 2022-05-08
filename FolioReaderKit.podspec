@@ -35,4 +35,5 @@ Pod::Spec.new do |s|
   s.dependency 'AEXML', '~> 4.0'
   s.dependency 'FontBlaster', '~> 5.0'
   s.dependency 'GCDWebServer', '~> 3.0'
+  s.dependency 'ZIPFoundation', '~> 0.9'
 end

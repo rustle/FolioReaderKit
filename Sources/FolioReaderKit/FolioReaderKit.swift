@@ -9,6 +9,7 @@
 import Foundation
 import UIKit
 import GCDWebServer
+import ZIPFoundation
 
 // MARK: - Internal constants
 
@@ -837,51 +838,144 @@ extension FolioReader {
                 }
             }
             
-            //prepare font hardlink
-            guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
-                return nil
-            }
-            if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false {
-                print("generateRuntimeStyle \(resourceBasePath)")
-            }
-            
-            let folioResPath = resourceBasePath.appendingPathComponent("_folio_res")
-
-            let toFontPath = folioResPath.appendingPathComponent(fontURL.lastPathComponent)
-
-            do {
-                if !FileManager.default.fileExists(atPath: folioResPath) {
-                    try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
+            if false {
+                //prepare font hardlink
+                guard let resourceBasePath = self.readerContainer?.book.smils.basePath else {
+                    return nil
+                }
+                if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false {
+                    print("generateRuntimeStyle \(resourceBasePath)")
                 }
                 
-                if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false  {
-                    print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+                let folioResPath = resourceBasePath.appendingPathComponent("_folio_res")
+                
+                let toFontPath = folioResPath.appendingPathComponent(fontURL.lastPathComponent)
+                
+                do {
+                    if !FileManager.default.fileExists(atPath: folioResPath) {
+                        try FileManager.default.createDirectory(atPath: folioResPath, withIntermediateDirectories: false, attributes: nil)
+                    }
+                    
+                    if self.readerContainer?.readerConfig.debug.contains(.htmlStyling) ?? false  {
+                        print("generateRuntimeStyle linkItem \(fontURL.path) \(toFontPath)")
+                    }
+                    
+                    if FileManager.default.fileExists(atPath: toFontPath) {
+                        try FileManager.default.removeItem(atPath: toFontPath)
+                    }
+                    try FileManager.default.linkItem(atPath: fontURL.path, toPath: toFontPath)
+                } catch {
+                    return ""
                 }
-
-                if FileManager.default.fileExists(atPath: toFontPath) {
-                    try FileManager.default.removeItem(atPath: toFontPath)
-                }
-                try FileManager.default.linkItem(atPath: fontURL.path, toPath: toFontPath)
-            } catch {
-                return ""
             }
             
-            return "@font-face { font-family: \"\(fontFamilyName)\"; font-style: \(isItalic ? "italic" : "normal"); font-weight: \(cssFontWeight); src: url(\"\(toFontPath)\");} "
+            return "@font-face { font-family: \"\(fontFamilyName)\"; font-style: \(isItalic ? "italic" : "normal"); font-weight: \(cssFontWeight); src: url(\"/_fonts/\(fontURL.lastPathComponent)\");} "
             
         }.joined(separator: " ")
     }
 }
 
+struct UncompressError: Error {
+    
+}
+
 extension FolioReader {
     open func initializeWebServer() -> Void {
+        print("\(#function) book=\(readerContainer?.book)")
+        
         webServer.addDefaultHandler(forMethod: "GET", request: GCDWebServerRequest.self) { request in
-            let path = request.path
+            guard let path = request.path.removingPercentEncoding else { return GCDWebServerErrorResponse()}
             print("\(#function) GCDREQUEST path=\(path)")
-            guard let fileResponse = GCDWebServerFileResponse(file: path) else { return GCDWebServerDataResponse(html:"<html><body><p>ERROR</p><p>Path: \(path)</body></html>") }
             
-            if fileResponse.contentType.contains("text/") {
-                fileResponse.contentType += ";charset=utf-8"
+            var pathSegs = path.split(separator: "/")
+            let fileName = pathSegs.removeFirst()
+            let resourcePath = pathSegs.joined(separator: "/")
+            
+            guard let fileURL =
+                try? FileManager.default.url(for: .documentDirectory,
+                                        in: .userDomainMask,
+                                        appropriateFor: nil,
+                                        create: false)
+                    .appendingPathComponent("Downloaded Books", isDirectory: true).appendingPathComponent(String(fileName), isDirectory: false)
+            else { return GCDWebServerErrorResponse() }
+            
+            guard let archive = Archive(url: fileURL, accessMode: .read, preferredEncoding: .utf8) else { return GCDWebServerErrorResponse() }
+            guard let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
+            var contentType = GCDWebServerGetMimeTypeForExtension(resourcePath.pathExtension, nil)
+            if contentType.contains("text/") {
+                contentType += ";charset=utf-8"
             }
+            
+            var dataQueue = [Data]()
+            var isError = false
+            
+            func getData() -> Data {
+                while( dataQueue.isEmpty && isError == false ) {
+                    Thread.sleep(forTimeInterval: 0.001)
+                }
+                if isError {
+                    return Data()
+                }
+                return dataQueue.removeFirst()
+            }
+            
+            let streamResponse = GCDWebServerStreamedResponse(
+                contentType: contentType,
+                asyncStreamBlock: { block in
+                    DispatchQueue.init(label: "async-stream-block", qos: .userInteractive).async {
+                        let data = getData()
+                        print("\(#function) async-stream-block \(resourcePath) dataCount=\(data.count)")
+                        DispatchQueue.main.async {
+                            if isError {
+                                block(nil, UncompressError())
+                            } else {
+                                block(data, nil)
+                            }
+                        }
+                    }
+                }
+            )
+            
+            var totalCount = 0
+            let entrySize = entry.uncompressedSize
+            DispatchQueue.init(label: "zipfile-deflate", qos: .userInitiated).async {
+                do {
+                    try archive.extract(entry) { data in
+                        while( dataQueue.count > 4) {
+                            Thread.sleep(forTimeInterval: 0.001)
+                        }
+                        dataQueue.append(Data(data))
+                        totalCount += data.count
+                        if totalCount >= entrySize {
+                            dataQueue.append(Data())
+                        }
+                        print("\(#function) zipfile-deflate \(resourcePath) dataCount=\(data.count)")
+                    }
+                } catch {
+                    isError = true
+                }
+            }
+            
+//            guard let fileResponse = GCDWebServerFileResponse(file: path) else { return GCDWebServerDataResponse(html:"<html><body><p>ERROR</p><p>Path: \(path)</body></html>") }
+//
+//            if fileResponse.contentType.contains("text/") {
+//                fileResponse.contentType += ";charset=utf-8"
+//            }
+//            return fileResponse
+            return streamResponse
+        }
+        
+        webServer.addHandler(forMethod: "GET", pathRegex: "(otf|ttf)$", request: GCDWebServerRequest.self) { request in
+            let fileName = request.path.lastPathComponent
+            print("\(#function) GCDREQUEST FONT fileName=\(fileName) path=\(request.path)")
+
+            guard let documentDirectory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            else { return nil }
+            
+            let fontFileURL = documentDirectory.appendingPathComponent("Fonts",  isDirectory: true).appendingPathComponent(fileName, isDirectory: false)
+            
+            guard let fileResponse = GCDWebServerFileResponse(file: fontFileURL.path) else { return GCDWebServerErrorResponse() }
+            
             return fileResponse
         }
         

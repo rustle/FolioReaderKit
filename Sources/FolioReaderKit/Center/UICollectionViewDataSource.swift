@@ -116,12 +116,16 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             urlComponents.scheme = "http"
             urlComponents.host = "localhost"
             urlComponents.port = Int(folioReader.webServer.port)
-            urlComponents.path = contentURL.path
-            if let url = urlComponents.url {
-                cell.webView?.load(URLRequest(url: url))
-            } else {
-                
-            }
+//            urlComponents.path = contentURL.path
+            
+            guard let fileName = self.book.name,
+                  let resourceHref = resource.href
+            else { return cell }
+            guard let path = ["", fileName, self.book.opfResource.href.deletingLastPathComponent, resourceHref].joined(separator: "/").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return cell }
+            
+            urlComponents.path = path
+            guard let url = urlComponents.url else { return cell }
+            cell.webView?.load(URLRequest(url: url))
         }
         
         if (false) {
