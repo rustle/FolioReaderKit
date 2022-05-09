@@ -54,9 +54,10 @@ extension FolioReaderCenter: UICollectionViewDataSource {
 
         // Configure the cell
         let resource = self.book.spine.spineReferences[indexPath.row].resource
-        guard var html = try? String(contentsOfFile: resource.fullHref, encoding: String.Encoding.utf8) else {
-            return cell
-        }
+//        guard var html = try? String(contentsOfFile: resource.fullHref, encoding: String.Encoding.utf8) else {
+//            return cell
+//        }
+        var html = ""
         
         // Inject viewport
         if (false) {
@@ -108,25 +109,26 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             html = modifiedHtmlContent
         }
         
-        if let resourceBasePath = self.book.smils.basePath {
-            let contentURL = URL(fileURLWithPath: resource.fullHref)
-            print("\(#function) CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
+//        if let resourceBasePath = self.book.smils.basePath {
+//            let contentURL = URL(fileURLWithPath: resource.fullHref)
+//            print("\(#function) CONFIG \(cell.debugDescription) \(cell.webView.debugDescription) \(contentURL) \(resourceBasePath)")
 //            cell.webView?.loadFileURL(contentURL, allowingReadAccessTo: URL(fileURLWithPath: resourceBasePath))
-            var urlComponents = URLComponents()
-            urlComponents.scheme = "http"
-            urlComponents.host = "localhost"
-            urlComponents.port = Int(folioReader.webServer.port)
+            
 //            urlComponents.path = contentURL.path
             
             guard let fileName = self.book.name,
                   let resourceHref = resource.href
             else { return cell }
             guard let path = ["", fileName, self.book.opfResource.href.deletingLastPathComponent, resourceHref].joined(separator: "/").addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) else { return cell }
-            
+        
+            var urlComponents = URLComponents()
+            urlComponents.scheme = "http"
+            urlComponents.host = "localhost"
+            urlComponents.port = Int(folioReader.webServer.port)
             urlComponents.path = path
             guard let url = urlComponents.url else { return cell }
             cell.webView?.load(URLRequest(url: url))
-        }
+//        }
         
         if (false) {
             cell.loadHTMLString(html, baseURL: URL(fileURLWithPath: resource.fullHref.deletingLastPathComponent))

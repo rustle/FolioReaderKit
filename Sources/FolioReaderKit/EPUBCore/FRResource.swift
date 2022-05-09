@@ -16,7 +16,7 @@ open class FRResource: NSObject {
     
     public var href: String!
     public var fullHref: String!
-    public var size: Int?
+    public var size: UInt64?
 
     func basePath() -> String! {
         if href == nil || href.isEmpty { return nil }

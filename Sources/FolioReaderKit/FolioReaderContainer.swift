@@ -8,6 +8,7 @@
 
 import UIKit
 import FontBlaster
+import ZIPFoundation
 
 /// Reader container
 open class FolioReaderContainer: UIViewController {
@@ -166,10 +167,14 @@ open class FolioReaderContainer: UIViewController {
             DispatchQueue.global(qos: .userInitiated).async {
 
                 do {
-                    let parsedBook = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
+                    self.folioReader.epubArchive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8)
+                    guard let archive = self.folioReader.epubArchive else { throw FolioReaderError.errorInContainer }
+                    let parsedBook = try FREpubParserArchive(archive: archive).readEpub(epubPath: self.epubPath)
+//                    let parsedBookOld = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
                     self.book = parsedBook
-                    self.folioReader.isReaderOpen = true
                     self.folioReader.initializeWebServer()
+                    
+                    self.folioReader.isReaderOpen = true
                     
                     // Reload data
                     DispatchQueue.main.async {

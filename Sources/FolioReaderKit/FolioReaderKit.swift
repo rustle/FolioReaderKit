@@ -133,6 +133,7 @@ public class FolioReader: NSObject {
     }
 
     let webServer = GCDWebServer()
+    var epubArchive: Archive?
     
     /// Custom unzip path
     open var unzipPath: String?
@@ -502,29 +503,6 @@ extension FolioReader {
     }
 }
 
-// MARK: - Metadata
-
-extension FolioReader {
-
-    // TODO QUESTION: The static `getCoverImage` function used the shared instance before and ignored the `unzipPath` parameter.
-    // Should we properly implement the parameter (what has been done now) or should change the API to only use the current FolioReader instance?
-
-    /**
-     Read Cover Image and Return an `UIImage`
-     */
-    open class func getCoverImage(_ epubPath: String, unzipPath: String? = nil) throws -> UIImage {
-        return try FREpubParser().parseCoverImage(epubPath, unzipPath: unzipPath)
-    }
-
-    open class func getTitle(_ epubPath: String, unzipPath: String? = nil) throws -> String {
-        return try FREpubParser().parseTitle(epubPath, unzipPath: unzipPath)
-    }
-
-    open class func getAuthorName(_ epubPath: String, unzipPath: String? = nil) throws-> String {
-        return try FREpubParser().parseAuthorName(epubPath, unzipPath: unzipPath)
-    }
-}
-
 // MARK: - Exit, save and close FolioReader
 
 extension FolioReader {
@@ -891,15 +869,8 @@ extension FolioReader {
             let fileName = pathSegs.removeFirst()
             let resourcePath = pathSegs.joined(separator: "/")
             
-            guard let fileURL =
-                try? FileManager.default.url(for: .documentDirectory,
-                                        in: .userDomainMask,
-                                        appropriateFor: nil,
-                                        create: false)
-                    .appendingPathComponent("Downloaded Books", isDirectory: true).appendingPathComponent(String(fileName), isDirectory: false)
-            else { return GCDWebServerErrorResponse() }
             
-            guard let archive = Archive(url: fileURL, accessMode: .read, preferredEncoding: .utf8) else { return GCDWebServerErrorResponse() }
+            guard let archive = self.epubWIP: toward no-unzip folio readerArchive else { return GCDWebServerErrorResponse() }
             guard let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
             var contentType = GCDWebServerGetMimeTypeForExtension(resourcePath.pathExtension, nil)
             if contentType.contains("text/") {
