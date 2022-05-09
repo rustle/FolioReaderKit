@@ -18,6 +18,8 @@ internal let kApplicationDocumentsDirectory = NSSearchPathForDirectoriesInDomain
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
 
+internal let kGCDWebServerPreferredPort = 46436
+
 public enum FolioReaderError: Error, LocalizedError {
     case bookNotAvailable
     case errorInContainer
@@ -129,7 +131,6 @@ public class FolioReader: NSObject {
 
     deinit {
         removeObservers()
-        webServer.stop()
     }
 
     let webServer = GCDWebServer()
@@ -539,6 +540,7 @@ extension FolioReader {
     /// Closes and save the reader current instance.
     open func close() {
         self.saveReaderState() {
+            self.webServer.stop()
             self.isReaderOpen = false
             self.isReaderReady = false
             self.readerAudioPlayer?.stop(immediate: true)
@@ -881,12 +883,7 @@ extension FolioReader {
             var isError = false
             
             func getData() -> Data {
-                while( dataQueue.isEmpty && isError == false ) {
-                    Thread.sleep(forTimeInterval: 0.001)
-                }
-                if isError {
-                    return Data()
-                }
+                
                 return dataQueue.removeFirst()
             }
             
@@ -894,13 +891,16 @@ extension FolioReader {
                 contentType: contentType,
                 asyncStreamBlock: { block in
                     DispatchQueue.init(label: "async-stream-block", qos: .userInteractive).async {
-                        let data = getData()
-                        print("\(#function) async-stream-block \(resourcePath) dataCount=\(data.count)")
+                        while( dataQueue.isEmpty && isError == false ) {
+                            Thread.sleep(forTimeInterval: 0.001)
+                        }
+                        print("\(#function) async-stream-block \(resourcePath) dataQueueCount=\(dataQueue.count)")
+                        
                         DispatchQueue.main.async {
                             if isError {
                                 block(nil, UncompressError())
                             } else {
-                                block(data, nil)
+                                block(dataQueue.removeFirst(), nil)
                             }
                         }
                     }
@@ -915,10 +915,12 @@ extension FolioReader {
                         while( dataQueue.count > 4) {
                             Thread.sleep(forTimeInterval: 0.001)
                         }
-                        dataQueue.append(Data(data))
-                        totalCount += data.count
-                        if totalCount >= entrySize {
-                            dataQueue.append(Data())
+                        DispatchQueue.main.async {
+                            dataQueue.append(Data(data))
+                            totalCount += data.count
+                            if totalCount >= entrySize {
+                                dataQueue.append(Data())
+                            }
                         }
                         print("\(#function) zipfile-deflate \(resourcePath) dataCount=\(data.count)")
                     }
@@ -951,8 +953,24 @@ extension FolioReader {
         }
         
         try? webServer.start(options: [
+            GCDWebServerOption_Port: kGCDWebServerPreferredPort,
             GCDWebServerOption_BindToLocalhost: true,
             GCDWebServerOption_AutomaticallySuspendInBackground: false
         ])
+        
+        // fallback
+        if webServer.isRunning == false {
+            try? webServer.start(options: [
+                GCDWebServerOption_BindToLocalhost: true,
+                GCDWebServerOption_AutomaticallySuspendInBackground: false
+            ])
+            
+            if webServer.isRunning == false {
+                try? webServer.start(options: [
+                    GCDWebServerOption_BindToLocalhost: true
+                ])
+            }
+        }
+        
     }
 }
