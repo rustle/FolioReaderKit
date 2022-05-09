@@ -861,19 +861,18 @@ struct UncompressError: Error {
 
 extension FolioReader {
     open func initializeWebServer() -> Void {
-        print("\(#function) book=\(readerContainer?.book)")
-        
         webServer.addDefaultHandler(forMethod: "GET", request: GCDWebServerRequest.self) { request in
-            guard let path = request.path.removingPercentEncoding else { return GCDWebServerErrorResponse()}
+            guard let path = request.path.removingPercentEncoding else { return GCDWebServerErrorResponse() }
             print("\(#function) GCDREQUEST path=\(path)")
             
             var pathSegs = path.split(separator: "/")
-            let fileName = pathSegs.removeFirst()
+            guard pathSegs.count > 1 else { return GCDWebServerErrorResponse() }
+            pathSegs.removeFirst()
             let resourcePath = pathSegs.joined(separator: "/")
             
+            guard let archive = self.epubArchive,
+                  let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
             
-            guard let archive = self.epubArchive else { return GCDWebServerErrorResponse() }
-            guard let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
             var contentType = GCDWebServerGetMimeTypeForExtension(resourcePath.pathExtension, nil)
             if contentType.contains("text/") {
                 contentType += ";charset=utf-8"
@@ -881,11 +880,6 @@ extension FolioReader {
             
             var dataQueue = [Data]()
             var isError = false
-            
-            func getData() -> Data {
-                
-                return dataQueue.removeFirst()
-            }
             
             let streamResponse = GCDWebServerStreamedResponse(
                 contentType: contentType,
@@ -911,7 +905,7 @@ extension FolioReader {
             let entrySize = entry.uncompressedSize
             DispatchQueue.init(label: "zipfile-deflate", qos: .userInitiated).async {
                 do {
-                    try archive.extract(entry) { data in
+                    let _ = try archive.extract(entry) { data in
                         while( dataQueue.count > 4) {
                             Thread.sleep(forTimeInterval: 0.001)
                         }
@@ -930,12 +924,6 @@ extension FolioReader {
                 }
             }
             
-//            guard let fileResponse = GCDWebServerFileResponse(file: path) else { return GCDWebServerDataResponse(html:"<html><body><p>ERROR</p><p>Path: \(path)</body></html>") }
-//
-//            if fileResponse.contentType.contains("text/") {
-//                fileResponse.contentType += ";charset=utf-8"
-//            }
-//            return fileResponse
             return streamResponse
         }
         

@@ -416,18 +416,4 @@ class FREpubParserArchive: NSObject {
         
         return spine
     }
-
-    /// Skip a file from iCloud backup.
-    ///
-    /// - Parameter url: File URL
-    /// - Throws: Error if not possible
-    fileprivate func addSkipBackupAttributeToItemAtURL(_ url: URL) throws {
-        assert(FileManager.default.fileExists(atPath: url.path))
-
-        var urlToExclude = url
-        var resourceValues = URLResourceValues()
-        resourceValues.isExcludedFromBackup = true
-        try urlToExclude.setResourceValues(resourceValues)
-    }
-
 }

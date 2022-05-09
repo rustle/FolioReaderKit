@@ -89,7 +89,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.scrollView.showsVerticalScrollIndicator = false
             webView?.scrollView.showsHorizontalScrollIndicator = false
             webView?.backgroundColor = .clear
-            webView?.isHidden = true
             webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
             self.contentView.addSubview(webView!)
             if readerConfig.debug.contains(.borderHighlight) {
@@ -97,6 +96,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 webView?.layer.borderColor = UIColor.magenta.cgColor
             }
         }
+        webView?.isHidden = true
         webView?.navigationDelegate = self
 
         if panDeadZoneTop == nil {
@@ -272,6 +272,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return
         }
         
+        let pageNumber = self.pageNumber
+        
         print("\(#function) bridgeFinished pageNumber=\(String(describing: pageNumber))")
         var preprocessor = ""
         if folioReader.doClearClass {
@@ -284,51 +286,64 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         preprocessor.append("document.body.style.minHeight = null;")
         
         self.webView?.js(preprocessor) {_ in
+            guard self.pageNumber == pageNumber else { return }
+
             print("\(#function) bridgeFinished pageNumber=\(String(describing: self.pageNumber)) size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
             self.delegate?.pageDidLoad?(self, navigating: nil)
             
-            self.updateRuntimStyle(delay: 0.2) {
-                print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
-                
-                self.injectHighlights() {
-                    webView.isHidden = false
-                    self.folioReader.readerCenter?.updateCurrentPage()
-                    
-                    guard let readerCenter = self.folioReader.readerCenter else { return }
-                    if readerCenter.isFirstLoad {
-                        
-                        if self.readerConfig.loadSavedPositionForCurrentBook,
-                           let position = self.folioReader.savedPositionForCurrentBook,
-                           self.pageNumber == position["pageNumber"] as? Int {
-                            var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
-                            
-                            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
-                            let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
-                            delay(delaySec) {
-                                if let chapterProgress = position["chapterProgress"] as? CGFloat {
-                                    var pageOffsetByProgress = (self.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
-                                    if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
-                                        let page = floor(pageOffsetByProgress / readerCenter.pageWidth)
-                                        pageOffsetByProgress = page * readerCenter.pageWidth
-                                    }
-                                    if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                                        pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2
-                                    }
-                                }
-                                if pageOffset > 0 {
-                                    if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
-                                        let page = floor(pageOffset / readerCenter.pageWidth)
-                                        pageOffset = (page * readerCenter.pageWidth)
-                                    }
-                                    self.scrollPageToOffset(pageOffset, animated: false)
-                                }
-                                readerCenter.isFirstLoad = false
-                            }
-                        }
-                    } else if readerCenter.isScrolling == false, self.folioReader.needsRTLChange {
-                        self.scrollPageToBottom()
-                    }
+            self.updateOverflowStyle(delay: 0.2) {
+                guard self.pageNumber == pageNumber else { return }
 
+                self.updateRuntimStyle(delay: 0.4) {
+                    guard self.pageNumber == pageNumber else { return }
+
+                    print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
+                    
+                    self.injectHighlights() {
+                        guard self.pageNumber == pageNumber else { return }
+
+                        guard let readerCenter = self.folioReader.readerCenter else { return }
+                        
+                        readerCenter.updateCurrentPage() {
+                            guard self.pageNumber == pageNumber else { return }
+
+                            if readerCenter.isFirstLoad {
+                                if self.readerConfig.loadSavedPositionForCurrentBook,
+                                   let position = self.folioReader.savedPositionForCurrentBook,
+                                   self.pageNumber == position["pageNumber"] as? Int {
+                                    var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
+                                    
+                                    let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
+                                    let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
+                                    delay(delaySec) {
+                                        if let chapterProgress = position["chapterProgress"] as? CGFloat {
+                                            var pageOffsetByProgress = (self.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
+                                            if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
+                                                let page = floor(pageOffsetByProgress / readerCenter.pageWidth)
+                                                pageOffsetByProgress = page * readerCenter.pageWidth
+                                            }
+                                            if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                                                pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2
+                                            }
+                                        }
+                                        if pageOffset > 0 {
+                                            if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
+                                                let page = floor(pageOffset / readerCenter.pageWidth)
+                                                pageOffset = (page * readerCenter.pageWidth)
+                                            }
+                                            self.scrollPageToOffset(pageOffset, animated: false)
+                                        }
+                                        readerCenter.isFirstLoad = false
+                                    }
+                                }
+                            } else if readerCenter.isScrolling == false, self.folioReader.needsRTLChange {
+                                self.scrollPageToBottom()
+                            }
+                            
+                            guard self.pageNumber == pageNumber else { return }
+                            webView.isHidden = false
+                        }
+                    }
                 }
             }
         }
@@ -388,28 +403,40 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         webView.js(
 """
-    {
-        var overflow = "\(webView.cssOverflowProperty)"
-        var head = document.head
-        var style = document.getElementById("folio_style_overflow")
-        if (style == null) {
-            style = document.createElement('style')
-            style.type = "text/css"
-            style.id = "folio_style_overflow"
-            head.appendChild(style)
-        }
-        while (style.firstChild) {
-            style.removeChild(style.firstChild)
-        }
-        
-        var cssText = "html { overflow: " + overflow + " !important; }"
-        if (overflow == "-webkit-paged-x") {
-            cssText += " body { min-height: 100vh; !important; }"
-        }
-        style.appendChild( document.createTextNode(cssText) )
-
-        document.body.style.minHeight = null;
+{
+    var viewport = document.querySelector("meta[name=viewport]");
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+    } else {
+        var metaTag=document.createElement('meta');
+        metaTag.name = "viewport"
+        metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        document.head.appendChild(metaTag);
     }
+}
+
+{
+    var overflow = "\(webView.cssOverflowProperty)"
+    var head = document.head
+    var style = document.getElementById("folio_style_overflow")
+    if (style == null) {
+        style = document.createElement('style')
+        style.type = "text/css"
+        style.id = "folio_style_overflow"
+        head.appendChild(style)
+    }
+    while (style.firstChild) {
+        style.removeChild(style.firstChild)
+    }
+    
+    var cssText = "html { overflow: " + overflow + " !important; }"
+    if (overflow == "-webkit-paged-x") {
+        cssText += " body { min-height: 100vh; !important; }"
+    }
+    style.appendChild( document.createTextNode(cssText) )
+
+    document.body.style.minHeight = null;
+}
 /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
 1
 """
@@ -429,50 +456,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView.js(
 """
 {
-    {
-        var overflow = "\(webView.cssOverflowProperty)"
-        var head = document.head
-        var style = document.getElementById("folio_style_overflow")
-        if (style == null) {
-            style = document.createElement('style')
-            style.type = "text/css"
-            style.id = "folio_style_overflow"
-            head.appendChild(style)
-        }
-        while (style.firstChild) {
-            style.removeChild(style.firstChild)
-        }
-        
-        var cssText = "html { overflow: " + overflow + " !important; }"
-        if (overflow == "-webkit-paged-x") {
-            cssText += " body { min-height: 100vh; !important; }"
-        }
-        style.appendChild( document.createTextNode(cssText) )
-    }
-
-    {
-        var viewport = document.querySelector("meta[name=viewport]");
-        if (viewport) {
-            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
-        } else {
-            var metaTag=document.createElement('meta');
-            metaTag.name = "viewport"
-            metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
-            document.head.appendChild(metaTag);
-        }
-    }
-
-    {
-        var charset = document.querySelector("meta[charset]");
-        if (charset) {
-            charset.setAttribute('charset', 'utf-8');
-        } else {
-            var metaTag=document.createElement('meta');
-            metaTag.setAttribute("charset", "utf-8")
-            document.head.appendChild(metaTag);
-        }
-    }
-
     themeMode(\(folioReader.themeMode))
 
     var styleOverride = \(folioReader.styleOverride.rawValue)
@@ -776,33 +759,40 @@ window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + ge
      - parameter animated:              Enable or not scrolling animation
      */
     open func handleAnchor(_ anchor: String, offsetInWindow: CGFloat, avoidBeginningAnchors: Bool, animated: Bool) {
-        if !anchor.isEmpty {
-            getAnchorOffset(anchor) { offset in
-                switch self.readerConfig.scrollDirection {
-                case .vertical, .defaultVertical, .horizontalWithVerticalContent:
-                    let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
-                    
-                    var voffset = offset > offsetInWindow ?
-                        offset - offsetInWindow : offset
-                    
-                    if let contentHeight = self.webView?.scrollView.contentSize.height,
-                        voffset + (self.folioReader.readerCenter?.pageHeight ?? 0) - (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0) > contentHeight {
-                        voffset = contentHeight - (self.folioReader.readerCenter?.pageHeight ?? 0) + (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0)
-                    }
-                    
-                    if !avoidBeginningAnchors {
-                        self.scrollPageToOffset(voffset, animated: animated)
-                    } else if avoidBeginningAnchors && !isBeginning {
-                        self.scrollPageToOffset(voffset, animated: animated)
-                    }
-                case .horizontal:
-                    self.scrollPageToOffset(offset, animated: animated)
+        guard !anchor.isEmpty else { return }
+        
+        guard webView?.isHidden == false else {
+            delay(0.1) {
+                self.handleAnchor(anchor, offsetInWindow: offsetInWindow, avoidBeginningAnchors: avoidBeginningAnchors, animated: animated)
+            }
+            return
+        }
+        
+        getAnchorOffset(anchor) { offset in
+            switch self.readerConfig.scrollDirection {
+            case .vertical, .defaultVertical, .horizontalWithVerticalContent:
+                let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
+                
+                var voffset = offset > offsetInWindow ?
+                offset - offsetInWindow : offset
+                
+                if let contentHeight = self.webView?.scrollView.contentSize.height,
+                   voffset + (self.folioReader.readerCenter?.pageHeight ?? 0) - (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0) > contentHeight {
+                    voffset = contentHeight - (self.folioReader.readerCenter?.pageHeight ?? 0) + (self.readerContainer?.navigationController?.navigationBar.frame.height ?? 0)
                 }
                 
-                self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: self.pageNumber - 1)
-
-                self.webView?.js("highlightAnchorText('\(anchor)', 'highlight-yellow', 3)")
+                if !avoidBeginningAnchors {
+                    self.scrollPageToOffset(voffset, animated: animated)
+                } else if avoidBeginningAnchors && !isBeginning {
+                    self.scrollPageToOffset(voffset, animated: animated)
+                }
+            case .horizontal:
+                self.scrollPageToOffset(offset, animated: animated)
             }
+            
+            self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: self.pageNumber - 1)
+            
+            self.webView?.js("highlightAnchorText('\(anchor)', 'highlight-yellow', 3)")
         }
     }
 
