@@ -870,7 +870,7 @@ extension FolioReader {
             let resourcePath = pathSegs.joined(separator: "/")
             
             
-            guard let archive = self.epubWIP: toward no-unzip folio readerArchive else { return GCDWebServerErrorResponse() }
+            guard let archive = self.epubArchive else { return GCDWebServerErrorResponse() }
             guard let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
             var contentType = GCDWebServerGetMimeTypeForExtension(resourcePath.pathExtension, nil)
             if contentType.contains("text/") {
