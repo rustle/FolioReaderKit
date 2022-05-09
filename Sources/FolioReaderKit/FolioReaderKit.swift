@@ -884,7 +884,7 @@ extension FolioReader {
             let streamResponse = GCDWebServerStreamedResponse(
                 contentType: contentType,
                 asyncStreamBlock: { block in
-                    DispatchQueue.init(label: "async-stream-block", qos: .userInteractive).async {
+                    DispatchQueue.global(qos: .userInteractive).async {
                         while( dataQueue.isEmpty && isError == false ) {
                             Thread.sleep(forTimeInterval: 0.001)
                         }
@@ -903,7 +903,7 @@ extension FolioReader {
             
             var totalCount = 0
             let entrySize = entry.uncompressedSize
-            DispatchQueue.init(label: "zipfile-deflate", qos: .userInitiated).async {
+            DispatchQueue.global(qos: .userInitiated).async {
                 do {
                     let _ = try archive.extract(entry) { data in
                         while( dataQueue.count > 4) {
