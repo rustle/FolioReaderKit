@@ -915,8 +915,9 @@ extension FolioReader {
                         while( dataQueue.count > 4) {
                             Thread.sleep(forTimeInterval: 0.001)
                         }
+                        let d = Data(data)
                         DispatchQueue.main.async {
-                            dataQueue.append(Data(data))
+                            dataQueue.append(d)
                             totalCount += data.count
                             if totalCount >= entrySize {
                                 dataQueue.append(Data())
