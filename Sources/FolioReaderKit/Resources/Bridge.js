@@ -9,17 +9,7 @@
 var thisHighlight;
 var audioMarkClass;
 var wordsPerMinute = 180;
-
-document.addEventListener("DOMContentLoaded", function(event) {
-//    var lnk = document.getElementsByClassName("lnk");
-//    for (var i=0; i<lnk.length; i++) {
-//        lnk[i].setAttribute("onclick","return callVerseURL(this);");
-//    }
-    //removeOuterTable()
-    //removePSpace()
-    //removeBodyClass()
-    //reParagraph()
-});
+var writingMode;
 
 // Generate a GUID
 function guid() {
@@ -748,9 +738,23 @@ var callHighlightWithNoteURL = function(elm) {
 }
 
 // Reading time
-function getReadingTime() {
+function getReadingTime(lang) {
     var text = document.body.innerText;
     var totalWords = text.trim().split(/\s+/g).length;
+    if (text.length > totalWords * 20) {
+        var denominator = 4;
+        switch (lang) {
+            case "zh":
+                denominator = 2.5;
+                break;
+            case "ja":
+                denominator = 3;
+                break;
+            default:
+                break;
+        }
+        totalWords = text.length / denominator
+    }
     var wordsPerSecond = wordsPerMinute / 60; //define words per second based on words per minute
     var totalReadingTimeSeconds = totalWords / wordsPerSecond; //define total reading time in seconds
     var readingTimeMinutes = Math.round(totalReadingTimeSeconds / 60);

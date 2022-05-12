@@ -40,7 +40,7 @@ extension FolioReaderCenter {
         }
 
         scrollScrubber?.setSliderVal()
-        currentPage.webView?.js("getReadingTime()") { readingTime in
+        currentPage.webView?.js("getReadingTime(\"\(book.metadata.language)\")") { readingTime in
             self.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0")!
             self.pagesForCurrentPage(currentPage)
             self.delegate?.pageDidAppear?(currentPage)
@@ -58,23 +58,23 @@ extension FolioReaderCenter {
             let pageSize = self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight)
             let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
             self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
+            var minScreenCount = 1
             if self.readerConfig.scrollDirection == .horizontal {
-                var totalPages = self.pageIndicatorView?.totalPages ?? 1
-                if totalPages < 1 {
-                    totalPages = 1
+                minScreenCount = self.pageIndicatorView?.totalPages ?? minScreenCount
+                if minScreenCount < 1 {
+                    minScreenCount = 1
                 }
-                page.webView?.js(
-                    """
-                    document.body.style.minHeight = "\(totalPages * 100)vh"
-                    """
-                )
-            } else {
-                page.webView?.js(
-                    """
-                    document.body.style.minHeight = "100vh"
-                    """
-                )
             }
+            
+            page.webView?.js(
+                """
+                if (writingMode == 'vertical-rl') {
+                    document.body.style.minWidth = "\(minScreenCount * 100)vw"
+                } else {
+                    document.body.style.minHeight = "\(minScreenCount * 100)vh"
+                }
+                """
+            )
 
             let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
             let webViewPage = self.pageForOffset(pageOffSet, pageHeight: pageSize)

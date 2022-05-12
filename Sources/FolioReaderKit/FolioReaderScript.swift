@@ -73,11 +73,19 @@ class FolioReaderScript: WKUserScript {
         )
         
         cssStrings.append(contentsOf: (0...10).map {
-            ".folioStyleBodyPaddingLeft\($0) { padding-left: \(Double($0) * 2.5)vw !important; overflow: hidden !important; }"
+            ".folioStyleBodyPaddingLeft\($0) { padding-left: \(Double($0) * 2.5)vw !important; overflow: hidden !important;}"
         })
         
         cssStrings.append(contentsOf: (0...10).map {
-            ".folioStyleBodyPaddingRight\($0) { padding-right: \(Double($0) * 2.5)vw !important; overflow: hidden !important; }"
+            ".folioStyleBodyPaddingRight\($0) { padding-right: \(Double($0) * 2.5)vw !important; overflow: hidden !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingTop\($0) { padding-top: \(Double($0) * 2.5)vh !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingBottom\($0) { padding-bottom: \(Double($0) * 2.5)vh !important;}"
         })
         
         let cssString = cssStrings.joined(separator: "\n")

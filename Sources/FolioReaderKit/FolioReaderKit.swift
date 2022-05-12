@@ -134,6 +134,7 @@ public class FolioReader: NSObject {
     }
 
     let webServer = GCDWebServer()
+    let dateFormatter = DateFormatter()
     var epubArchive: Archive?
     
     /// Custom unzip path
@@ -392,7 +393,11 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
-            updateViewerLayout(delay: 0.2)
+            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
+                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
+            } else {
+                updateViewerLayout(delay: 0.2)
+            }
         }
     }
 
@@ -403,7 +408,11 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
-            updateViewerLayout(delay: 0.2)
+            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
+                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
+            } else {
+                updateViewerLayout(delay: 0.2)
+            }
         }
     }
 
@@ -414,7 +423,11 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
-            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
+            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
+                updateViewerLayout(delay: 0.2)
+            } else {
+                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
+            }
         }
     }
 
@@ -425,8 +438,11 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
-            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
-
+            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
+                updateViewerLayout(delay: 0.2)
+            } else {
+                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
+            }
         }
     }
     
@@ -861,6 +877,10 @@ struct UncompressError: Error {
 
 extension FolioReader {
     open func initializeWebServer() -> Void {
+        dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
+        dateFormatter.locale = Locale(identifier: "en_US")
+        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
+        
         webServer.addDefaultHandler(forMethod: "GET", request: GCDWebServerRequest.self) { request in
             guard let path = request.path.removingPercentEncoding else { return GCDWebServerErrorResponse() }
             print("\(#function) GCDREQUEST path=\(path)")
@@ -901,6 +921,11 @@ extension FolioReader {
                 }
             )
             
+            if let modificationDate = entry.fileAttributes[.modificationDate] as? Date {
+                streamResponse.setValue(self.dateFormatter.string(from: modificationDate), forAdditionalHeader: "Last-Modified")
+                streamResponse.cacheControlMaxAge = 86400
+            }
+            
             var totalCount = 0
             let entrySize = entry.uncompressedSize
             DispatchQueue.global(qos: .userInitiated).async {
@@ -927,7 +952,7 @@ extension FolioReader {
             return streamResponse
         }
         
-        webServer.addHandler(forMethod: "GET", pathRegex: "(otf|ttf)$", request: GCDWebServerRequest.self) { request in
+        webServer.addHandler(forMethod: "GET", pathRegex: "^/_fonts/.+?(otf|ttf)$", request: GCDWebServerRequest.self) { request in
             let fileName = request.path.lastPathComponent
             print("\(#function) GCDREQUEST FONT fileName=\(fileName) path=\(request.path)")
 
@@ -935,6 +960,7 @@ extension FolioReader {
             else { return nil }
             
             let fontFileURL = documentDirectory.appendingPathComponent("Fonts",  isDirectory: true).appendingPathComponent(fileName, isDirectory: false)
+            guard FileManager.default.fileExists(atPath: fontFileURL.path) else { return GCDWebServerErrorResponse() }
             
             guard let fileResponse = GCDWebServerFileResponse(file: fontFileURL.path) else { return GCDWebServerErrorResponse() }
             

@@ -47,6 +47,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open var panDeadZoneTop: UIView?
     open var panDeadZoneBot: UIView?
     
+    open var writingMode = "horizontal-tb"
+    
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
     fileprivate var menuIsVisible = false
@@ -175,19 +177,36 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
         let paddingTop: CGFloat = CGFloat(self.folioReader.currentMarginTop) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0))
         let paddingBottom: CGFloat = CGFloat(self.folioReader.currentMarginBottom) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0))
+        let paddingLeft: CGFloat = CGFloat(self.folioReader.currentMarginLeft) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0))
+        let paddingRight: CGFloat = CGFloat(self.folioReader.currentMarginRight) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0))
         
-        return CGRect(
-            x: bounds.origin.x,
-            y: self.readerConfig.isDirection(
-                bounds.origin.y + topComponentTotal,
-                bounds.origin.y + topComponentTotal + paddingTop,
-                bounds.origin.y + topComponentTotal),
-            width: bounds.width,
-            height: self.readerConfig.isDirection(
-                bounds.height - topComponentTotal,
-                bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
-                bounds.height - topComponentTotal)
-        )
+        if writingMode == "vertical-rl" {
+            return CGRect(
+                x: self.readerConfig.isDirection(
+                    bounds.origin.x,
+                    bounds.origin.x + paddingLeft,
+                    bounds.origin.x),
+                y: bounds.origin.y,
+                width: self.readerConfig.isDirection(
+                    bounds.width,
+                    bounds.width - paddingLeft - paddingRight,
+                    bounds.width),
+                height: bounds.height
+            )
+        } else {
+            return CGRect(
+                x: bounds.origin.x,
+                y: self.readerConfig.isDirection(
+                    bounds.origin.y + topComponentTotal,
+                    bounds.origin.y + topComponentTotal + paddingTop,
+                    bounds.origin.y + topComponentTotal),
+                width: bounds.width,
+                height: self.readerConfig.isDirection(
+                    bounds.height - topComponentTotal,
+                    bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
+                    bounds.height - topComponentTotal)
+            )
+        }
     }
     
     func webViewFrameVanilla() -> CGRect {
@@ -294,6 +313,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.updateOverflowStyle(delay: 0.2) {
                 guard self.pageNumber == pageNumber else { return }
 
+                if self.writingMode == "vertical-rl" {
+                    self.setNeedsLayout()       //resize webViewFrame
+                }
+                
                 self.updateRuntimStyle(delay: 0.4) {
                     guard self.pageNumber == pageNumber else { return }
 
@@ -429,18 +452,29 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         style.removeChild(style.firstChild)
     }
     
-    var cssText = "html { overflow: " + overflow + " !important; }"
+    writingMode = window.getComputedStyle(document.body).getPropertyValue("writing-mode")
+
+    var cssText = "html { overflow: " + overflow + " !important; display: block !important; text-align: justify !important;}"
     if (overflow == "-webkit-paged-x") {
-        cssText += " body { min-height: 100vh; !important; }"
+        if (writingMode == "vertical-rl") {
+            cssText += " body { min-width: 100vw; margin: 0 0 !important; }"
+        } else {
+            cssText += " body { min-height: 100vh; margin: 0 0 !important; }"
+        }
     }
     style.appendChild( document.createTextNode(cssText) )
 
     document.body.style.minHeight = null;
+    document.body.style.minWidth = null;
 }
 /*window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())*/
-1
+
+writingMode
 """
-        ) { _ in
+        ) { writingMode in
+            if let writingMode = writingMode {
+                self.writingMode = writingMode
+            }
             delay(bySecond) {
                 readerCenter.layoutAdapting = false
                 completion?()
@@ -461,8 +495,15 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     var styleOverride = \(folioReader.styleOverride.rawValue)
 
     removeClasses(document.body, 'folioStyle\\\\w+')
-    addClass(document.body, 'folioStyleBodyPaddingLeft\(folioReader.currentMarginLeft/5)')
-    addClass(document.body, 'folioStyleBodyPaddingRight\(folioReader.currentMarginRight/5)')
+    if (writingMode == 'vertical-rl') {
+        addClass(document.body, 'folioStyleBodyPaddingTop\(folioReader.currentMarginTop/5)')
+        addClass(document.body, 'folioStyleBodyPaddingBottom\(folioReader.currentMarginBottom/5)')
+        document.body.style.minWidth = "100vw";
+    } else {
+        addClass(document.body, 'folioStyleBodyPaddingLeft\(folioReader.currentMarginLeft/5)')
+        addClass(document.body, 'folioStyleBodyPaddingRight\(folioReader.currentMarginRight/5)')
+        document.body.style.minHeight = "100vh";
+    }
     while (styleOverride > 0) {
         var folioStyleLevel = 'folioStyleL' + styleOverride
         addClass(document.body, folioStyleLevel + 'FontFamily\(folioReader.currentFont.replacingOccurrences(of: " ", with: "_"))')
@@ -474,11 +515,15 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         addClass(document.body, folioStyleLevel + 'TextIndent\(folioReader.currentTextIndent+4)')
         styleOverride -= 1
     }
-
-    document.body.style.minHeight = "100vh";
 }
 window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
-1
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.documentElement).cssText)
+window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.body).cssText)
+
+window.webkit.messageHandlers.FolioReaderPage.postMessage("writingMode " + writingMode)
+
+writingMode
 """
         ) { _ in
             let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
