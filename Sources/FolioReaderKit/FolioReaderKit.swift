@@ -393,11 +393,10 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
-            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
-                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
-            } else {
-                updateViewerLayout(delay: 0.2)
-            }
+            readerCenter?.currentPage?.byWritingMode(
+                horizontal: { self.updateViewerLayout(delay: 0.2) },
+                vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
+            )
         }
     }
 
@@ -408,11 +407,10 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
-            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
-                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
-            } else {
-                updateViewerLayout(delay: 0.2)
-            }
+            readerCenter?.currentPage?.byWritingMode(
+                horizontal: { self.updateViewerLayout(delay: 0.2) },
+                vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
+            )
         }
     }
 
@@ -423,11 +421,10 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
-            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
-                updateViewerLayout(delay: 0.2)
-            } else {
-                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
-            }
+            readerCenter?.currentPage?.byWritingMode(
+                horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
+                vertical: { self.updateViewerLayout(delay: 0.2) }
+            )
         }
     }
 
@@ -438,11 +435,10 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
-            if readerCenter?.currentPage?.writingMode == "vertical-rl" {
-                updateViewerLayout(delay: 0.2)
-            } else {
-                readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
-            }
+            readerCenter?.currentPage?.byWritingMode(
+                horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
+                vertical: { self.updateViewerLayout(delay: 0.2) }
+            )
         }
     }
     

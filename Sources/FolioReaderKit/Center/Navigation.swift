@@ -335,7 +335,10 @@ extension FolioReaderCenter {
         let currentPageItem = getCurrentPageItemNumber()
         
         if totalPages > 0 {
-            var progress = Double(currentPageItem - 1) * 100.0 / Double(totalPages)
+            var progress = page.byWritingMode(
+                Double(currentPageItem - 1) * 100.0 / Double(totalPages),
+                100.0 - Double(currentPageItem - 1) * 100.0 / Double(totalPages)
+            )
             
             if progress < 0 { progress = 0 }
             if progress > 100 { progress = 100 }

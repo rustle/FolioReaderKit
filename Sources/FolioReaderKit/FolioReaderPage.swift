@@ -180,8 +180,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         let paddingLeft: CGFloat = CGFloat(self.folioReader.currentMarginLeft) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0))
         let paddingRight: CGFloat = CGFloat(self.folioReader.currentMarginRight) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0))
         
-        if writingMode == "vertical-rl" {
-            return CGRect(
+        return byWritingMode(
+            CGRect(
+                x: bounds.origin.x,
+                y: self.readerConfig.isDirection(
+                    bounds.origin.y + topComponentTotal,
+                    bounds.origin.y + topComponentTotal + paddingTop,
+                    bounds.origin.y + topComponentTotal),
+                width: bounds.width,
+                height: self.readerConfig.isDirection(
+                    bounds.height - topComponentTotal,
+                    bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
+                    bounds.height - topComponentTotal)
+            ),
+            CGRect(
                 x: self.readerConfig.isDirection(
                     bounds.origin.x,
                     bounds.origin.x + paddingLeft,
@@ -193,20 +205,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     bounds.width),
                 height: bounds.height
             )
-        } else {
-            return CGRect(
-                x: bounds.origin.x,
-                y: self.readerConfig.isDirection(
-                    bounds.origin.y + topComponentTotal,
-                    bounds.origin.y + topComponentTotal + paddingTop,
-                    bounds.origin.y + topComponentTotal),
-                width: bounds.width,
-                height: self.readerConfig.isDirection(
-                    bounds.height - topComponentTotal,
-                    bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
-                    bounds.height - topComponentTotal)
-            )
-        }
+        )
     }
     
     func webViewFrameVanilla() -> CGRect {
@@ -339,14 +338,16 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                     let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
                                     let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
                                     delay(delaySec) {
+                                        guard let contentSize = self.webView?.scrollView.contentSize else { return }
                                         if let chapterProgress = position["chapterProgress"] as? CGFloat {
-                                            var pageOffsetByProgress = (self.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * chapterProgress / 100
-                                            if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
+                                            var pageOffsetByProgress = contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress / 100
+                                            if readerCenter.pageWidth > 0,
+                                                self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
                                                 let page = floor(pageOffsetByProgress / readerCenter.pageWidth)
-                                                pageOffsetByProgress = page * readerCenter.pageWidth
+                                                pageOffsetByProgress = self.byWritingMode(page * readerCenter.pageWidth, contentSize.width - page * readerCenter.pageWidth)
                                             }
                                             if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                                                pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2
+                                                pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2     //TODO FIX for non-vertical layout
                                             }
                                         }
                                         if pageOffset > 0 {
@@ -922,4 +923,22 @@ writingMode
         return false
     }
     
+}
+
+extension FolioReaderPage {
+    func byWritingMode<T> (_ horizontal: T, _ vertical: T) -> T {
+        if writingMode == "vertical-rl" {
+            return vertical
+        } else {
+            return horizontal
+        }
+    }
+    
+    func byWritingMode (horizontal: () -> Void, vertical: () -> Void) {
+        if writingMode == "vertical-rl" {
+            vertical()
+        } else {
+            horizontal()
+        }
+    }
 }
