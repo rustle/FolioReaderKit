@@ -306,8 +306,9 @@ open class FolioReaderCenter: UIViewController {
             print("viewWillTransition size=\(size) newBounds=\(bounds) screenBounds=\(String(describing: screenBounds)) collectionViewFrame=\(collectionView.frame)")
         }
         
-        updateCurrentPage()
-        updatePageOffsetRate()
+//        updateCurrentPage() {     //cannot use async method
+            self.updatePageOffsetRate()
+//        }
         
         coordinator.animate { _ in
             
@@ -315,23 +316,31 @@ open class FolioReaderCenter: UIViewController {
             guard let currentPage = self.currentPage else {
                 return
             }
-            setPageProgressiveDirection(currentPage)
+            self.setPageProgressiveDirection(currentPage)
 
             // After rotation fix internal page offset
-            var pageOffset = (currentPage.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * self.pageOffsetRate
+            if let contentSize = currentPage.webView?.scrollView.contentSize {
+                var pageOffset = contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate
 
-            // Fix the offset for paged scroll
-            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                let page = currentPage.byWritingMode(floor(pageOffset / self.pageWidth), ceil(pageOffset / self.pageWidth))
-                pageOffset = page * self.pageWidth
+                // Fix the offset for paged scroll
+                if self.pageWidth > 0,
+                   currentPage.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                    let page = currentPage.byWritingMode(
+                        floor(pageOffset / self.pageWidth),
+                        ceil( (contentSize.width - pageOffset) / self.pageWidth)
+                    )
+                    pageOffset = currentPage.byWritingMode(page * self.pageWidth, contentSize.width - page * self.pageWidth)
+                }
+
+                let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
+                currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
             }
-
-            let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-            currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
-            
-            updateCurrentPage()
-            updatePageOffsetRate()
+            updateCurrentPage() {
+                updatePageOffsetRate()
+            }
         }
+        
+        
     }
     
     // MARK: NavigationBar Actions

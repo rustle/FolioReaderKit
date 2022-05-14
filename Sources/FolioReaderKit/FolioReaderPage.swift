@@ -351,9 +351,13 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                             }
                                         }
                                         if pageOffset > 0 {
-                                            if (self.readerConfig.scrollDirection == .horizontal && readerCenter.pageWidth != 0) {
-                                                let page = floor(pageOffset / readerCenter.pageWidth)
-                                                pageOffset = (page * readerCenter.pageWidth)
+                                            if readerCenter.pageWidth > 0,
+                                               self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                                                let page = self.byWritingMode(
+                                                    floor(pageOffset / readerCenter.pageWidth),
+                                                    ceil( (contentSize.width - pageOffset) / readerCenter.pageWidth)
+                                                )
+                                                pageOffset = self.byWritingMode(page * readerCenter.pageWidth, contentSize.width - page * readerCenter.pageWidth)
                                             }
                                             self.scrollPageToOffset(pageOffset, animated: false)
                                         }
