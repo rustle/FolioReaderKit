@@ -208,42 +208,43 @@ extension FolioReaderCenter {
         delay(0.1) {
             webView.setupScrollDirection()
             currentPage.updateOverflowStyle(delay: 0.5) {
-                var pageOffset = (webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate)
-                // Fix the offset for paged scroll
-                if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                    let page = floor(pageOffset / self.pageWidth)
-                    pageOffset = (page * self.pageWidth)
-                }
-
-                let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-                currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
-                
+                self.scrollWebViewByPageOffsetRate()
                 self.updateCurrentPage()
             }
         }
     }
 
     func updateScrollPosition(delay bySecond: Double = 0.1, completion: (() -> Void)?) {
-        guard let currentPage = currentPage else { return }
         // After rotation fix internal page offset
         
         self.updatePageOffsetRate()
         delay(bySecond) {
-            var pageOffset = (currentPage.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0) * self.pageOffsetRate
-
-            // Fix the offset for paged scroll
-            if (self.readerConfig.scrollDirection == .horizontal && self.pageWidth != 0) {
-                let page = round(pageOffset / self.pageWidth)
-                pageOffset = page * self.pageWidth
-            }
-
-            let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-            currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
-            
+            self.scrollWebViewByPageOffsetRate()
             self.updatePageOffsetRate()
             completion?()
         }
     }
+    
+    func scrollWebViewByPageOffsetRate() {
+        guard let currentPage = currentPage,
+              let webViewFrameSize = currentPage.webView?.frame.size,
+              webViewFrameSize.width > 0, webViewFrameSize.height > 0,
+              let contentSize = currentPage.webView?.scrollView.contentSize else { return }
+        
+        var pageOffset = contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate
+        
+        // Fix the offset for paged scroll
+        if currentPage.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+            let page = currentPage.byWritingMode(
+                floor( pageOffset / webViewFrameSize.width ),
+                max(floor( (contentSize.width - pageOffset) / webViewFrameSize.width), 1)
+            )
+            pageOffset = currentPage.byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
+        }
+        
+        currentPage.scrollPageToOffset(pageOffset, animated: true, retry: 0)
+    }
+    
     // MARK: Status bar and Navigation bar
 
     func hideBars() {

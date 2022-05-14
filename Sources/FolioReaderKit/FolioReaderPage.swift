@@ -338,29 +338,30 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                     let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
                                     let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
                                     delay(delaySec) {
-                                        guard let contentSize = self.webView?.scrollView.contentSize else { return }
+                                        let contentSize = webView.scrollView.contentSize
+                                        let webViewFrameSize = webView.frame.size
                                         if let chapterProgress = position["chapterProgress"] as? CGFloat {
-                                            var pageOffsetByProgress = contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress / 100
-                                            if readerCenter.pageWidth > 0,
-                                                self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
-                                                let page = floor(pageOffsetByProgress / readerCenter.pageWidth)
-                                                pageOffsetByProgress = self.byWritingMode(page * readerCenter.pageWidth, contentSize.width - page * readerCenter.pageWidth)
+                                            var pageOffsetByProgress = contentSize.forDirection(withConfiguration: self.readerConfig) * self.byWritingMode(
+                                                chapterProgress,
+                                                100 - chapterProgress - (100 * webViewFrameSize.width / contentSize.width)
+                                            ) / 100
+                                            if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                                                let page = self.byWritingMode(
+                                                    floor( pageOffsetByProgress / webViewFrameSize.width ),
+                                                    max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)
+                                                )
+                                                pageOffsetByProgress = self.byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
                                             }
                                             if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                                                pageOffset = pageOffsetByProgress - readerCenter.pageHeight / 2     //TODO FIX for non-vertical layout
-                                            }
-                                        }
-                                        if pageOffset > 0 {
-                                            if readerCenter.pageWidth > 0,
-                                               self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
-                                                let page = self.byWritingMode(
-                                                    floor(pageOffset / readerCenter.pageWidth),
-                                                    ceil( (contentSize.width - pageOffset) / readerCenter.pageWidth)
+                                                pageOffset = pageOffsetByProgress - self.byWritingMode(
+                                                    self.readerConfig.isDirection(readerCenter.pageHeight / 2, readerCenter.pageWidth / 2, readerCenter.pageHeight / 2),
+                                                    webViewFrameSize.width / 2
                                                 )
-                                                pageOffset = self.byWritingMode(page * readerCenter.pageWidth, contentSize.width - page * readerCenter.pageWidth)
                                             }
-                                            self.scrollPageToOffset(pageOffset, animated: false)
+                                            readerCenter.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
                                         }
+                                        
+                                        readerCenter.scrollWebViewByPageOffsetRate()
                                         readerCenter.isFirstLoad = false
                                     }
                                 }
@@ -779,7 +780,6 @@ writingMode
                     self.scrollPageToOffset(offset, animated: animated, retry: retry - 1)
                 }
             }
-            
         }
     }
 

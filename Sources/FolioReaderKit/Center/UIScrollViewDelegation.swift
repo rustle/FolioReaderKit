@@ -45,7 +45,10 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         // Update current reading page
         if (isCollectionScrollView == false), let page = currentPage, let webView = page.webView {
 
-            let pageSize = self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight)
+            let pageSize = page.byWritingMode(
+                self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
+                webView.frame.width
+            )
             let contentOffset = webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig)
             let contentSize = webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
             if (contentOffset + pageSize <= contentSize) {

@@ -55,8 +55,11 @@ extension FolioReaderCenter {
         guard let page = page, let webView = page.webView else { return }
 
         delay(0.2) {
-            let pageSize = self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight)
-            let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
+            let pageSize = page.byWritingMode(
+                self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
+                webView.frame.width
+            )
+            let contentSize = webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
             self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
             var minScreenCount = 1
             if self.readerConfig.scrollDirection == .horizontal {
@@ -310,14 +313,15 @@ extension FolioReaderCenter {
         return row <= rowCount
     }
 
-    
-    
     public func getCurrentPageItemNumber() -> Int {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         guard let page = currentPage, let webView = page.webView else { return 0 }
         
-        let pageSize = readerConfig.isDirection(pageHeight, pageWidth, pageHeight)
+        let pageSize = page.byWritingMode(
+            readerConfig.isDirection(pageHeight, pageWidth, pageHeight),
+            webView.frame.width
+        )
         let pageOffSet = readerConfig.isDirection(webView.scrollView.contentOffset.y, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
         let webViewPage = pageForOffset(pageOffSet, pageHeight: pageSize)
         
@@ -327,10 +331,13 @@ extension FolioReaderCenter {
     public func getCurrentPageProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        guard let page = currentPage else { return 0 }
+        guard let page = currentPage, let webView = page.webView else { return 0 }
         
-        let pageSize = self.readerConfig.isDirection(pageHeight, self.pageWidth, pageHeight)
-        let contentSize = page.webView?.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig) ?? 0
+        let pageSize = page.byWritingMode(
+            self.readerConfig.isDirection(pageHeight, pageWidth, pageHeight),
+            webView.frame.width
+        )
+        let contentSize = webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
         let totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
         let currentPageItem = getCurrentPageItemNumber()
         

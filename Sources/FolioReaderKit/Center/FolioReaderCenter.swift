@@ -313,28 +313,14 @@ open class FolioReaderCenter: UIViewController {
         coordinator.animate { _ in
             
         } completion: { [self] _ in
-            guard let currentPage = self.currentPage else {
+            guard let currentPage = currentPage else {
                 return
             }
-            self.setPageProgressiveDirection(currentPage)
+            setPageProgressiveDirection(currentPage)
 
             // After rotation fix internal page offset
-            if let contentSize = currentPage.webView?.scrollView.contentSize {
-                var pageOffset = contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate
-
-                // Fix the offset for paged scroll
-                if self.pageWidth > 0,
-                   currentPage.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
-                    let page = currentPage.byWritingMode(
-                        floor(pageOffset / self.pageWidth),
-                        ceil( (contentSize.width - pageOffset) / self.pageWidth)
-                    )
-                    pageOffset = currentPage.byWritingMode(page * self.pageWidth, contentSize.width - page * self.pageWidth)
-                }
-
-                let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: pageOffset), CGPoint(x: pageOffset, y: 0), CGPoint(x: 0, y: pageOffset))
-                currentPage.setScrollViewContentOffset(pageOffsetPoint, animated: true)
-            }
+            scrollWebViewByPageOffsetRate()
+            
             updateCurrentPage() {
                 updatePageOffsetRate()
             }
