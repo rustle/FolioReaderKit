@@ -166,7 +166,8 @@ extension FolioReaderCenter {
     
     // MARK: Change layout orientation
 
-    /// Get internal page offset before layout change
+    /// Get internal page offset before layout change.
+    /// Represent upper-left point regardless of layout
     func updatePageOffsetRate() {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
@@ -175,8 +176,14 @@ extension FolioReaderCenter {
         }
 
         let pageScrollView = webView.scrollView
-        let contentSize = pageScrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
-        let contentOffset = pageScrollView.contentOffset.forDirection(withConfiguration: self.readerConfig)
+        let contentSize = currentPage.byWritingMode(
+            pageScrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
+            pageScrollView.contentSize.width
+        )
+        let contentOffset = currentPage.byWritingMode(
+            pageScrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
+            pageScrollView.contentOffset.x
+        )
         self.pageOffsetRate = (contentSize != 0 ? (contentOffset / contentSize) : 0)
     }
 
@@ -200,16 +207,25 @@ extension FolioReaderCenter {
         self.setCollectionViewProgressiveDirection()
         delay(0.2) { self.setPageProgressiveDirection(currentPage) }
 
-
         /**
          *  This delay is needed because the page will not be ready yet
          *  so the delay wait until layout finished the changes.
          */
-        delay(0.1) {
+        
+        let fileSize = self.book.spine.spineReferences[safe: currentPage.pageNumber-1]?.resource.size ?? 102400
+        let delaySec = min(0.1 + 0.1 * Double(fileSize / 51200), 0.5)
+        delay(delaySec) {
             webView.setupScrollDirection()
             currentPage.updateOverflowStyle(delay: 0.5) {
                 self.scrollWebViewByPageOffsetRate()
                 self.updateCurrentPage()
+                
+                self.updateCurrentPage() {
+                    self.updateScrollPosition(delay: delaySec) {
+                        currentPage.updateStyleBackgroundPadding(delay: delaySec, completion: nil)
+                    }
+                }
+                
             }
         }
     }
@@ -231,7 +247,10 @@ extension FolioReaderCenter {
               webViewFrameSize.width > 0, webViewFrameSize.height > 0,
               let contentSize = currentPage.webView?.scrollView.contentSize else { return }
         
-        var pageOffset = contentSize.forDirection(withConfiguration: self.readerConfig) * self.pageOffsetRate
+        var pageOffset = currentPage.byWritingMode(
+            contentSize.forDirection(withConfiguration: self.readerConfig),
+            contentSize.width
+        ) * self.pageOffsetRate
         
         // Fix the offset for paged scroll
         if currentPage.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {

@@ -54,36 +54,23 @@ extension FolioReaderCenter {
 
         guard let page = page, let webView = page.webView else { return }
 
-        delay(0.2) {
-            let pageSize = page.byWritingMode(
-                self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
-                webView.frame.width
-            )
-            let contentSize = webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
-            self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-            var minScreenCount = 1
-            if self.readerConfig.scrollDirection == .horizontal {
-                minScreenCount = self.pageIndicatorView?.totalPages ?? minScreenCount
-                if minScreenCount < 1 {
-                    minScreenCount = 1
-                }
-            }
-            
-            page.webView?.js(
-                """
-                if (writingMode == 'vertical-rl') {
-                    document.body.style.minWidth = "\(minScreenCount * 100)vw"
-                } else {
-                    document.body.style.minHeight = "\(minScreenCount * 100)vh"
-                }
-                """
-            )
+        let pageSize = page.byWritingMode(
+            self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
+            webView.frame.width
+        )
+        let contentSize = page.byWritingMode(
+            webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
+            webView.scrollView.contentSize.width
+        )
+        self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
+        
+        let pageOffSet = page.byWritingMode(
+            webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
+            webView.scrollView.contentOffset.x + webView.frame.width
+        )
+        let webViewPage = self.pageForOffset(pageOffSet, pageHeight: pageSize)
 
-            let pageOffSet = self.readerConfig.isDirection(webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
-            let webViewPage = self.pageForOffset(pageOffSet, pageHeight: pageSize)
-
-            self.pageIndicatorView?.currentPage = webViewPage
-        }
+        self.pageIndicatorView?.currentPage = webViewPage
     }
 
     func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
@@ -322,7 +309,10 @@ extension FolioReaderCenter {
             readerConfig.isDirection(pageHeight, pageWidth, pageHeight),
             webView.frame.width
         )
-        let pageOffSet = readerConfig.isDirection(webView.scrollView.contentOffset.y, webView.scrollView.contentOffset.x, webView.scrollView.contentOffset.y)
+        let pageOffSet = page.byWritingMode(
+            webView.scrollView.contentOffset.forDirection(withConfiguration: readerConfig),
+            webView.scrollView.contentOffset.x + webView.frame.width
+        )
         let webViewPage = pageForOffset(pageOffSet, pageHeight: pageSize)
         
         return webViewPage
@@ -337,14 +327,17 @@ extension FolioReaderCenter {
             self.readerConfig.isDirection(pageHeight, pageWidth, pageHeight),
             webView.frame.width
         )
-        let contentSize = webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig)
+        let contentSize = page.byWritingMode(
+            webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
+            webView.scrollView.contentSize.width
+        )
         let totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
         let currentPageItem = getCurrentPageItemNumber()
         
         if totalPages > 0 {
             var progress = page.byWritingMode(
                 Double(currentPageItem - 1) * 100.0 / Double(totalPages),
-                100.0 - Double(currentPageItem) * 100.0 / Double(totalPages)
+                100.0 - Double(currentPageItem - 1) * 100.0 / Double(totalPages)
             )
             
             if progress < 0 { progress = 0 }

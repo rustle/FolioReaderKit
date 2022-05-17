@@ -167,12 +167,10 @@ open class FolioReaderContainer: UIViewController {
             DispatchQueue.global(qos: .userInitiated).async {
 
                 do {
-                    self.folioReader.epubArchive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8)
-                    guard let archive = self.folioReader.epubArchive else { throw FolioReaderError.errorInContainer }
+                    guard let archive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8) else { throw FolioReaderError.errorInContainer }
                     let parsedBook = try FREpubParserArchive(archive: archive).readEpub(epubPath: self.epubPath)
 //                    let parsedBookOld = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
                     self.book = parsedBook
-                    self.folioReader.initializeWebServer()
                     
                     self.folioReader.isReaderOpen = true
                     
@@ -186,9 +184,11 @@ open class FolioReaderContainer: UIViewController {
                         if self.book.hasAudio || self.readerConfig.enableTTS {
                             self.addAudioPlayer()
                         }
+                        
+                        self.folioReader.delegate?.folioReader?(self.folioReader, didFinishedLoading: self.book)
+                        
                         self.centerViewController?.reloadData()
                         self.folioReader.isReaderReady = true
-                        self.folioReader.delegate?.folioReader?(self.folioReader, didFinishedLoading: self.book)
                     }
                 } catch {
                     self.errorOnLoad = true

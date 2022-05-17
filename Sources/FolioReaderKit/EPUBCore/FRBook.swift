@@ -8,6 +8,7 @@
 //
 
 import UIKit
+import ZIPFoundation
 
 open class FRBook: NSObject {
     var metadata = FRMetadata()
@@ -24,6 +25,8 @@ open class FRBook: NSObject {
     public var tableOfContents: [FRTocReference]!
     public var flatTableOfContents: [FRTocReference]!
 
+    public var epubArchive: Archive?
+    
     var hasAudio: Bool {
         return smils.smils.count > 0
     }

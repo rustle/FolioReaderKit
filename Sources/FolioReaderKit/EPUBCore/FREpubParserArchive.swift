@@ -34,6 +34,7 @@ class FREpubParserArchive: NSObject {
         book.name = withEpubPath.lastPathComponent
         try readContainer()
         try readOpf()
+        self.book.epubArchive = archive
         return self.book
     }
 

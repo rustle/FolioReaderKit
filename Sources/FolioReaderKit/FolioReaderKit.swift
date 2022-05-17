@@ -8,8 +8,6 @@
 
 import Foundation
 import UIKit
-import GCDWebServer
-import ZIPFoundation
 
 // MARK: - Internal constants
 
@@ -17,8 +15,6 @@ internal let kApplicationDocumentsDirectory = NSSearchPathForDirectoriesInDomain
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
-
-internal let kGCDWebServerPreferredPort = 46436
 
 public enum FolioReaderError: Error, LocalizedError {
     case bookNotAvailable
@@ -133,10 +129,6 @@ public class FolioReader: NSObject {
         removeObservers()
     }
 
-    let webServer = GCDWebServer()
-    let dateFormatter = DateFormatter()
-    var epubArchive: Archive?
-    
     /// Custom unzip path
     open var unzipPath: String?
 
@@ -552,7 +544,6 @@ extension FolioReader {
     /// Closes and save the reader current instance.
     open func close() {
         self.saveReaderState() {
-            self.webServer.stop()
             self.isReaderOpen = false
             self.isReaderReady = false
             self.readerAudioPlayer?.stop(immediate: true)
@@ -571,11 +562,20 @@ extension FolioReader {
         guard let readerCenter = readerCenter else { return }
         
         readerCenter.layoutAdapting = true
-        
-        readerCenter.currentPage?.setNeedsLayout()
-        
-        readerCenter.updateScrollPosition(delay: bySecond) {
-            readerCenter.layoutAdapting = false
+        readerCenter.currentPage?.webView?.js(
+        """
+            document.body.style.minHeight = null;
+            document.body.style.minWidth = null;
+        """) { _ in
+            readerCenter.currentPage?.setNeedsLayout()
+            
+            readerCenter.updateScrollPosition(delay: bySecond) {
+                readerCenter.updateCurrentPage() {
+                    readerCenter.currentPage?.updateStyleBackgroundPadding(delay: bySecond) {
+                        readerCenter.layoutAdapting = false
+                    }
+                }
+            }
         }
     }
     
@@ -864,124 +864,5 @@ extension FolioReader {
             return "@font-face { font-family: \"\(fontFamilyName)\"; font-style: \(isItalic ? "italic" : "normal"); font-weight: \(cssFontWeight); src: url(\"/_fonts/\(fontURL.lastPathComponent)\");} "
             
         }.joined(separator: " ")
-    }
-}
-
-struct UncompressError: Error {
-    
-}
-
-extension FolioReader {
-    open func initializeWebServer() -> Void {
-        dateFormatter.dateFormat = "EEE, dd MMM yyyy HH:mm:ss zzz"
-        dateFormatter.locale = Locale(identifier: "en_US")
-        dateFormatter.timeZone = TimeZone(secondsFromGMT: 0)
-        
-        webServer.addDefaultHandler(forMethod: "GET", request: GCDWebServerRequest.self) { request in
-            guard let path = request.path.removingPercentEncoding else { return GCDWebServerErrorResponse() }
-            print("\(#function) GCDREQUEST path=\(path)")
-            
-            var pathSegs = path.split(separator: "/")
-            guard pathSegs.count > 1 else { return GCDWebServerErrorResponse() }
-            pathSegs.removeFirst()
-            let resourcePath = pathSegs.joined(separator: "/")
-            
-            guard let archive = self.epubArchive,
-                  let entry = archive[resourcePath] else { return GCDWebServerErrorResponse() }
-            
-            var contentType = GCDWebServerGetMimeTypeForExtension(resourcePath.pathExtension, nil)
-            if contentType.contains("text/") {
-                contentType += ";charset=utf-8"
-            }
-            
-            var dataQueue = [Data]()
-            var isError = false
-            
-            let streamResponse = GCDWebServerStreamedResponse(
-                contentType: contentType,
-                asyncStreamBlock: { block in
-                    DispatchQueue.global(qos: .userInteractive).async {
-                        while( dataQueue.isEmpty && isError == false ) {
-                            Thread.sleep(forTimeInterval: 0.001)
-                        }
-                        print("\(#function) async-stream-block \(resourcePath) dataQueueCount=\(dataQueue.count)")
-                        
-                        DispatchQueue.main.async {
-                            if isError {
-                                block(nil, UncompressError())
-                            } else {
-                                block(dataQueue.removeFirst(), nil)
-                            }
-                        }
-                    }
-                }
-            )
-            
-            if let modificationDate = entry.fileAttributes[.modificationDate] as? Date {
-                streamResponse.setValue(self.dateFormatter.string(from: modificationDate), forAdditionalHeader: "Last-Modified")
-                streamResponse.cacheControlMaxAge = 86400
-            }
-            
-            var totalCount = 0
-            let entrySize = entry.uncompressedSize
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    let _ = try archive.extract(entry) { data in
-                        while( dataQueue.count > 4) {
-                            Thread.sleep(forTimeInterval: 0.001)
-                        }
-                        let d = Data(data)
-                        DispatchQueue.main.async {
-                            dataQueue.append(d)
-                            totalCount += data.count
-                            if totalCount >= entrySize {
-                                dataQueue.append(Data())
-                            }
-                        }
-                        print("\(#function) zipfile-deflate \(resourcePath) dataCount=\(data.count)")
-                    }
-                } catch {
-                    isError = true
-                }
-            }
-            
-            return streamResponse
-        }
-        
-        webServer.addHandler(forMethod: "GET", pathRegex: "^/_fonts/.+?(otf|ttf)$", request: GCDWebServerRequest.self) { request in
-            let fileName = request.path.lastPathComponent
-            print("\(#function) GCDREQUEST FONT fileName=\(fileName) path=\(request.path)")
-
-            guard let documentDirectory = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            else { return nil }
-            
-            let fontFileURL = documentDirectory.appendingPathComponent("Fonts",  isDirectory: true).appendingPathComponent(fileName, isDirectory: false)
-            guard FileManager.default.fileExists(atPath: fontFileURL.path) else { return GCDWebServerErrorResponse() }
-            
-            guard let fileResponse = GCDWebServerFileResponse(file: fontFileURL.path) else { return GCDWebServerErrorResponse() }
-            
-            return fileResponse
-        }
-        
-        try? webServer.start(options: [
-            GCDWebServerOption_Port: kGCDWebServerPreferredPort,
-            GCDWebServerOption_BindToLocalhost: true,
-            GCDWebServerOption_AutomaticallySuspendInBackground: false
-        ])
-        
-        // fallback
-        if webServer.isRunning == false {
-            try? webServer.start(options: [
-                GCDWebServerOption_BindToLocalhost: true,
-                GCDWebServerOption_AutomaticallySuspendInBackground: false
-            ])
-            
-            if webServer.isRunning == false {
-                try? webServer.start(options: [
-                    GCDWebServerOption_BindToLocalhost: true
-                ])
-            }
-        }
-        
     }
 }

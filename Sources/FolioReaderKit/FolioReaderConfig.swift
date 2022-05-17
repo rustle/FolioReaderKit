@@ -219,6 +219,8 @@ open class FolioReaderConfig: NSObject {
 
     open var enableMDictViewer = false
     
+    open var serverPort = 0
+    
     /// Used to distinguish between multiple or different reader instances. The content of the user defaults (font settings etc.) depends on this identifier. The default is `nil`.
     open var identifier: String?
 
