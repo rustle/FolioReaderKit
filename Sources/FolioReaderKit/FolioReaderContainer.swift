@@ -13,11 +13,9 @@ import ZIPFoundation
 /// Reader container
 open class FolioReaderContainer: UIViewController {
     var shouldHideStatusBar = true
-    var shouldRemoveEpub = true
     
     // Mark those property as public so they can accessed from other classes/subclasses.
     public var epubPath: String
-	public var unzipPath: String?
     public var book: FRBook
     
     public var centerNavigationController: UINavigationController?
@@ -39,12 +37,10 @@ open class FolioReaderContainer: UIViewController {
     ///   - path: The ePub path on system. Must not be nil nor empty string.
 	///   - unzipPath: Path to unzip the compressed epub.
     ///   - removeEpub: Should delete the original file after unzip? Default to `true` so the ePub will be unziped only once.
-    public init(withConfig config: FolioReaderConfig, folioReader: FolioReader, epubPath path: String, unzipPath: String? = nil, removeEpub: Bool = true) {
+    public init(withConfig config: FolioReaderConfig, folioReader: FolioReader, epubPath path: String) {
         self.readerConfig = config
         self.folioReader = folioReader
         self.epubPath = path
-		self.unzipPath = unzipPath
-        self.shouldRemoveEpub = removeEpub
         self.book = FRBook()
 
         super.init(nibName: nil, bundle: Bundle.frameworkBundle())
@@ -66,7 +62,6 @@ open class FolioReaderContainer: UIViewController {
         self.readerConfig = FolioReaderConfig()
         self.folioReader = FolioReader()
         self.epubPath = ""
-        self.shouldRemoveEpub = false
         self.book = FRBook()
 
         super.init(coder: aDecoder)
@@ -88,13 +83,11 @@ open class FolioReaderContainer: UIViewController {
     ///   - path: The ePub path on system. Must not be nil nor empty string.
 	///   - unzipPath: Path to unzip the compressed epub.
     ///   - removeEpub: Should delete the original file after unzip? Default to `true` so the ePub will be unziped only once.
-    open func setupConfig(_ config: FolioReaderConfig, epubPath path: String, unzipPath: String? = nil, removeEpub: Bool = true) {
+    open func setupConfig(_ config: FolioReaderConfig, epubPath path: String) {
         self.readerConfig = config
         self.folioReader = FolioReader()
         self.folioReader.readerContainer = self
         self.epubPath = path
-		self.unzipPath = unzipPath
-        self.shouldRemoveEpub = removeEpub
     }
 
     // MARK: - View life cicle
@@ -102,6 +95,17 @@ open class FolioReaderContainer: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
 
+        do {
+            guard let archive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8) else { throw FolioReaderError.errorInContainer }
+            folioLogger("BEFORE readEpub")
+            let parsedBook = try FREpubParserArchive(archive: archive).readEpub(epubPath: self.epubPath)
+            folioLogger("AFTER readEpub")
+
+            self.book = parsedBook
+        } catch {
+            self.errorOnLoad = true
+        }
+        
         let canChangeScrollDirection = self.readerConfig.canChangeScrollDirection
         self.readerConfig.canChangeScrollDirection = self.readerConfig.isDirection(canChangeScrollDirection, canChangeScrollDirection, false)
 
@@ -167,11 +171,7 @@ open class FolioReaderContainer: UIViewController {
             DispatchQueue.global(qos: .userInitiated).async {
 
                 do {
-                    guard let archive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8) else { throw FolioReaderError.errorInContainer }
-                    let parsedBook = try FREpubParserArchive(archive: archive).readEpub(epubPath: self.epubPath)
-//                    let parsedBookOld = try FREpubParser().readEpub(epubPath: self.epubPath, removeEpub: self.shouldRemoveEpub, unzipPath: self.unzipPath)
-                    self.book = parsedBook
-                    
+                    guard self.errorOnLoad == false else { throw FolioReaderError.errorInContainer }
                     self.folioReader.isReaderOpen = true
                     
                     // Reload data

@@ -188,10 +188,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     bounds.origin.y + topComponentTotal + paddingTop,
                     bounds.origin.y + topComponentTotal),
                 width: bounds.width,
-                height: self.readerConfig.isDirection(
+                height: max(self.readerConfig.isDirection(
                     bounds.height - topComponentTotal,
                     bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
-                    bounds.height - topComponentTotal)
+                    bounds.height - topComponentTotal), 0)
             ),
             CGRect(
                 x: self.readerConfig.isDirection(

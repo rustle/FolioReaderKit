@@ -129,9 +129,6 @@ public class FolioReader: NSObject {
         removeObservers()
     }
 
-    /// Custom unzip path
-    open var unzipPath: String?
-
     /// FolioReaderDelegate
     open weak var delegate: FolioReaderDelegate?
     
@@ -186,8 +183,8 @@ extension FolioReader {
     ///   - config: FolioReader configuration.
     ///   - shouldRemoveEpub: Boolean to remove the epub or not. Default true.
     ///   - animated: Pass true to animate the presentation; otherwise, pass false.
-    open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
-        let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath, unzipPath: unzipPath, removeEpub: shouldRemoveEpub)
+    open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
+        let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath)
         readerContainer.modalPresentationStyle = .fullScreen
         self.readerContainer = readerContainer
         
@@ -195,8 +192,8 @@ extension FolioReader {
         addObservers()
     }
     
-    open func prepareReader(parentViewController: UIViewController, withEpubPath epubPath: String, unzipPath: String? = nil, andConfig config: FolioReaderConfig, shouldRemoveEpub: Bool = true, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
-        let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath, unzipPath: unzipPath, removeEpub: shouldRemoveEpub)
+    open func prepareReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
+        let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath)
         self.readerContainer = readerContainer
         
         addObservers()
@@ -354,17 +351,20 @@ extension FolioReader {
         }
     }
 
+    open var defaultScrollDirection: FolioReaderScrollDirection {
+        self.readerContainer?.book.spine.isRtl == true ? .horizontal : .horizontalWithVerticalContent
+    }
     /// Check the current scroll direction. Default .defaultVertical
     open var currentScrollDirection: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
-                .preference(currentScrollDirection: FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue)
-                ?? FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue
+                .preference(currentScrollDirection: defaultScrollDirection.rawValue)
+                ?? defaultScrollDirection.rawValue
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentScrollDirection: value)
 
-            let direction = (FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? .defaultVertical)
+            let direction = FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? defaultScrollDirection
             self.readerCenter?.setScrollDirection(direction)
         }
     }

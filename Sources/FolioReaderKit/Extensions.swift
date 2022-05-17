@@ -536,5 +536,5 @@ extension Array {
 }
 
 func folioLogger(_ logMessage: String, functionName: String = #function, lineNumber: Int = #line) {
-    print("\(functionName):\(lineNumber): \(logMessage)")
+    print("[\(Date())] \(functionName):\(lineNumber): \(logMessage)")
 }
