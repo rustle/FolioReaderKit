@@ -59,15 +59,16 @@ open class FolioReaderWebView: WKWebView {
         let configuration = WKWebViewConfiguration()
         configuration.dataDetectorTypes = .link
         super.init(frame: frame, configuration: configuration)
-        FolioReaderScript.cssInjection.addIfNeeded(to: self)
+        FolioReaderScript.bridgeJS.addIfNeeded(to: self)
         FolioReaderScript.readiumCFIJS.addIfNeeded(to: self)
+
+        FolioReaderScript.cssInjection.addIfNeeded(to: self)
         FolioReaderScript(
             source: FolioReaderScript.cssInjectionSource(for: folioReader.cssUserFontFaces(), id: "folio_style_user_font_faces")
         ).addIfNeeded(to: self)
         FolioReaderScript(
             source: FolioReaderScript.cssInjectionSource(for: folioReader.cssFontFamilies(), id: "folio_style_font_families")
         ).addIfNeeded(to: self)
-        FolioReaderScript.bridgeJS.addIfNeeded(to: self)
     }
 
     required public init?(coder aDecoder: NSCoder) {

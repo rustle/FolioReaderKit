@@ -13,10 +13,11 @@ import ZIPFoundation
 class FREpubParserArchive: NSObject {
     static let ContainerPath = "META-INF/container.xml"
 
-    let book = FRBook()
+    let book: FRBook
     let archive: Archive
     
-    init(archive: Archive) {
+    init(book: FRBook, archive: Archive) {
+        self.book = book
         self.archive = archive
     }
     
@@ -32,8 +33,46 @@ class FREpubParserArchive: NSObject {
         }
 
         book.name = withEpubPath.lastPathComponent
-        try readContainer()
+        if book.opfResource == nil {
+            try readContainer()
+        }
         try readOpf()
+        self.book.epubArchive = archive
+        return self.book
+    }
+    
+    /// Unzip, delete and read an epub file.
+    ///
+    /// - Parameters:
+    ///   - withEpubPath: Epub path on the disk
+    /// - Returns: `FRBook` Object
+    /// - Throws: `FolioReaderError`
+    func readEpubLight(epubPath withEpubPath: String) throws -> FRBook {
+        guard FileManager.default.fileExists(atPath: withEpubPath) else {
+            throw FolioReaderError.bookNotAvailable
+        }
+
+        book.name = withEpubPath.lastPathComponent
+        try readContainer()
+        
+        guard let opfPath = book.opfResource.href,
+              let opfEntry = archive[opfPath] else  { throw FolioReaderError.errorInOpf }
+        
+        var opfData = Data(capacity: Int(opfEntry.uncompressedSize))
+        let crc = try archive.extract(opfEntry) { data in
+            opfData.append(data)
+        }
+        guard crc == opfEntry.checksum else { throw FolioReaderError.errorInOpf }
+        let xmlDoc = try AEXMLDocument(xml: opfData)
+
+        // Read Spine
+        let spine = xmlDoc.root["spine"]
+
+        // Page progress direction `ltr` or `rtl`
+        if let pageProgressionDirection = spine.attributes["page-progression-direction"] {
+            book.spine.pageProgressionDirection = pageProgressionDirection
+        }
+        
         self.book.epubArchive = archive
         return self.book
     }

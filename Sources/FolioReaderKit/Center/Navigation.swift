@@ -195,7 +195,7 @@ extension FolioReaderCenter {
         }
     }
 
-    open func changePageWith(indexPath: IndexPath, animated: Bool = false, completion: (() -> Void)? = nil) {
+    open func changePageWith(indexPath: IndexPath, retryDelaySec: Double = 0.4, animated: Bool = false, completion: (() -> Void)? = nil) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         guard indexPathIsValid(indexPath) else {
@@ -212,12 +212,12 @@ extension FolioReaderCenter {
         self.collectionViewLayout.invalidateLayout()
         self.collectionView.layoutIfNeeded()
         
-        delay(0.4) {
+        delay(retryDelaySec) {
             let indexPaths = self.collectionView.indexPathsForVisibleItems
-            if indexPaths.contains(indexPath) {
+            if indexPaths.contains(indexPath) || retryDelaySec < 0.05 {
                 completion?()
             } else {
-                self.changePageWith(indexPath: indexPath, animated: animated, completion: completion)
+                self.changePageWith(indexPath: indexPath, retryDelaySec: retryDelaySec - 0.1, animated: animated, completion: completion)
             }
         }
         
