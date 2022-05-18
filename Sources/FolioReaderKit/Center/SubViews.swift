@@ -193,6 +193,8 @@ extension FolioReaderCenter {
         guard let currentPage = self.currentPage, let webView = currentPage.webView else {
             return
         }
+        
+        self.layoutAdapting = true
 
         // Get internal page offset before layout change
         self.updatePageOffsetRate()
@@ -216,16 +218,16 @@ extension FolioReaderCenter {
         let delaySec = min(0.1 + 0.1 * Double(fileSize / 51200), 0.5)
         delay(delaySec) {
             webView.setupScrollDirection()
-            currentPage.updateOverflowStyle(delay: 0.5) {
+            currentPage.updateOverflowStyle(delay: delaySec) {
                 self.scrollWebViewByPageOffsetRate()
-                self.updateCurrentPage()
                 
                 self.updateCurrentPage() {
                     self.updateScrollPosition(delay: delaySec) {
-                        currentPage.updateStyleBackgroundPadding(delay: delaySec, completion: nil)
+                        currentPage.updateStyleBackgroundPadding(delay: delaySec) {
+                            self.layoutAdapting = false
+                        }
                     }
                 }
-                
             }
         }
     }

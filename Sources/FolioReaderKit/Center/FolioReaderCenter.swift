@@ -60,7 +60,11 @@ open class FolioReaderCenter: UIViewController {
     var pageWidth: CGFloat = 0.0
     var pageHeight: CGFloat = 0.0
     
-    var layoutAdapting = false
+    var layoutAdapting = false {
+        didSet {
+            layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
+        }
+    }
     var lastMenuSelectedIndex = 0
 
     var screenBounds: CGRect!

@@ -286,7 +286,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        guard let webView = webView as? FolioReaderWebView else {
+        guard let readerCenter = self.folioReader.readerCenter,
+              let webView = webView as? FolioReaderWebView else {
             return
         }
         
@@ -324,8 +325,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     self.injectHighlights() {
                         guard self.pageNumber == pageNumber else { return }
 
-                        guard let readerCenter = self.folioReader.readerCenter else { return }
-                        
                         readerCenter.updateCurrentPage() {
                             guard self.pageNumber == pageNumber else { return }
 
@@ -369,7 +368,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                 self.scrollPageToBottom()
                             }
                             
-                            guard self.pageNumber == pageNumber else { return }
+                            if readerCenter.currentPageNumber == pageNumber {
+                                readerCenter.layoutAdapting = false
+                            }
                             webView.isHidden = false
                         }
                     }
@@ -537,7 +538,11 @@ writingMode
             delay(delaySec) {
                 readerCenter.updateCurrentPage() {
                     readerCenter.updateScrollPosition(delay: delaySec) {
-                        self.updateStyleBackgroundPadding(delay: delaySec, completion: completion)
+                        if completion == nil {
+                            readerCenter.layoutAdapting = false
+                        } else {
+                            self.updateStyleBackgroundPadding(delay: delaySec, completion: completion)
+                        }
                     }
                 }
             }
@@ -566,7 +571,6 @@ writingMode
         ) { _ in
             delay(bySecond) {
                 readerCenter.updateCurrentPage() {
-                    readerCenter.layoutAdapting = false
                     completion?()
                 }
             }
