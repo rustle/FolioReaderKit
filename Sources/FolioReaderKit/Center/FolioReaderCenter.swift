@@ -24,7 +24,7 @@ open class FolioReaderCenter: UIViewController {
     open weak var readerContainer: FolioReaderContainer?
 
     /// The current visible page on reader
-    open var currentPage: FolioReaderPage?
+//    open var currentPage: FolioReaderPage?
 
     /// The collection view with pages
     open var collectionView: UICollectionView!
@@ -46,13 +46,36 @@ open class FolioReaderCenter: UIViewController {
     var isScrolling = false
     var pageScrollDirection = ScrollDirection()
     
-    var nextPageNumber: Int = 0
-    var previousPageNumber: Int = 0
-    var currentPageNumber: Int = 0 {
-        didSet {
-            print("currentPageNumber \(oldValue) -> \(currentPageNumber)")
+    var nextPageNumber: Int {
+        self.currentPageNumber + 1
+    }
+    var previousPageNumber: Int {
+        self.currentPageNumber - 1
+    }
+//    var currentPageNumber: Int = 0 {
+//        didSet {
+//            print("currentPageNumber \(oldValue) -> \(currentPageNumber)")
+//        }
+//        
+//    }
+    
+    open var currentPage: FolioReaderPage? {
+        get {
+            self.collectionView.cellForItem(at: self.getCurrentIndexPath(navigating: nil)) as? FolioReaderPage
+        }
+        set {
+            //dummy
         }
     }
+    var currentPageNumber: Int {
+        get {
+            self.getCurrentIndexPath(navigating: nil).item + 1
+        }
+        set {
+            print("currentPageNumber set newValue=\(newValue)")
+        }
+    }
+    
     var isLastPage: Bool {
         currentPageNumber == nextPageNumber
     }
@@ -60,16 +83,10 @@ open class FolioReaderCenter: UIViewController {
     var pageWidth: CGFloat = 0.0
     var pageHeight: CGFloat = 0.0
     
-    var layoutAdapting = false {
-        didSet {
-            layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
-        }
-    }
     var lastMenuSelectedIndex = 0
 
     var screenBounds: CGRect!
     var pointNow = CGPoint.zero
-    var pageOffsetRate: CGFloat = 0
     var tempReference: FRTocReference?
     var isFirstLoad = true
     var currentWebViewScrollPositions = [Int: CGPoint]()
@@ -310,23 +327,23 @@ open class FolioReaderCenter: UIViewController {
             print("viewWillTransition size=\(size) newBounds=\(bounds) screenBounds=\(String(describing: screenBounds)) collectionViewFrame=\(collectionView.frame)")
         }
         
+        guard let currentPage = currentPage else {
+            return
+        }
 //        updateCurrentPage() {     //cannot use async method
-            self.updatePageOffsetRate()
+        currentPage.updatePageOffsetRate()
 //        }
         
         coordinator.animate { _ in
             
         } completion: { [self] _ in
-            guard let currentPage = currentPage else {
-                return
-            }
             setPageProgressiveDirection(currentPage)
 
             // After rotation fix internal page offset
-            scrollWebViewByPageOffsetRate()
+            currentPage.scrollWebViewByPageOffsetRate()
             
             updateCurrentPage() {
-                updatePageOffsetRate()
+                currentPage.updatePageOffsetRate()
             }
         }
         
@@ -340,20 +357,6 @@ open class FolioReaderCenter: UIViewController {
 
         dismiss()
         folioReader.close()
-    }
-    
-    @objc func gotoLastReadPosition(_ sender: UIBarButtonItem) {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        if self.readerConfig.loadSavedPositionForCurrentBook, let position = self.readerConfig.savedPositionForCurrentBook {
-            let pageNumber = position["pageNumber"] as? Int
-            let offset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat
-            let pageOffset = offset
-
-            if (self.currentPageNumber == pageNumber && pageOffset > 0) {
-                self.currentPage?.scrollPageToOffset(pageOffset!, animated: false)
-            }
-        }
     }
     
     @objc func logoButtonAction(_ sender: UIBarButtonItem) {

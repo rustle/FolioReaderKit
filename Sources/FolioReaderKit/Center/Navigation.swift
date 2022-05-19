@@ -17,7 +17,7 @@ extension FolioReaderCenter {
 
         if let page = page {
             currentPage = page
-            self.previousPageNumber = page.pageNumber-1
+//            self.previousPageNumber = page.pageNumber-1
             self.currentPageNumber = page.pageNumber
         } else {
             let currentIndexPath = getCurrentIndexPath(navigating: to)
@@ -27,11 +27,11 @@ extension FolioReaderCenter {
             }
             currentPage = collectionView.cellForItem(at: currentIndexPath) as? FolioReaderPage
 
-            self.previousPageNumber = currentIndexPath.row
+//            self.previousPageNumber = currentIndexPath.row
             self.currentPageNumber = currentIndexPath.row+1
         }
 
-        self.nextPageNumber = (((self.currentPageNumber + 1) <= totalPages) ? (self.currentPageNumber + 1) : self.currentPageNumber)
+//        self.nextPageNumber = (((self.currentPageNumber + 1) <= totalPages) ? (self.currentPageNumber + 1) : self.currentPageNumber)
 
         // Set pages
         guard let currentPage = currentPage else {

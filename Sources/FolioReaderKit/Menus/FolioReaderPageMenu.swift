@@ -304,8 +304,8 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
     // MARK: - SMSegmentView delegate
 
     func segmentView(_ segmentView: SMSegmentView, didSelectSegmentAtIndex index: Int) {
-        guard (self.folioReader.readerCenter?.currentPage) != nil else { return }
-        guard self.folioReader.readerCenter?.layoutAdapting == false else { return }
+        guard let currentPage = self.folioReader.readerCenter?.currentPage,
+              currentPage.layoutAdapting == false else { return }
 
         if segmentView.tag == 1 {   //Theme Mode
 

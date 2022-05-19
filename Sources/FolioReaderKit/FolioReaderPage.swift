@@ -46,13 +46,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open var webView: FolioReaderWebView?
     open var panDeadZoneTop: UIView?
     open var panDeadZoneBot: UIView?
-    
+    open var loadingView = UIActivityIndicatorView()
+
     open var writingMode = "horizontal-tb"
     
+    open var pageOffsetRate: CGFloat = 0
+
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
     fileprivate var menuIsVisible = false
-    
+    fileprivate(set) var layoutAdapting = false {
+        didSet {
+            layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
+        }
+    }
     var fileURLLoaded = false
 
     fileprivate var readerConfig: FolioReaderConfig {
@@ -133,6 +140,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.scrollView.addSubview(colorView)
         }
 
+        loadingView.style = folioReader.isNight(.white, .gray)
+        loadingView.hidesWhenStopped = true
+        loadingView.startAnimating()
+        self.contentView.addSubview(loadingView)
+        
         // Remove all gestures before adding new one
         webView?.gestureRecognizers?.forEach({ gesture in
             webView?.removeGestureRecognizer(gesture)
@@ -165,6 +177,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         let panDeadZoneBotFrame = CGRect(x: 0, y: webViewFrame.maxY, width: webViewFrame.width, height: frame.maxY - webViewFrame.maxY)
         panDeadZoneBot?.frame = panDeadZoneBotFrame
+        
+        loadingView.center = contentView.center
     }
 
     func webViewFrame() -> CGRect {
@@ -358,9 +372,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                                 webViewFrameSize.width / 2
                                             )
                                         }
-                                        readerCenter.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
+                                        self.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
                                         
-                                        readerCenter.scrollWebViewByPageOffsetRate()
+                                        self.scrollWebViewByPageOffsetRate()
                                     }
                                     readerCenter.isFirstLoad = false
                                 }
@@ -368,9 +382,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                 self.scrollPageToBottom()
                             }
                             
-                            if readerCenter.currentPageNumber == pageNumber {
-                                readerCenter.layoutAdapting = false
-                            }
+                            self.layoutAdapting = false
                             webView.isHidden = false
                         }
                     }
@@ -412,6 +424,75 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView.js("setMediaOverlayStyleColors(\(colors))")
     }
 
+    func updatePageInfo(completion: (() -> Void)? = nil) {
+        if readerConfig.debug.contains(.functionTrace) {
+            folioLogger("ENTER");
+        }
+
+        self.folioReader.readerCenter?.scrollScrubber?.setSliderVal()
+        self.webView?.js("getReadingTime(\"\(book.metadata.language)\")") { readingTime in
+            if let readerCenter = self.folioReader.readerCenter {
+                readerCenter.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0")!
+                readerCenter.pagesForCurrentPage(self)
+                readerCenter.delegate?.pageDidAppear?(self)
+                readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
+            }
+            completion?()
+        }
+    }
+    
+    /// Get internal page offset before layout change.
+    /// Represent upper-left point regardless of layout
+    open func updatePageOffsetRate() {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        guard let webView = self.webView else { return }
+
+        let pageScrollView = webView.scrollView
+        let contentSize = byWritingMode(
+            pageScrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
+            pageScrollView.contentSize.width
+        )
+        let contentOffset = byWritingMode(
+            pageScrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
+            pageScrollView.contentOffset.x
+        )
+        self.pageOffsetRate = (contentSize != 0 ? (contentOffset / contentSize) : 0)
+    }
+
+    open func updateScrollPosition(delay bySecond: Double = 0.1, completion: (() -> Void)?) {
+        // After rotation fix internal page offset
+        
+        self.updatePageOffsetRate()
+        delay(bySecond) {
+            self.scrollWebViewByPageOffsetRate()
+            self.updatePageOffsetRate()
+            completion?()
+        }
+    }
+    
+    open func scrollWebViewByPageOffsetRate() {
+        guard let webViewFrameSize = webView?.frame.size,
+              webViewFrameSize.width > 0, webViewFrameSize.height > 0,
+              let contentSize = webView?.scrollView.contentSize else { return }
+        
+        var pageOffset = byWritingMode(
+            contentSize.forDirection(withConfiguration: self.readerConfig),
+            contentSize.width
+        ) * self.pageOffsetRate
+        
+        // Fix the offset for paged scroll
+        if byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+            let page = byWritingMode(
+                floor( pageOffset / webViewFrameSize.width ),
+                max(floor( (contentSize.width - pageOffset) / webViewFrameSize.width), 1)
+            )
+            pageOffset = byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
+        }
+        
+        scrollPageToOffset(pageOffset, animated: true, retry: 0)
+    }
+    
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
         webView?.scrollView.setContentOffset(contentOffset, animated: animated)
         if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
@@ -426,10 +507,55 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         decisionHandler(policy)
     }
 
+    // MARK: Change layout orientation
+    func setScrollDirection(_ direction: FolioReaderScrollDirection) {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
+        
+        self.layoutAdapting = true
+
+        // Get internal page offset before layout change
+        self.updatePageOffsetRate()
+        
+        // Change layout
+        self.readerConfig.scrollDirection = direction
+        readerCenter.collectionViewLayout.scrollDirection = .direction(withConfiguration: self.readerConfig)
+        self.setNeedsLayout()
+        readerCenter.collectionView.collectionViewLayout.invalidateLayout()
+        readerCenter.collectionView.setContentOffset(readerCenter.frameForPage(readerCenter.currentPageNumber).origin, animated: false)
+
+        // Page progressive direction
+        readerCenter.setCollectionViewProgressiveDirection()
+        delay(0.2) { readerCenter.setPageProgressiveDirection(self) }
+
+        /**
+         *  This delay is needed because the page will not be ready yet
+         *  so the delay wait until layout finished the changes.
+         */
+        
+        let fileSize = self.book.spine.spineReferences[safe: pageNumber-1]?.resource.size ?? 102400
+        let delaySec = min(0.1 + 0.1 * Double(fileSize / 51200), 0.5)
+        delay(delaySec) {
+            webView.setupScrollDirection()
+            self.updateOverflowStyle(delay: delaySec) {
+                self.scrollWebViewByPageOffsetRate()
+                
+                readerCenter.updateCurrentPage() {
+                    self.updateScrollPosition(delay: delaySec) {
+                        self.updateStyleBackgroundPadding(delay: delaySec) {
+                            self.layoutAdapting = false
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     func updateOverflowStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
         guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
         
-        readerCenter.layoutAdapting = true
+        self.layoutAdapting = true
         
         webView.js(
 """
@@ -483,7 +609,7 @@ writingMode
                 self.writingMode = writingMode
             }
             delay(bySecond) {
-                readerCenter.layoutAdapting = false
+                self.layoutAdapting = false
                 completion?()
             }
         }
@@ -492,7 +618,7 @@ writingMode
     func updateRuntimStyle(delay bySecond: Double, completion: (() -> Void)? = nil) {
         guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
 
-        readerCenter.layoutAdapting = true
+        self.layoutAdapting = true
         
         webView.js(
 """
@@ -537,9 +663,9 @@ writingMode
             let delaySec = min(bySecond + 0.1 * Double(fileSize / 51200), 1.0)
             delay(delaySec) {
                 readerCenter.updateCurrentPage() {
-                    readerCenter.updateScrollPosition(delay: delaySec) {
+                    self.updateScrollPosition(delay: delaySec) {
                         if completion == nil {
-                            readerCenter.layoutAdapting = false
+                            self.layoutAdapting = false
                         } else {
                             self.updateStyleBackgroundPadding(delay: delaySec, completion: completion)
                         }
@@ -572,6 +698,28 @@ writingMode
             delay(bySecond) {
                 readerCenter.updateCurrentPage() {
                     completion?()
+                }
+            }
+        }
+    }
+    
+    func updateViewerLayout(delay bySecond: Double) {
+        guard let readerCenter = self.folioReader.readerCenter else { return }
+        
+        self.layoutAdapting = true
+        
+        webView?.js(
+        """
+            document.body.style.minHeight = null;
+            document.body.style.minWidth = null;
+        """) { _ in
+            self.setNeedsLayout()
+            
+            self.updateScrollPosition(delay: bySecond) {
+                readerCenter.updateCurrentPage() {
+                    self.updateStyleBackgroundPadding(delay: bySecond) {
+                        self.layoutAdapting = false
+                    }
                 }
             }
         }

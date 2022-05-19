@@ -365,7 +365,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentScrollDirection: value)
 
             let direction = FolioReaderScrollDirection(rawValue: currentScrollDirection) ?? defaultScrollDirection
-            self.readerCenter?.setScrollDirection(direction)
+            readerCenter?.currentPage?.setScrollDirection(direction)
         }
     }
 
@@ -386,7 +386,7 @@ extension FolioReader {
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
             readerCenter?.currentPage?.byWritingMode(
-                horizontal: { self.updateViewerLayout(delay: 0.2) },
+                horizontal: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) },
                 vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
             )
         }
@@ -400,7 +400,7 @@ extension FolioReader {
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
             readerCenter?.currentPage?.byWritingMode(
-                horizontal: { self.updateViewerLayout(delay: 0.2) },
+                horizontal: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) },
                 vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
             )
         }
@@ -415,7 +415,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
-                vertical: { self.updateViewerLayout(delay: 0.2) }
+                vertical: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) }
             )
         }
     }
@@ -429,7 +429,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
-                vertical: { self.updateViewerLayout(delay: 0.2) }
+                vertical: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) }
             )
         }
     }
@@ -558,26 +558,6 @@ extension FolioReader {
 
 extension FolioReader {
     
-    func updateViewerLayout(delay bySecond: Double) {
-        guard let readerCenter = readerCenter else { return }
-        
-        readerCenter.layoutAdapting = true
-        readerCenter.currentPage?.webView?.js(
-        """
-            document.body.style.minHeight = null;
-            document.body.style.minWidth = null;
-        """) { _ in
-            readerCenter.currentPage?.setNeedsLayout()
-            
-            readerCenter.updateScrollPosition(delay: bySecond) {
-                readerCenter.updateCurrentPage() {
-                    readerCenter.currentPage?.updateStyleBackgroundPadding(delay: bySecond) {
-                        readerCenter.layoutAdapting = false
-                    }
-                }
-            }
-        }
-    }
     
     func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)

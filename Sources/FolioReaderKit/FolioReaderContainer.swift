@@ -171,18 +171,13 @@ open class FolioReaderContainer: UIViewController {
             DispatchQueue.global(qos: .userInitiated).async {
 
                 do {
-                    do {
-                        guard let archive = self.book.epubArchive else { throw FolioReaderError.errorInContainer }
-                        folioLogger("BEFORE readEpub")
-                        let parsedBook = try FREpubParserArchive(book: self.book, archive: archive).readEpub(epubPath: self.epubPath)
-                        folioLogger("AFTER readEpub")
+                    guard let archive = self.book.epubArchive else { throw FolioReaderError.errorInContainer }
+                    folioLogger("BEFORE readEpub")
+                    let parsedBook = try FREpubParserArchive(book: self.book, archive: archive).readEpub(epubPath: self.epubPath)
+                    folioLogger("AFTER readEpub")
 
-                        self.book = parsedBook
-                    } catch {
-                        self.errorOnLoad = true
-                    }
+                    self.book = parsedBook
                     
-                    guard self.errorOnLoad == false else { throw FolioReaderError.errorInContainer }
                     self.folioReader.isReaderOpen = true
                     
                     // Reload data
