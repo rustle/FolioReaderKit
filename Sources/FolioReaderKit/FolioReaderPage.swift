@@ -339,7 +339,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     self.injectHighlights() {
                         guard self.pageNumber == pageNumber else { return }
 
-                        readerCenter.updateCurrentPage() {
+                        self.updatePageInfo() {
                             guard self.pageNumber == pageNumber else { return }
 
                             if readerCenter.isFirstLoad {
@@ -429,11 +429,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             folioLogger("ENTER");
         }
 
-        self.folioReader.readerCenter?.scrollScrubber?.setSliderVal()
         self.webView?.js("getReadingTime(\"\(book.metadata.language)\")") { readingTime in
             if let readerCenter = self.folioReader.readerCenter {
                 readerCenter.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0")!
                 readerCenter.pagesForCurrentPage(self)
+                readerCenter.scrollScrubber?.setSliderVal()
                 readerCenter.delegate?.pageDidAppear?(self)
                 readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
             }
@@ -541,7 +541,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.updateOverflowStyle(delay: delaySec) {
                 self.scrollWebViewByPageOffsetRate()
                 
-                readerCenter.updateCurrentPage() {
+                self.updatePageInfo() {
                     self.updateScrollPosition(delay: delaySec) {
                         self.updateStyleBackgroundPadding(delay: delaySec) {
                             self.layoutAdapting = false
@@ -662,7 +662,7 @@ writingMode
             let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
             let delaySec = min(bySecond + 0.1 * Double(fileSize / 51200), 1.0)
             delay(delaySec) {
-                readerCenter.updateCurrentPage() {
+                self.updatePageInfo {
                     self.updateScrollPosition(delay: delaySec) {
                         if completion == nil {
                             self.layoutAdapting = false
@@ -696,7 +696,7 @@ writingMode
             """
         ) { _ in
             delay(bySecond) {
-                readerCenter.updateCurrentPage() {
+                self.updatePageInfo {
                     completion?()
                 }
             }
@@ -716,7 +716,7 @@ writingMode
             self.setNeedsLayout()
             
             self.updateScrollPosition(delay: bySecond) {
-                readerCenter.updateCurrentPage() {
+                self.updatePageInfo {
                     self.updateStyleBackgroundPadding(delay: bySecond) {
                         self.layoutAdapting = false
                     }

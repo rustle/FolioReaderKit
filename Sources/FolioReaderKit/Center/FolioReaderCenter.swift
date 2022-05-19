@@ -342,7 +342,7 @@ open class FolioReaderCenter: UIViewController {
             // After rotation fix internal page offset
             currentPage.scrollWebViewByPageOffsetRate()
             
-            updateCurrentPage() {
+            currentPage.updatePageInfo() {
                 currentPage.updatePageOffsetRate()
             }
         }

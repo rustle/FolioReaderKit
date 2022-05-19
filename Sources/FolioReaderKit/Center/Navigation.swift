@@ -10,6 +10,9 @@ import Foundation
 
 extension FolioReaderCenter {
     func updateCurrentPage(_ page: FolioReaderPage? = nil, navigating to: IndexPath? = nil, completion: (() -> Void)? = nil) {
+        completion?()
+        return;
+        
         if readerConfig.debug.contains(.functionTrace) {
             folioLogger("ENTER");
             Thread.callStackSymbols.forEach{print($0)}
