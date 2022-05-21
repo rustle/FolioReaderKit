@@ -46,6 +46,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open var webView: FolioReaderWebView?
     open var panDeadZoneTop: UIView?
     open var panDeadZoneBot: UIView?
+    open var panDeadZoneLeft: UIView?
+    open var panDeadZoneRight: UIView?
     open var loadingView = UIActivityIndicatorView()
 
     open var writingMode = "horizontal-tb"
@@ -55,6 +57,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
     fileprivate var menuIsVisible = false
+    fileprivate var firstLoadReloaded = false
+    
     fileprivate(set) var layoutAdapting = false {
         didSet {
             layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
@@ -134,6 +138,32 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.contentView.addSubview(panDeadZoneBot!)
         }
         
+        if panDeadZoneLeft == nil {
+            panDeadZoneLeft = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            panDeadZoneLeft?.autoresizingMask = []
+            panDeadZoneLeft?.backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.folioReader.themeMode]
+            panDeadZoneLeft?.isOpaque = false
+            
+            let panGeature = UIPanGestureRecognizer(target: self, action: nil)
+            panGeature.delegate = self
+            panDeadZoneLeft?.addGestureRecognizer(panGeature)
+            
+            self.contentView.addSubview(panDeadZoneLeft!)
+        }
+        
+        if panDeadZoneRight == nil {
+            panDeadZoneRight = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 0))
+            panDeadZoneRight?.autoresizingMask = []
+            panDeadZoneRight?.backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.folioReader.themeMode]
+            panDeadZoneRight?.isOpaque = false
+            
+            let panGeature = UIPanGestureRecognizer(target: self, action: nil)
+            panGeature.delegate = self
+            panDeadZoneRight?.addGestureRecognizer(panGeature)
+            
+            self.contentView.addSubview(panDeadZoneRight!)
+        }
+        
         if colorView == nil {
             colorView = UIView()
             colorView.backgroundColor = self.readerConfig.nightModeBackground
@@ -177,6 +207,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         let panDeadZoneBotFrame = CGRect(x: 0, y: webViewFrame.maxY, width: webViewFrame.width, height: frame.maxY - webViewFrame.maxY)
         panDeadZoneBot?.frame = panDeadZoneBotFrame
+        
+        let panDeadZoneLeftFrame = CGRect(x: 0, y: 0, width: webViewFrame.minX, height: webViewFrame.height)
+        panDeadZoneLeft?.frame = panDeadZoneLeftFrame
+        
+        let panDeadZoneRightFrame = CGRect(x: webViewFrame.maxX, y: 0, width: frame.maxX - webViewFrame.maxX, height: webViewFrame.height)
+        panDeadZoneRight?.frame = panDeadZoneRightFrame
         
         loadingView.center = contentView.center
     }
@@ -322,8 +358,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             guard self.pageNumber == pageNumber else { return }
 
             print("\(#function) bridgeFinished pageNumber=\(String(describing: self.pageNumber)) size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
-            self.delegate?.pageDidLoad?(self, navigating: nil)
-            
             self.updateOverflowStyle(delay: 0.2) {
                 guard self.pageNumber == pageNumber else { return }
 
@@ -331,7 +365,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     self.setNeedsLayout()       //resize webViewFrame
                 }
                 
-                self.updateRuntimStyle(delay: 0.4) {
+                self.updateRuntimStyle(delay: 0.2) {
                     guard self.pageNumber == pageNumber else { return }
 
                     print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
@@ -343,6 +377,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                             guard self.pageNumber == pageNumber else { return }
 
                             if readerCenter.isFirstLoad {
+                                guard self.firstLoadReloaded else {    //fix page scale too small
+                                    self.firstLoadReloaded = true
+                                    self.webView?.reloadFromOrigin()
+                                    return
+                                }
+                                
                                 if self.readerConfig.loadSavedPositionForCurrentBook,
                                    let position = self.folioReader.savedPositionForCurrentBook,
                                    self.pageNumber == position["pageNumber"] as? Int {
@@ -384,6 +424,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                             
                             self.layoutAdapting = false
                             webView.isHidden = false
+                            
+                            self.delegate?.pageDidLoad?(self, navigating: nil)
                         }
                     }
                 }
@@ -430,14 +472,17 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
 
         self.webView?.js("getReadingTime(\"\(book.metadata.language)\")") { readingTime in
-            if let readerCenter = self.folioReader.readerCenter {
-                readerCenter.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0")!
-                readerCenter.pagesForCurrentPage(self)
-                readerCenter.scrollScrubber?.setSliderVal()
-                readerCenter.delegate?.pageDidAppear?(self)
-                readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
+            defer {
+                completion?()
             }
-            completion?()
+            guard let readerCenter = self.folioReader.readerCenter,
+                  readerCenter.currentPageNumber == self.pageNumber else { return }
+            
+            readerCenter.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0") ?? 0
+            readerCenter.pagesForCurrentPage(self)
+            readerCenter.scrollScrubber?.setSliderVal()
+            readerCenter.delegate?.pageDidAppear?(self)
+            readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
         }
     }
     
@@ -464,9 +509,13 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         // After rotation fix internal page offset
         
         self.updatePageOffsetRate()
-        delay(bySecond) {
-            self.scrollWebViewByPageOffsetRate()
-            self.updatePageOffsetRate()
+        if self.pageOffsetRate > 0 {
+            delay(bySecond) {
+                self.scrollWebViewByPageOffsetRate()
+                self.updatePageOffsetRate()
+                completion?()
+            }
+        } else {
             completion?()
         }
     }
@@ -559,14 +608,24 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         webView.js(
 """
+writingMode = window.getComputedStyle(document.body).getPropertyValue("writing-mode")
+
 {
     var viewport = document.querySelector("meta[name=viewport]");
     if (viewport) {
-        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+        if (writingMode == "vertical-rl") {
+            viewport.setAttribute('content', 'height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+        } else {
+            viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0');
+        }
     } else {
         var metaTag=document.createElement('meta');
         metaTag.name = "viewport"
-        metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        if (writingMode == "vertical-rl") {
+            metaTag.content = "height=device-height, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        } else {
+            metaTag.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"
+        }
         document.head.appendChild(metaTag);
     }
 }
@@ -585,8 +644,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         style.removeChild(style.firstChild)
     }
     
-    writingMode = window.getComputedStyle(document.body).getPropertyValue("writing-mode")
-
     var cssText = "html { overflow: " + overflow + " !important; display: block !important; text-align: justify !important;}"
     if (overflow == "-webkit-paged-x") {
         if (writingMode == "vertical-rl") {
@@ -665,7 +722,9 @@ writingMode
                 self.updatePageInfo {
                     self.updateScrollPosition(delay: delaySec) {
                         if completion == nil {
-                            self.layoutAdapting = false
+                            self.updateStyleBackgroundPadding(delay: delaySec) {
+                                self.layoutAdapting = false
+                            }
                         } else {
                             self.updateStyleBackgroundPadding(delay: delaySec, completion: completion)
                         }
@@ -788,24 +847,25 @@ writingMode
 
                 if (hrefPage == pageNumber) {
                     // Handle internal #anchor
-                        self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
-                            print("getClickAnchorOffset offset=\(offset ?? "0")")
-                            self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
-
-                        }
-                        return false
+                    self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                        print("getClickAnchorOffset offset=\(offset ?? "0")")
+                        self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
+                        
+                    }
                 } else {
-//                    self.folioReader.readerCenter?.tempFragment = anchorFromURL
+                    // self.folioReader.readerCenter?.tempFragment = anchorFromURL
                     self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: hrefPage - 1)
                     self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
                         print("getClickAnchorOffset offset=\(offset ?? "0")")
                         self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
-                            delay(0.4) {
-                                self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
+                            delay(0.2) {
+                                guard self.folioReader.readerCenter?.currentPageNumber == hrefPage else { return }
+                                self.folioReader.readerCenter?.currentPage?.waitForLayoutFinish {
+                                    self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
+                                }
                             }
                         }
                     }
-                    
                 }
                 return false
             }
@@ -1101,7 +1161,7 @@ writingMode
     
     // MARK: - Deadzone Pan Gesture
     open override func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        if gestureRecognizer.view == panDeadZoneTop || gestureRecognizer.view == panDeadZoneBot {
+        if gestureRecognizer.view == panDeadZoneTop || gestureRecognizer.view == panDeadZoneBot || gestureRecognizer.view == panDeadZoneLeft || gestureRecognizer.view == panDeadZoneRight {
             return true
         }
         return false
@@ -1123,6 +1183,16 @@ extension FolioReaderPage {
             vertical()
         } else {
             horizontal()
+        }
+    }
+    
+    func waitForLayoutFinish(completion: @escaping () -> Void, retry: Int = 99) {
+        if layoutAdapting, retry > 0 {
+            delay(0.1) {
+                self.waitForLayoutFinish(completion: completion, retry: retry - 1)
+            }
+        } else {
+            completion()
         }
     }
 }

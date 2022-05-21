@@ -13,10 +13,10 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
     public func pageDidLoad(_ page: FolioReaderPage, navigating to: IndexPath?) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        let indexPath = getCurrentIndexPath(navigating: to)
-        guard indexPath.row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
+//        let indexPath = getCurrentIndexPath(navigating: to)
+//        guard indexPath.row + 1 == page.pageNumber else { return }  //guard against cancelled page transition
         
-        updateCurrentPage(page)
+//        updateCurrentPage(page)
         
         // UGLYFIX: to make share menu item appear on first attempt
         page.webView?.scrollView.subviews.first?.becomeFirstResponder()

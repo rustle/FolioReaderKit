@@ -270,6 +270,8 @@ extension FolioReader {
                 if let page = readerCenter.currentPage {
                     page.panDeadZoneTop?.backgroundColor = backgroundColor
                     page.panDeadZoneBot?.backgroundColor = backgroundColor
+                    page.panDeadZoneLeft?.backgroundColor = backgroundColor
+                    page.panDeadZoneRight?.backgroundColor = backgroundColor
                 }
             }, completion: { (finished: Bool) in
                 NotificationCenter.default.post(name: Notification.Name(rawValue: "needRefreshPageMode"), object: nil)

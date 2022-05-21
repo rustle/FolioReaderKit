@@ -106,8 +106,12 @@ extension FolioReaderCenter: UIScrollViewDelegate {
                 }
                 
                 if instance.totalPages > 0 {
-                    instance.updateCurrentPage()
-                    instance.delegate?.pageItemChanged?(instance.getCurrentPageItemNumber())
+//                    instance.updateCurrentPage()
+                    instance.currentPage?.waitForLayoutFinish {
+                        instance.currentPage?.updatePageInfo {
+                            instance.delegate?.pageItemChanged?(instance.getCurrentPageItemNumber())
+                        }
+                    }
                 }
             } else {
                 self?.scrollScrubber?.scrollViewDidEndDecelerating(scrollView)

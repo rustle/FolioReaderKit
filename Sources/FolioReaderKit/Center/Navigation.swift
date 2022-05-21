@@ -172,9 +172,9 @@ extension FolioReaderCenter {
         let item = findPageByHref(href)
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: animated, completion: { () -> Void in
-            self.updateCurrentPage(navigating: indexPath) {
+//            self.updateCurrentPage(navigating: indexPath) {
                 completion?()
-            }
+//            }
         })
     }
 
@@ -189,7 +189,7 @@ extension FolioReaderCenter {
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: true) { () -> Void in
             if pageUpdateNeeded {
-                self.updateCurrentPage(navigating: indexPath) {
+                self.currentPage?.waitForLayoutFinish {
                     currentPage.audioMarkID(markID)
                 }
             } else {
@@ -435,7 +435,7 @@ extension FolioReaderCenter {
         UIView.animate(withDuration: animated ? 0.3 : 0, delay: 0, options: UIView.AnimationOptions(), animations: { () -> Void in
             cell.scrollPageToOffset(contentOffsetX, animated: animated)
         }) { (finished: Bool) -> Void in
-            self.updateCurrentPage {
+            cell.updatePageInfo {
                 completion?()
             }
         }
@@ -566,9 +566,11 @@ extension FolioReaderCenter {
         if page > 0 && page-1 < totalPages {
             let indexPath = IndexPath(row: page-1, section: 0)
             changePageWith(indexPath: indexPath, animated: animated, completion: { () -> Void in
-                self.updateCurrentPage(navigating: indexPath) {
-                    completion?()
+//                self.updateCurrentPage(navigating: indexPath) {
+                if self.currentPageNumber == page, let completion = completion {
+                    self.currentPage?.waitForLayoutFinish(completion: completion)
                 }
+//                }
             })
         }
     }
