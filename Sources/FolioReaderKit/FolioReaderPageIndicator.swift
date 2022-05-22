@@ -11,12 +11,7 @@ import UIKit
 class FolioReaderPageIndicator: UIView {
     var pagesLabel: UILabel!
     var minutesLabel: UILabel!
-    var totalMinutes: Int?
-    var totalPages: Int?
-    var currentPage: Int = 1 {
-        didSet { self.reloadViewWithPage(self.currentPage) }
-    }
-
+    
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
 
@@ -88,9 +83,11 @@ class FolioReaderPageIndicator: UIView {
         pagesLabel.textColor = self.folioReader.isNight(UIColor(white: 1, alpha: 0.6), UIColor(white: 0, alpha: 0.9))
     }
 
-    fileprivate func reloadViewWithPage(_ page: Int) {
-        guard let totalPages = totalPages,
-              let totalMinutes = totalMinutes else { return }
+    func reloadViewWithPage(_ page: Int) {
+        guard let readerPage = self.folioReader.readerCenter?.currentPage,
+              let totalPages = readerPage.totalPages,
+              let totalMinutes = readerPage.totalMinutes else { return }
+        
         var pagesRemaining = self.folioReader.needsRTLChange ? totalPages-(totalPages-page+1) : totalPages-page
         if pagesRemaining >= totalPages {
             pagesRemaining = totalPages - 1
@@ -99,17 +96,17 @@ class FolioReaderPageIndicator: UIView {
             pagesRemaining = 0
         }
 
-        var pagesLabelText = ""
+        var pagesLabelText = readerPage.currentChapterName ?? ""
         if pagesRemaining == 1 {
-            pagesLabelText = " " + self.readerConfig.localizedReaderOnePageLeft
+            pagesLabelText += " · " + self.readerConfig.localizedReaderOnePageLeft
         } else {
-            pagesLabelText = " \(pagesRemaining) " + self.readerConfig.localizedReaderManyPagesLeft
+            pagesLabelText += " · \(pagesRemaining) " + self.readerConfig.localizedReaderManyPagesLeft
         }
         
         let pagePercent = self.folioReader.readerCenter?.getCurrentPageProgress() ?? 0.0
         let bookPercent = self.folioReader.readerCenter?.getBookProgress() ?? 0.0
         
-        pagesLabelText += " \(String(format: "%.2f", pagePercent))% \(String(format: "%.2f", bookPercent))%"
+        pagesLabelText += " · \(String(format: "%.2f", pagePercent))% \(String(format: "%.2f", bookPercent))%"
         
         pagesLabel.text = pagesLabelText
 

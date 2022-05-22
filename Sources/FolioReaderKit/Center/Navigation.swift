@@ -9,6 +9,7 @@
 import Foundation
 
 extension FolioReaderCenter {
+    /* replaced by FolioReaderPage.updatePageInfo and .waitForLayoutFinish
     func updateCurrentPage(_ page: FolioReaderPage? = nil, navigating to: IndexPath? = nil, completion: (() -> Void)? = nil) {
         completion?()
         return;
@@ -51,31 +52,8 @@ extension FolioReaderCenter {
             completion?()
         }
     }
-
-    func pagesForCurrentPage(_ page: FolioReaderPage?) {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        guard let page = page, let webView = page.webView else { return }
-
-        let pageSize = page.byWritingMode(
-            self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
-            webView.frame.width
-        )
-        let contentSize = page.byWritingMode(
-            webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
-            webView.scrollView.contentSize.width
-        )
-        self.pageIndicatorView?.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-        
-        let pageOffSet = page.byWritingMode(
-            webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
-            webView.scrollView.contentOffset.x + webView.frame.width
-        )
-        let webViewPage = self.pageForOffset(pageOffSet, pageHeight: pageSize)
-
-        self.pageIndicatorView?.currentPage = webViewPage
-    }
-
+    */
+    
     func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
@@ -537,6 +515,33 @@ extension FolioReaderCenter {
                 guard foundChapterName == nil else { break }
                 
                 if let reference = self.book.spine.spineReferences[safe: (self.currentPageNumber - 1)],
+                    let resource = item.resource,
+                    resource == reference.resource,
+                    let title = item.title {
+                    foundChapterName = title
+                } else if let children = item.children, children.isEmpty == false {
+                    search(children)
+                }
+            }
+        }
+        search(self.book.flatTableOfContents)
+        
+        return foundChapterName
+    }
+
+    /**
+     Find and return the chapter name.
+     */
+    public func getChapterName(pageNumber: Int) -> String? {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        var foundChapterName: String?
+        
+        func search(_ items: [FRTocReference]) {
+            for item in items {
+                guard foundChapterName == nil else { break }
+                
+                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
                     let resource = item.resource,
                     resource == reference.resource,
                     let title = item.title {

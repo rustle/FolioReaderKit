@@ -229,7 +229,7 @@ open class FolioReaderCenter: UIViewController {
         configureNavBar()
 
         // Update pages
-        pagesForCurrentPage(currentPage)
+        currentPage?.updatePages()
         pageIndicatorView?.reloadView(updateShadow: true)
     }
 

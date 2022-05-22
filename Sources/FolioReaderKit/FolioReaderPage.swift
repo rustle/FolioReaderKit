@@ -54,6 +54,22 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     
     open var pageOffsetRate: CGFloat = 0
 
+    var totalMinutes: Int?
+    var totalPages: Int?
+    var currentPage: Int = 1 {
+        didSet {
+            DispatchQueue.global(qos: .utility).async {
+                self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
+                DispatchQueue.main.async {
+                    if self.pageNumber == self.folioReader.readerCenter?.currentPageNumber {
+                        self.folioReader.readerCenter?.pageIndicatorView?.reloadViewWithPage(self.currentPage)
+                    }
+                }
+            }
+        }
+    }
+    var currentChapterName: String?
+    
     fileprivate var colorView: UIView!
     fileprivate var shouldShowBar = true
     fileprivate var menuIsVisible = false
@@ -422,10 +438,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                 self.scrollPageToBottom()
                             }
                             
-                            self.layoutAdapting = false
-                            webView.isHidden = false
-                            
-                            self.delegate?.pageDidLoad?(self, navigating: nil)
+                            self.updateStyleBackgroundPadding(delay: 0.1) {
+                                self.layoutAdapting = false
+                                webView.isHidden = false
+                                
+                                self.delegate?.pageDidLoad?(self, navigating: nil)
+                            }
                         }
                     }
                 }
@@ -478,12 +496,36 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             guard let readerCenter = self.folioReader.readerCenter,
                   readerCenter.currentPageNumber == self.pageNumber else { return }
             
-            readerCenter.pageIndicatorView?.totalMinutes = Int(readingTime ?? "0") ?? 0
-            readerCenter.pagesForCurrentPage(self)
+            self.totalMinutes = Int(readingTime ?? "0") ?? 0
+            self.updatePages()
             readerCenter.scrollScrubber?.setSliderVal()
             readerCenter.delegate?.pageDidAppear?(self)
             readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
         }
+    }
+    
+    func updatePages() {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        guard let readerCenter = self.folioReader.readerCenter, let webView = self.webView else { return }
+
+        let pageSize = self.byWritingMode(
+            self.readerConfig.isDirection(readerCenter.pageHeight, readerCenter.pageWidth, readerCenter.pageHeight),
+            webView.frame.width
+        )
+        let contentSize = self.byWritingMode(
+            webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
+            webView.scrollView.contentSize.width
+        )
+        self.totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
+        
+        let pageOffSet = self.byWritingMode(
+            webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
+            webView.scrollView.contentOffset.x + webView.frame.width
+        )
+        let webViewPage = readerCenter.pageForOffset(pageOffSet, pageHeight: pageSize)
+
+        self.currentPage = webViewPage
     }
     
     /// Get internal page offset before layout change.
@@ -739,7 +781,7 @@ writingMode
         
         var minScreenCount = 1
         if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
-            minScreenCount = readerCenter.pageIndicatorView?.totalPages ?? minScreenCount
+            minScreenCount = self.totalPages ?? minScreenCount
             if minScreenCount < 1 {
                 minScreenCount = 1
             }

@@ -72,8 +72,8 @@ extension FolioReaderCenter: UIScrollViewDelegate {
                     }
                 }
 
-                if (pageIndicatorView?.currentPage != webViewPage) {
-                    pageIndicatorView?.currentPage = webViewPage
+                if (page.currentPage != webViewPage) {
+                    page.currentPage = webViewPage
                 }
                 
                 self.delegate?.pageItemChanged?(webViewPage)
