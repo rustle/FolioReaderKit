@@ -376,6 +376,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         delegate?.pageWillLoad?(self)
     }
+    
+    open func webView(_ webView: WKWebView, didFail: WKNavigation!, withError: Error) {
+        self.readerContainer?.alert(message: "LOAD FAIL WITH ERROR \(withError.localizedDescription)")
+    }
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let readerCenter = self.folioReader.readerCenter,
