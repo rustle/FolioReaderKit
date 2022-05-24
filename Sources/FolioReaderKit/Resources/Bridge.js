@@ -775,6 +775,10 @@ var getAnchorOffset = function(target, horizontal) {
         elem = document.getElementsByName(target)[0];
     }
     
+    if (writingMode == "vertical-rl") {
+        return elem.offsetLeft + elem.offsetWidth;
+    }
+    
     if (horizontal) {
         return document.body.clientWidth * Math.floor(elem.offsetTop / window.innerHeight);
     }
@@ -1331,6 +1335,24 @@ function setFolioStyle(styleTextEncoded) {
     var para = document.querySelector('p')
     var compStyles = window.getComputedStyle(para)
 //    window.webkit.messageHandlers.FolioReaderPage.postMessage("setFolioStyle compStyles p " + compStyles.cssText)
+}
+
+function getOffsetsOfElementsWithID(horizontal) {
+
+    const els = document.querySelectorAll("[id]")
+    var offsets = {}
+    
+    for(const elem of els) {
+        if (writingMode == "vertical-rl") {
+            offsets[elem.id] = elem.offsetLeft
+        } else if (horizontal) {
+            offsets[elem.id] = document.body.clientWidth * Math.floor(elem.offsetTop / window.innerHeight);
+        } else {
+            offsets[elem.id] = elem.offsetTop
+        }
+    }
+
+    return JSON.stringify(offsets)
 }
 
 //function injectHighlight() {    //sample data

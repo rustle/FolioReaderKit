@@ -290,7 +290,7 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
         guard let items = tocItems else { return tableOfContent }
 
         for item in items {
-            guard let ref = readTOCReference(item) else { continue }
+            guard let ref = readTOCReference(item, level: 0) else { continue }
             tableOfContent.append(ref)
         }
 
@@ -312,7 +312,7 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
         return nil
     }
 
-    fileprivate func readTOCReference(_ navpointElement: AEXMLElement) -> FRTocReference? {
+    fileprivate func readTOCReference(_ navpointElement: AEXMLElement, level: Int) -> FRTocReference? {
         var label = ""
 
         if book.tocResource?.mediaType == MediaType.ncx {
@@ -326,12 +326,12 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
 
             // Recursively find child
             if let navPoints = navpointElement["navPoint"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
                     toc.children.append(item)
                 }
             }
@@ -347,12 +347,12 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
 
             // Recursively find child
             if let navPoints = navpointElement["ol"]["li"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
                     toc.children.append(item)
                 }
             }

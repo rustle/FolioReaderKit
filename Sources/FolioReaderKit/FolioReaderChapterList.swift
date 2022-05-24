@@ -89,7 +89,7 @@ class FolioReaderChapterList: UITableViewController {
         let tocReference = tocItems[indexPath.row]
         let isSection = tocReference.children.count > 0
 
-        cell.indexLabel?.text = tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        cell.indexLabel?.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Add audio duration for Media Ovelay
         if let resource = tocReference.resource {
@@ -97,8 +97,7 @@ class FolioReaderChapterList: UITableViewController {
                 let duration = self.book.duration(for: "#"+mediaOverlay)
 
                 if let durationFormatted = (duration != nil ? duration : "")?.clockTimeToMinutesString() {
-                    let text = cell.indexLabel?.text ?? ""
-                    cell.indexLabel?.text = text + (duration != nil ? (" - " + durationFormatted) : "")
+                    cell.indexLabel?.text = (cell.indexLabel?.text ?? "") + (duration != nil ? (" - " + durationFormatted) : "")
                 }
             }
         }
@@ -111,6 +110,7 @@ class FolioReaderChapterList: UITableViewController {
             let resource = reference.resource
             cell.indexLabel?.textColor = (tocReference.resource == resource ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
         }
+        cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(tocReference.level ?? 0) * 1.5)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false

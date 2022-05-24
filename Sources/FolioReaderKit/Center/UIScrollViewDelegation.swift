@@ -43,41 +43,10 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         let scrollType: ScrollType = ((isCollectionScrollView == true) ? .chapter : .page)
 
         // Update current reading page
-        if (isCollectionScrollView == false), let page = currentPage, let webView = page.webView {
-
-            let pageSize = page.byWritingMode(
-                self.readerConfig.isDirection(self.pageHeight, self.pageWidth, self.pageHeight),
-                webView.frame.width
-            )
-            let contentOffset = page.byWritingMode(
-                webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
-                webView.scrollView.contentOffset.x
-            )
-            let contentSize = page.byWritingMode(
-                webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
-                webView.scrollView.contentSize.width
-            )
-            if page.byWritingMode(contentOffset + pageSize <= contentSize, contentOffset >= 0) {
-
-                let webViewPage = pageForOffset(contentOffset, pageHeight: pageSize)
-
-                if (readerConfig.scrollDirection == .horizontalWithVerticalContent) {
-                    let currentIndexPathRow = (page.pageNumber - 1)
-
-                    // if the cell reload doesn't save the top position offset
-                    if let oldOffSet = self.currentWebViewScrollPositions[currentIndexPathRow], (abs(oldOffSet.y - scrollView.contentOffset.y) > 100) {
-                        // Do nothing
-                    } else {
-                        self.currentWebViewScrollPositions[currentIndexPathRow] = scrollView.contentOffset
-                    }
-                }
-
-                if (page.currentPage != webViewPage) {
-                    page.currentPage = webViewPage
-                }
-                
-                self.delegate?.pageItemChanged?(webViewPage)
-            }
+        if (isCollectionScrollView == false), let page = currentPage {
+            page.updatePages()
+            
+            self.delegate?.pageItemChanged?(page.currentPage)
         }
 
         self.updatePageScrollDirection(inScrollView: scrollView, forScrollType: scrollType)

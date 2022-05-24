@@ -272,7 +272,7 @@ class FREpubParserArchive: NSObject {
         guard let items = tocItems else { return tableOfContent }
 
         for item in items {
-            guard let ref = readTOCReference(item) else { continue }
+            guard let ref = readTOCReference(item, level: 0) else { continue }
             tableOfContent.append(ref)
         }
 
@@ -294,7 +294,7 @@ class FREpubParserArchive: NSObject {
         return nil
     }
 
-    fileprivate func readTOCReference(_ navpointElement: AEXMLElement) -> FRTocReference? {
+    fileprivate func readTOCReference(_ navpointElement: AEXMLElement, level: Int) -> FRTocReference? {
         var label = ""
 
         if book.tocResource?.mediaType == MediaType.ncx {
@@ -308,12 +308,12 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
 
             // Recursively find child
             if let navPoints = navpointElement["navPoint"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
                     toc.children.append(item)
                 }
             }
@@ -329,12 +329,12 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
 
             // Recursively find child
             if let navPoints = navpointElement["ol"]["li"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
                     toc.children.append(item)
                 }
             }
@@ -359,6 +359,7 @@ class FREpubParserArchive: NSObject {
 
         item.children.forEach {
             tocItems.append($0)
+            tocItems.append(contentsOf: countTocChild($0))
         }
         return tocItems
     }

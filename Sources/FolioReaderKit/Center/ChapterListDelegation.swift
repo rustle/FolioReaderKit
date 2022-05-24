@@ -19,6 +19,9 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
             let indexPath = IndexPath(row: item, section: 0)
             changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
                 //self.updateCurrentPage(navigating: indexPath) //no need
+                self.currentPage?.updatePageInfo {
+                    self.currentPage?.updatePageOffsetRate()
+                }
             })
             tempReference = reference
         } else {

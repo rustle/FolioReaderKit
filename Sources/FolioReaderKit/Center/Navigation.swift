@@ -65,15 +65,16 @@ extension FolioReaderCenter {
         return page
     }
 
-    func getCurrentIndexPath(navigating to: IndexPath?) -> IndexPath {
+    func getCurrentIndexPath() -> IndexPath {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         let contentOffset = self.collectionView.contentOffset
-        let indexPaths = collectionView.indexPathsForVisibleItems.filter {
-            guard let layoutAttributes = self.collectionView.layoutAttributesForItem(at: $0) else { return false }
-            
-            folioLogger("offset=\(contentOffset) layoutSize=\(layoutAttributes.size) itemFrame=\(layoutAttributes.frame)")
-            //for horizontal
+        let indexPaths = collectionView.indexPathsForVisibleItems.compactMap { indexPath -> (indexPath: IndexPath, layoutAttributes: UICollectionViewLayoutAttributes)? in
+            guard let layoutAttributes = self.collectionView.layoutAttributesForItem(at: indexPath) else { return nil }
+//            folioLogger("indexPath=\(indexPath) offset=\(contentOffset) layoutSize=\(layoutAttributes.size) itemFrame=\(layoutAttributes.frame)")
+            return (indexPath: indexPath, layoutAttributes: layoutAttributes)
+        }.filter {
+            let layoutAttributes = $0.layoutAttributes
             
             guard layoutAttributes.frame.maxX >= contentOffset.x,
                   layoutAttributes.frame.minX <= contentOffset.x + layoutAttributes.size.width
@@ -86,34 +87,34 @@ extension FolioReaderCenter {
             return true
         }
         
-        folioLogger("\(indexPaths)")
+        folioLogger("visibleIndexPath=\(indexPaths)")
 
-        if let to = to, indexPaths.contains(to) {
-            return to
-        }
-        var indexPath = IndexPath()
+        let indexPath = indexPaths.min {
+            abs($0.layoutAttributes.frame.minX - contentOffset.x) + abs($0.layoutAttributes.frame.minY - contentOffset.y) <
+                abs($1.layoutAttributes.frame.minX - contentOffset.x) + abs($1.layoutAttributes.frame.minY - contentOffset.y)
+        }?.indexPath ?? IndexPath(row: 0, section: 0)
 
-        if indexPaths.count > 1 {
-            let first = indexPaths.first!
-            let last = indexPaths.last!
-
-            switch self.pageScrollDirection {
-            case .up, .left:
-                if first.compare(last) == .orderedAscending {
-                    indexPath = last
-                } else {
-                    indexPath = first
-                }
-            default:
-                if first.compare(last) == .orderedAscending {
-                    indexPath = first
-                } else {
-                    indexPath = last
-                }
-            }
-        } else {
-            indexPath = indexPaths.first ?? IndexPath(row: 0, section: 0)
-        }
+//        if indexPaths.count > 1 {
+//            let first = indexPaths.first!
+//            let last = indexPaths.last!
+//
+//            switch self.pageScrollDirection {
+//            case .up, .left:
+//                if first.compare(last) == .orderedAscending {
+//                    indexPath = last
+//                } else {
+//                    indexPath = first
+//                }
+//            default:
+//                if first.compare(last) == .orderedAscending {
+//                    indexPath = first
+//                } else {
+//                    indexPath = last
+//                }
+//            }
+//        } else {
+//            indexPath = indexPaths.first ?? IndexPath(row: 0, section: 0)
+//        }
 
         return indexPath
     }
@@ -246,7 +247,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
             let contentOffset = cell.webView?.scrollView.contentOffset,
             let contentOffsetXLimit = cell.webView?.scrollView.contentSize.width else {
                 completion?()
@@ -336,7 +337,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
             let contentOffset = cell.webView?.scrollView.contentOffset else {
                 completion?()
                 return
@@ -360,7 +361,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
             let contentSize = cell.webView?.scrollView.contentSize else {
                 completion?()
                 return
@@ -388,7 +389,7 @@ extension FolioReaderCenter {
         // TODO: It was implemented for horizontal orientation.
         // Need check page orientation (v/h) and make correct calc for vertical
         guard
-            let cell = collectionView.cellForItem(at: getCurrentIndexPath(navigating: nil)) as? FolioReaderPage,
+            let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
             let contentSize = cell.webView?.scrollView.contentSize else {
                 delegate?.pageItemChanged?(getCurrentPageItemNumber())
                 completion?()
@@ -554,6 +555,31 @@ extension FolioReaderCenter {
         search(self.book.flatTableOfContents)
         
         return foundChapterName
+    }
+
+    /**
+     Find and return the chapter name.
+     */
+    public func getChapterNames(pageNumber: Int) -> [(id: String?, name: String)] {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        var foundChapterNames = [(id: String?, name: String)]()
+        
+        func search(_ items: [FRTocReference]) {
+            for item in items {
+                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
+                    let resource = item.resource,
+                    resource == reference.resource,
+                    let title = item.title {
+                    foundChapterNames.append((id: item.fragmentID, name: title))
+                } else if let children = item.children, children.isEmpty == false {
+                    search(children)
+                }
+            }
+        }
+        search(self.book.flatTableOfContents)
+        
+        return foundChapterNames
     }
 
     // MARK: Public page methods

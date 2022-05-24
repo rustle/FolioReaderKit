@@ -14,21 +14,23 @@ open class FRTocReference: NSObject {
     public var title: String!
     public var resource: FRResource?
     public var fragmentID: String?
+    public var level: Int?
     
-    convenience init(title: String, resource: FRResource?, fragmentID: String = "") {
-        self.init(title: title, resource: resource, fragmentID: fragmentID, children: [FRTocReference]())
+    convenience init(title: String, resource: FRResource?, fragmentID: String = "", level: Int = 0) {
+        self.init(title: title, resource: resource, fragmentID: fragmentID, children: [FRTocReference](), level: level)
     }
 
-    init(title: String, resource: FRResource?, fragmentID: String, children: [FRTocReference]) {
+    init(title: String, resource: FRResource?, fragmentID: String, children: [FRTocReference], level: Int) {
         self.resource = resource
         self.title = title
         self.fragmentID = fragmentID
         self.children = children
+        self.level = level
     }
 }
 
 // MARK: Equatable
 
 func ==(lhs: FRTocReference, rhs: FRTocReference) -> Bool {
-    return lhs.title == rhs.title && lhs.fragmentID == rhs.fragmentID
+    return lhs.title == rhs.title && lhs.fragmentID == rhs.fragmentID && lhs.level == rhs.level
 }

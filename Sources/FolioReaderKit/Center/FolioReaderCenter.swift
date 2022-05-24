@@ -61,7 +61,7 @@ open class FolioReaderCenter: UIViewController {
     
     open var currentPage: FolioReaderPage? {
         get {
-            self.collectionView.cellForItem(at: self.getCurrentIndexPath(navigating: nil)) as? FolioReaderPage
+            self.collectionView.cellForItem(at: self.getCurrentIndexPath()) as? FolioReaderPage
         }
         set {
             //dummy
@@ -69,7 +69,7 @@ open class FolioReaderCenter: UIViewController {
     }
     var currentPageNumber: Int {
         get {
-            self.getCurrentIndexPath(navigating: nil).item + 1
+            self.getCurrentIndexPath().item + 1
         }
         set {
             print("currentPageNumber set newValue=\(newValue)")
