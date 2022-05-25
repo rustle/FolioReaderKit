@@ -70,16 +70,17 @@ extension FolioReaderCenter: UIScrollViewDelegate {
             }
 
             if (scrollView is UICollectionView) {
-                guard let instance = self else {
+                guard let instance = self,
+                      instance.totalPages > 0,
+                      let page = instance.currentPage
+                else {
                     return
                 }
                 
-                if instance.totalPages > 0 {
-//                    instance.updateCurrentPage()
-                    instance.currentPage?.waitForLayoutFinish {
-                        instance.currentPage?.updatePageInfo {
-                            instance.delegate?.pageItemChanged?(instance.getCurrentPageItemNumber())
-                        }
+                page.waitForLayoutFinish {
+                    page.updatePageInfo {
+                        guard instance.currentPageNumber == page.pageNumber else { return }
+                        instance.delegate?.pageItemChanged?(page.currentPage)
                     }
                 }
             } else {

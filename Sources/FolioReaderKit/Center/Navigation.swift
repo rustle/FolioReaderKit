@@ -282,6 +282,7 @@ extension FolioReaderCenter {
         return row <= rowCount
     }
 
+    /*
     public func getCurrentPageItemNumber() -> Int {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
@@ -299,6 +300,7 @@ extension FolioReaderCenter {
         
         return webViewPage
     }
+    */
     
     public func getCurrentPageProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
@@ -314,7 +316,7 @@ extension FolioReaderCenter {
             webView.scrollView.contentSize.width
         )
         let totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-        let currentPageItem = getCurrentPageItemNumber()
+        let currentPageItem = page.currentPage
         
         if totalPages > 0 {
             var progress = page.byWritingMode(
@@ -391,7 +393,6 @@ extension FolioReaderCenter {
         guard
             let cell = collectionView.cellForItem(at: getCurrentIndexPath()) as? FolioReaderPage,
             let contentSize = cell.webView?.scrollView.contentSize else {
-                delegate?.pageItemChanged?(getCurrentPageItemNumber())
                 completion?()
                 return
         }
@@ -415,6 +416,7 @@ extension FolioReaderCenter {
             cell.scrollPageToOffset(contentOffsetX, animated: animated)
         }) { (finished: Bool) -> Void in
             cell.updatePageInfo {
+                self.delegate?.pageItemChanged?(cell.currentPage)
                 completion?()
             }
         }

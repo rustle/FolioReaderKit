@@ -383,11 +383,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     open func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let readerCenter = self.folioReader.readerCenter,
-              let webView = webView as? FolioReaderWebView else {
+              let webView = webView as? FolioReaderWebView,
+              let pageNumber = self.pageNumber else {
             return
         }
-        
-        let pageNumber = self.pageNumber
         
         print("\(#function) bridgeFinished pageNumber=\(String(describing: pageNumber))")
         var preprocessor = ""
@@ -401,26 +400,29 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         preprocessor.append("document.body.style.minHeight = null;")
         
         self.webView?.js(preprocessor) {_ in
-            guard self.pageNumber == pageNumber else { return }
+            guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch \(pageNumber) vs \(self.pageNumber!)"); return }
 
-            print("\(#function) bridgeFinished pageNumber=\(String(describing: self.pageNumber)) size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
+            folioLogger("bridgeFinished pageNumber=\(String(describing: self.pageNumber)) size=\(String(describing: self.book.spine.spineReferences[self.pageNumber-1].resource.size))")
             self.updateOverflowStyle(delay: 0.2) {
-                guard self.pageNumber == pageNumber else { return }
+                guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch updateOverflowStyle \(pageNumber) vs \(self.pageNumber!)"); return }
+                folioLogger("bridgeFinished updateOverflowStyle pageNumber=\(pageNumber)")
 
                 if self.writingMode == "vertical-rl" {
                     self.setNeedsLayout()       //resize webViewFrame
                 }
                 
                 self.updateRuntimStyle(delay: 0.2) {
-                    guard self.pageNumber == pageNumber else { return }
+                    guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch updateRuntimStyle \(pageNumber) vs \(self.pageNumber!)"); return }
 
-                    print("\(#function) bridgeFinished updateRuntimStyle pageNumber=\(String(describing: self.pageNumber))")
+                    folioLogger("bridgeFinished updateRuntimStyle pageNumber=\(pageNumber)")
                     
                     self.injectHighlights() {
-                        guard self.pageNumber == pageNumber else { return }
+                        guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch injectHighlights \(pageNumber) vs \(self.pageNumber!)"); return }
+                        folioLogger("bridgeFinished injectHighlights pageNumber=\(pageNumber)")
 
                         self.updatePageInfo() {
-                            guard self.pageNumber == pageNumber else { return }
+                            guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch updatePageInfo \(pageNumber) vs \(self.pageNumber!)"); return }
+                            folioLogger("bridgeFinished updatePageInfo pageNumber=\(pageNumber)")
 
                             if readerCenter.isFirstLoad {
                                 guard self.firstLoadReloaded else {    //fix page scale too small
@@ -428,7 +430,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                     self.webView?.reloadFromOrigin()
                                     return
                                 }
-                                
+                                folioLogger("bridgeFinished isFirstLoad pageNumber=\(pageNumber)")
+
                                 if self.readerConfig.loadSavedPositionForCurrentBook,
                                    let position = self.folioReader.savedPositionForCurrentBook {
                                     if self.pageNumber == position["pageNumber"] as? Int {
@@ -478,6 +481,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                             }
                             
                             self.updateStyleBackgroundPadding(delay: 0.1) {
+                                folioLogger("bridgeFinished updateStyleBackgroundPadding pageNumber=\(pageNumber)")
+                                
                                 self.layoutAdapting = false
                                 webView.isHidden = false
                                 
@@ -530,16 +535,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         self.webView?.js("getReadingTime(\"\(book.metadata.language)\")") { readingTime in
             self.totalMinutes = Int(readingTime ?? "0") ?? 0
-            self.updatePages()
             
-            guard let readerCenter = self.folioReader.readerCenter,
-                  readerCenter.currentPageNumber == self.pageNumber else { return }
-            
-            readerCenter.scrollScrubber?.setSliderVal()
-            readerCenter.delegate?.pageDidAppear?(self)
-            readerCenter.delegate?.pageItemChanged?(readerCenter.getCurrentPageItemNumber())
-            
-            self.updatePageIdOffsets(completion: completion)
+            self.updatePageIdOffsets {
+                self.updatePages()
+                
+                defer {
+                    completion?()
+                }
+                guard let readerCenter = self.folioReader.readerCenter,
+                      readerCenter.currentPageNumber == self.pageNumber else { return }
+                
+                readerCenter.scrollScrubber?.setSliderVal()
+                readerCenter.delegate?.pageDidAppear?(self)
+                readerCenter.delegate?.pageItemChanged?(self.currentPage)
+            }
         }
     }
     
@@ -578,7 +587,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView.scrollView.contentOffset.x + webView.frame.width
         )
         
-        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
+//        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
             let webViewPage = readerCenter.pageForOffset(pageOffSet, pageHeight: pageSize)
             
             if (self.readerConfig.scrollDirection == .horizontalWithVerticalContent) {
@@ -593,7 +602,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             }
             
             self.currentPage = webViewPage
-        }
+//        }
     }
     
     /// Get internal page offset before layout change.
@@ -816,12 +825,14 @@ writingMode
         styleOverride -= 1
     }
 }
+/*
 window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
 
 window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.documentElement).cssText)
 window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.body).cssText)
 
 window.webkit.messageHandlers.FolioReaderPage.postMessage("writingMode " + writingMode)
+*/
 
 writingMode
 """
