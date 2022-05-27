@@ -61,9 +61,12 @@ class FolioReaderScript: WKUserScript {
         
         cssStrings.append(
             contentsOf: (0...10).map { //1.5 ~ 2.05
-                FolioReader.CssLevels(type: "LineHeight\($0)", def: "line-height: \(Decimal(($0 + 10) * 5) / 100 + 1) !important;") +
-                FolioReader.CssLevels(type: "Margin\($0)", def: "margin: 1em 0 \((Decimal($0 + 10) * 5) / 100)em 0 !important;")
-            }.flatMap{$0}
+                [
+                    FolioReader.CssLevels(type: "LineHeight\($0)", def: "line-height: \(Decimal(($0 + 10) * 5) / 100 + 1) !important;"),
+                    FolioReader.CssLevels(type: "MarginH\($0)", def: "margin-top: 1em; margin-bottom: \((Decimal($0 + 10) * 5) / 100)em;"),
+                    FolioReader.CssLevels(type: "MarginV\($0)", def: "margin-right: 1em; margin-left: \((Decimal($0 + 10) * 5) / 100)em;")
+                ]
+            }.flatMap{$0.flatMap{$0}}
         )
         
         cssStrings.append(

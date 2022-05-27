@@ -56,7 +56,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     open var writingMode = "horizontal-tb"
     
-    open var pageOffsetRate: CGFloat = 0
+    open var pageOffsetRate: CGFloat = 0 {
+        didSet {
+            folioLogger("SET pageOffsetRate=\(pageOffsetRate)")
+        }
+    }
 
     var totalMinutes: Int?
     var totalPages: Int?
@@ -639,7 +643,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
-    open func scrollWebViewByPageOffsetRate() {
+    open func scrollWebViewByPageOffsetRate(animated: Bool = true) {
         guard let webViewFrameSize = webView?.frame.size,
               webViewFrameSize.width > 0, webViewFrameSize.height > 0,
               let contentSize = webView?.scrollView.contentSize else { return }
@@ -658,7 +662,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             pageOffset = byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
         }
         
-        scrollPageToOffset(pageOffset, animated: true, retry: 0)
+        scrollPageToOffset(pageOffset, animated: animated, retry: 0)
     }
     
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
@@ -703,16 +707,18 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
          */
         
         let fileSize = self.book.spine.spineReferences[safe: pageNumber-1]?.resource.size ?? 102400
-        let delaySec = min(0.1 + 0.1 * Double(fileSize / 51200), 0.5)
+        let delaySec = min(0.2 + 0.1 * Double(fileSize / 51200), 0.5)
         delay(delaySec) {
             webView.setupScrollDirection()
             self.updateOverflowStyle(delay: delaySec) {
-                self.scrollWebViewByPageOffsetRate()
+                self.scrollWebViewByPageOffsetRate(animated: false)
                 
-                self.updatePageInfo() {
-                    self.updateScrollPosition(delay: delaySec) {
-                        self.updateStyleBackgroundPadding(delay: delaySec) {
-                            self.layoutAdapting = false
+                delay(delaySec + 0.2) {
+                    self.updatePageInfo() {
+                        self.updateScrollPosition(delay: delaySec) {
+                            self.updateStyleBackgroundPadding(delay: delaySec) {
+                                self.layoutAdapting = false
+                            }
                         }
                     }
                 }
@@ -820,7 +826,11 @@ writingMode
         addClass(document.body, folioStyleLevel + 'FontWeight\(folioReader.currentFontWeight)')
         addClass(document.body, folioStyleLevel + 'LetterSpacing\(folioReader.currentLetterSpacing)')
         addClass(document.body, folioStyleLevel + 'LineHeight\(folioReader.currentLineHeight)')
-        addClass(document.body, folioStyleLevel + 'Margin\(folioReader.currentLineHeight)')
+        if (writingMode == 'vertical-rl') {
+            addClass(document.body, folioStyleLevel + 'MarginV\(folioReader.currentLineHeight)')
+        } else {
+            addClass(document.body, folioStyleLevel + 'MarginH\(folioReader.currentLineHeight)')
+        }
         addClass(document.body, folioStyleLevel + 'TextIndent\(folioReader.currentTextIndent+4)')
         styleOverride -= 1
     }
@@ -856,8 +866,6 @@ writingMode
     }
     
     func updateStyleBackgroundPadding(delay bySecond: Double, completion: (() -> Void)? = nil) {
-        guard let readerCenter = self.folioReader.readerCenter else { return }
-        
         var minScreenCount = 1
         if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
             minScreenCount = self.totalPages ?? minScreenCount
@@ -875,9 +883,14 @@ writingMode
             }
             """
         ) { _ in
+            folioLogger("updateStyleBackgroundPadding pageNumber=\(self.pageNumber!) minScreenCount=\(minScreenCount) totalPages=\(self.totalPages ?? 0)")
             delay(bySecond) {
                 self.updatePageInfo {
-                    completion?()
+                    if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true), self.totalPages != minScreenCount {
+                        self.updateStyleBackgroundPadding(delay: bySecond, completion: completion)
+                    } else {
+                        completion?()
+                    }
                 }
             }
         }

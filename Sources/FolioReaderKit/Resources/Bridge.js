@@ -197,10 +197,6 @@ function tweakStyleOnly() {
     tds.forEach((item) => {
         item.removeAttribute("class")
     })
-    var ps = [...document.getElementsByTagName('p')]
-    ps.forEach((item) => {
-        item.removeAttribute("class")
-    })
     var fonts = [...document.getElementsByTagName('font')]
     fonts.forEach((item) => {
         item.removeAttribute("size")
