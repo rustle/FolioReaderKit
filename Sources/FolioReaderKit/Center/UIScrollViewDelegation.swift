@@ -43,7 +43,7 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         let scrollType: ScrollType = ((isCollectionScrollView == true) ? .chapter : .page)
 
         // Update current reading page
-        if (isCollectionScrollView == false), let page = currentPage {
+        if (isCollectionScrollView == false), let page = currentPage, page.layoutAdapting == false {
             page.updatePages()
             
             self.delegate?.pageItemChanged?(page.currentPage)

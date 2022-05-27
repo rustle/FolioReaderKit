@@ -294,12 +294,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     bounds.origin.x,
                     bounds.origin.x + paddingLeft,
                     bounds.origin.x),
-                y: bounds.origin.y,
+                y: bounds.origin.y + topComponentTotal,
                 width: self.readerConfig.isDirection(
                     bounds.width,
                     bounds.width - paddingLeft - paddingRight,
                     bounds.width),
-                height: bounds.height
+                height: bounds.height - topComponentTotal - bottomComponentTotal
             )
         )
     }
@@ -429,11 +429,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                             folioLogger("bridgeFinished updatePageInfo pageNumber=\(pageNumber)")
 
                             if readerCenter.isFirstLoad {
-                                guard self.firstLoadReloaded else {    //fix page scale too small
-                                    self.firstLoadReloaded = true
-                                    self.webView?.reloadFromOrigin()
-                                    return
-                                }
+//                                guard self.firstLoadReloaded else {    //fix page scale too small
+//                                    self.firstLoadReloaded = true
+//                                    self.webView?.reloadFromOrigin()
+//                                    return
+//                                }
                                 folioLogger("bridgeFinished isFirstLoad pageNumber=\(pageNumber)")
 
                                 if self.readerConfig.loadSavedPositionForCurrentBook,
@@ -588,9 +588,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         let pageOffSet = self.byWritingMode(
             webView.scrollView.contentOffset.forDirection(withConfiguration: self.readerConfig),
-            webView.scrollView.contentOffset.x + webView.frame.width
+            webView.scrollView.contentOffset.x //+ webView.frame.width
         )
         
+        folioLogger("updatePages pageNumber=\(self.pageNumber!) totalPages=\(self.totalPages!) contentSize=\(contentSize) pageSize=\(pageSize)")
 //        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
             let webViewPage = readerCenter.pageForOffset(pageOffSet, pageHeight: pageSize)
             
@@ -801,7 +802,7 @@ writingMode
         guard let readerCenter = self.folioReader.readerCenter, let webView = webView else { return }
 
         self.layoutAdapting = true
-        
+        self.updatePageOffsetRate()
         webView.js(
 """
 {
@@ -851,6 +852,8 @@ writingMode
             let delaySec = min(bySecond + 0.1 * Double(fileSize / 51200), 1.0)
             delay(delaySec) {
                 self.updatePageInfo {
+                    self.scrollWebViewByPageOffsetRate()
+                    
                     self.updateScrollPosition(delay: delaySec) {
                         if completion == nil {
                             self.updateStyleBackgroundPadding(delay: delaySec) {
@@ -865,7 +868,7 @@ writingMode
         }
     }
     
-    func updateStyleBackgroundPadding(delay bySecond: Double, completion: (() -> Void)? = nil) {
+    func updateStyleBackgroundPadding(delay bySecond: Double, tryShrinking: Bool = true, completion: (() -> Void)? = nil) {
         var minScreenCount = 1
         if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
             minScreenCount = self.totalPages ?? minScreenCount
@@ -874,20 +877,35 @@ writingMode
             }
         }
         
+        // must set width instead of minWidth, otherwise there will be an extra blank page after calling scrollView.setContentOffset
+        // could be a bug?
+        // and shrinking by 100vw has no effect on totalPages
         self.webView?.js(
             """
             if (writingMode == 'vertical-rl') {
-                document.body.style.minWidth = "\(minScreenCount * 100)vw"
+                document.body.style.width     = "\(minScreenCount * 100 - (tryShrinking ? 200 : 0))vw"
             } else {
                 document.body.style.minHeight = "\(minScreenCount * 100)vh"
             }
             """
         ) { _ in
-            folioLogger("updateStyleBackgroundPadding pageNumber=\(self.pageNumber!) minScreenCount=\(minScreenCount) totalPages=\(self.totalPages ?? 0)")
             delay(bySecond) {
                 self.updatePageInfo {
-                    if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true), self.totalPages != minScreenCount {
-                        self.updateStyleBackgroundPadding(delay: bySecond, completion: completion)
+                    folioLogger("updateStyleBackgroundPadding pageNumber=\(self.pageNumber!) minScreenCount=\(minScreenCount) totalPages=\(self.totalPages ?? 0) tryShrinking=\(tryShrinking)")
+                    if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                        if tryShrinking {
+                            if self.totalPages < minScreenCount {   //shrinked one page, try again
+                                self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: true, completion: completion)
+                            } else {  //stop shrinking
+                                self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: false, completion: completion)
+                            }
+                        } else {
+                            if self.totalPages != minScreenCount {
+                                self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: false, completion: completion)
+                            } else {
+                                completion?()
+                            }
+                        }
                     } else {
                         completion?()
                     }
