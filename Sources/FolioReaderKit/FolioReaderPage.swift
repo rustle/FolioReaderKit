@@ -428,64 +428,59 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                             guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch updatePageInfo \(pageNumber) vs \(self.pageNumber!)"); return }
                             folioLogger("bridgeFinished updatePageInfo pageNumber=\(pageNumber)")
 
-                            if readerCenter.isFirstLoad {
-//                                guard self.firstLoadReloaded else {    //fix page scale too small
-//                                    self.firstLoadReloaded = true
-//                                    self.webView?.reloadFromOrigin()
-//                                    return
-//                                }
-                                folioLogger("bridgeFinished isFirstLoad pageNumber=\(pageNumber)")
+                            self.updateStyleBackgroundPadding(delay: 0.2, tryShrinking: false) {
+                                folioLogger("bridgeFinished updateStyleBackgroundPadding pageNumber=\(pageNumber)")
+                                
+                                if readerCenter.isFirstLoad {
+                                    folioLogger("bridgeFinished isFirstLoad pageNumber=\(pageNumber)")
 
-                                if self.readerConfig.loadSavedPositionForCurrentBook,
-                                   let position = self.folioReader.savedPositionForCurrentBook {
-                                    if self.pageNumber == position["pageNumber"] as? Int {
-                                        var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
-                                        
-                                        let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
-                                        let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
-                                        delay(delaySec) {
-                                            guard let chapterProgress = position["chapterProgress"] as? CGFloat else { return }
+                                    if self.readerConfig.loadSavedPositionForCurrentBook,
+                                       let position = self.folioReader.savedPositionForCurrentBook {
+                                        if self.pageNumber == position["pageNumber"] as? Int {
+                                            var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
                                             
-                                            let contentSize = webView.scrollView.contentSize
-                                            let webViewFrameSize = webView.frame.size
-                                            
-                                            var pageOffsetByProgress = self.byWritingMode(
-                                                contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress,
-                                                contentSize.width * (100 - chapterProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
-                                            if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                                                if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
-                                                    let page = self.byWritingMode(
-                                                        floor( pageOffsetByProgress / webViewFrameSize.width ),
-                                                        max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)
+                                            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
+                                            let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
+                                            delay(delaySec) {
+                                                guard let chapterProgress = position["chapterProgress"] as? CGFloat else { return }
+                                                
+                                                let contentSize = webView.scrollView.contentSize
+                                                let webViewFrameSize = webView.frame.size
+                                                
+                                                var pageOffsetByProgress = self.byWritingMode(
+                                                    contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress,
+                                                    contentSize.width * (100 - chapterProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
+                                                if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                                                    if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                                                        let page = self.byWritingMode(
+                                                            floor( pageOffsetByProgress / webViewFrameSize.width ),
+                                                            max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)
+                                                        )
+                                                        pageOffsetByProgress = self.byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
+                                                    }
+                                                    pageOffset = pageOffsetByProgress - self.byWritingMode(
+                                                        self.readerConfig.isDirection(readerCenter.pageHeight / 2, readerCenter.pageWidth / 2, readerCenter.pageHeight / 2),
+                                                        webViewFrameSize.width / 2
                                                     )
-                                                    pageOffsetByProgress = self.byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
                                                 }
-                                                pageOffset = pageOffsetByProgress - self.byWritingMode(
-                                                    self.readerConfig.isDirection(readerCenter.pageHeight / 2, readerCenter.pageWidth / 2, readerCenter.pageHeight / 2),
-                                                    webViewFrameSize.width / 2
-                                                )
+                                                if pageOffset < 0 {
+                                                    pageOffset = 0
+                                                }
+                                                self.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
+                                                self.scrollWebViewByPageOffsetRate(animated: false)
                                             }
-                                            if pageOffset < 0 {
-                                                pageOffset = 0
-                                            }
-                                            self.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
-                                            self.scrollWebViewByPageOffsetRate()
+                                            readerCenter.isFirstLoad = false
+                                        } else if position["pageNumber"] as? Int == 0 {
+                                            readerCenter.isFirstLoad = false
                                         }
-                                        readerCenter.isFirstLoad = false
-                                    } else if position["pageNumber"] as? Int == 0 {
-                                        readerCenter.isFirstLoad = false
+                                    }
+                                } else if readerCenter.isScrolling == false {
+                                    if self.folioReader.needsRTLChange {
+                                        self.scrollPageToBottom()
+                                    } else {
+                                        self.scrollPageToOffset(.zero, animated: false)
                                     }
                                 }
-                            } else if readerCenter.isScrolling == false {
-                                if self.folioReader.needsRTLChange {
-                                    self.scrollPageToBottom()
-                                } else {
-                                    self.scrollPageToOffset(.zero, animated: false)
-                                }
-                            }
-                            
-                            self.updateStyleBackgroundPadding(delay: 0.1) {
-                                folioLogger("bridgeFinished updateStyleBackgroundPadding pageNumber=\(pageNumber)")
                                 
                                 self.layoutAdapting = false
                                 webView.isHidden = false
@@ -1163,7 +1158,10 @@ writingMode
             return
         }
 
-        let pageOffsetPoint = self.readerConfig.isDirection(CGPoint(x: 0, y: offset), CGPoint(x: offset, y: 0), CGPoint(x: 0, y: offset))
+        let pageOffsetPoint = byWritingMode(
+            self.readerConfig.isDirection(CGPoint(x: 0, y: offset), CGPoint(x: offset, y: 0), CGPoint(x: 0, y: offset)),
+            CGPoint(x: offset, y: 0)
+        )
         setScrollViewContentOffset(pageOffsetPoint, animated: animated)
         
         if retry > 0 {
