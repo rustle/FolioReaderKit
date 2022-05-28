@@ -885,7 +885,7 @@ writingMode
             if (writingMode == 'vertical-rl') {
                 document.body.style.width     = "\(minScreenCount * 100 - (tryShrinking ? 200 : 0))vw"
             } else {
-                document.body.style.minHeight = "\(minScreenCount * 100)vh"
+                document.body.style.minHeight = "\(minScreenCount * 100 - (tryShrinking ? 100 : 0))vh"
             }
             """
         ) { _ in
