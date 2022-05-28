@@ -478,7 +478,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                     if self.folioReader.needsRTLChange {
                                         self.scrollPageToBottom()
                                     } else {
-                                        self.scrollPageToOffset(.zero, animated: false)
+                                        self.scrollPageToOffset(.zero, animated: false, retry: 0)
                                     }
                                 }
                                 
@@ -662,6 +662,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
     
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
+        folioLogger("pageNumber=\(pageNumber!) contentOffset=\(contentOffset)")
         webView?.scrollView.setContentOffset(contentOffset, animated: animated)
         if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
             let currentIndexPathRow = pageNumber - 1
@@ -1153,7 +1154,7 @@ writingMode
      - parameter offset:   The offset to scroll
      - parameter animated: Enable or not scrolling animation
      */
-    open func scrollPageToOffset(_ offset: CGFloat, animated: Bool, retry: Int = 5) {
+    open func scrollPageToOffset(_ offset: CGFloat, animated: Bool, retry: Int = 5, completion: (() -> Void)? = nil) {
         guard let webView = webView else {
             return
         }
@@ -1165,11 +1166,15 @@ writingMode
         setScrollViewContentOffset(pageOffsetPoint, animated: animated)
         
         if retry > 0 {
-            delay(0.1) {
+            delay(0.1 * Double(retry)) {
                 if pageOffsetPoint != webView.scrollView.contentOffset {
-                    self.scrollPageToOffset(offset, animated: animated, retry: retry - 1)
+                    self.scrollPageToOffset(offset, animated: animated, retry: retry - 1, completion: completion)
+                } else {
+                    completion?()
                 }
             }
+        } else {
+            completion?()
         }
     }
 

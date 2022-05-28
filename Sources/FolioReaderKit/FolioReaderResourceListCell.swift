@@ -1,5 +1,5 @@
 //
-//  FolioReaderChapterListCell.swift
+//  FolioReaderResourceListCell.swift
 //  FolioReaderKit
 //
 //  Created by Heberti Almeida on 07/05/15.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FolioReaderChapterListCell: UITableViewCell {
+class FolioReaderResourceListCell: UITableViewCell {
     var indexLabel: UILabel?
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {

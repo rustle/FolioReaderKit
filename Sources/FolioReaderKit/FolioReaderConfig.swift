@@ -232,6 +232,8 @@ open class FolioReaderConfig: NSObject {
     /// Localizes Content title
     open var localizedContentsTitle = NSLocalizedString("Contents", comment: "")
 
+    open var localizedResourcesTitle = NSLocalizedString("Resources", comment: "")
+    
     /// Localizes Highlight date format. This is a `dateFormat` from `NSDateFormatter`, so be careful 🤔
     open var localizedHighlightsDateFormat = "MMM dd, YYYY | HH:mm"
     open var localizedHighlightMenu = NSLocalizedString("Highlight", comment: "")

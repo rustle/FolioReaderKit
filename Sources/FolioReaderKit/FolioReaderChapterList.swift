@@ -72,6 +72,23 @@ class FolioReaderChapterList: UITableViewController {
         }
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Jump to the current chapter
+        DispatchQueue.main.async {
+          
+            if
+                let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
+                let reference = self.book.spine.spineReferences[safe: currentPageNumber - 1],
+                let index = self.tocItems.firstIndex(where: { $0.resource == reference.resource }) {
+              
+                  let indexPath = IndexPath(row: index, section: 0)
+                  self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
+            }
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {

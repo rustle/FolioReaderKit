@@ -131,6 +131,7 @@
 		B0D69CCA1D0387F7003B4CCD /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */; };
 		E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */; };
 		E7EA4E102841EDF0006F79C9 /* FolioReaderResourceListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */; };
+		E7EA4E122841F1D7006F79C9 /* ResourceListDelegation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -227,6 +228,7 @@
 		B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
 		E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceList.swift; sourceTree = "<group>"; };
 		E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceListCell.swift; sourceTree = "<group>"; };
+		E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceListDelegation.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -390,6 +392,7 @@
 				2AEE912A26F0939200B012B0 /* CenterLayout.swift */,
 				2AEE912426F062E500B012B0 /* CenterViewModel.swift */,
 				2AEE910626F03D1C00B012B0 /* ChapterListDelegation.swift */,
+				E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */,
 				1A958F101D397BE900D56699 /* FolioReaderCenter.swift */,
 				2AEE911526F0419600B012B0 /* Navigation.swift */,
 				2AEE910926F03D7F00B012B0 /* PageDelegation.swift */,
@@ -608,6 +611,7 @@
 				1A958FA01D397BE900D56699 /* FolioReaderContainer.swift in Sources */,
 				1A958FA81D397BE900D56699 /* FolioReaderSharingProvider.swift in Sources */,
 				1A958FAB1D397BE900D56699 /* Highlight+Helper.swift in Sources */,
+				E7EA4E122841F1D7006F79C9 /* ResourceListDelegation.swift in Sources */,
 				3AD5EEB91D9433C100E42810 /* FolioReaderWebView.swift in Sources */,
 				2AEE911326F0413500B012B0 /* Sharing.swift in Sources */,
 				2AEE911026F03F8F00B012B0 /* UIScrollViewDelegation.swift in Sources */,
@@ -680,6 +684,7 @@
 				3A27F0B41FD9C25500D84A57 /* FolioReaderConfig.swift in Sources */,
 				2AEE912926F0932600B012B0 /* CenterCollection.swift in Sources */,
 				3A27F0AF1FD9C25500D84A57 /* Extensions.swift in Sources */,
+				E7EA4E132841F1D7006F79C9 /* ResourceListDelegation.swift in Sources */,
 				3A27F0C81FD9C33A00D84A57 /* Highlight.swift in Sources */,
 				2AEE911726F0419600B012B0 /* Navigation.swift in Sources */,
 				2AEE910826F03D1C00B012B0 /* ChapterListDelegation.swift in Sources */,
