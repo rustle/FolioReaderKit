@@ -129,6 +129,8 @@
 		B0D69CC81D0387F7003B4CCD /* HADiscreteSlider.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C441D0387F7003B4CCD /* HADiscreteSlider.swift */; };
 		B0D69CC91D0387F7003B4CCD /* SMSegment.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C461D0387F7003B4CCD /* SMSegment.swift */; };
 		B0D69CCA1D0387F7003B4CCD /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */; };
+		E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */; };
+		E7EA4E102841EDF0006F79C9 /* FolioReaderResourceListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -223,6 +225,8 @@
 		B0D69C441D0387F7003B4CCD /* HADiscreteSlider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HADiscreteSlider.swift; sourceTree = "<group>"; };
 		B0D69C461D0387F7003B4CCD /* SMSegment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegment.swift; sourceTree = "<group>"; };
 		B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
+		E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceList.swift; sourceTree = "<group>"; };
+		E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceListCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,7 +359,9 @@
 				256AE60A20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift */,
 				1A958F0F1D397BE900D56699 /* FolioReaderAudioPlayer.swift */,
 				1A958F111D397BE900D56699 /* FolioReaderChapterList.swift */,
+				E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */,
 				1A958F121D397BE900D56699 /* FolioReaderChapterListCell.swift */,
+				E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */,
 				1A958F131D397BE900D56699 /* FolioReaderConfig.swift */,
 				1A958F141D397BE900D56699 /* FolioReaderContainer.swift */,
 				1A958F161D397BE900D56699 /* FolioReaderHighlightList.swift */,
@@ -588,6 +594,7 @@
 			files = (
 				2AA1D55E26FC11CC00F8CAB2 /* FolioReaderParagraphMenu.swift in Sources */,
 				2AA1D55F26FC11CC00F8CAB2 /* FolioReaderMenu.swift in Sources */,
+				E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */,
 				6EB47B9C266F428700189F63 /* FolioReaderCenter.swift in Sources */,
 				2AEE911F26F0435E00B012B0 /* SubViews.swift in Sources */,
 				B0D69CC91D0387F7003B4CCD /* SMSegment.swift in Sources */,
@@ -611,6 +618,7 @@
 				256AE60B20A1D4DD00EAD746 /* FolioReaderAddHighlightNote.swift in Sources */,
 				1A958F921D397BE900D56699 /* FREpubParser.swift in Sources */,
 				1A958FAE1D397BE900D56699 /* PageViewController.swift in Sources */,
+				E7EA4E102841EDF0006F79C9 /* FolioReaderResourceListCell.swift in Sources */,
 				2AEE910A26F03D7F00B012B0 /* PageDelegation.swift in Sources */,
 				2AEE911C26F0432800B012B0 /* CenterDelegate.swift in Sources */,
 				1A958FAD1D397BE900D56699 /* Highlight.swift in Sources */,
