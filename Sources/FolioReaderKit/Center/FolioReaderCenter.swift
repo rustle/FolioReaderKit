@@ -60,20 +60,11 @@ open class FolioReaderCenter: UIViewController {
 //    }
     
     open var currentPage: FolioReaderPage? {
-        get {
-            self.collectionView.cellForItem(at: self.getCurrentIndexPath()) as? FolioReaderPage
-        }
-        set {
-            //dummy
-        }
+        self.collectionView.cellForItem(at: self.getCurrentIndexPath()) as? FolioReaderPage
     }
+    
     var currentPageNumber: Int {
-        get {
-            self.getCurrentIndexPath().item + 1
-        }
-        set {
-            print("currentPageNumber set newValue=\(newValue)")
-        }
+        self.getCurrentIndexPath().item + 1
     }
     
     var isLastPage: Bool {
@@ -284,12 +275,8 @@ open class FolioReaderCenter: UIViewController {
         if self.readerConfig.loadSavedPositionForCurrentBook {
             guard let position = folioReader.savedPositionForCurrentBook,
                   let pageNumber = position["pageNumber"] as? Int,
-                  pageNumber > 0 else {
-                      self.currentPageNumber = 1
-                      return
-                  }
+                  pageNumber > 0 else { return }
             self.changePageWith(page: pageNumber)
-            self.currentPageNumber = pageNumber
         }
     }
 
@@ -367,7 +354,9 @@ open class FolioReaderCenter: UIViewController {
         if position.0 == currentPageNumber {
             self.currentPage?.setScrollViewContentOffset(position.1, animated: true)
         } else {
-            self.changePageWith(page: position.0)     //depends on `currentWebViewScrollPositions` to in page reposition
+            self.changePageWith(page: position.0) {     //depends on `currentWebViewScrollPositions` to in page reposition
+                self.currentPage?.updatePages()
+            }
         }
     }
 }
