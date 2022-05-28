@@ -141,6 +141,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         self.readerContainer = readerContainer
         guard let readerContainer = self.readerContainer else { return }
 
+        self.pageNumber = -1     //guard against webView didFinish handler
+        
         if webView == nil {
             webView = FolioReaderWebView(frame: webViewFrame(), readerContainer: readerContainer)
             webView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -481,6 +483,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                         self.scrollPageToOffset(.zero, animated: false, retry: 0)
                                     }
                                 }
+                                
+                                guard self.pageNumber == pageNumber else { folioLogger("bridgeFinished pageNumberMisMatch beforeShow \(pageNumber) vs \(self.pageNumber!)"); return }
                                 
                                 self.layoutAdapting = false
                                 webView.isHidden = false

@@ -58,6 +58,9 @@ open class FolioReaderWebView: WKWebView {
         
         let configuration = WKWebViewConfiguration()
         configuration.dataDetectorTypes = .link
+        if let wkProcessorPool = readerContainer.folioReader.readerCenter?.wkProcessorPool {
+            configuration.processPool = wkProcessorPool
+        }
         super.init(frame: frame, configuration: configuration)
         FolioReaderScript.bridgeJS.addIfNeeded(to: self)
         FolioReaderScript.readiumCFIJS.addIfNeeded(to: self)

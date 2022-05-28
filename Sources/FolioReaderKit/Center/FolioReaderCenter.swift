@@ -45,6 +45,7 @@ open class FolioReaderCenter: UIViewController {
     var activityIndicator = UIActivityIndicatorView()
     var isScrolling = false
     var pageScrollDirection = ScrollDirection()
+    let wkProcessorPool = WKProcessPool()
     
     var nextPageNumber: Int {
         self.currentPageNumber + 1
