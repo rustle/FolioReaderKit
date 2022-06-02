@@ -58,7 +58,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     
     open var pageOffsetRate: CGFloat = 0 {
         didSet {
-            folioLogger("SET pageOffsetRate=\(pageOffsetRate)")
+            folioLogger("SET pageOffsetRate=\(pageOffsetRate) pageNumber=\(pageNumber!) currentPage=\(currentPage) totalPages=\(totalPages ?? -1)")
         }
     }
 

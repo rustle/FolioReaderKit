@@ -328,10 +328,13 @@ open class FolioReaderCenter: UIViewController {
             setPageProgressiveDirection(currentPage)
 
             // After rotation fix internal page offset
-            currentPage.scrollWebViewByPageOffsetRate()
-            
-            currentPage.updatePageInfo() {
-                currentPage.updatePageOffsetRate()
+            delay(0.2) {    //wait for webView finish resizing
+                currentPage.updatePageInfo() {
+                    currentPage.scrollWebViewByPageOffsetRate(animated: false)
+                    delay(0.2) {
+                        currentPage.updatePageOffsetRate()
+                    }
+                }
             }
         }
         
