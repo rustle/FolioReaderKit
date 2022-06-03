@@ -125,6 +125,10 @@ class FREpubParserArchive: NSObject {
             }
         }
 
+        var entrySizeMap = [String:UInt64]()
+        archive.forEach { entry in
+            entrySizeMap[entry.path] = entry.uncompressedSize
+        }
         // Parse and save each "manifest item"
         xmlDoc.root["manifest"]["item"].all?.forEach {
             let resource = FRResource()
@@ -134,7 +138,7 @@ class FREpubParserArchive: NSObject {
             resource.mediaType = MediaType.by(name: $0.attributes["media-type"] ?? "", fileName: resource.href)
             resource.mediaOverlay = $0.attributes["media-overlay"]
             
-            resource.size = archive[opfPath.deletingLastPathComponent.appendingPathComponent(resource.href)]?.uncompressedSize
+            resource.size = entrySizeMap[opfPath.deletingLastPathComponent.appendingPathComponent(resource.href)]
             
             // if a .smil file is listed in resources, go parse that file now and save it on book model
             if (resource.mediaType != nil && resource.mediaType == .smil) {
