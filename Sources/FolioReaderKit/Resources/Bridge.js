@@ -45,38 +45,38 @@ function reParagraph() {
         var lines = leafNode.textContent.split(/\r\n|\r|\n/g)
         var j = 0
         var linesLen = lines.length
-        if (linesLen < 10)
-            continue
-        var para = ""
-        var pNodes = []
-        for (; j<linesLen; j++) {
-            if (lines[j].match(startWithSpaceReg)) {
-                if (para.length > 0) {
-                    var pNode = document.createElement('p')
-                    var text = document.createTextNode(para)
-                    pNode.appendChild(text)
-                    pNodes.push(pNode)
+        if (linesLen > 10 || leafNode.textContent.length > 50 || leafNode.parentNode.tagName == "DIV") {
+            var para = ""
+            var pNodes = []
+            for (; j<linesLen; j++) {
+                if (lines[j].match(startWithSpaceReg)) {
+                    if (para.length > 0) {
+                        var pNode = document.createElement('p')
+                        var text = document.createTextNode(para)
+                        pNode.appendChild(text)
+                        pNodes.push(pNode)
+                    }
+                    para = lines[j]
+                } else {
+                    para = para + lines[j]
                 }
-                para = lines[j]
-            } else {
-                para = para + lines[j]
             }
-        }
-        if (para.length > 0) {
-            var pNode = document.createElement('p')
-            var text = document.createTextNode(para)
-            pNode.appendChild(text)
-            pNodes.push(pNode)
-        }
-        if (pNodes.length > 0) {
-            //alert(leafNode.textContent.split(/\r\n|\r|\n/g).length)
-            //alert(pNodes.length)
-            //leafNode.innerHTML = ""
-            leafNode.removeChild(leafNode.firstChild)
-            var k = 0
-            var pNodesLen = pNodes.length
-            for(; k<pNodesLen; k++) {
-                leafNode.appendChild(pNodes[k])
+            if (para.length > 0) {
+                var pNode = document.createElement('p')
+                var text = document.createTextNode(para)
+                pNode.appendChild(text)
+                pNodes.push(pNode)
+            }
+            if (pNodes.length > 0) {
+                //alert(leafNode.textContent.split(/\r\n|\r|\n/g).length)
+                //alert(pNodes.length)
+                //leafNode.innerHTML = ""
+                leafNode.removeChild(leafNode.firstChild)
+                var k = 0
+                var pNodesLen = pNodes.length
+                for(; k<pNodesLen; k++) {
+                    leafNode.appendChild(pNodes[k])
+                }
             }
         }
     }
