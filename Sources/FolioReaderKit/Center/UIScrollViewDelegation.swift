@@ -79,6 +79,11 @@ extension FolioReaderCenter: UIScrollViewDelegate {
                 
                 page.waitForLayoutFinish {
                     page.updatePageInfo {
+                        defer {
+                            if let currentPage = instance.currentPage {
+                                currentPage.delegate?.pageDidLoad?(currentPage)
+                            }
+                        }
                         guard instance.currentPageNumber == page.pageNumber else { return }
                         instance.delegate?.pageItemChanged?(page.currentPage)
                     }

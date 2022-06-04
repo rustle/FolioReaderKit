@@ -10,7 +10,7 @@ import Foundation
 
 extension FolioReaderCenter: FolioReaderPageDelegate {
 
-    public func pageDidLoad(_ page: FolioReaderPage, navigating to: IndexPath?) {
+    public func pageDidLoad(_ page: FolioReaderPage) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
 //        let indexPath = getCurrentIndexPath(navigating: to)
@@ -32,7 +32,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         }
         
         // Pass the event to the centers `pageDelegate`
-        pageDelegate?.pageDidLoad?(page, navigating: to)
+        pageDelegate?.pageDidLoad?(page)
     }
     
     public func pageWillLoad(_ page: FolioReaderPage) {

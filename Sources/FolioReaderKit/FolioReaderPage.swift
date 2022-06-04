@@ -27,7 +27,7 @@ import WebKit
 
      - parameter page: The loaded page
      */
-    @objc optional func pageDidLoad(_ page: FolioReaderPage, navigating to: IndexPath?)
+    @objc optional func pageDidLoad(_ page: FolioReaderPage)
     
     /**
      Notifies that page receive tap gesture.
@@ -489,7 +489,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                                 self.layoutAdapting = false
                                 webView.isHidden = false
                                 
-                                self.delegate?.pageDidLoad?(self, navigating: nil)
+                                self.delegate?.pageDidLoad?(self)
                             }
                         }
                     }
