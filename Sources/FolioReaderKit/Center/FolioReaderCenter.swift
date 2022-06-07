@@ -312,15 +312,16 @@ open class FolioReaderCenter: UIViewController {
             bounds.size.height = bounds.size.height - view.safeAreaInsets.bottom
         }
         if readerConfig.debug.contains(.viewTransition) {
-            print("viewWillTransition size=\(size) newBounds=\(bounds) screenBounds=\(String(describing: screenBounds)) collectionViewFrame=\(collectionView.frame)")
+            folioLogger("size=\(size) newBounds=\(bounds) screenBounds=\(String(describing: screenBounds)) collectionViewFrame=\(collectionView.frame)")
         }
         
         guard let currentPage = currentPage else {
             return
         }
-//        updateCurrentPage() {     //cannot use async method
+        
+        currentPage.layoutAdapting = true
         currentPage.updatePageOffsetRate()
-//        }
+        folioLogger("TRANS1 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
         
         coordinator.animate { _ in
             
@@ -328,11 +329,15 @@ open class FolioReaderCenter: UIViewController {
             setPageProgressiveDirection(currentPage)
 
             // After rotation fix internal page offset
-            delay(0.2) {    //wait for webView finish resizing
+            delay(currentPage.delaySec()) {    //wait for webView finish resizing
+                folioLogger("TRANS2 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
                 currentPage.updatePageInfo() {
                     currentPage.scrollWebViewByPageOffsetRate(animated: false)
                     delay(0.2) {
+                        folioLogger("TRANS3 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
                         currentPage.updatePageOffsetRate()
+                        currentPage.layoutAdapting = false
+                        folioLogger("TRANS4 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
                     }
                 }
             }

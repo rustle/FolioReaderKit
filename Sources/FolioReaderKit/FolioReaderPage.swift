@@ -106,7 +106,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     fileprivate var menuIsVisible = false
     fileprivate var firstLoadReloaded = false
     
-    fileprivate(set) var layoutAdapting = false {
+    var layoutAdapting = false {
         didSet {
             layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
         }
@@ -707,17 +707,15 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
          *  so the delay wait until layout finished the changes.
          */
         
-        let fileSize = self.book.spine.spineReferences[safe: pageNumber-1]?.resource.size ?? 102400
-        let delaySec = min(0.2 + 0.1 * Double(fileSize / 51200), 0.5)
-        delay(delaySec) {
+        delay(delaySec()) {
             webView.setupScrollDirection()
-            self.updateOverflowStyle(delay: delaySec) {
+            self.updateOverflowStyle(delay: self.delaySec()) {
                 self.scrollWebViewByPageOffsetRate(animated: false)
                 
-                delay(delaySec + 0.2) {
+                delay(self.delaySec() + 0.2) {
                     self.updatePageInfo() {
-                        self.updateScrollPosition(delay: delaySec) {
-                            self.updateStyleBackgroundPadding(delay: delaySec) {
+                        self.updateScrollPosition(delay: self.delaySec()) {
+                            self.updateStyleBackgroundPadding(delay: self.delaySec()) {
                                 self.layoutAdapting = false
                             }
                         }
@@ -1370,5 +1368,11 @@ extension FolioReaderPage {
         } else {
             completion()
         }
+    }
+    
+    func delaySec(_ max: Double = 0.5) -> Double {
+        let fileSize = self.book.spine.spineReferences[safe: pageNumber-1]?.resource.size ?? 102400
+        let delaySec = min(0.2 + 0.1 * Double(fileSize / 51200), max)
+        return delaySec
     }
 }
