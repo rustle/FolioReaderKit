@@ -399,6 +399,7 @@ open class FolioReaderWebView: WKWebView {
         let blue = UIImage(readerImageNamed: "blue-marker")
         let pink = UIImage(readerImageNamed: "pink-marker")
         let underline = UIImage(readerImageNamed: "underline-marker")
+        let mdictImage = UIImage(readerImageNamed: "icon-dictionary")
 
         let menuController = UIMenuController.shared
 
@@ -407,7 +408,10 @@ open class FolioReaderWebView: WKWebView {
         let editNoteItem = UIMenuItem(title: self.readerConfig.localizedHighlightNote, action: #selector(updateHighlightNote(_:)))
         let playAudioItem = UIMenuItem(title: self.readerConfig.localizedPlayMenu, action: #selector(play(_:)))
         let defineItem = UIMenuItem(title: self.readerConfig.localizedDefineMenu, action: #selector(define(_:)))
-        let mDictItem = UIMenuItem(title: self.readerConfig.localizedMDictMenu, action: #selector(lookup(_:)))
+        
+        let mDictItem = UIMenuItem(title: self.readerConfig.localizedMDictMenu, image: mdictImage) { [weak self] _ in
+            self?.lookup(menuController)
+        }
         
         let colorsItem = UIMenuItem(title: "C", image: colors) { [weak self] _ in
             self?.colors(menuController)

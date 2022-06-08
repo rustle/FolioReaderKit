@@ -181,7 +181,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     // MARK: - Gestures
     @objc func tapGesture() {
         dismiss() {
-            self.folioReader.readerCenter?.lastMenuSelectedIndex = 2
+            self.folioReader.readerCenter?.lastMenuSelectedIndex = 3
         }
         
         if (self.readerConfig.shouldHideNavigationOnTap == false) {
