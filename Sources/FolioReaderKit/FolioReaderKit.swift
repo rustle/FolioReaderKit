@@ -442,7 +442,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLetterSpacing: value)
-            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
     
@@ -452,7 +452,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentLineHeight: value)
-            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
 
@@ -463,7 +463,7 @@ extension FolioReader {
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentTextIndent: value)
-            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.2)
+            readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
     

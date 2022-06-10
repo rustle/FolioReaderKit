@@ -400,7 +400,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             preprocessor.append("removeBodyClass();tweakStyleOnly();")
         }
         if folioReader.doWrapPara {
-            preprocessor.append("reParagraph();removePSpace();")
+            preprocessor.append("removeOuterTable();reParagraph();removePSpace();")
         }
         
         preprocessor.append("document.body.style.minHeight = null;")
@@ -631,7 +631,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open func updateScrollPosition(delay bySecond: Double = 0.1, completion: (() -> Void)?) {
         // After rotation fix internal page offset
         
-        self.updatePageOffsetRate()
+//        self.updatePageOffsetRate()
         if self.pageOffsetRate > 0 {
             delay(bySecond) {
                 self.scrollWebViewByPageOffsetRate()
@@ -846,20 +846,20 @@ window.webkit.messageHandlers.FolioReaderPage.postMessage("writingMode " + writi
 writingMode
 """
         ) { _ in
-            let fileSize = self.book.spine.spineReferences[safe: self.pageNumber-1]?.resource.size ?? 102400
-            let delaySec = min(bySecond + 0.1 * Double(fileSize / 51200), 1.0)
+            let delaySec = self.delaySec() + bySecond
             delay(delaySec) {
                 self.updatePageInfo {
-                    self.scrollWebViewByPageOffsetRate()
-                    
-                    self.updateScrollPosition(delay: delaySec) {
-                        if completion == nil {
-                            self.updateStyleBackgroundPadding(delay: delaySec) {
-                                self.layoutAdapting = false
+                    delay(delaySec) {
+                        self.updateStyleBackgroundPadding(delay: delaySec, completion: completion != nil ? completion : {
+                            self.updatePageInfo() {
+                                self.scrollWebViewByPageOffsetRate()
+                                delay(delaySec) {
+                                    self.updatePageOffsetRate()
+                                    self.layoutAdapting = false
+                                    self.updatePageInfo()
+                                }
                             }
-                        } else {
-                            self.updateStyleBackgroundPadding(delay: delaySec, completion: completion)
-                        }
+                        })
                     }
                 }
             }
@@ -916,6 +916,7 @@ writingMode
         guard let readerCenter = self.folioReader.readerCenter else { return }
         
         self.layoutAdapting = true
+        self.updatePageOffsetRate()
         
         webView?.js(
         """
@@ -924,13 +925,26 @@ writingMode
         """) { _ in
             self.setNeedsLayout()
             
-            self.updateScrollPosition(delay: bySecond) {
+            delay(self.delaySec() + bySecond) {
                 self.updatePageInfo {
-                    self.updateStyleBackgroundPadding(delay: bySecond) {
-                        self.layoutAdapting = false
+                    self.updateStyleBackgroundPadding(delay: self.delaySec()) {
+                        self.scrollWebViewByPageOffsetRate()
+                        delay(0.2) {
+                            self.updatePageOffsetRate()
+                            self.layoutAdapting = false
+                            self.updatePageInfo()
+                        }
                     }
                 }
             }
+            
+//            self.updateScrollPosition(delay: bySecond) {
+//                self.updatePageInfo {
+//                    self.updateStyleBackgroundPadding(delay: bySecond) {
+//                        self.layoutAdapting = false
+//                    }
+//                }
+//            }
         }
     }
     
@@ -1370,9 +1384,9 @@ extension FolioReaderPage {
         }
     }
     
-    func delaySec(_ max: Double = 0.5) -> Double {
+    func delaySec(_ max: Double = 1.0) -> Double {
         let fileSize = self.book.spine.spineReferences[safe: pageNumber-1]?.resource.size ?? 102400
-        let delaySec = min(0.2 + 0.1 * Double(fileSize / 51200), max)
+        let delaySec = min(0.2 + 0.2 * Double(fileSize / 51200), max)
         return delaySec
     }
 }

@@ -331,13 +331,34 @@ open class FolioReaderCenter: UIViewController {
             // After rotation fix internal page offset
             delay(currentPage.delaySec()) {    //wait for webView finish resizing
                 folioLogger("TRANS2 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
-                currentPage.updatePageInfo() {
-                    currentPage.scrollWebViewByPageOffsetRate(animated: false)
-                    delay(0.2) {
-                        folioLogger("TRANS3 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
-                        currentPage.updatePageOffsetRate()
-                        currentPage.layoutAdapting = false
-                        folioLogger("TRANS4 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
+                
+//                currentPage.scrollPageToOffset(
+//                    currentPage.byWritingMode(
+//                        0.0,
+//                        (currentPage.webView?.scrollView.contentSize.width ?? 0.0) - (currentPage.webView?.scrollView.frame.width ?? 0.0)
+//                    ), animated: false
+//                )
+                
+                currentPage.webView?.js(
+                """
+                    document.body.style.minHeight = null;
+                    document.body.style.minWidth = null;
+                """) { _ in
+                    currentPage.setNeedsLayout()
+                    
+                    delay(currentPage.delaySec() + 0.5) {   //need some time for webView finishing paging
+                        currentPage.updatePageInfo() {
+                            currentPage.updateStyleBackgroundPadding(delay: 0.2) {
+                                currentPage.scrollWebViewByPageOffsetRate(animated: false)
+                                delay(0.2) {
+                                    folioLogger("TRANS3 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
+                                    currentPage.updatePageOffsetRate()
+                                    currentPage.layoutAdapting = false
+                                    folioLogger("TRANS4 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
+                                    currentPage.updatePageInfo()
+                                }
+                            }
+                        }
                     }
                 }
             }
