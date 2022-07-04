@@ -103,7 +103,7 @@ class FolioReaderPageIndicator: UIView {
             pagesLabelText += " · \(pagesRemaining) " + self.readerConfig.localizedReaderManyPagesLeft
         }
         
-        let pagePercent = self.folioReader.readerCenter?.getCurrentPageProgress() ?? 0.0
+        let pagePercent = readerPage.getPageProgress() 
         let bookPercent = self.folioReader.readerCenter?.getBookProgress() ?? 0.0
         
         pagesLabelText += " · \(String(format: "%.2f", pagePercent))% \(String(format: "%.2f", bookPercent))%"

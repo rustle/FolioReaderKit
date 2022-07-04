@@ -80,8 +80,8 @@ open class FolioReaderCenter: UIViewController {
     var screenBounds: CGRect!
     var pointNow = CGPoint.zero
     var tempReference: FRTocReference?
-    var isFirstLoad = true
-    var currentWebViewScrollPositions = [Int: CGPoint]()
+//    var isFirstLoad = true
+    var currentWebViewScrollPositions = [Int: [String: Any]]()
     var navigateWebViewScrollPositions = Array<(Int, CGPoint)>()
 
     var tempCollectionViewInset: CGFloat = 0.0
@@ -273,10 +273,10 @@ open class FolioReaderCenter: UIViewController {
         self.configureNavBarButtons()
         self.setCollectionViewProgressiveDirection()
 
-        if self.readerConfig.loadSavedPositionForCurrentBook {
-            guard let position = folioReader.savedPositionForCurrentBook,
-                  let pageNumber = position["pageNumber"] as? Int,
-                  pageNumber > 0 else { return }
+        if self.readerConfig.loadSavedPositionForCurrentBook,
+           let position = folioReader.savedPositionForCurrentBook,
+           let pageNumber = position["pageNumber"] as? Int,
+           pageNumber > 0 {
             self.changePageWith(page: pageNumber)
         }
     }

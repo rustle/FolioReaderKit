@@ -182,8 +182,10 @@ open class FolioReaderContainer: UIViewController {
                     
                     // Reload data
                     DispatchQueue.main.async {
-                        if let position = self.readerConfig.savedPositionForCurrentBook {
+                        if let position = self.readerConfig.savedPositionForCurrentBook,
+                           let pageNumber = position["pageNumber"] as? Int {
                             self.folioReader.savedPositionForCurrentBook = position
+                            self.folioReader.readerCenter?.currentWebViewScrollPositions[pageNumber - 1] = position
                         }
 
                         // Add audio player if needed

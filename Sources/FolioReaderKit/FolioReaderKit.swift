@@ -524,23 +524,16 @@ extension FolioReader {
         }
 
         print("saveReaderState before getVisibleCFI \(Date())")
-        webView.js("getVisibleCFI()", completion: { cfi in
+        
+        currentPage.getWebViewScrollPosition() { position in
             print("saveReaderState after getVisibleCFI \(Date())")
-            
-            let position = [
-                "pageNumber": (self.readerCenter?.currentPageNumber ?? 0),
-                "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
-                "pageOffsetX": webView.scrollView.contentOffset.x,
-                "pageOffsetY": webView.scrollView.contentOffset.y,
-                "cfi": "/\((self.readerCenter?.currentPageNumber ?? 0) * 2)\(cfi ?? "")"
-                ] as [String : Any]
 
             print("saveReaderState position \(position)")
             
             self.savedPositionForCurrentBook = position
 
             completion?()
-        })
+        }
     }
 
     /// Closes and save the reader current instance.

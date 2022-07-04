@@ -302,37 +302,6 @@ extension FolioReaderCenter {
     }
     */
     
-    public func getCurrentPageProgress() -> Double {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        guard let page = currentPage, let webView = page.webView else { return 0 }
-        
-        let pageSize = page.byWritingMode(
-            self.readerConfig.isDirection(pageHeight, pageWidth, pageHeight),
-            webView.frame.width
-        )
-        let contentSize = page.byWritingMode(
-            webView.scrollView.contentSize.forDirection(withConfiguration: self.readerConfig),
-            webView.scrollView.contentSize.width
-        )
-        let totalPages = ((pageSize != 0) ? Int(ceil(contentSize / pageSize)) : 0)
-        let currentPageItem = page.currentPage
-        
-        if totalPages > 0 {
-            var progress = page.byWritingMode(
-                Double(currentPageItem - 1) * 100.0 / Double(totalPages),
-                100.0 - Double(currentPageItem) * 100.0 / Double(totalPages)
-            )
-            
-            if progress < 0 { progress = 0 }
-            if progress > 100 { progress = 100 }
-            
-            return progress
-        }
-        
-        return 0
-    }
-
     public func changePageItemToPrevious(_ completion: (() -> Void)? = nil) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
@@ -498,9 +467,10 @@ extension FolioReaderCenter {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
         
         guard book.spine.size > 0 else { return 0 }
+        guard let currentPage = currentPage else { return 0 }
         
         let chapterProgress = getCurrentChapterProgress()
-        let pageProgress = getCurrentPageProgress()
+        let pageProgress = currentPage.getPageProgress()
         
         return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(book.spine.size)
     }
