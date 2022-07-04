@@ -148,6 +148,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             webView?.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             webView?.scrollView.showsVerticalScrollIndicator = false
             webView?.scrollView.showsHorizontalScrollIndicator = false
+            webView?.scrollView.scrollsToTop = false
             webView?.backgroundColor = .clear
             webView?.configuration.userContentController.add(self, name: "FolioReaderPage")
             self.contentView.addSubview(webView!)
