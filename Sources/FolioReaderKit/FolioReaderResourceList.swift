@@ -96,20 +96,24 @@ class FolioReaderResourceList: UITableViewController {
         let spineReference = book.spine.spineReferences[indexPath.row]
         let isSection = false
 
-        cell.indexLabel?.text = spineReference.resource.href
+        cell.indexLabel.text = spineReference.resource.href
+        cell.indexSize.text = ByteCountFormatter.string(fromByteCount: Int64(spineReference.resource.size ?? 0), countStyle: .file)
 
         // Add audio duration for Media Ovelay
         if let mediaOverlay = spineReference.resource.mediaOverlay {
             let duration = self.book.duration(for: "#"+mediaOverlay)
             
             if let durationFormatted = (duration != nil ? duration : "")?.clockTimeToMinutesString() {
-                cell.indexLabel?.text = (cell.indexLabel?.text ?? "") + (duration != nil ? (" - " + durationFormatted) : "")
+                cell.indexLabel.text = (cell.indexLabel.text ?? "") + (duration != nil ? (" - " + durationFormatted) : "")
             }
         }
 
         // Mark current reading resource
-        cell.indexLabel?.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
-        cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 15.0)
+        cell.indexLabel.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
+        cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
+
+        cell.indexSize.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
+        cell.indexSize.font = UIFont(name: "Avenir-Light", size: 13.0)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
