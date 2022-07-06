@@ -462,11 +462,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         let direction: ScrollDirection = self.folioReader.needsRTLChange ? .positive(withConfiguration: self.readerConfig) : .negative(withConfiguration: self.readerConfig)
 
-        if (self.folioReader.readerCenter?.pageScrollDirection == direction &&
-            self.folioReader.readerCenter?.isScrolling == true &&
-            self.readerConfig.scrollDirection != .horizontalWithVerticalContent) {
-            scrollPageToBottom()
-        }
+//        For what purpose?
+//        if (self.folioReader.readerCenter?.pageScrollDirection == direction &&
+//            self.folioReader.readerCenter?.isScrolling == true &&
+//            self.readerConfig.scrollDirection != .horizontalWithVerticalContent) {
+//            scrollPageToBottom()
+//        }
 
         UIView.animate(withDuration: 0.2, animations: {webView.alpha = 1}, completion: { finished in
             webView.isColors = false
@@ -544,19 +545,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
         self.currentPage = readerCenter.pageForOffset(pageOffSet, pageHeight: pageSize)
             
-            if (self.readerConfig.scrollDirection == .horizontalWithVerticalContent) {
-                let currentIndexPathRow = (self.pageNumber - 1)
-                
-                // if the cell reload doesn't save the top position offset
-                if let oldOffSet = readerCenter.currentWebViewScrollPositions[currentIndexPathRow], (abs((oldOffSet["pageOffsetY"] as? CGFloat ?? 0) - webView.scrollView.contentOffset.y) > 100) {
-                    // Do nothing
-                    // MARK: - FIXME
-                } else {
-                    getWebViewScrollPosition { position in
-                        readerCenter.currentWebViewScrollPositions[currentIndexPathRow] = position
-                    }
-                }
-            }
+//        if (self.readerConfig.scrollDirection == .horizontalWithVerticalContent) {
+        let currentIndexPathRow = (self.pageNumber - 1)
+            
+            // if the cell reload doesn't save the top position offset
+//            if let oldOffSet = readerCenter.currentWebViewScrollPositions[currentIndexPathRow], (abs((oldOffSet["pageOffsetY"] as? CGFloat ?? 0) - webView.scrollView.contentOffset.y) > 100) {
+//                // Do nothing
+//                // MARK: - FIXME
+//            } else {
+        guard layoutAdapting == false else { return }
+        getWebViewScrollPosition { position in
+            readerCenter.currentWebViewScrollPositions[currentIndexPathRow] = position
+        }
+//            }
+//        }
             
 //        }
     }
@@ -572,7 +574,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
                 "pageOffsetX": webView.scrollView.contentOffset.x,
                 "pageOffsetY": webView.scrollView.contentOffset.y,
-                "chapterProgress": self.getPageProgress(),
+                "chapterProgress": CGFloat(self.getPageProgress()),
                 "chapterName": self.currentChapterName ?? "Untitled Chapter",
                 "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
                 "cfi": "/\((self.pageNumber ?? 0) * 2)\(cfi ?? "")"
@@ -675,12 +677,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
         folioLogger("pageNumber=\(pageNumber!) contentOffset=\(contentOffset)")
         webView?.scrollView.setContentOffset(contentOffset, animated: animated)
-        if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
+//        if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
             let currentIndexPathRow = pageNumber - 1
             self.getWebViewScrollPosition { position in
                 self.folioReader.readerCenter?.currentWebViewScrollPositions[currentIndexPathRow] = position
             }
-        }
+//        }
     }
     
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
