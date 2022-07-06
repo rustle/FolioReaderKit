@@ -845,14 +845,13 @@ writingMode
         styleOverride -= 1
     }
 }
-/*
+
 window.webkit.messageHandlers.FolioReaderPage.postMessage("bridgeFinished " + getHTML())
 
-window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.documentElement).cssText)
-window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle " + window.getComputedStyle(document.body).cssText)
+window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle document.documentElement " + window.getComputedStyle(document.documentElement).cssText)
+window.webkit.messageHandlers.FolioReaderPage.postMessage("getComputedStyle document.body" + window.getComputedStyle(document.body).cssText)
 
 window.webkit.messageHandlers.FolioReaderPage.postMessage("writingMode " + writingMode)
-*/
 
 writingMode
 """
@@ -909,7 +908,9 @@ writingMode
                                 self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: false, completion: completion)
                             }
                         } else {
-                            if self.totalPages != minScreenCount {
+                            if self.totalPages > minScreenCount {
+                                self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: true, completion: completion)
+                            } else if self.totalPages < minScreenCount {
                                 self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: false, completion: completion)
                             } else {
                                 completion?()
@@ -1116,6 +1117,13 @@ writingMode
         guard let response = message.body as? String else { return }
         if self.readerConfig.debug.contains(.htmlStyling) {
             print("userContentController response\n\(response)")
+        }
+        if response.starts(with: "bridgeFinished") {
+            let tempDir = FileManager.default.temporaryDirectory
+            let tempFile = tempDir.appendingPathComponent(self.book.spine.spineReferences[self.pageNumber-1].resource.href.lastPathComponent)
+            print("\(#function) tempDir=\(tempDir.absoluteString) tempFile=\(tempFile.absoluteString)")
+            try? FileManager.default.removeItem(atPath: tempFile.path)
+            FileManager.default.createFile(atPath: tempFile.path, contents: response.suffix(response.count - "bridgeFinished ".count).data(using: .utf8), attributes: nil)
         }
     }
     

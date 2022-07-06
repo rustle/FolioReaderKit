@@ -64,7 +64,7 @@ class FolioReaderScript: WKUserScript {
                 [
                     FolioReader.CssLevels(type: "LineHeight\($0)", def: "line-height: \(Decimal(($0 + 10) * 5) / 100 + 1) !important;"),
                     FolioReader.CssLevels(type: "MarginH\($0)", def: "margin-top: 1em; margin-bottom: \((Decimal($0 + 10) * 5) / 100)em;"),
-                    FolioReader.CssLevels(type: "MarginV\($0)", def: "margin-right: 0.5em; margin-left: \((Decimal($0 + 10) * 5) / 200)em;")
+                    FolioReader.CssLevels(type: "MarginV\($0)", def: "margin-right: 0em; margin-left: \((Decimal($0 + 10) * 5) / 200)em;")
                 ]
             }.flatMap{$0.flatMap{$0}}
         )

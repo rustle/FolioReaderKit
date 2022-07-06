@@ -37,10 +37,10 @@ html {
     overflow: hidden;
 }
 
-body {
-/*    padding: 40px 20px !important;*/
-/*    overflow: hidden !important; */
-}
+/*body {
+    padding: 40px 20px !important;
+    overflow: hidden !important;
+}*/
 
 * {
     page-break-before: initial !important; /* Reset page breaks to default */
@@ -359,4 +359,10 @@ body {
         -webkit-hyphens: none !important;
         hyphens: none !important;
     }
+}
+
+.vrtl {
+    writing-mode: vertical-rl;
+    -webkit-writing-mode: vertical-rl;
+    font-family: serif-ja, serif
 }
