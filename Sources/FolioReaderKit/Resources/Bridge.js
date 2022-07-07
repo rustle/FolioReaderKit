@@ -203,8 +203,11 @@ function tweakStyleOnly() {
     })
     var imgs = [...document.getElementsByTagName('img')]
     imgs.forEach((item) => {
-        item.removeAttribute("height")
-        item.removeAttribute("width")
+        if( (item.parentNode.tagName == "P" || item.parentNode.tagName == "DIV") && item.parentNode.innerText.trim().length == 0 ) {
+            item.removeAttribute("height")
+            item.removeAttribute("width")
+            addClass(item, "folioImg")
+        }
     })
 }
 

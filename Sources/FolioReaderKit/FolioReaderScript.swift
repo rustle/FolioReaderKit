@@ -75,6 +75,11 @@ class FolioReaderScript: WKUserScript {
             }.flatMap{$0}
         )
         
+        cssStrings.append(
+            contentsOf: (0...8).map {     //-4 ~ 4
+                FolioReader.CssImgLevels(type: "TextIndent\($0)", def: "max-height: \(96 - max($0*2,0))vh !important; max-width: \(96 - max($0*2,0))vw !important;")
+            }.flatMap{$0}
+        )
         cssStrings.append(contentsOf: (0...10).map {
             ".folioStyleBodyPaddingLeft\($0) { padding-left: \(Double($0) * 2.5)vw !important; overflow: hidden !important;}"
         })
@@ -89,6 +94,22 @@ class FolioReaderScript: WKUserScript {
         
         cssStrings.append(contentsOf: (0...10).map {
             ".folioStyleBodyPaddingBottom\($0) { padding-bottom: \(Double($0) * 2.5)vh !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingLeft\($0) img.folioImg { margin-left: -\(Double($0-1) * 2.5)vw !important; overflow: hidden !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingRight\($0) img.folioImg { margin-right: -\(Double($0-1) * 2.5)vw !important; overflow: hidden !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingTop\($0) img.folioImg { margin-top: -\(Double($0-1) * 2.5)vh !important;}"
+        })
+        
+        cssStrings.append(contentsOf: (0...10).map {
+            ".folioStyleBodyPaddingBottom\($0) img.folioImg { margin-bottom: -\(Double($0-1) * 2.5)vh !important;}"
         })
         
         let cssString = cssStrings.joined(separator: "\n")

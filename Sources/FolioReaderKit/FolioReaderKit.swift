@@ -729,6 +729,12 @@ extension FolioReader {
         }.sorted()
     }
     
+    static func CssImgLevels(type: String, def: String) -> [String] {
+        CssLevelTags.map {
+            ".folioStyleL\($0.rawValue)\(type) \($1) img.folioImg { \(def) }"
+        }.sorted()
+    }
+    
     func cssFontFamilies() -> String {
         UIFont.familyNames.map {
             FolioReader.CssLevels(type: "FontFamily\($0.replacingOccurrences(of: " ", with: "_"))", def: "font-family: \"\($0)\" !important;")
