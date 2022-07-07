@@ -24,7 +24,7 @@ import UIKit
 class FolioReaderResourceList: UITableViewController {
 
     weak var delegate: FolioReaderResourceListDelegate?
-    fileprivate var tocItems = [FRTocReference]()
+    fileprivate var resourceTocMap = [FRResource: [FRTocReference]]()
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
@@ -55,8 +55,17 @@ class FolioReaderResourceList: UITableViewController {
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 50
 
-        // Create TOC list
-        self.tocItems = self.book.flatTableOfContents
+        // Create TOC Map
+        self.book.flatTableOfContents.forEach { tocItem in
+            guard let resource = tocItem.resource else { return }
+            
+            var tocList = self.resourceTocMap[resource]
+            if tocList == nil {
+                tocList = [FRTocReference]()
+                self.resourceTocMap[resource] = tocList
+            }
+            self.resourceTocMap[resource]?.append(tocItem)
+        }
         
         // Jump to the current resource
         DispatchQueue.main.async {
@@ -94,11 +103,8 @@ class FolioReaderResourceList: UITableViewController {
 
         cell.setup(withConfiguration: self.readerConfig)
         let spineReference = book.spine.spineReferences[indexPath.row]
-        let isSection = false
 
         cell.indexLabel.text = spineReference.resource.href
-        cell.indexSize.text = ByteCountFormatter.string(fromByteCount: Int64(spineReference.resource.size ?? 0), countStyle: .file)
-
         // Add audio duration for Media Ovelay
         if let mediaOverlay = spineReference.resource.mediaOverlay {
             let duration = self.book.duration(for: "#"+mediaOverlay)
@@ -112,13 +118,27 @@ class FolioReaderResourceList: UITableViewController {
         cell.indexLabel.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
         cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
 
+        cell.indexSize.text = ByteCountFormatter.string(fromByteCount: Int64(spineReference.resource.size ?? 0), countStyle: .file)
         cell.indexSize.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
         cell.indexSize.font = UIFont(name: "Avenir-Light", size: 13.0)
 
+        if let tocList = self.resourceTocMap[spineReference.resource] {
+            var tocTitles = tocList.map { $0.title! }.prefix(3)
+            if tocList.count > 3 {
+                tocTitles.append("...")
+                tocTitles.append(tocList.last!.title)
+            }
+            cell.indexToc.text = tocTitles.joined(separator: ", ")
+        } else {
+            cell.indexToc.text = "No ToC Defined"
+        }
+        cell.indexToc.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
+        cell.indexToc.font = UIFont(name: "Avenir-Light", size: 13.0)
+        
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
-        cell.contentView.backgroundColor = isSection ? UIColor(white: 0.7, alpha: 0.1) : UIColor.clear
         cell.backgroundColor = UIColor.clear
+        
         return cell
     }
 

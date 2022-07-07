@@ -11,6 +11,7 @@ import UIKit
 class FolioReaderResourceListCell: UITableViewCell {
     let indexLabel = UILabel()
     let indexSize = UILabel()
+    let indexToc = UILabel()
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -28,21 +29,29 @@ class FolioReaderResourceListCell: UITableViewCell {
         self.indexSize.textColor = readerConfig.menuTextColor
         self.indexSize.textAlignment = .right
         
+        self.indexToc.lineBreakMode = .byWordWrapping
+        self.indexToc.numberOfLines = 1
+        self.indexToc.translatesAutoresizingMaskIntoConstraints = false
+        self.indexToc.textColor = readerConfig.menuTextColor
+                
         self.contentView.addSubview(self.indexLabel)
         self.contentView.addSubview(self.indexSize)
-        
+        self.contentView.addSubview(self.indexToc)
+
         // Configure cell contraints
         var constraints = [NSLayoutConstraint]()
-        let views = ["label": self.indexLabel, "size": self.indexSize]
+        let views = ["label": self.indexLabel, "size": self.indexSize, "toc": self.indexToc]
         
         NSLayoutConstraint.constraints(withVisualFormat: "H:|-15-[label]-[size(>=50,<=100)]-15-|", options: [], metrics: nil, views: views).forEach {
             constraints.append($0 as NSLayoutConstraint)
         }
-        
-        NSLayoutConstraint.constraints(withVisualFormat: "V:|-16-[label]-16-|", options: [], metrics: nil, views: views).forEach {
+        NSLayoutConstraint.constraints(withVisualFormat: "H:|-20-[toc]-20-|", options: [], metrics: nil, views: views).forEach {
             constraints.append($0 as NSLayoutConstraint)
         }
         
+        NSLayoutConstraint.constraints(withVisualFormat: "V:|-[label]-[toc]-|", options: [], metrics: nil, views: views).forEach {
+            constraints.append($0 as NSLayoutConstraint)
+        }
         NSLayoutConstraint.constraints(withVisualFormat: "V:|-16-[size]-16-|", options: [], metrics: nil, views: views).forEach {
             constraints.append($0 as NSLayoutConstraint)
         }
@@ -60,5 +69,6 @@ class FolioReaderResourceListCell: UITableViewCell {
         // As the `setup` is called at each reuse, make sure the label is added only once to the view hierarchy.
         self.indexLabel.removeFromSuperview()
         self.indexSize.removeFromSuperview()
+        self.indexToc.removeFromSuperview()
     }
 }
