@@ -201,6 +201,11 @@ function tweakStyleOnly() {
     fonts.forEach((item) => {
         item.removeAttribute("size")
     })
+    var imgs = [...document.getElementsByTagName('img')]
+    imgs.forEach((item) => {
+        item.removeAttribute("height")
+        item.removeAttribute("width")
+    })
 }
 
 function injectHighlights(highlightJSONDataEncodedArray) {
