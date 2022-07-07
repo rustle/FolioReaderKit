@@ -553,7 +553,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //                // Do nothing
 //                // MARK: - FIXME
 //            } else {
-        guard layoutAdapting == false else { return }
+        guard !(webView.isHidden || layoutAdapting) else { return }
         getWebViewScrollPosition { position in
             readerCenter.currentWebViewScrollPositions[currentIndexPathRow] = position
         }
