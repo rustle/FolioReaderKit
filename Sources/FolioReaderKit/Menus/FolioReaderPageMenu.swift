@@ -20,15 +20,20 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
     let marginMenuHSegment = SMSegmentView()
     let marginMenuHSegmentHeight = CGFloat(55)
     
+    let vLinkedButton = UIButton()
     let topMarginText = UILabel()
     let botMarginText = UILabel()
     
+    let hLinkedButton = UIButton()
     let leftMarginText = UILabel()
     let rightMarginText = UILabel()
     
     let lineAfterDayNight = UIView()
     let lineB4MarginV = UIView()
     let lineB4MarginH = UIView()
+    
+    let marginLinked = UIImage(readerImageNamed: "icon-page-linked")
+    let marginUnlinked = UIImage(readerImageNamed: "icon-page-unlinked")
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -166,19 +171,16 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         marginMenuVSegment.segmentVerticalMargin = 17
         marginMenuVSegment.delegate = self
         marginMenuVSegment.tag = 4
-        // top margin decrease / text placeholder / increase
+        
         marginMenuVSegment.addSegmentWithTitle(nil, onSelectionImage: topMarginDecrease, offSelectionImage: topMarginDecrease)
         marginMenuVSegment.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuVSegment.addSegmentWithTitle(nil, onSelectionImage: topMarginIncrease, offSelectionImage: topMarginIncrease)
-        
-        // bot margin decrease / text placeholder / increase
+        marginMenuVSegment.addSegmentWithTitle(nil, onSelectionImage: nil, offSelectionImage: nil)
         marginMenuVSegment.addSegmentWithTitle(nil, onSelectionImage: botMarginIncrease, offSelectionImage: botMarginIncrease)
         marginMenuVSegment.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuVSegment.addSegmentWithTitle(nil, onSelectionImage: botMarginDecrease, offSelectionImage: botMarginDecrease)
 
         menuView.addSubview(marginMenuVSegment)
-
-
 
 //        let topMarginText = UILabel()
         topMarginText.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
@@ -200,6 +202,10 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         botMarginText.tag = 401
 
         menuView.addSubview(botMarginText)
+        
+        vLinkedButton.setImage(self.folioReader.currentVMarginLinked ? marginLinked : marginUnlinked, for: .normal)
+        vLinkedButton.addTarget(self, action: #selector(linkedButtonAction(sender:)), for: .primaryActionTriggered)
+        menuView.addSubview(vLinkedButton)
         
         lineB4MarginH.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(lineB4MarginH)
@@ -224,6 +230,7 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         marginMenuHSegment.addSegmentWithTitle(nil, onSelectionImage: leftMarginDecrease, offSelectionImage: leftMarginDecrease)
         marginMenuHSegment.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuHSegment.addSegmentWithTitle(nil, onSelectionImage: leftMarginIncrease, offSelectionImage: leftMarginIncrease)
+        marginMenuHSegment.addSegmentWithTitle(nil, onSelectionImage: nil, offSelectionImage: nil)
         marginMenuHSegment.addSegmentWithTitle(nil, onSelectionImage: rightMarginIncrease, offSelectionImage: rightMarginIncrease)
         marginMenuHSegment.addSegmentWithTitle("PH", onSelectionImage: nil, offSelectionImage: nil)
         marginMenuHSegment.addSegmentWithTitle(nil, onSelectionImage: rightMarginDecrease, offSelectionImage: rightMarginDecrease)
@@ -250,6 +257,10 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
 
         menuView.addSubview(rightMarginText)
         
+        hLinkedButton.setImage(self.folioReader.currentHMarginLinked ? marginLinked : marginUnlinked, for: .normal)
+        hLinkedButton.addTarget(self, action: #selector(linkedButtonAction(sender:)), for: .primaryActionTriggered)
+        menuView.addSubview(hLinkedButton)
+        
         reloadColors()
     }
     
@@ -268,16 +279,23 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         marginMenuVSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
 
         topMarginText.frame = CGRect(
-            x: marginMenuVSegment.frame.width / 6 + 2,
+            x: marginMenuVSegment.frame.width / 7 + 2,
             y: marginMenuVSegment.frame.minY + 4,
-            width: marginMenuVSegment.frame.width / 6 - 4,
+            width: marginMenuVSegment.frame.width / 7 - 4,
             height: marginMenuVSegment.frame.height - 3
         )
         
         botMarginText.frame = CGRect(
-            x: marginMenuVSegment.frame.width - marginMenuVSegment.frame.width / 3 + 2,
+            x: marginMenuVSegment.frame.width - marginMenuVSegment.frame.width / 7 * 2 + 2,
             y: lineB4MarginV.frame.minY + 4,
-            width: marginMenuVSegment.frame.width / 6 - 4,
+            width: marginMenuVSegment.frame.width / 7 - 4,
+            height: marginMenuVSegment.frame.height - 3
+        )
+        
+        vLinkedButton.frame = CGRect(
+            x: marginMenuVSegment.frame.width / 7 * 3 + 2,
+            y: marginMenuVSegment.frame.minY + 4,
+            width: marginMenuVSegment.frame.width / 7 - 4,
             height: marginMenuVSegment.frame.height - 3
         )
         
@@ -287,18 +305,26 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         marginMenuHSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
 
         leftMarginText.frame = CGRect(
-            x: marginMenuHSegment.frame.width / 6 + 2,
+            x: marginMenuHSegment.frame.width / 7 + 2,
             y: marginMenuHSegment.frame.minY + 4,
-            width: marginMenuHSegment.frame.width / 6 - 4,
+            width: marginMenuHSegment.frame.width / 7 - 4,
             height: marginMenuHSegment.frame.height - 3
         )
         
         rightMarginText.frame = CGRect(
-            x: marginMenuHSegment.frame.width - marginMenuHSegment.frame.width / 3 + 2,
+            x: marginMenuHSegment.frame.width - marginMenuHSegment.frame.width / 7 * 2 + 2,
             y: marginMenuHSegment.frame.minY + 4,
-            width: marginMenuHSegment.frame.width / 6 - 4,
+            width: marginMenuHSegment.frame.width / 7 - 4,
             height: marginMenuVSegment.frame.height - 3
         )
+        
+        hLinkedButton.frame = CGRect(
+            x: marginMenuHSegment.frame.width / 7 * 3 + 2,
+            y: marginMenuHSegment.frame.minY + 4,
+            width: marginMenuHSegment.frame.width / 7 - 4,
+            height: marginMenuHSegment.frame.height - 3
+        )
+        
     }
     
     // MARK: - SMSegmentView delegate
@@ -332,83 +358,95 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
             switch index {
             case 0:
                 self.folioReader.currentMarginTop -= 5
-                if self.folioReader.currentMarginTop < 0 {
-                    self.folioReader.currentMarginTop = 0
-                }
-                if let textView = menuView.viewWithTag(400) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
-                }
+                (menuView.viewWithTag(400) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
                 break;
             case 2:
                 self.folioReader.currentMarginTop += 5
-                if self.folioReader.currentMarginTop > 50 {
-                    self.folioReader.currentMarginTop = 50
-                }
-                if let textView = menuView.viewWithTag(400) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
-                }
+                (menuView.viewWithTag(400) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
                 break;
-            case 3:
+            case 4:
                 self.folioReader.currentMarginBottom += 5
-                if self.folioReader.currentMarginBottom > 50 {
-                    self.folioReader.currentMarginBottom = 50
-                }
-                if let textView = menuView.viewWithTag(401) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
-                }
+                (menuView.viewWithTag(401) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
                 break;
-            case 5:
+            case 6:
                 self.folioReader.currentMarginBottom -= 5
-                if self.folioReader.currentMarginBottom < 0 {
-                    self.folioReader.currentMarginBottom = 0
-                }
-                if let textView = menuView.viewWithTag(401) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
-                }
+                (menuView.viewWithTag(401) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
                 break;
             default:
                 break;
+            }
+            if self.folioReader.currentVMarginLinked {
+                switch index {
+                case 0:
+                    self.folioReader.currentMarginBottom -= 5
+                    (menuView.viewWithTag(401) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
+                    break;
+                case 2:
+                    self.folioReader.currentMarginBottom += 5
+                    (menuView.viewWithTag(401) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginBottom) / 2.0)
+                    break;
+                case 4:
+                    self.folioReader.currentMarginTop += 5
+                    (menuView.viewWithTag(400) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
+                    break;
+                case 6:
+                    self.folioReader.currentMarginTop -= 5
+                    (menuView.viewWithTag(400) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginTop) / 2.0)
+                    break;
+                default:
+                    break;
+                }
+                currentPage.byWritingMode(
+                    horizontal: { currentPage.updateViewerLayout(delay: 0.2) },
+                    vertical: { currentPage.updateRuntimStyle(delay: 0.4) }
+                )
             }
         } else if segmentView.tag == 5 {
             switch index {
             case 0:
                 self.folioReader.currentMarginLeft -= 5
-                if self.folioReader.currentMarginLeft < 0 {
-                    self.folioReader.currentMarginLeft = 0
-                }
-                if let textView = menuView.viewWithTag(402) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
-                }
+                (menuView.viewWithTag(402) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
                 break;
             case 2:
                 self.folioReader.currentMarginLeft += 5
-                if self.folioReader.currentMarginLeft > 50 {
-                    self.folioReader.currentMarginLeft = 50
-                }
-                if let textView = menuView.viewWithTag(402) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
-                }
+                (menuView.viewWithTag(402) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
                 break;
-            case 3:
+            case 4:
                 self.folioReader.currentMarginRight += 5
-                if self.folioReader.currentMarginRight > 50 {
-                    self.folioReader.currentMarginRight = 50
-                }
-                if let textView = menuView.viewWithTag(403) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
-                }
+                (menuView.viewWithTag(403) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
                 break;
-            case 5:
+            case 6:
                 self.folioReader.currentMarginRight -= 5
-                if self.folioReader.currentMarginRight < 0 {
-                    self.folioReader.currentMarginRight = 0
-                }
-                if let textView = menuView.viewWithTag(403) as? UILabel {
-                    textView.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
-                }
+                (menuView.viewWithTag(403) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
                 break;
             default:
                 break;
+            }
+            if self.folioReader.currentHMarginLinked {
+                switch index {
+                case 0:
+                    self.folioReader.currentMarginRight -= 5
+                    (menuView.viewWithTag(403) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
+                    break;
+                case 2:
+                    self.folioReader.currentMarginRight += 5
+                    (menuView.viewWithTag(403) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginRight) / 2.0)
+                    break;
+                case 4:
+                    self.folioReader.currentMarginLeft += 5
+                    (menuView.viewWithTag(402) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
+                    break;
+                case 6:
+                    self.folioReader.currentMarginLeft -= 5
+                    (menuView.viewWithTag(402) as? UILabel)?.text = String(format: "%.1f%%", Double(self.folioReader.currentMarginLeft) / 2.0)
+                    break;
+                default:
+                    break;
+                }
+                currentPage.byWritingMode(
+                    horizontal: { currentPage.updateRuntimStyle(delay: 0.4) },
+                    vertical: { currentPage.updateViewerLayout(delay: 0.2) }
+                )
             }
         }
     }
@@ -422,6 +460,17 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         
         if (self.readerConfig.shouldHideNavigationOnTap == false) {
             self.folioReader.readerCenter?.showBars()
+        }
+    }
+    
+    @objc func linkedButtonAction(sender: Any?) {
+        if sender as? UIButton == vLinkedButton {
+            self.folioReader.currentVMarginLinked.toggle()
+            vLinkedButton.setImage(self.folioReader.currentVMarginLinked ? marginLinked : marginUnlinked, for: .normal)
+        }
+        if sender as? UIButton == hLinkedButton {
+            self.folioReader.currentHMarginLinked.toggle()
+            hLinkedButton.setImage(self.folioReader.currentHMarginLinked ? marginLinked : marginUnlinked, for: .normal)
         }
     }
     

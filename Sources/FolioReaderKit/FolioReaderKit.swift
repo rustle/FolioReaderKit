@@ -380,13 +380,24 @@ extension FolioReader {
         }
     }
     
+    open var currentVMarginLinked: Bool {
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentVMarginLinked: true) ?? true
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentVMarginLinked: value)
+        }
+    }
+    
     open var currentMarginTop: Int {
         get {
             let defaults = self.readerCenter?.traitCollection.verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: defaults) ?? defaults
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: value)
+            let newValue = max(0, min(50, value))
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginTop: newValue)
+            guard currentVMarginLinked == false else { return }
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) },
                 vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
@@ -400,7 +411,9 @@ extension FolioReader {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: defaults) ?? defaults
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: value)
+            let newValue = max(0, min(50, value))
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginBottom: newValue)
+            guard currentVMarginLinked == false else { return }
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) },
                 vertical: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) }
@@ -408,13 +421,24 @@ extension FolioReader {
         }
     }
 
+    open var currentHMarginLinked: Bool {
+        get {
+            delegate?.folioReaderPreferenceProvider?(self).preference(currentHMarginLinked: true) ?? true
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentHMarginLinked: value)
+        }
+    }
+    
     open var currentMarginLeft: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 20 : 5    //10% for regular size, otherwise 2.5%
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: defaults) ?? defaults
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: value)
+            let newValue = max(0, min(50, value))
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginLeft: newValue)
+            guard currentHMarginLinked == false else { return }
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
                 vertical: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) }
@@ -424,11 +448,13 @@ extension FolioReader {
 
     open var currentMarginRight: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 20 : 5    //10% for regular size, otherwise 2.5%
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: defaults) ?? defaults
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: value)
+            let newValue = max(0, min(50, value))
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMarginRight: newValue)
+            guard currentHMarginLinked == false else { return }
             readerCenter?.currentPage?.byWritingMode(
                 horizontal: { self.readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4) },
                 vertical: { self.readerCenter?.currentPage?.updateViewerLayout(delay: 0.2) }

@@ -49,6 +49,10 @@ import Foundation
     
     @objc func preference(setCurrentMenuIndex value: Int)
     
+    @objc func preference(currentVMarginLinked defaults: Bool) -> Bool
+    
+    @objc func preference(setCurrentVMarginLinked value: Bool)
+    
     @objc func preference(currentMarginTop defaults: Int) -> Int
     
     @objc func preference(setCurrentMarginTop value: Int)
@@ -56,6 +60,10 @@ import Foundation
     @objc func preference(currentMarginBottom defaults: Int) -> Int
     
     @objc func preference(setCurrentMarginBottom value: Int)
+    
+    @objc func preference(currentHMarginLinked defaults: Bool) -> Bool
+    
+    @objc func preference(setCurrentHMarginLinked value: Bool)
     
     @objc func preference(currentMarginLeft defaults: Int) -> Int
     
@@ -195,6 +203,14 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
 
     }
     
+    public func preference(currentVMarginLinked defaults: Bool) -> Bool {
+        return defaults
+    }
+    
+    public func preference(setCurrentVMarginLinked value: Bool) {
+        
+    }
+    
     public func preference(setCurrentMarginTop value: Int) {
         
     }
@@ -223,6 +239,14 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
     }
     
     public func preference(setCurrentMarginRight value: Int) {
+        
+    }
+    
+    public func preference(currentHMarginLinked defaults: Bool) -> Bool {
+        return defaults
+    }
+    
+    public func preference(setCurrentHMarginLinked value: Bool) {
         
     }
     

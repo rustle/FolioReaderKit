@@ -117,18 +117,6 @@ class FolioReaderScript: WKUserScript {
         return FolioReaderScript(source: cssInjectionSource(for: cssString, id: "folio_bundle_style"))
     }()
     
-    static func cssInjection(overflow: String, id: String) -> FolioReaderScript {
-        var cssString = "html { overflow: \(overflow) }"
-        if overflow == "-webkit-paged-x" {
-            cssString =
-            """
-            html { overflow: -webkit-paged-x; /*margin-top: 20px !important;margin-bottom: 20px !important;*/ }
-            body { min-height: 100vh; }
-            """
-        }
-        return FolioReaderScript(source: cssInjectionSource(for: cssString, id: id))
-    }
-    
     static func cssInjectionSource(for content: String, id: String) -> String {
         let oneLineContent = content.components(separatedBy: .newlines).joined(separator: " ")
         let source = """
