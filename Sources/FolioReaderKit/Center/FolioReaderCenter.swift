@@ -319,8 +319,12 @@ open class FolioReaderCenter: UIViewController {
             return
         }
         
-        currentPage.layoutAdapting = true
-        currentPage.updatePageOffsetRate()
+        if currentPage.layoutAdapting == false {
+            currentPage.layoutAdapting = true
+            currentPage.updatePageOffsetRate()
+        }
+        let pageOffsetRate = currentPage.pageOffsetRate
+        
         folioLogger("TRANS1 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
         
         coordinator.animate { _ in
@@ -349,6 +353,7 @@ open class FolioReaderCenter: UIViewController {
                     delay(currentPage.delaySec() + 0.5) {   //need some time for webView finishing paging
                         currentPage.updatePageInfo() {
                             currentPage.updateStyleBackgroundPadding(delay: 0.2) {
+                                currentPage.pageOffsetRate = pageOffsetRate
                                 currentPage.scrollWebViewByPageOffsetRate(animated: false)
                                 delay(0.2) {
                                     folioLogger("TRANS3 pageOffsetRate=\(currentPage.pageOffsetRate) contentSize=\(currentPage.webView?.scrollView.contentSize ?? .zero) contentOffset=\(currentPage.webView?.scrollView.contentOffset ?? .zero)")
