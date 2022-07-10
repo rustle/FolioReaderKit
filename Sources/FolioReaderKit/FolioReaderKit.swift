@@ -149,7 +149,7 @@ public class FolioReader: NSObject {
 
     /// Check if layout needs to change to fit Right To Left
     var needsRTLChange: Bool {
-        return (self.readerContainer?.book.spine.isRtl == true && self.readerContainer?.readerConfig.scrollDirection == .horizontal)
+        return (self.readerContainer?.book.spine.isRtl == true && (true || self.readerContainer?.readerConfig.scrollDirection == .horitonzalWithPagedContent))
     }
 
     func isNight<T>(_ f: T, _ l: T) -> T {
@@ -354,7 +354,7 @@ extension FolioReader {
     }
 
     open var defaultScrollDirection: FolioReaderScrollDirection {
-        self.readerContainer?.book.spine.isRtl == true ? .horizontal : .horizontalWithVerticalContent
+        self.readerContainer?.book.spine.isRtl == true ? .horitonzalWithPagedContent : .horizontalWithScrollContent
     }
     /// Check the current scroll direction. Default .defaultVertical
     open var currentScrollDirection: Int {

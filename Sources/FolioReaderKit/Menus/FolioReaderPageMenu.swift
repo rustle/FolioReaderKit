@@ -11,7 +11,8 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
     let dayNightSegment = SMSegmentView()
     let dayNightSegmentHeight = CGFloat(55)
     
-    let layoutDirectionSegment = SMSegmentView()
+    let layoutDirectionHorizontalSegment = SMSegmentView()
+    let layoutDirectionVerticalSegment = SMSegmentView()
     let layoutDirectionSegmentHeight = CGFloat(55)
     
     let marginMenuVSegment = SMSegmentView()
@@ -110,50 +111,66 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         let vertical = UIImage(readerImageNamed: "icon-menu-vertical")
         let horizontal = UIImage(readerImageNamed: "icon-menu-horizontal")
         let hybrid = UIImage(readerImageNamed: "icon-menu-hybrid")
+        let rtlImage = UIImage(readerImageNamed: "icon-page-rtl")
         
         let verticalNormal = vertical?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         let horizontalNormal = horizontal?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
         let hybridNormal = hybrid?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
-
+        let rtlNormal = rtlImage?.imageTintColor(normalColor)?.withRenderingMode(.alwaysOriginal)
+        
         let verticalSelected = vertical?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
         let horizontalSelected = horizontal?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
         let hybridSelected = hybrid?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
+        let rtlSelected = rtlImage?.imageTintColor(selectedColor)?.withRenderingMode(.alwaysOriginal)
 
         // Layout direction
-        layoutDirectionSegment.segmentTitleFont = segmentFont
-        layoutDirectionSegment.separatorColour = self.readerConfig.nightModeSeparatorColor
-        layoutDirectionSegment.separatorWidth = 1
-        layoutDirectionSegment.segmentOnSelectionColour = UIColor.clear
-        layoutDirectionSegment.segmentOffSelectionColour = UIColor.clear
-        layoutDirectionSegment.segmentOnSelectionTextColour = selectedColor
-        layoutDirectionSegment.segmentOffSelectionTextColour = normalColor
-        layoutDirectionSegment.segmentVerticalMargin = 17
-        layoutDirectionSegment.delegate = self
-        layoutDirectionSegment.tag = 3
-        layoutDirectionSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutVertical, onSelectionImage: verticalSelected, offSelectionImage: verticalNormal)
-        layoutDirectionSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutHorizontal, onSelectionImage: horizontalSelected, offSelectionImage: horizontalNormal)
-        layoutDirectionSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutHybrid, onSelectionImage: hybridSelected, offSelectionImage: hybridNormal)
+        layoutDirectionHorizontalSegment.segmentTitleFont = segmentFont
+        layoutDirectionHorizontalSegment.separatorColour = self.readerConfig.nightModeSeparatorColor
+        layoutDirectionHorizontalSegment.separatorWidth = 1
+        layoutDirectionHorizontalSegment.segmentOnSelectionColour = UIColor.clear
+        layoutDirectionHorizontalSegment.segmentOffSelectionColour = UIColor.clear
+        layoutDirectionHorizontalSegment.segmentOnSelectionTextColour = selectedColor
+        layoutDirectionHorizontalSegment.segmentOffSelectionTextColour = normalColor
+        layoutDirectionHorizontalSegment.segmentVerticalMargin = 17
+        layoutDirectionHorizontalSegment.delegate = self
+        layoutDirectionHorizontalSegment.tag = 3
         
-        var scrollDirection = FolioReaderScrollDirection(rawValue: self.folioReader.currentScrollDirection)
+        layoutDirectionHorizontalSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutVertical, onSelectionImage: verticalSelected, offSelectionImage: verticalNormal)
+        layoutDirectionHorizontalSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutHorizontal, onSelectionImage: horizontalSelected, offSelectionImage: horizontalNormal)
+        layoutDirectionHorizontalSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutHybrid, onSelectionImage: hybridSelected, offSelectionImage: hybridNormal)
+        
+        layoutDirectionVerticalSegment.segmentTitleFont = segmentFont
+        layoutDirectionVerticalSegment.separatorColour = self.readerConfig.nightModeSeparatorColor
+        layoutDirectionVerticalSegment.separatorWidth = 1
+        layoutDirectionVerticalSegment.segmentOnSelectionColour = UIColor.clear
+        layoutDirectionVerticalSegment.segmentOffSelectionColour = UIColor.clear
+        layoutDirectionVerticalSegment.segmentOnSelectionTextColour = selectedColor
+        layoutDirectionVerticalSegment.segmentOffSelectionTextColour = normalColor
+        layoutDirectionVerticalSegment.segmentVerticalMargin = 17
+        layoutDirectionVerticalSegment.delegate = self
+        layoutDirectionVerticalSegment.tag = 33
+        
+        layoutDirectionVerticalSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutPaged, onSelectionImage: rtlSelected, offSelectionImage: rtlNormal)
+        layoutDirectionVerticalSegment.addSegmentWithTitle(self.readerConfig.localizedLayoutScroll, onSelectionImage: rtlSelected, offSelectionImage: rtlNormal)
+        
+        let scrollDirection = FolioReaderScrollDirection(rawValue: self.folioReader.currentScrollDirection) ?? self.readerConfig.scrollDirection
 
-        if scrollDirection == .defaultVertical && self.readerConfig.scrollDirection != .defaultVertical {
-            scrollDirection = self.readerConfig.scrollDirection
-        }
-
-        switch scrollDirection ?? .vertical {
+        switch scrollDirection {
         case .vertical, .defaultVertical:
-            layoutDirectionSegment.selectSegmentAtIndex(FolioReaderScrollDirection.vertical.rawValue)
-        case .horizontal:
-            layoutDirectionSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horizontal.rawValue)
-        case .horizontalWithVerticalContent:
-            layoutDirectionSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horizontalWithVerticalContent.rawValue)
+            layoutDirectionHorizontalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.vertical.rawValue)
+            layoutDirectionVerticalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horizontalWithScrollContent.rawValue-1)
+        case .horitonzalWithPagedContent:
+            layoutDirectionHorizontalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horitonzalWithPagedContent.rawValue)
+            layoutDirectionVerticalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horitonzalWithPagedContent.rawValue-1)
+        case .horizontalWithScrollContent:
+            layoutDirectionHorizontalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horizontalWithScrollContent.rawValue)
+            layoutDirectionVerticalSegment.selectSegmentAtIndex(FolioReaderScrollDirection.horizontalWithScrollContent.rawValue-1)
         }
-        menuView.addSubview(layoutDirectionSegment)
-
+        menuView.addSubview(layoutDirectionHorizontalSegment)
+        menuView.addSubview(layoutDirectionVerticalSegment)
         
         lineB4MarginV.backgroundColor = self.readerConfig.nightModeSeparatorColor
         menuView.addSubview(lineB4MarginV)
-        
         
         let topMarginIncrease = UIImage(readerImageNamed: "icon-top-margin-increase")
         let topMarginDecrease = UIImage(readerImageNamed: "icon-top-margin-decrease")
@@ -271,9 +288,24 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
         dayNightSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
         lineAfterDayNight.frame = CGRect(x: 0, y: dayNightSegment.frame.maxY, width: frame.width, height: 1)
         
-        layoutDirectionSegment.frame = CGRect(x: 0, y: lineAfterDayNight.frame.maxY,width: frame.width, height: layoutDirectionSegmentHeight)
-        layoutDirectionSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
-        lineB4MarginV.frame = CGRect(x: 0, y: layoutDirectionSegment.frame.maxY, width: frame.width, height: 1)
+        layoutDirectionHorizontalSegment.frame = CGRect(x: 0, y: lineAfterDayNight.frame.maxY, width: frame.width, height: layoutDirectionSegmentHeight)
+        layoutDirectionHorizontalSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
+        
+        layoutDirectionVerticalSegment.frame = CGRect(x: 0, y: lineAfterDayNight.frame.maxY, width: frame.width, height: layoutDirectionSegmentHeight)
+        layoutDirectionVerticalSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
+        
+        self.folioReader.readerCenter?.currentPage?.byWritingMode(horizontal: {
+            layoutDirectionHorizontalSegment.isHidden = false
+            layoutDirectionVerticalSegment.isHidden = true
+            
+            lineB4MarginV.frame = CGRect(x: 0, y: layoutDirectionHorizontalSegment.frame.maxY, width: frame.width, height: 1)
+        }, vertical: {
+            layoutDirectionHorizontalSegment.isHidden = true
+            layoutDirectionVerticalSegment.isHidden = false
+            
+            lineB4MarginV.frame = CGRect(x: 0, y: layoutDirectionVerticalSegment.frame.maxY, width: frame.width, height: 1)
+        })
+        
         
         marginMenuVSegment.frame = CGRect(x: 0, y: lineB4MarginV.frame.maxY, width: frame.width, height: marginMenuVSegmentHeight)
         marginMenuVSegment.segmentTitleFont = segmentFont  //to trigger segment width re-calculation
@@ -354,6 +386,13 @@ class FolioReaderPageMenu: FolioReaderMenu, SMSegmentViewDelegate {
             }
 
             self.folioReader.currentScrollDirection = index
+        }  else if segmentView.tag == 33 {
+
+            guard self.folioReader.currentScrollDirection != index + 1 else {
+                return
+            }
+
+            self.folioReader.currentScrollDirection = index + 1
         } else if segmentView.tag == 4 {
             switch index {
             case 0:

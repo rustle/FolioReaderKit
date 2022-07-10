@@ -106,12 +106,12 @@ open class FolioReaderContainer: UIViewController {
             self.errorOnLoad = true
         }
         
-        let canChangeScrollDirection = self.readerConfig.canChangeScrollDirection
-        self.readerConfig.canChangeScrollDirection = self.readerConfig.isDirection(canChangeScrollDirection, canChangeScrollDirection, false)
+        //let canChangeScrollDirection = self.readerConfig.canChangeScrollDirection
+        //self.readerConfig.canChangeScrollDirection = self.readerConfig.isDirection(canChangeScrollDirection, canChangeScrollDirection, false)
 
         // If user can change scroll direction use the last saved
         if self.readerConfig.canChangeScrollDirection == true {
-            var scrollDirection = FolioReaderScrollDirection(rawValue: self.folioReader.currentScrollDirection) ?? .vertical
+            var scrollDirection = FolioReaderScrollDirection(rawValue: self.folioReader.currentScrollDirection) ?? .horizontalWithScrollContent
             if (scrollDirection == .defaultVertical && self.readerConfig.scrollDirection != .defaultVertical) {
                 scrollDirection = self.readerConfig.scrollDirection
             }

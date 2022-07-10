@@ -18,7 +18,7 @@ extension FolioReaderCenter: UICollectionViewDelegateFlowLayout {
         let orientation = UIDevice.current.orientation
         
         if orientation == .portrait || orientation == .portraitUpsideDown {
-            if readerConfig.scrollDirection == .horizontal {
+            if readerConfig.scrollDirection == .horitonzalWithPagedContent {
                 size.height = size.height - view.safeAreaInsets.bottom
             }
         }

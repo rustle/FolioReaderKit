@@ -12,24 +12,24 @@ import UIKit
 
 /// Defines the Reader scrolling direction
 ///
-/// - vertical: Section and content scroll on vertical.
-/// - horizontal: Section and content scroll on horizontal.
-/// - horizontalWithVerticalContent: Sections scroll horizontal and content scroll on vertical.
+/// - vertical: Section and content scroll on vertical, LTR WRITING ONLY
+/// - horitonzalWithPagedContent: Enable content pagination, section scroll on horizontal.
+/// - horizontalWithScrollContent: Sections scroll horizontal and content scroll on vertical/horizontal based on writing direction,
 /// - defaultVertical: The default scroll direction, if not overridden; works as .vertical.
 public enum FolioReaderScrollDirection: Int {
     case vertical
-    case horizontal
-    case horizontalWithVerticalContent
+    case horitonzalWithPagedContent
+    case horizontalWithScrollContent
     case defaultVertical
 
     /// The current scroll direction
     ///
     /// - Returns: Returns `UICollectionViewScrollDirection`
-    func collectionViewScrollDirection() -> UICollectionView.ScrollDirection {
+    func collectionViewScrollDirection(isWritingRTL: Bool) -> UICollectionView.ScrollDirection {
         switch self {
         case .vertical, .defaultVertical:
             return .vertical
-        case .horizontal, .horizontalWithVerticalContent:
+        case .horitonzalWithPagedContent, .horizontalWithScrollContent:
             return .horizontal
         }
     }
@@ -173,7 +173,7 @@ open class FolioReaderConfig: NSObject {
     open var hideBars = false
 
     /// If `canChangeScrollDirection` is `true` it will be overrided by user's option.
-    open var scrollDirection: FolioReaderScrollDirection = .defaultVertical
+    open var scrollDirection: FolioReaderScrollDirection = .horizontalWithScrollContent
 
     /// Enable or disable hability to user change scroll direction on menu.
     open var canChangeScrollDirection = true
@@ -250,7 +250,10 @@ open class FolioReaderConfig: NSObject {
     open var localizedLayoutHorizontal = NSLocalizedString("Horizontal", comment: "")
     open var localizedLayoutVertical = NSLocalizedString("Vertical", comment: "")
     open var localizedLayoutHybrid = NSLocalizedString("Hybrid", comment: "")
+    open var localizedLayoutPaged = NSLocalizedString("Paged", comment: "")
+    open var localizedLayoutScroll = NSLocalizedString("Scroll", comment: "")
 
+    
     open var localizedReaderOnePageLeft = NSLocalizedString("1 page left", comment: "")
     open var localizedReaderManyPagesLeft = NSLocalizedString("pages left", comment: "")
     open var localizedReaderManyMinutes = NSLocalizedString("minutes", comment: "")
@@ -299,11 +302,11 @@ open class FolioReaderConfig: NSObject {
 
      - returns: The right value based on direction.
      */
-    func isDirection<T> (_ vertical: T, _ horizontal: T, _ horizontalContentVertical: T) -> T {
+    func isDirection<T> (_ vertical: T, _ horizontalContentPaged: T, _ horizontalContentScroll: T) -> T {
         switch self.scrollDirection {
         case .vertical, .defaultVertical:       return vertical
-        case .horizontal:                       return horizontal
-        case .horizontalWithVerticalContent:    return horizontalContentVertical
+        case .horitonzalWithPagedContent:       return horizontalContentPaged
+        case .horizontalWithScrollContent:      return horizontalContentScroll
         }
     }
 }

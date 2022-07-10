@@ -40,7 +40,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
                 
                 let fileSize = self.book.spine.spineReferences[safe: page.pageNumber-1]?.resource.size ?? 102400
-                let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horizontal ? 0.25 : 0.1)
+                let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horitonzalWithPagedContent ? 0.25 : 0.1)
                 delay(delaySec) {
                     guard let chapterProgress = position["chapterProgress"] as? CGFloat else { return }
                     
@@ -51,7 +51,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                         contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress,
                         contentSize.width * (100 - chapterProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
                     if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                        if page.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                        if page.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
                             let pageInPage = page.byWritingMode(
                                 floor( pageOffsetByProgress / webViewFrameSize.width ),
                                 max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)

@@ -663,7 +663,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         ) * self.pageOffsetRate
         
         // Fix the offset for paged scroll
-        if byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+        if byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
             let page = byWritingMode(
                 floor( pageOffset / webViewFrameSize.width ),
                 max(floor( (contentSize.width - pageOffset) / webViewFrameSize.width), 1)
@@ -880,7 +880,7 @@ writingMode
     
     func updateStyleBackgroundPadding(delay bySecond: Double, tryShrinking: Bool = true, completion: (() -> Void)? = nil) {
         var minScreenCount = 1
-        if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+        if self.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
             minScreenCount = self.totalPages ?? minScreenCount
             if minScreenCount < 1 {
                 minScreenCount = 1
@@ -902,7 +902,7 @@ writingMode
             delay(bySecond) {
                 self.updatePageInfo {
                     folioLogger("updateStyleBackgroundPadding pageNumber=\(self.pageNumber!) minScreenCount=\(minScreenCount) totalPages=\(self.totalPages ?? 0) tryShrinking=\(tryShrinking)")
-                    if self.byWritingMode(self.readerConfig.scrollDirection == .horizontal, true) {
+                    if self.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
                         if tryShrinking {
                             if self.totalPages < minScreenCount {   //shrinked one page, try again
                                 self.updateStyleBackgroundPadding(delay: bySecond, tryShrinking: true, completion: completion)
@@ -1243,7 +1243,7 @@ writingMode
     open func handleAnchor(_ anchor: String, offsetInWindow: CGFloat, avoidBeginningAnchors: Bool, animated: Bool) {
         guard !anchor.isEmpty else { return }
         
-        guard webView?.isHidden == false, self.layoutAdapting == false else {
+        guard let webView = webView, webView.isHidden == false, self.layoutAdapting == false else {
             delay(0.1) {
                 self.handleAnchor(anchor, offsetInWindow: offsetInWindow, avoidBeginningAnchors: avoidBeginningAnchors, animated: animated)
             }
@@ -1253,7 +1253,9 @@ writingMode
         getAnchorOffset(anchor) { offset in
             self.byWritingMode {
                 switch self.readerConfig.scrollDirection {
-                case .vertical, .defaultVertical, .horizontalWithVerticalContent:
+                case .horitonzalWithPagedContent:
+                    self.scrollPageToOffset(offset, animated: animated)
+                default:
                     let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
                     
                     var voffset = offset > offsetInWindow ?
@@ -1269,21 +1271,14 @@ writingMode
                     } else if avoidBeginningAnchors && !isBeginning {
                         self.scrollPageToOffset(voffset, animated: animated)
                     }
-                case .horizontal:
-                    self.scrollPageToOffset(offset, animated: animated)
                 }
             } vertical: {
                 switch self.readerConfig.scrollDirection {
-                case .horizontal:
-                    if let webView = self.webView {
-                        let page = ceil((webView.scrollView.contentSize.width - offset) / webView.frame.width)
-                        self.scrollPageToOffset(webView.scrollView.contentSize.width - page * webView.frame.width, animated: true)
-                    } else {
-                        self.scrollPageToOffset(offset + (self.webView?.frame.width ?? 0), animated: animated)
-                    }
-                    break
+                case .horitonzalWithPagedContent:
+                    let page = ceil((webView.scrollView.contentSize.width - offset) / webView.frame.width)
+                    self.scrollPageToOffset(webView.scrollView.contentSize.width - page * webView.frame.width, animated: true)
                 default:
-                    self.scrollPageToOffset(offset + (self.webView?.frame.width ?? 0), animated: animated)
+                    self.scrollPageToOffset(offset + webView.frame.width, animated: animated)
                 }
             }
 
@@ -1304,7 +1299,7 @@ writingMode
      - returns: The element offset ready to scroll
      */
     func getAnchorOffset(_ anchor: String, completion: @escaping ((CGFloat) -> ())) {
-        let horizontal = self.readerConfig.scrollDirection == .horizontal
+        let horizontal = self.readerConfig.scrollDirection == .horitonzalWithPagedContent
         self.webView?.js("getAnchorOffset(\"\(anchor)\", \(horizontal.description))") { strOffset in
             guard let strOffset = strOffset else {
                 completion(CGFloat(0))
