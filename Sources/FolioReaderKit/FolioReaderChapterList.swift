@@ -28,6 +28,7 @@ class FolioReaderChapterList: UITableViewController {
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
+    fileprivate var highlightResourceIds = Set<String>()
 
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderChapterListDelegate?) {
         self.readerConfig = readerConfig
@@ -60,18 +61,31 @@ class FolioReaderChapterList: UITableViewController {
       
         // Jump to the current chapter
         DispatchQueue.main.async {
-          
-            if
-                let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
-                let reference = self.book.spine.spineReferences[safe: currentPageNumber - 1],
-                let index = self.tocItems.firstIndex(where: { $0.resource == reference.resource }) {
-              
-                  let indexPath = IndexPath(row: index, section: 0)
-                  self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
-            }
+            guard let index = self.tocItems.firstIndex(where: { self.highlightResourceIds.contains($0.resource?.id ?? "___NIL___") }) else { return }
+            let indexPath = IndexPath(row: index, section: 0)
+            self.tableView.scrollToRow(at: indexPath, at: .middle, animated: true)
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        highlightResourceIds.removeAll()
+        
+        guard var pageNumber = self.folioReader.readerCenter?.currentPageNumber else { return }
+        
+        while( pageNumber > 0 ) {
+            guard let reference = self.book.spine.spineReferences[safe: pageNumber - 1] else { return }
+            if let tocReferences = self.book.resourceTocMap[reference.resource] {
+                tocReferences.forEach {
+                    guard let id = $0.resource?.id else { return }
+                    highlightResourceIds.insert(id)
+                }
+                break
+            } else {
+                pageNumber -= 1
+            }
+        }
+    }
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -120,13 +134,7 @@ class FolioReaderChapterList: UITableViewController {
         }
 
         // Mark current reading chapter
-        if
-            let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
-            let reference = self.book.spine.spineReferences[safe: currentPageNumber - 1],
-            (tocReference.resource != nil) {
-            let resource = reference.resource
-            cell.indexLabel?.textColor = (tocReference.resource == resource ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
-        }
+        cell.indexLabel?.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
         cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(tocReference.level ?? 0) * 1.5)
 
         cell.layoutMargins = UIEdgeInsets.zero

@@ -24,7 +24,6 @@ import UIKit
 class FolioReaderResourceList: UITableViewController {
 
     weak var delegate: FolioReaderResourceListDelegate?
-    fileprivate var resourceTocMap = [FRResource: [FRTocReference]]()
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
@@ -55,18 +54,6 @@ class FolioReaderResourceList: UITableViewController {
         self.tableView.rowHeight = UITableView.automaticDimension
         self.tableView.estimatedRowHeight = 50
 
-        // Create TOC Map
-        self.book.flatTableOfContents.forEach { tocItem in
-            guard let resource = tocItem.resource else { return }
-            
-            var tocList = self.resourceTocMap[resource]
-            if tocList == nil {
-                tocList = [FRTocReference]()
-                self.resourceTocMap[resource] = tocList
-            }
-            self.resourceTocMap[resource]?.append(tocItem)
-        }
-        
         // Jump to the current resource
         DispatchQueue.main.async {
             if let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber {
@@ -122,7 +109,7 @@ class FolioReaderResourceList: UITableViewController {
         cell.indexSize.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
         cell.indexSize.font = UIFont(name: "Avenir-Light", size: 13.0)
 
-        if let tocList = self.resourceTocMap[spineReference.resource] {
+        if let tocList = self.book.resourceTocMap[spineReference.resource] {
             var tocTitles = tocList.map { $0.title! }.prefix(3)
             if tocList.count > 3 {
                 tocTitles.append("...")

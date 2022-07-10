@@ -208,6 +208,19 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
         book.tableOfContents = findTableOfContents()
         book.flatTableOfContents = flatTOC
 
+        // Create TOC Map
+        book.resourceTocMap = [:]
+        book.flatTableOfContents.forEach { tocItem in
+            guard let resource = tocItem.resource else { return }
+            
+            var tocList = book.resourceTocMap[resource]
+            if tocList == nil {
+                tocList = [FRTocReference]()
+                book.resourceTocMap[resource] = tocList
+            }
+            book.resourceTocMap[resource]?.append(tocItem)
+        }
+        
         // Read Spine
         let spine = xmlDoc.root["spine"]
         book.spine = readSpine(spine.children)

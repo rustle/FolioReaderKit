@@ -24,6 +24,7 @@ open class FRBook: NSObject {
     public var resources = FRResources()
     public var tableOfContents: [FRTocReference]!
     public var flatTableOfContents: [FRTocReference]!
+    public var resourceTocMap: [FRResource: [FRTocReference]]!
 
     public var epubArchive: Archive?
     
