@@ -25,6 +25,9 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         page.becomeFirstResponder()
         webView.createMenu(onHighlight: false)
         
+        // set scroll slider frame based on page writing mode
+        updateSubviewFrames()
+        
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
             currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)

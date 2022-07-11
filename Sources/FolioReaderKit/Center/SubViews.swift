@@ -52,8 +52,15 @@ extension FolioReaderCenter {
     func frameForScrollScrubber(outerBounds: CGRect) -> CGRect {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        let scrubberY: CGFloat = ((self.readerConfig.shouldHideNavigationOnTap == true || self.readerConfig.hideBars == true) ? 50 : 74)
-        return CGRect(x: self.pageWidth + 10, y: scrubberY, width: 40, height: (self.pageHeight - 100))
+        guard let currentPage = currentPage else { return .zero }
+        
+        let scrubberYforHorizontal: CGFloat = ((self.readerConfig.shouldHideNavigationOnTap == true || self.readerConfig.hideBars == true) ? 50 : 74)
+        let scrubberYforVertical: CGFloat = self.pageHeight// + ((self.readerConfig.shouldHideNavigationOnTap == true || self.readerConfig.hideBars == true) ? 50 : 74)
+        
+        return currentPage.byWritingMode(
+            CGRect(x: self.pageWidth + 10, y: scrubberYforHorizontal, width: 40, height: (self.pageHeight - 100)),
+            CGRect(x: self.pageWidth - 40, y: scrubberYforVertical, width: self.pageWidth - 100, height: 40)
+        )
     }
 
     func frameForCollectionView(outerBounds: CGRect) -> CGRect {
