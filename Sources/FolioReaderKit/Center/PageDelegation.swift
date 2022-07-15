@@ -28,6 +28,11 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         // set scroll slider frame based on page writing mode
         updateSubviewFrames()
         
+        webView.js("""
+            getElementOffsetByCFI()
+        """) { offset in
+            folioLogger("getElementOffsetByCFI offset=\(String(describing: offset))")
+        }
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage , fragmentID != "" {
             currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)

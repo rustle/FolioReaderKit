@@ -1263,25 +1263,68 @@ function visible(elem) {
     return !(elem.clientHeight === 0 || elem.clientWidth === 0)
 }
 
-function getVisibleCFI() {
+function getVisibleCFI(horizontal) {
     let first;
-    let firstOffY;
+    let firstOff;
+    let firstHorizontalTop;
     //let allVisible = Array.from(document.querySelectorAll('body > *')).filter(visible)
-    let allVisible = getLeafNodes(document).filter(visible)
-    for(const elem of allVisible) {
+    let allVisible = getTextNodesIn(document.body, false).filter(visible)
+    let bodyWidth = document.body.clientWidth
+    for(const textNode of allVisible) {
+        let elem = textNode.parentNode
+        if (!elem || elem == first) {
+            continue
+        }
         //Calculate the offset to the document
         //See: https://stackoverflow.com/a/18673641/7448536
-        const offY = elem.getBoundingClientRect().top + document.documentElement.scrollTop
-        if (first == null || offY < firstOffY) {
+        const coord = elem.getBoundingClientRect()
+        const offY = coord.top + document.documentElement.scrollTop
+        const offYB = coord.bottom + document.documentElement.scrollTop
+        const offX = coord.left + document.documentElement.scrollLeft
+        const offXR = coord.right + document.documentElement.scrollLeft
+        if (horizontal ? (offX > window.innerWidth || offXR < 0) : (offY > window.innerHeight || offYB < 0)) {
+            continue
+        }
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI visible " + horizontal + " " + (offX < firstOff) + ":" + (firstOff < 0) + ":" + (offX > 0) + ":" + (offX < window.innerWidth) + " " + offX + ":" + offXR + " " + offY + ":" + offYB + " " + window.innerWidth + " " + window.innerHeight + " " + elem.outerHTML);
+        
+        // for horizontal:
+        //    case 1: firstOff < 0, then next offX must be > 0, replace first
+        //    case 2: firstOff > 0, then ignore offX < 0 or offXR > window.innerWidth, and pick smaller firstHorizontalTop
+        // for vertical:
+        //    case 1: firstOff < 0, then next offY must be > 0, replace first
+        //    case 2: firstOff > 0, then pick smaller offY (>0)
+        if ((first == null) || (horizontal ? ((firstOff < 0) || (offX >= 0 && offXR <= window.innerWidth && offY < firstHorizontalTop)) : ((firstOff < 0) || (offY >= 0 && offY < firstOff)) ) ) {
             first = elem;
-            firstOffY = offY;
+            firstOff = horizontal ? offX : offY;
+            firstHorizontalTop = horizontal ? offY : 0;
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI first " + horizontal + " " + first.outerHTML);
         }
     }
+    
+    if (!first) {
+        return "/"
+    }
+    
     var cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
 
     window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI " + cfiStart + " " + first.outerHTML);
     
     return cfiStart
+}
+
+function getElementOffsetByCFI(cfi) {
+    try {
+        let elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI("epubcfi(/4/94)"), document, [], [], []).get(0)
+    
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getElementOffsetByCFI " + elem.outerHTML);
+        
+        let bounds = elem.getBoundingClientRect()
+        
+        return JSON.stringify({top: bounds.top, left: bounds.left})
+    } catch (e) {
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getElementOffsetByCFI " + e.toString());
+        return "__NOT_FOUND__"
+    }
 }
 
 // Class based onClick listener

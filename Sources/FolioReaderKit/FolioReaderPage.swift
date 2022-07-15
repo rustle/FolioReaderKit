@@ -568,7 +568,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return
         }
 
-        webView.js("getVisibleCFI()") { cfi in
+        let isHorizontal: Bool = self.byWritingMode(
+            self.folioReader.readerConfig?.isDirection(false, true, false),
+            true) ?? false
+        webView.js("getVisibleCFI(\(isHorizontal))") { cfi in
             let position: [String : Any] = [
                 "pageNumber": self.pageNumber ?? 0,
                 "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
@@ -1126,6 +1129,9 @@ writingMode
             print("\(#function) tempDir=\(tempDir.absoluteString) tempFile=\(tempFile.absoluteString)")
             try? FileManager.default.removeItem(atPath: tempFile.path)
             FileManager.default.createFile(atPath: tempFile.path, contents: response.suffix(response.count - "bridgeFinished ".count).data(using: .utf8), attributes: nil)
+        }
+        if response.starts(with: "getVisibleCFI") {
+            print("userContentController response \(response)")
         }
     }
     
