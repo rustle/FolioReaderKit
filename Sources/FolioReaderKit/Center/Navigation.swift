@@ -54,17 +54,6 @@ extension FolioReaderCenter {
     }
     */
     
-    func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        guard (height != 0) else {
-            return 0
-        }
-
-        let page = Int(ceil(offset / height))+1
-        return page
-    }
-
     func getCurrentIndexPath() -> IndexPath {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 

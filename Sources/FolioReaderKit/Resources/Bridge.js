@@ -1278,14 +1278,25 @@ function getVisibleCFI(horizontal) {
         //Calculate the offset to the document
         //See: https://stackoverflow.com/a/18673641/7448536
         const coord = elem.getBoundingClientRect()
-        const offY = coord.top + document.documentElement.scrollTop
-        const offYB = coord.bottom + document.documentElement.scrollTop
-        const offX = coord.left + document.documentElement.scrollLeft
-        const offXR = coord.right + document.documentElement.scrollLeft
+        const offY = coord.top// + document.documentElement.scrollTop
+        const offYB = coord.bottom// + document.documentElement.scrollTop
+        const offX = coord.left// + document.documentElement.scrollLeft
+        const offXR = coord.right// + document.documentElement.scrollLeft
+        
+        const isVisible = !(horizontal ? (offX > window.innerWidth || offXR < 0) : (offY > window.innerHeight || offYB < 0))
+        window.webkit.messageHandlers.FolioReaderPage
+        .postMessage(
+                     "getVisibleCFI isVisible:" + isVisible
+                     + " " + horizontal
+                     + " " + (offX < firstOff) + ":" + (firstOff < 0) + ":" + (offX > 0) + ":" + (offX < window.innerWidth)
+                     + " " + offX + ":" + offXR + " " + offY + ":" + offYB
+                     + " " + window.innerWidth + " " + window.innerHeight + " " + elem.outerHTML
+                     );
+        
         if (horizontal ? (offX > window.innerWidth || offXR < 0) : (offY > window.innerHeight || offYB < 0)) {
             continue
         }
-        window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI visible " + horizontal + " " + (offX < firstOff) + ":" + (firstOff < 0) + ":" + (offX > 0) + ":" + (offX < window.innerWidth) + " " + offX + ":" + offXR + " " + offY + ":" + offYB + " " + window.innerWidth + " " + window.innerHeight + " " + elem.outerHTML);
+        
         
         // for horizontal:
         //    case 1: firstOff < 0, then next offX must be > 0, replace first

@@ -64,10 +64,18 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
     var totalMinutes: Int?
     var totalPages: Int?
-    var currentPage: Int = 1 {
+    var currentPage: Int = -1 {
         didSet {
+            guard currentPage > 0 else { return }
+            guard currentPage != oldValue else { return }
+            
             guard let contentOffset = self.webView?.scrollView.contentOffset,
                   let webViewFrameSize = self.webView?.frame.size else { return }
+            
+            getWebViewScrollPosition { position in
+                self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
+            }
+            
             DispatchQueue.global(qos: .utility).async {
                 if let names = self.pageChapterNames,
                    let idOffsets = self.idOffsets,
@@ -500,6 +508,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                       readerCenter.currentPageNumber == self.pageNumber else { return }
                 
                 readerCenter.scrollScrubber?.setSliderVal()
+                readerCenter.pageIndicatorView?.reloadViewWithPage(self.currentPage)
                 readerCenter.delegate?.pageDidAppear?(self)
                 readerCenter.delegate?.pageItemChanged?(self.currentPage)
             }
@@ -521,7 +530,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
-    func updatePages() {
+    func updatePages(updateWebViewScrollPosition: Bool = true) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         guard let readerCenter = self.folioReader.readerCenter, let webView = self.webView else { return }
@@ -543,10 +552,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         
         folioLogger("updatePages pageNumber=\(self.pageNumber!) totalPages=\(self.totalPages!) contentSize=\(contentSize) pageSize=\(pageSize)")
 //        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
-        self.currentPage = readerCenter.pageForOffset(pageOffSet, pageHeight: pageSize)
+        self.currentPage = pageForOffset(pageOffSet, pageHeight: pageSize)
             
 //        if (self.readerConfig.scrollDirection == .horizontalWithVerticalContent) {
-        let currentIndexPathRow = (self.pageNumber - 1)
+//        let currentIndexPathRow = (self.pageNumber - 1)
             
             // if the cell reload doesn't save the top position offset
 //            if let oldOffSet = readerCenter.currentWebViewScrollPositions[currentIndexPathRow], (abs((oldOffSet["pageOffsetY"] as? CGFloat ?? 0) - webView.scrollView.contentOffset.y) > 100) {
@@ -554,8 +563,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //                // MARK: - FIXME
 //            } else {
         guard !(webView.isHidden || layoutAdapting) else { return }
+        guard updateWebViewScrollPosition else { return }
+        
         getWebViewScrollPosition { position in
-            readerCenter.currentWebViewScrollPositions[currentIndexPathRow] = position
+            readerCenter.currentWebViewScrollPositions[self.pageNumber - 1] = position
         }
 //            }
 //        }
@@ -567,6 +578,10 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let webView = webView else {
             return
         }
+
+//        for symbol: String in Thread.callStackSymbols {
+//            folioLogger(symbol)
+//        }
 
         let isHorizontal: Bool = self.byWritingMode(
             self.folioReader.readerConfig?.isDirection(false, true, false),
@@ -580,12 +595,34 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 "chapterProgress": CGFloat(self.getPageProgress()),
                 "chapterName": self.currentChapterName ?? "Untitled Chapter",
                 "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
-                "cfi": "/\((self.pageNumber ?? 0) * 2)\(cfi ?? "")"
+                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
                 ]
 
             completion?(position)
         }
     }
+    
+    func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        guard (height != 0) else {
+            return 0
+        }
+
+        guard let scrollDirection = self.folioReader.readerCenter?.pageScrollDirection, scrollDirection != .none else {
+            return Int(ceil(offset / height))+1
+        }
+        let page = self.byWritingMode(
+            self.readerConfig.isDirection(
+                Int(ceil(offset / height))+1,
+                scrollDirection == .right ? Int(ceil(offset / height))+1 : Int(floor(offset / height))+1,
+                Int(ceil(offset / height))+1
+            ),
+            Int(ceil(offset / height))+1
+        )
+        return page
+    }
+
     
     func getPageProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }

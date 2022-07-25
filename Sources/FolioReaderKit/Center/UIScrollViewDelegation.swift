@@ -43,13 +43,13 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         let scrollType: ScrollType = ((isCollectionScrollView == true) ? .chapter : .page)
 
         // Update current reading page
+        self.updatePageScrollDirection(inScrollView: scrollView, forScrollType: scrollType)
+        
         if (isCollectionScrollView == false), let page = currentPage, page.layoutAdapting == false {
-            page.updatePages()
+            page.updatePages(updateWebViewScrollPosition: false)
             
             self.delegate?.pageItemChanged?(page.currentPage)
         }
-
-        self.updatePageScrollDirection(inScrollView: scrollView, forScrollType: scrollType)
     }
     
     open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
