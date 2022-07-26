@@ -587,19 +587,39 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.folioReader.readerConfig?.isDirection(false, true, false),
             true) ?? false
         webView.js("getVisibleCFI(\(isHorizontal))") { cfi in
-            let position: [String : Any] = [
+            var position: [String : Any] = [
                 "pageNumber": self.pageNumber ?? 0,
                 "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
                 "pageOffsetX": webView.scrollView.contentOffset.x,
                 "pageOffsetY": webView.scrollView.contentOffset.y,
                 "chapterProgress": CGFloat(self.getPageProgress()),
                 "chapterName": self.currentChapterName ?? "Untitled Chapter",
-                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
-                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
+                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0
                 ]
 
+            position["cfi"] = self.encodeEPUBCFI(position:position, cfi:cfi)
+            
             completion?(position)
         }
+    }
+    
+    func encodeEPUBCFI(position: [String: Any], cfi: String?) -> String {
+        let firstStep = "/\((self.pageNumber ?? 0) * 2)"
+        
+        let vndParameters = position.map {
+            "vnd_YabrEPUB_\($0.key)=\($0.value)"
+        }.joined(separator: ";")
+        
+        var cfi = cfi ?? ""
+        if cfi.last == "]" {
+            var insertIndex = cfi.endIndex
+            _ = cfi.formIndex(&insertIndex, offsetBy: -1, limitedBy: cfi.startIndex)
+            cfi.insert(contentsOf: ";" + vndParameters, at: insertIndex)
+        } else {
+            cfi += "[;\(vndParameters)]"
+        }
+        
+        return "epubcfi(\(firstStep)\(cfi))"
     }
     
     func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
