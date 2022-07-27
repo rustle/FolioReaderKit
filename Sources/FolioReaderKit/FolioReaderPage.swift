@@ -66,42 +66,14 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     var totalPages: Int?
     var currentPage: Int = -1 {
         didSet {
-            guard currentPage > 0 else { return }
-            guard currentPage != oldValue else { return }
+            guard currentPage != oldValue, currentPage >= 0 else { return }
             
-            guard let contentOffset = self.webView?.scrollView.contentOffset,
-                  let webViewFrameSize = self.webView?.frame.size else { return }
+            updateCurrentChapterName()
+            
+            guard layoutAdapting == false else { return }       //FIXME: prevent overriding last known good position
             
             getWebViewScrollPosition { position in
                 self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
-            }
-            
-            DispatchQueue.global(qos: .utility).async {
-                if let names = self.pageChapterNames,
-                   let idOffsets = self.idOffsets,
-                   let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, offset: Int, distance: CGFloat)? in
-                       guard let id = name.id else { return nil }
-                       guard let offset = idOffsets[id] else { return nil }
-                       return (
-                        id: id,
-                        name: name.name,
-                        offset: offset,
-                        distance: self.byWritingMode(
-                            contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
-                            -(contentOffset.x - CGFloat(offset))
-                            )
-                       )
-                   }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
-                    self.currentChapterName = firstChapterName.name
-                } else {
-                    self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
-                }
-                
-                DispatchQueue.main.async {
-                    if self.pageNumber == self.folioReader.readerCenter?.currentPageNumber {
-                        self.folioReader.readerCenter?.pageIndicatorView?.reloadViewWithPage(self.currentPage)
-                    }
-                }
             }
         }
     }
@@ -150,6 +122,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let readerContainer = self.readerContainer else { return }
 
         self.pageNumber = -1     //guard against webView didFinish handler
+        self.currentChapterName = nil
         
         if webView == nil {
             webView = FolioReaderWebView(frame: webViewFrame(), readerContainer: readerContainer)
@@ -568,6 +541,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         getWebViewScrollPosition { position in
             readerCenter.currentWebViewScrollPositions[self.pageNumber - 1] = position
         }
+        
+        self.updateCurrentChapterName()
 //            }
 //        }
             
@@ -587,39 +562,19 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             self.folioReader.readerConfig?.isDirection(false, true, false),
             true) ?? false
         webView.js("getVisibleCFI(\(isHorizontal))") { cfi in
-            var position: [String : Any] = [
+            let position: [String : Any] = [
                 "pageNumber": self.pageNumber ?? 0,
                 "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
                 "pageOffsetX": webView.scrollView.contentOffset.x,
                 "pageOffsetY": webView.scrollView.contentOffset.y,
                 "chapterProgress": CGFloat(self.getPageProgress()),
                 "chapterName": self.currentChapterName ?? "Untitled Chapter",
-                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0
+                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
+                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
                 ]
 
-            position["cfi"] = self.encodeEPUBCFI(position:position, cfi:cfi)
-            
             completion?(position)
         }
-    }
-    
-    func encodeEPUBCFI(position: [String: Any], cfi: String?) -> String {
-        let firstStep = "/\((self.pageNumber ?? 0) * 2)"
-        
-        let vndParameters = position.map {
-            "vnd_YabrEPUB_\($0.key)=\($0.value)"
-        }.joined(separator: ";")
-        
-        var cfi = cfi ?? ""
-        if cfi.last == "]" {
-            var insertIndex = cfi.endIndex
-            _ = cfi.formIndex(&insertIndex, offsetBy: -1, limitedBy: cfi.startIndex)
-            cfi.insert(contentsOf: ";" + vndParameters, at: insertIndex)
-        } else {
-            cfi += "[;\(vndParameters)]"
-        }
-        
-        return "epubcfi(\(firstStep)\(cfi))"
     }
     
     func pageForOffset(_ offset: CGFloat, pageHeight height: CGFloat) -> Int {
@@ -743,6 +698,39 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 self.folioReader.readerCenter?.currentWebViewScrollPositions[currentIndexPathRow] = position
             }
 //        }
+    }
+    
+    func updateCurrentChapterName() {
+        guard let contentOffset = self.webView?.scrollView.contentOffset,
+              let webViewFrameSize = self.webView?.frame.size else { return }
+        
+        DispatchQueue.global(qos: .utility).async {
+            if let names = self.pageChapterNames,
+               let idOffsets = self.idOffsets,
+               let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, offset: Int, distance: CGFloat)? in
+                   guard let id = name.id else { return nil }
+                   guard let offset = idOffsets[id] else { return nil }
+                   return (
+                    id: id,
+                    name: name.name,
+                    offset: offset,
+                    distance: self.byWritingMode(
+                        contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
+                        -(contentOffset.x - CGFloat(offset))
+                        )
+                   )
+               }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
+                self.currentChapterName = firstChapterName.name
+            } else {
+                self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
+            }
+            
+            DispatchQueue.main.async {
+                if self.pageNumber == self.folioReader.readerCenter?.currentPageNumber {
+                    self.folioReader.readerCenter?.pageIndicatorView?.reloadViewWithPage(self.currentPage)
+                }
+            }
+        }
     }
     
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
