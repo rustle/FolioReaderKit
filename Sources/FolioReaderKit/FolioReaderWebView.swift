@@ -277,6 +277,13 @@ open class FolioReaderWebView: WKWebView {
                 if withNote {
                     self.folioReader.readerCenter?.presentAddHighlightNote(highlight, edit: false)
                 } else {
+                    if let cfiStart = highlight.cfiStart {
+                        highlight.cfiStart = "/\(highlight.page * 2)\(cfiStart)"
+                    }
+                    if let cfiEnd = highlight.cfiEnd {
+                        highlight.cfiEnd = "/\(highlight.page * 2)\(cfiEnd)"
+                    }
+                    
                     self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
                         guard error == nil else {
                             self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)

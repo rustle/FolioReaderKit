@@ -123,6 +123,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         self.pageNumber = -1     //guard against webView didFinish handler
         self.currentChapterName = nil
+        self.layoutAdapting = true
         
         if webView == nil {
             webView = FolioReaderWebView(frame: webViewFrame(), readerContainer: readerContainer)
@@ -1182,7 +1183,16 @@ writingMode
     
     func injectHighlights(completion: (() -> Void)? = nil) {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
-              let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?),
+              let highlights:[Highlight] = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({
+                  let prefix = "/\($0.page * 2)"
+                  if let cfiStart = $0.cfiStart, cfiStart.hasPrefix(prefix) {
+                      $0.cfiStart = String(cfiStart[cfiStart.index(cfiStart.startIndex, offsetBy: prefix.count)..<cfiStart.endIndex])
+                  }
+                  if let cfiEnd = $0.cfiEnd, cfiEnd.hasPrefix(prefix) {
+                      $0.cfiEnd = String(cfiEnd[cfiEnd.index(cfiEnd.startIndex, offsetBy: prefix.count)..<cfiEnd.endIndex])
+                  }
+                  return $0
+              }),
               highlights.isEmpty == false
         else {
             completion?()
