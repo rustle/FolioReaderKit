@@ -33,6 +33,11 @@ import UIKit
         case "highlight-blue": return .blue
         case "highlight-pink": return .pink
         case "highlight-underline": return .underline
+        case "yellow": return .yellow
+        case "green": return .green
+        case "blue": return .blue
+        case "pink": return .pink
+        case "underline": return .underline
         default: return .yellow
         }
     }

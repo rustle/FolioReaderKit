@@ -1184,7 +1184,7 @@ writingMode
     func injectHighlights(completion: (() -> Void)? = nil) {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
               let highlights:[Highlight] = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({
-                  let prefix = "/\($0.page * 2)"
+                  let prefix = "/2"
                   if let cfiStart = $0.cfiStart, cfiStart.hasPrefix(prefix) {
                       $0.cfiStart = String(cfiStart[cfiStart.index(cfiStart.startIndex, offsetBy: prefix.count)..<cfiStart.endIndex])
                   }
