@@ -46,7 +46,6 @@ import UIKit
      Return CSS class for HighlightStyle.
      */
     public static func classForStyle(_ style: Int) -> String {
-
         let enumStyle = (HighlightStyle(rawValue: style) ?? HighlightStyle())
         switch enumStyle {
         case .yellow: return "highlight-yellow"
@@ -54,6 +53,17 @@ import UIKit
         case .blue: return "highlight-blue"
         case .pink: return "highlight-pink"
         case .underline: return "highlight-underline"
+        }
+    }
+
+    public static func classForStyleCalibre(_ style: Int) -> String {
+        let enumStyle = (HighlightStyle(rawValue: style) ?? HighlightStyle())
+        switch enumStyle {
+        case .yellow: return "yellow"
+        case .green: return "green"
+        case .blue: return "blue"
+        case .pink: return "pink"
+        case .underline: return "underline"
         }
     }
 

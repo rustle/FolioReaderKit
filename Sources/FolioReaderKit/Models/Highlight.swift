@@ -30,6 +30,8 @@ import Foundation
     open var contentPreEncoded: String!
     open var contentPostEncoded: String!
     
+    open var spineName: String!
+    
     open func encodeContents() {
         contentEncoded = content.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
         contentPreEncoded = contentPre.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)

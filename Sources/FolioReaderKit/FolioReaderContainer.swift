@@ -182,6 +182,36 @@ open class FolioReaderContainer: UIViewController {
                     
                     // Reload data
                     DispatchQueue.main.async {
+                        //FIXME: temp fix for highlights
+                        if let highlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
+                           let bookId = (self.book.name as NSString?)?.deletingPathExtension {
+                            highlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
+                                .filter {
+                                    $0.spineName == "TODO"
+                                }.forEach { highlight in
+                                    if highlight.page > 1 {
+                                        highlight.page -= 1
+                                    }
+                                    if let resHref = self.book.spine.spineReferences[safe: highlight.page - 1]?.resource.href,
+                                       let opfUrl = URL(string: self.book.opfResource.href),
+                                       let resUrl = URL(string: resHref, relativeTo: opfUrl) {
+                                        highlight.spineName = resUrl.absoluteString.replacingOccurrences(of: "//", with: "")
+                                        while highlight.spineName.hasPrefix("/") {
+                                            highlight.spineName.removeFirst()
+                                        }
+                                        if let cfiStart = highlight.cfiStart, cfiStart.hasPrefix("/2") == false {
+                                            highlight.cfiStart = "/2\(cfiStart)"
+                                        }
+                                        if let cfiEnd = highlight.cfiEnd, cfiEnd.hasPrefix("/2") == false {
+                                            highlight.cfiEnd = "/2\(cfiEnd)"
+                                        }
+                                        highlight.date += 0.001
+                                    }
+                                    print("\(#function) fixHighlight=\(highlight) \(highlight.page) \(highlight.spineName) \(highlight.cfiStart) \(highlight.cfiEnd) \(highlight.style) \(highlight.content.prefix(10))")
+                                    highlightProvider.folioReaderHighlight(self.folioReader, added: highlight, completion: nil)
+                                }
+                        }
+                        
                         if let position = self.readerConfig.savedPositionForCurrentBook,
                            let pageNumber = position["pageNumber"] as? Int {
                             self.folioReader.savedPositionForCurrentBook = position
