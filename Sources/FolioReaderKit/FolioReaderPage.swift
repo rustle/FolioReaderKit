@@ -78,7 +78,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     var currentChapterName: String?
-    var pageChapterNames: [(id: String?, name: String)]?
+    var pageChapterNames: [(id: String?, name: String, parent: FRTocReference?)]?
     var idOffsets: [String: Int]?
     
     fileprivate var colorView: UIView!
@@ -1176,14 +1176,18 @@ writingMode
             try? FileManager.default.removeItem(atPath: tempFile.path)
             FileManager.default.createFile(atPath: tempFile.path, contents: response.suffix(response.count - "bridgeFinished ".count).data(using: .utf8), attributes: nil)
         }
-        if response.starts(with: "getVisibleCFI") {
-            print("userContentController response \(response)")
-        }
+//        if response.starts(with: "getVisibleCFI") {
+//            print("userContentController response \(response)")
+//        }
+//        if response.starts(with: "injectHighlight") {
+//            print("userContentController response \(response)")
+//        }
     }
     
     func injectHighlights(completion: (() -> Void)? = nil) {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
-              let highlights:[Highlight] = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({
+              let folioReaderHighlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
+              let highlights = folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({
                   let prefix = "/2"
                   if let cfiStart = $0.cfiStart, cfiStart.hasPrefix(prefix) {
                       $0.cfiStart = String(cfiStart[cfiStart.index(cfiStart.startIndex, offsetBy: prefix.count)..<cfiStart.endIndex])
@@ -1192,16 +1196,77 @@ writingMode
                       $0.cfiEnd = String(cfiEnd[cfiEnd.index(cfiEnd.startIndex, offsetBy: prefix.count)..<cfiEnd.endIndex])
                   }
                   return $0
-              }),
+              }) as [Highlight]?,
               highlights.isEmpty == false
         else {
             completion?()
             return
         }
+        
+        
         let encodedData = ((try? JSONEncoder().encode(highlights)) ?? .init()).base64EncodedString()
         
-        self.webView?.js("injectHighlights('\(encodedData)')") {_ in
-            completion?()
+        self.webView?.js("injectHighlights('\(encodedData)')") { results in
+            defer {
+                completion?()
+            }
+            
+            //FIXME: populate toc family titles
+            guard let webViewFrameSize = self.webView?.frame.size else { return }
+            
+            let decoder = JSONDecoder()
+            guard let results = results, let encodedData = results.data(using: .utf8), let encodedObjects = try? decoder.decode([String].self, from: encodedData) else { return }
+            var highlightIdToBoundingMap = [String: NodeBoundingClientRect]()
+            encodedObjects.forEach { encodedObject in
+                guard let objectData = encodedObject.data(using: .utf8),
+                      let object = try? decoder.decode(NodeBoundingClientRect.self, from: objectData) else { return }
+                
+//                print("\(#function) fixHighlight object=\(object)")
+                highlightIdToBoundingMap[object.id] = object
+            }
+            
+            highlights.filter {
+                $0.tocFamilyTitles.first == "TODO" || $0.tocFamilyTitles.isEmpty
+            }.forEach { highlight in
+                guard let boundingRect = highlightIdToBoundingMap[highlight.highlightId] else { return }
+                
+                let contentOffset = CGPoint(x: boundingRect.left, y: boundingRect.top)
+                
+                var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? "TODO"]
+                if let names = self.pageChapterNames,
+                   let idOffsets = self.idOffsets,
+                   let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, parent: FRTocReference?, offset: Int, distance: CGFloat)? in
+                       guard let id = name.id else { return nil }
+                       guard let offset = idOffsets[id] else { return nil }
+                       return (
+                        id: id,
+                        name: name.name,
+                        parent: name.parent,
+                        offset: offset,
+                        distance: self.byWritingMode(
+                            contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
+                            -(contentOffset.x - CGFloat(offset))
+                            )
+                       )
+                   }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
+//                    self.currentChapterName = firstChapterName.name
+                    highlightChapterName.removeAll()
+                    highlightChapterName.append(firstChapterName.name)
+                    var parent = firstChapterName.parent
+                    while( parent != nil ) {
+                        highlightChapterName.append(parent!.title)
+                        parent = parent!.parent
+                    }
+                }
+                
+                guard highlightChapterName.first != "TODO" else { return }
+                
+                highlight.tocFamilyTitles = highlightChapterName.reversed()
+                highlight.date += 0.001
+                
+                print("\(#function) fixHighlight \(boundingRect) \(highlight.tocFamilyTitles) \(highlight.content)")
+                folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, added: highlight, completion: nil)
+            }
         }
     }
     
@@ -1466,4 +1531,12 @@ extension FolioReaderPage {
         let delaySec = min(0.2 + 0.2 * Double(fileSize / 51200), max)
         return delaySec
     }
+}
+
+struct NodeBoundingClientRect: Codable {
+    let id: String
+    let top: Double
+    let left: Double
+    let bottom: Double
+    let right: Double
 }

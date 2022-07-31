@@ -215,6 +215,7 @@ function injectHighlights(highlightJSONDataEncodedArray) {
     var sHighlightJsonArray = window.atob(highlightJSONDataEncodedArray);
     var oHighlightArray = JSON.parse(sHighlightJsonArray);
     
+    let results = new Array()
     oHighlightArray.forEach( (oHighlight) => {
         try {
             var id = oHighlight.highlightId
@@ -222,11 +223,15 @@ function injectHighlights(highlightJSONDataEncodedArray) {
             if (elem) {
                 window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception duplicate " + JSON.stringify(oHighlight))
             }
-            injectHighlight(oHighlight)
+            var result = injectHighlight(oHighlight)
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights result " + result)
+            results.push(result)
         } catch (e) {
             window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception " + e + " " + JSON.stringify(oHighlight))
         }
     } )
+    
+    return JSON.stringify(results)
 }
 
 function injectHighlight(oHighlight) {
@@ -349,6 +354,10 @@ function injectHighlight(oHighlight) {
         window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight finished " + range + " " + elm)
     }
     window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight getHTML " + getHTML());
+    
+    let startNodeBounding = startNode.parentNode.getBoundingClientRect()
+    
+    return JSON.stringify({id: oHighlight.highlightId, top: startNodeBounding.top, left: startNodeBounding.left, bottom: startNodeBounding.bottom, right: startNodeBounding.right})
 }
 // Get All HTML
 function getHTML() {

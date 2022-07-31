@@ -32,6 +32,8 @@ import Foundation
     
     open var spineName: String!
     
+    open var tocFamilyTitles = [String]()
+    
     open func encodeContents() {
         contentEncoded = content.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)
         contentPreEncoded = contentPre.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed)

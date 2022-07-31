@@ -311,7 +311,7 @@ class FREpubParserArchive: NSObject {
         return nil
     }
 
-    fileprivate func readTOCReference(_ navpointElement: AEXMLElement, level: Int) -> FRTocReference? {
+    fileprivate func readTOCReference(_ navpointElement: AEXMLElement, level: Int, parent: FRTocReference? = nil) -> FRTocReference? {
         var label = ""
 
         if book.tocResource?.mediaType == MediaType.ncx {
@@ -325,12 +325,12 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
 
             // Recursively find child
             if let navPoints = navpointElement["navPoint"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1, parent: toc) else { continue }
                     toc.children.append(item)
                 }
             }
@@ -346,12 +346,12 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level)
+            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
 
             // Recursively find child
             if let navPoints = navpointElement["ol"]["li"].all {
                 for navPoint in navPoints {
-                    guard let item = readTOCReference(navPoint, level: level + 1) else { continue }
+                    guard let item = readTOCReference(navPoint, level: level + 1, parent: toc) else { continue }
                     toc.children.append(item)
                 }
             }

@@ -521,10 +521,10 @@ extension FolioReaderCenter {
     /**
      Find and return the chapter name.
      */
-    public func getChapterNames(pageNumber: Int) -> [(id: String?, name: String)] {
+    public func getChapterNames(pageNumber: Int) -> [(id: String?, name: String, parent: FRTocReference?)] {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var foundChapterNames = [(id: String?, name: String)]()
+        var foundChapterNames = [(id: String?, name: String, parent: FRTocReference?)]()
         
         func search(_ items: [FRTocReference]) {
             for item in items {
@@ -532,7 +532,7 @@ extension FolioReaderCenter {
                     let resource = item.resource,
                     resource == reference.resource,
                     let title = item.title {
-                    foundChapterNames.append((id: item.fragmentID, name: title))
+                    foundChapterNames.append((id: item.fragmentID, name: title, parent: item.parent))
                 } else if let children = item.children, children.isEmpty == false {
                     search(children)
                 }
