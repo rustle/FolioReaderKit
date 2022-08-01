@@ -117,7 +117,7 @@ class FolioReaderHighlightList: UITableViewController {
         highlightLabel.frame = CGRect(x: 20, y: 46, width: view.frame.width-40, height: highlightLabel.frame.height)
         
         // Note text if it exists
-        if let note = highlight.noteForHighlight {
+        if let note = highlight.noteForHighlight ?? self.folioReader.readerCenter?.highlightErrors[highlight.highlightId] {
             var noteLabel: UILabel!
             if cell.contentView.viewWithTag(789) == nil {
                 noteLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 0))
@@ -182,14 +182,18 @@ class FolioReaderHighlightList: UITableViewController {
         guard let highlight = highlights[safe: indexPath.row] else { return }
         guard let readerCenter = self.folioReader.readerCenter else { return }
         
-        if let currentPageNumber = readerCenter.currentPage?.pageNumber,
-            let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
-            self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-            self.folioReader.readerCenter?.navigationItem.leftBarButtonItems?[2].isEnabled = true
+        if let error = readerCenter.highlightErrors[highlight.highlightId] {
+            presentLocatingHighlightError(error, highlight: highlight, at: indexPath)
+        } else {
+            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
+                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
+                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+                readerCenter.navigationItem.leftBarButtonItems?[2].isEnabled = true
+            }
+            
+            readerCenter.changePageWith(page: highlight.page, andFragment: highlight.highlightId)
+            self.dismiss()
         }
-        
-        self.folioReader.readerCenter?.changePageWith(page: highlight.page, andFragment: highlight.highlightId)
-        self.dismiss()
     }
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
@@ -212,5 +216,56 @@ class FolioReaderHighlightList: UITableViewController {
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         tableView.reloadData()
+    }
+    
+    func presentLocatingHighlightError(_ message: String, highlight: Highlight, at: IndexPath) {
+        let textView = UITextView()
+        textView.text = message
+        
+        let vc = UIViewController()
+        vc.view = textView
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .formSheet
+        
+        let alert = UIAlertController(title: "Cannot Find", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        alert.addAction(UIAlertAction(title: "Fix", style: .default, handler: { (action) in
+            alert.dismiss()
+            
+            self.folioReader.readerCenter?.currentPage?.relocateHighlights(highlight: highlight, completion: { newHighlight, error in
+                guard error == nil else {
+                    self.presentLocatingHighlightFailure("\(error!)", highlight: newHighlight ?? highlight, at: at)
+                    return
+                }
+                
+                self.tableView.reloadRows(at: [at], with: .automatic)
+                
+                self.tableView(self.tableView, didSelectRowAt: at)
+            })
+        }))
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func presentLocatingHighlightFailure(_ message: String, highlight: Highlight, at: IndexPath) {
+        let textView = UITextView()
+        textView.text = message
+        
+        let vc = UIViewController()
+        vc.view = textView
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .formSheet
+        
+        let alert = UIAlertController(title: "Cannot Fix", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        
+        present(alert, animated: true, completion: nil)
     }
 }

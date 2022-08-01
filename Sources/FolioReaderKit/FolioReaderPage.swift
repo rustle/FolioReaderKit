@@ -734,6 +734,38 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
+    func getChapterNames(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [String] {
+        var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? "TODO"]
+        
+        if let names = self.pageChapterNames,
+           let idOffsets = self.idOffsets,
+           let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, parent: FRTocReference?, offset: Int, distance: CGFloat)? in
+               guard let id = name.id else { return nil }
+               guard let offset = idOffsets[id] else { return nil }
+               return (
+                id: id,
+                name: name.name,
+                parent: name.parent,
+                offset: offset,
+                distance: self.byWritingMode(
+                    contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
+                    -(contentOffset.x - CGFloat(offset))
+                    )
+               )
+           }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
+//                    self.currentChapterName = firstChapterName.name
+            highlightChapterName.removeAll()
+            highlightChapterName.append(firstChapterName.name)
+            var parent = firstChapterName.parent
+            while( parent != nil ) {
+                highlightChapterName.append(parent!.title)
+                parent = parent!.parent
+            }
+        }
+        
+        return highlightChapterName
+    }
+    
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
         let handledAction = handlePolicy(for: navigationAction)
         let policy: WKNavigationActionPolicy = handledAction ? .allow : .cancel
@@ -1179,9 +1211,12 @@ writingMode
 //        if response.starts(with: "getVisibleCFI") {
 //            print("userContentController response \(response)")
 //        }
-//        if response.starts(with: "injectHighlight") {
-//            print("userContentController response \(response)")
-//        }
+        if response.starts(with: "injectHighlight") {
+            print("userContentController response \(response)")
+        }
+        if response.starts(with: "highlightStringCFI") {
+            print("userContentController response \(response)")
+        }
     }
     
     func injectHighlights(completion: (() -> Void)? = nil) {
@@ -1215,13 +1250,23 @@ writingMode
             guard let webViewFrameSize = self.webView?.frame.size else { return }
             
             let decoder = JSONDecoder()
-            guard let results = results, let encodedData = results.data(using: .utf8), let encodedObjects = try? decoder.decode([String].self, from: encodedData) else { return }
+            guard let results = results,
+                  let encodedData = results.data(using: .utf8),
+                  let encodedObjects = try? decoder.decode([String].self, from: encodedData)
+            else { return }
+            
             var highlightIdToBoundingMap = [String: NodeBoundingClientRect]()
             encodedObjects.forEach { encodedObject in
                 guard let objectData = encodedObject.data(using: .utf8),
                       let object = try? decoder.decode(NodeBoundingClientRect.self, from: objectData) else { return }
                 
-//                print("\(#function) fixHighlight object=\(object)")
+                guard object.err.isEmpty else {
+                    self.folioReader.readerCenter?.highlightErrors[object.id] = object.err
+                    return
+                }
+                
+                self.folioReader.readerCenter?.highlightErrors.removeValue(forKey: object.id)
+                
                 highlightIdToBoundingMap[object.id] = object
             }
             
@@ -1232,40 +1277,46 @@ writingMode
                 
                 let contentOffset = CGPoint(x: boundingRect.left, y: boundingRect.top)
                 
-                var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? "TODO"]
-                if let names = self.pageChapterNames,
-                   let idOffsets = self.idOffsets,
-                   let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, parent: FRTocReference?, offset: Int, distance: CGFloat)? in
-                       guard let id = name.id else { return nil }
-                       guard let offset = idOffsets[id] else { return nil }
-                       return (
-                        id: id,
-                        name: name.name,
-                        parent: name.parent,
-                        offset: offset,
-                        distance: self.byWritingMode(
-                            contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
-                            -(contentOffset.x - CGFloat(offset))
-                            )
-                       )
-                   }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
-//                    self.currentChapterName = firstChapterName.name
-                    highlightChapterName.removeAll()
-                    highlightChapterName.append(firstChapterName.name)
-                    var parent = firstChapterName.parent
-                    while( parent != nil ) {
-                        highlightChapterName.append(parent!.title)
-                        parent = parent!.parent
-                    }
-                }
+                let highlightChapterNames = self.getChapterNames(for: contentOffset, by: webViewFrameSize)
                 
-                guard highlightChapterName.first != "TODO" else { return }
+                guard highlightChapterNames.first != "TODO" else { return }
                 
-                highlight.tocFamilyTitles = highlightChapterName.reversed()
+                highlight.tocFamilyTitles = highlightChapterNames.reversed()
                 highlight.date += 0.001
                 
                 print("\(#function) fixHighlight \(boundingRect) \(highlight.tocFamilyTitles) \(highlight.content)")
                 folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, added: highlight, completion: nil)
+            }
+        }
+    }
+    
+    func relocateHighlights(highlight: Highlight, completion: ((Highlight?, HighlightError?) -> Void)? = nil) {
+        let encodedData = ((try? JSONEncoder().encode([highlight])) ?? .init()).base64EncodedString()
+        
+        self.webView?.js("relocateHighlights('\(encodedData)')") { results in
+            var results = results
+            
+            defer {
+                print("\(#function) results=\(results)")
+            }
+            
+            guard let resultsData = results?.data(using: .utf8),
+                  let result = try? JSONDecoder().decode([NodeBoundingClientRect].self, from: resultsData).first
+            else {
+                completion?(highlight, HighlightError.runtimeError("Unknown Exception"))
+                return
+            }
+            
+            results = result.err
+
+            guard let highlightData = result.err.data(using: .utf8)
+            else {
+                completion?(highlight, HighlightError.runtimeError("Unknown Exception"))
+                return
+            }
+            
+            self.webView?.handleHighlightReturn(highlightData, withNote: !(highlight.noteForHighlight?.isEmpty ?? true), original: highlight) { highlight, error in
+                completion?(highlight, error)
             }
         }
     }
@@ -1539,4 +1590,5 @@ struct NodeBoundingClientRect: Codable {
     let left: Double
     let bottom: Double
     let right: Double
+    let err: String
 }

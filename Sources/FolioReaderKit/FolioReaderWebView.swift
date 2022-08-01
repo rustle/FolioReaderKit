@@ -214,11 +214,12 @@ open class FolioReaderWebView: WKWebView {
         }
     }
     
-    func handleHighlightReturn(_ jsonData: Data, withNote: Bool = false) {
+    // will keep original's id and date if presented
+    func handleHighlightReturn(_ jsonData: Data, withNote: Bool = false, original: Highlight? = nil, completion: ((Highlight?, HighlightError?) -> Void)? = nil) {
         do {
             guard let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? NSArray,
                   let dic = json.firstObject as? [String: String] else {
-                throw HighlightError.runtimeError("no json result")
+                      throw HighlightError.runtimeError("no json result, string=\(String(data: jsonData, encoding: .utf8) ?? "(invalid data)")")
             }
             guard let startOffset = dic["startOffset"], let startOffsetInt = Int(startOffset) else {
                 throw HighlightError.runtimeError("no start offset")
@@ -242,8 +243,12 @@ open class FolioReaderWebView: WKWebView {
             highlight.cfiEnd = dic["cfiEnd"]
             highlight.contentPost = dic["contentPost"]
             highlight.contentPre = dic["contentPre"]
-            highlight.date = Date()
-            highlight.highlightId = dic["id"]
+            if let date = original?.date {
+                highlight.date = date + 0.001
+            } else {
+                highlight.date = Date()
+            }
+            highlight.highlightId = original?.highlightId ?? dic["id"]
             highlight.page = self.folioReader.readerCenter?.currentPageNumber ?? 0
             highlight.type = self.folioReader.currentHighlightStyle
             highlight.style = HighlightStyle.classForStyle(highlight.type)
@@ -270,12 +275,55 @@ open class FolioReaderWebView: WKWebView {
             let serializedData = try JSONEncoder().encode([highlight])
             let encodedData = serializedData.base64EncodedString()
             self.js("injectHighlights('\(encodedData)')") { result in
-                guard result == nil else {
-                    self.folioReader.readerCenter?.presentAddHighlightError(result!)
+                var errMsg: String = "Unknown Error"
+                var deferred: (() -> Void)? = {
+                    if original == nil {
+                        self.folioReader.readerCenter?.presentAddHighlightError(errMsg)
+                    } else {
+                        completion?(original, HighlightError.runtimeError(errMsg))
+                    }
                     return
                 }
+                
+                defer {
+                    deferred?()
+                }
+                
+                guard let result = result else {
+                    return
+                }
+                
+                let decoder = JSONDecoder()
+                
+                guard let encodedData = result.data(using: .utf8),
+                      let encodedObjects = try? decoder.decode([String].self, from: encodedData)
+                else {
+                    return
+                }
+                
+                var boundingRect: NodeBoundingClientRect? = nil
+                
+                if let objectData = encodedObjects.first?.data(using: .utf8) {
+                    boundingRect = try? JSONDecoder().decode(NodeBoundingClientRect.self, from: objectData)
+                }
+                
+                guard boundingRect != nil, boundingRect!.err.isEmpty else {
+                    errMsg = boundingRect?.err ?? errMsg
+                    return
+                }
+                
+                let contentOffset = CGPoint(x: boundingRect!.left, y: boundingRect!.top)
+            
+                let highlightChapterNames = self.folioReader.readerCenter?.currentPage?.getChapterNames(for: contentOffset, by: self.frame.size) ?? ["TODO"]
+                highlight.tocFamilyTitles = highlightChapterNames.reversed()
+                
+                
                 if withNote {
-                    self.folioReader.readerCenter?.presentAddHighlightNote(highlight, edit: false)
+                    if original == nil {
+                        self.folioReader.readerCenter?.presentAddHighlightNote(highlight, edit: false)
+                    } else {
+                        completion?(highlight, nil)
+                    }
                 } else {
                     if let cfiStart = highlight.cfiStart {
                         highlight.cfiStart = "/2\(cfiStart)"
@@ -286,18 +334,30 @@ open class FolioReaderWebView: WKWebView {
                     
                     self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
                         guard error == nil else {
-                            self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)
+                            if original == nil {
+                                self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)
+                            } else {
+                                completion?(highlight, HighlightError.runtimeError(error!.localizedDescription))
+                            }
                             return
                         }
                         
                         self.clearTextSelection()
                         self.setMenuVisible(false)
+                        
+                        self.folioReader.readerCenter?.highlightErrors.removeValue(forKey: highlight.highlightId)
+                        
+                        completion?(highlight, nil)
                     }
                 }
+                
+                deferred = nil
             }
             
+        } catch HighlightError.runtimeError(let hlError) {
+            completion?(original, HighlightError.runtimeError(hlError))
         } catch {
-            
+            completion?(original, HighlightError.runtimeError("\(error.localizedDescription)"))
         }
     }
     

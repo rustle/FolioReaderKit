@@ -89,6 +89,8 @@ open class FolioReaderCenter: UIViewController {
     var menuBarController = UITabBarController()
     var menuTabs = [FolioReaderMenu]()
     
+    var highlightErrors: [String: String] = [:]
+    
     var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
         return readerContainer.readerConfig

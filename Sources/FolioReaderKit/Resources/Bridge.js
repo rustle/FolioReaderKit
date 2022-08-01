@@ -228,6 +228,7 @@ function injectHighlights(highlightJSONDataEncodedArray) {
             results.push(result)
         } catch (e) {
             window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlights exception " + e + " " + JSON.stringify(oHighlight))
+            results.push(JSON.stringify({id: oHighlight.highlightId, top: 0, left: 0, bottom: 0, right: 0, err: e.stack}))
         }
     } )
     
@@ -357,8 +358,66 @@ function injectHighlight(oHighlight) {
     
     let startNodeBounding = startNode.parentNode.getBoundingClientRect()
     
-    return JSON.stringify({id: oHighlight.highlightId, top: startNodeBounding.top, left: startNodeBounding.left, bottom: startNodeBounding.bottom, right: startNodeBounding.right})
+    return JSON.stringify({id: oHighlight.highlightId, top: startNodeBounding.top, left: startNodeBounding.left, bottom: startNodeBounding.bottom, right: startNodeBounding.right, err: ""})
 }
+
+function relocateHighlights(highlightJSONDataEncodedArray) {
+    var sHighlightJsonArray = window.atob(highlightJSONDataEncodedArray);
+    var oHighlightArray = JSON.parse(sHighlightJsonArray);
+    
+    let results = new Array()
+    oHighlightArray.forEach( (oHighlight) => {
+        try {
+            var id = oHighlight.highlightId
+            var elem = document.getElementById(id)
+            if (elem) {
+                window.webkit.messageHandlers.FolioReaderPage.postMessage("relocateHighlights exception duplicate " + JSON.stringify(oHighlight))
+                results.push({id: oHighlight.highlightId, top: 0, left: 0, bottom: 0, right: 0, err: "duplicate id"})
+            } else {
+                var result = relocateHighlight(oHighlight)
+                window.webkit.messageHandlers.FolioReaderPage.postMessage("relocateHighlights result " + result)
+                results.push(result)
+            }
+        } catch (e) {
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("relocateHighlights exception " + e + " " + JSON.stringify(oHighlight))
+            results.push({id: oHighlight.highlightId, top: 0, left: 0, bottom: 0, right: 0, err: e.message + "\n" + e.stack})
+        }
+    } )
+    
+    return JSON.stringify(results)
+}
+
+function relocateHighlight(oHighlight) {
+    oHighlight.content = decodeURIComponent(oHighlight.contentEncoded)
+    oHighlight.contentPost = decodeURIComponent(oHighlight.contentPostEncoded)
+    oHighlight.contentPre = decodeURIComponent(oHighlight.contentPreEncoded)
+
+    let allVisible = getTextNodesIn(document.body, false).filter(visible)
+    let startNode;
+    let indexOfHighlightContent;
+    for(const textNode of allVisible) {
+        indexOfHighlightContent = textNode.textContent.indexOf(oHighlight.content)
+        if (indexOfHighlightContent >= 0) {
+            startNode = textNode
+            break
+        }
+    }
+    
+    if (startNode) {
+        let range = document.createRange()
+        range.setStart(startNode, indexOfHighlightContent)
+        range.setEnd(startNode, indexOfHighlightContent + oHighlight.content.length)
+        
+        let result = highlightStringCFIByRange(oHighlight.style, oHighlight.noteForHighlight && oHighlight.noteForHighlight.length > 0, range)
+        let startNodeBounding = startNode.parentNode.getBoundingClientRect()
+        
+        return {id: oHighlight.highlightId, top: startNodeBounding.top, left: startNodeBounding.left, bottom: startNodeBounding.bottom, right: startNodeBounding.right, err: result}
+    } else {
+        return {id: oHighlight.highlightId, top: 0, left: 0, bottom: 0, right: 0, err: "connot find content"}
+    }
+}
+
+
 // Get All HTML
 function getHTML() {
     return document.documentElement.outerHTML;
@@ -440,6 +499,8 @@ function setFontSize(cls) {
 /*
  *	Native bridge Highlight text
  */
+
+/*deprecated*/
 function highlightString(style) {
     var range = window.getSelection().getRangeAt(0);
     var startOffset = range.startOffset;
@@ -464,6 +525,10 @@ function highlightString(style) {
 
 function highlightStringCFI(style, withNote) {
     var range = window.getSelection().getRangeAt(0);
+    return highlightStringCFIByRange(style, withNote, range)
+}
+    
+function highlightStringCFIByRange(style, withNote, range) {
     var startOffset = range.startOffset;
     var endOffset = range.endOffset;
 
@@ -558,6 +623,7 @@ function highlightStringCFI(style, withNote) {
     return JSON.stringify(params);
 }
 
+/*deprecated*/
 function highlightStringWithNoteCFI(style) {
     var range = window.getSelection().getRangeAt(0);
     var startOffset = range.startOffset;
@@ -619,6 +685,7 @@ function highlightStringWithNoteCFI(style) {
     return JSON.stringify(params);
 }
 
+/*deprecated*/
 function highlightStringWithNote(style) {
     var range = window.getSelection().getRangeAt(0);
     var startOffset = range.startOffset;
@@ -1421,36 +1488,3 @@ function getOffsetsOfElementsWithID(horizontal) {
 
     return JSON.stringify(offsets)
 }
-
-//function injectHighlight() {    //sample data
-////    var cfiStart = "/2/4/2/2/2/2/4/2/8/2/1:20";
-////    var cfiEnd = "/2/4/2/2/2/2/4/2/8/2/1:41";
-////    var cfiStart = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:20)"
-////    var cfiEnd   = "epubcfi(/10/2/4/2/2/2/2/4/2/8/2/1:42)"
-//                var cfiStart = "epubcfi(/4/2/2/2/2/4/2/8/2/1)"
-//                var startNode = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiStart), document, [], [], []).get(0)
-//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight startNode " + startNode + " " + startNode.outerHTML)
-//
-//    var cfiEnd   = "epubcfi(/4/2/2/2/2/4/2/8/2/1)"
-//    var endNode   = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiEnd),   document, [], [], []).get(0)
-//    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight endNode " + endNode + " " + endNode.outerHTML)
-//
-//                var range = document.createRange()
-//                range.setStart(startNode, 20)
-//                range.setEnd(endNode, 42)
-//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight range " + range)
-//
-//                var selectionContents = range.extractContents();
-//                var elm = document.createElement("highlight");
-//                var id = guid();
-//
-//                elm.appendChild(selectionContents);
-//                elm.setAttribute("id", id);
-//                elm.setAttribute("onclick","callHighlightURL(this);");
-//                elm.setAttribute("class", "highlight-yellow");
-//
-//                range.insertNode(elm);
-//                window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight finished " + range + " " + elm)
-//
-//}
-
