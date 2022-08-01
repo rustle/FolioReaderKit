@@ -92,6 +92,14 @@ class FolioReaderResourceList: UITableViewController {
         let spineReference = book.spine.spineReferences[indexPath.row]
 
         cell.indexLabel.text = spineReference.resource.href
+        if let resHref = spineReference.resource.href,
+           let opfUrl = URL(string: self.book.opfResource.href),
+           let resUrl = URL(string: resHref, relativeTo: opfUrl) {
+            cell.indexLabel.text = resUrl.absoluteString.replacingOccurrences(of: "//", with: "")
+            while cell.indexLabel.text?.hasPrefix("/") == true {
+                cell.indexLabel.text?.removeFirst()
+            }
+        }
         // Add audio duration for Media Ovelay
         if let mediaOverlay = spineReference.resource.mediaOverlay {
             let duration = self.book.duration(for: "#"+mediaOverlay)
@@ -103,11 +111,7 @@ class FolioReaderResourceList: UITableViewController {
 
         // Mark current reading resource
         cell.indexLabel.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
-        cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
-
-        cell.indexSize.text = ByteCountFormatter.string(fromByteCount: Int64(spineReference.resource.size ?? 0), countStyle: .file)
-        cell.indexSize.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
-        cell.indexSize.font = UIFont(name: "Avenir-Light", size: 13.0)
+        cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 11.0)
 
         if let tocList = self.book.resourceTocMap[spineReference.resource] {
             var tocTitles = tocList.map { $0.title! }.prefix(3)
@@ -120,7 +124,18 @@ class FolioReaderResourceList: UITableViewController {
             cell.indexToc.text = "No ToC Defined"
         }
         cell.indexToc.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
-        cell.indexToc.font = UIFont(name: "Avenir-Light", size: 13.0)
+        cell.indexToc.font = UIFont(name: "Avenir-Light", size: 15.0)
+        
+        cell.indexSize.text = ByteCountFormatter.string(fromByteCount: Int64(spineReference.resource.size ?? 0), countStyle: .file)
+        cell.indexSize.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
+        cell.indexSize.font = UIFont(name: "Avenir-Light", size: 11.0)
+
+        let formatter = NumberFormatter()
+        formatter.minimumIntegerDigits = 3
+        
+        cell.indexSpine.text = "Index " + (formatter.string(from: NSNumber(value: indexPath.row)) ?? "N/A")
+        cell.indexSpine.textColor = (indexPath.row + 1 == self.folioReader.readerCenter?.currentPageNumber ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor)
+        cell.indexSpine.font = UIFont(name: "Avenir-Light", size: 13.0)
         
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false

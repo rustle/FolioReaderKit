@@ -187,7 +187,7 @@ open class FolioReaderContainer: UIViewController {
                            let bookId = (self.book.name as NSString?)?.deletingPathExtension {
                             highlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
                                 .filter {
-                                    $0.spineName == "TODO" || $0.cfiStart?.hasPrefix("/2") == false || $0.cfiEnd?.hasPrefix("/2") == false
+                                    $0.spineName == nil || $0.spineName.isEmpty || $0.spineName == "TODO" || $0.cfiStart?.hasPrefix("/2") == false || $0.cfiEnd?.hasPrefix("/2") == false
                                 }.forEach { highlight in
                                     if highlight.spineName == "TODO", highlight.page > 1 {
                                         highlight.page -= 1

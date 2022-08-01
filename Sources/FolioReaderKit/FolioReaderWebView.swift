@@ -249,7 +249,7 @@ open class FolioReaderWebView: WKWebView {
                 highlight.date = Date()
             }
             highlight.highlightId = original?.highlightId ?? dic["id"]
-            highlight.page = self.folioReader.readerCenter?.currentPageNumber ?? 0
+            highlight.page = self.folioReader.readerCenter?.currentPageNumber ?? 1
             highlight.type = self.folioReader.currentHighlightStyle
             highlight.style = HighlightStyle.classForStyle(highlight.type)
 
@@ -317,6 +317,22 @@ open class FolioReaderWebView: WKWebView {
                 let highlightChapterNames = self.folioReader.readerCenter?.currentPage?.getChapterNames(for: contentOffset, by: self.frame.size) ?? ["TODO"]
                 highlight.tocFamilyTitles = highlightChapterNames.reversed()
                 
+                highlight.spineName = self.book.spine.spineReferences[highlight.page - 1].resource.href
+                if let resHref = highlight.spineName,
+                   let opfUrl = URL(string: self.book.opfResource.href),
+                   let resUrl = URL(string: resHref, relativeTo: opfUrl) {
+                    highlight.spineName = resUrl.absoluteString.replacingOccurrences(of: "//", with: "")
+                    while highlight.spineName.hasPrefix("/") {
+                        highlight.spineName.removeFirst()
+                    }
+                }
+
+                if let cfiStart = highlight.cfiStart, cfiStart.hasPrefix("/2") == false {
+                    highlight.cfiStart = "/2\(cfiStart)"
+                }
+                if let cfiEnd = highlight.cfiEnd, cfiEnd.hasPrefix("/2") == false {
+                    highlight.cfiEnd = "/2\(cfiEnd)"
+                }
                 
                 if withNote {
                     if original == nil {
@@ -325,13 +341,6 @@ open class FolioReaderWebView: WKWebView {
                         completion?(highlight, nil)
                     }
                 } else {
-                    if let cfiStart = highlight.cfiStart {
-                        highlight.cfiStart = "/2\(cfiStart)"
-                    }
-                    if let cfiEnd = highlight.cfiEnd {
-                        highlight.cfiEnd = "/2\(cfiEnd)"
-                    }
-                    
                     self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
                         guard error == nil else {
                             if original == nil {
