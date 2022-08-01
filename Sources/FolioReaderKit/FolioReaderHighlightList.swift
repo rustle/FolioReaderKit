@@ -10,7 +10,9 @@ import UIKit
 
 class FolioReaderHighlightList: UITableViewController {
 
-    fileprivate var highlights = [Highlight]()
+//    fileprivate var highlights = [Highlight]()
+    fileprivate var sections = [Int]()
+    fileprivate var sectionHighlights = [Int: [Highlight]]()
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
 
@@ -29,34 +31,76 @@ class FolioReaderHighlightList: UITableViewController {
         super.viewDidLoad()
 
         self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
+//        self.tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: kReuseHeaderFooterIdentifier)
+        
         self.tableView.separatorInset = UIEdgeInsets.zero
         //self.tableView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.menuBackgroundColor)
         self.tableView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         self.tableView.separatorColor = self.folioReader.isNight(self.readerConfig.nightModeSeparatorColor, self.readerConfig.menuSeparatorColor)
-
-        guard let bookId = (self.folioReader.readerContainer?.book.name as NSString?)?.deletingPathExtension else {
-            self.highlights = []
+        
+        guard let bookId = (self.folioReader.readerContainer?.book.name as NSString?)?.deletingPathExtension,
+              let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
+        else {
             return
         }
 
-        self.highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil) ?? []
+        sectionHighlights = highlights.reduce(into: sectionHighlights) { partialResult, highlight in
+            if partialResult[highlight.page] != nil {
+                partialResult[highlight.page]?.append(highlight)
+                partialResult[highlight.page]?.sort(by: { $0.cfiStart < $1.cfiStart })
+            } else {
+                partialResult[highlight.page] = [highlight]
+            }
+        }
+        sections = sectionHighlights.keys.sorted()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Jump to the current chapter
+        DispatchQueue.main.async {
+            guard let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
+                  let sectionPageNumber = self.sections.filter({ $0 <= currentPageNumber }).last,
+                  let section = self.sections.firstIndex(of: sectionPageNumber)
+            else { return }
+            self.tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
+        }
+    }
+    
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
+        return sections.count
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return highlights.count
+        return sectionHighlights[sections[section]]?.count ?? 0
     }
 
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard let pageNumber = sections[safe: section] else { return nil }
+        guard let tocItem = self.folioReader.readerCenter?.getChapterName(pageNumber: pageNumber) else {
+            return "  Book Item \(pageNumber)"
+        }
+        var title = [tocItem.title!]
+        var parent = tocItem.parent
+        while (parent != nil) {
+            if parent?.title != nil {
+                title.append(parent!.title!)
+            }
+            parent = parent?.parent
+        }
+        return "  " + title.reversed().joined(separator: ", ")
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath)
         cell.backgroundColor = UIColor.clear
 
-        let highlight = highlights[indexPath.row]
+        guard let highlight = sectionHighlights[sections[indexPath.section]]?[indexPath.row] else {
+            return cell
+        }
 
         // Format date
         let dateFormatter = DateFormatter()
@@ -78,6 +122,25 @@ class FolioReaderHighlightList: UITableViewController {
         dateLabel.text = dateString.uppercased()
         dateLabel.textColor = self.folioReader.isNight(UIColor(white: 5, alpha: 0.3), UIColor.lightGray)
         dateLabel.frame = CGRect(x: 20, y: 20, width: view.frame.width-40, height: dateLabel.frame.height)
+        
+        if let error = self.folioReader.readerCenter?.highlightErrors[highlight.highlightId] {
+            var errorLabel: UILabel!
+            if cell.contentView.viewWithTag(4567) == nil {
+                errorLabel = UILabel(frame: CGRect(x: view.frame.width-40, y: 0, width: 40, height: 16))
+                errorLabel.tag = 4567
+                errorLabel.autoresizingMask = UIView.AutoresizingMask.flexibleWidth
+                errorLabel.font = UIFont(name: "Avenir-Medium", size: 12)
+                cell.contentView.addSubview(errorLabel)
+            } else {
+                errorLabel = cell.contentView.viewWithTag(4567) as? UILabel
+            }
+            errorLabel.text = "Cannot Locate, Touch to Fix"
+            errorLabel.textColor = UIColor.systemRed
+            errorLabel.sizeToFit()
+            errorLabel.frame = CGRect(x: view.frame.width-180, y: 20, width: 160, height: errorLabel.frame.height)
+        } else {
+            cell.contentView.viewWithTag(4567)?.removeFromSuperview()
+        }
 
         // Text
         let cleanString = highlight.content.stripHtml().truncate(250, trailing: "...").stripLineBreaks()
@@ -117,7 +180,7 @@ class FolioReaderHighlightList: UITableViewController {
         highlightLabel.frame = CGRect(x: 20, y: 46, width: view.frame.width-40, height: highlightLabel.frame.height)
         
         // Note text if it exists
-        if let note = highlight.noteForHighlight ?? self.folioReader.readerCenter?.highlightErrors[highlight.highlightId] {
+        if let note = highlight.noteForHighlight {
             var noteLabel: UILabel!
             if cell.contentView.viewWithTag(789) == nil {
                 noteLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 0))
@@ -145,7 +208,9 @@ class FolioReaderHighlightList: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let highlight = highlights[indexPath.row]
+        guard let highlight = sectionHighlights[sections[indexPath.section]]?[indexPath.row] else {
+            return 0.0
+        }
 
         let cleanString = highlight.content.stripHtml().truncate(250, trailing: "...").stripLineBreaks()
         let text = NSMutableAttributedString(string: cleanString)
@@ -179,7 +244,9 @@ class FolioReaderHighlightList: UITableViewController {
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let highlight = highlights[safe: indexPath.row] else { return }
+        guard let highlight = sectionHighlights[sections[indexPath.section]]?[indexPath.row] else {
+            return
+        }
         guard let readerCenter = self.folioReader.readerCenter else { return }
         
         if let error = readerCenter.highlightErrors[highlight.highlightId] {
@@ -198,7 +265,9 @@ class FolioReaderHighlightList: UITableViewController {
 
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            guard let highlight = highlights[safe: indexPath.row] else { return }
+            guard let highlight = sectionHighlights[sections[indexPath.section]]?[indexPath.row] else {
+                return
+            }
 
             if (highlight.page == self.folioReader.readerCenter?.currentPageNumber),
                 let page = self.folioReader.readerCenter?.currentPage {
@@ -206,7 +275,12 @@ class FolioReaderHighlightList: UITableViewController {
             }
 
             folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(folioReader, removedId: highlight.highlightId)
-            highlights.remove(at: indexPath.row)
+            
+            sectionHighlights[sections[indexPath.section]]?.remove(at: indexPath.row)
+            if sectionHighlights[sections[indexPath.section]]?.isEmpty == true {
+                sectionHighlights.removeValue(forKey: sections[indexPath.section])
+                sections.remove(at: indexPath.section)
+            }
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }

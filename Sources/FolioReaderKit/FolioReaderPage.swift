@@ -723,7 +723,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
                 self.currentChapterName = firstChapterName.name
             } else {
-                self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
+                self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)?.title
             }
             
             DispatchQueue.main.async {
@@ -735,7 +735,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     }
     
     func getChapterNames(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [String] {
-        var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? "TODO"]
+        var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)?.title ?? "TODO"]
         
         if let names = self.pageChapterNames,
            let idOffsets = self.idOffsets,

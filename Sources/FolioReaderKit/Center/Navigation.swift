@@ -494,10 +494,10 @@ extension FolioReaderCenter {
     /**
      Find and return the chapter name.
      */
-    public func getChapterName(pageNumber: Int) -> String? {
+    public func getChapterName(pageNumber: Int) -> FRTocReference? {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var foundChapterName: String?
+        var foundChapterName: FRTocReference?
         
         func search(_ items: [FRTocReference]) {
             for item in items {
@@ -506,8 +506,8 @@ extension FolioReaderCenter {
                 if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
                     let resource = item.resource,
                     resource == reference.resource,
-                    let title = item.title {
-                    foundChapterName = title
+                   item.title != nil {
+                    foundChapterName = item
                 } else if let children = item.children, children.isEmpty == false {
                     search(children)
                 }

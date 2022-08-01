@@ -15,6 +15,7 @@ internal let kApplicationDocumentsDirectory = NSSearchPathForDirectoriesInDomain
 
 internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
+internal let kReuseHeaderFooterIdentifier = "com.folioreader.HeaderFooter.ReuseIdentifier"
 
 public enum FolioReaderError: Error, LocalizedError {
     case bookNotAvailable
