@@ -1,5 +1,5 @@
 //
-//  FolioReaderChapterList.swift
+//  FolioReaderBookList.swift
 //  FolioReaderKit
 //
 //  Created by Heberti Almeida on 15/04/15.
@@ -9,28 +9,28 @@
 import UIKit
 
 /// Table Of Contents delegate
-@objc protocol FolioReaderChapterListDelegate: AnyObject {
+@objc protocol FolioReaderBookListDelegate: AnyObject {
     /**
      Notifies when the user selected some item on menu.
      */
-    func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference)
+    func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference)
 
     /**
-     Notifies when chapter list did totally dismissed.
+     Notifies when book list did totally dismissed.
      */
-    func chapterList(didDismissedChapterList chapterList: FolioReaderChapterList)
+    func bookList(didDismissedBookList bookList: FolioReaderBookList)
 }
 
-class FolioReaderChapterList: UITableViewController {
+class FolioReaderBookList: UITableViewController {
 
-    weak var delegate: FolioReaderChapterListDelegate?
+    weak var delegate: FolioReaderBookListDelegate?
     fileprivate var tocItems = [FRTocReference]()
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
     fileprivate var highlightResourceIds = Set<String>()
 
-    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderChapterListDelegate?) {
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderBookListDelegate?) {
         self.readerConfig = readerConfig
         self.folioReader = folioReader
         self.delegate = delegate
@@ -47,7 +47,7 @@ class FolioReaderChapterList: UITableViewController {
         super.viewDidLoad()
 
         // Register cell classes
-        self.tableView.register(FolioReaderChapterListCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
+        self.tableView.register(FolioReaderBookListCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
         self.tableView.separatorInset = UIEdgeInsets.zero
         //self.tableView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.menuBackgroundColor)
         self.tableView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
@@ -57,29 +57,13 @@ class FolioReaderChapterList: UITableViewController {
         self.tableView.estimatedRowHeight = 50
 
         // Create TOC list
-        if self.folioReader.structuralStyle == .bundle {
-            guard let tocList = self.folioReader.readerCenter?.currentPage?.getChapterTocReferences(for: .zero, by: .zero).compactMap({ $0.resource?.id }) else { return }
-            let tocSet = Set<String>(tocList)
-            let tocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
-            self.tocItems = self.book.flatTableOfContents.filter {
-                var toc: FRTocReference? = $0
-                if toc?.level < tocLevel {
-                    return false
-                }
-                while( toc != nil && (toc?.level ?? 0) >= (tocLevel-1) ) {
-                    if let id = toc?.resource?.id, tocSet.contains(id) {
-                        return true
-                    }
-                    toc = toc?.parent
-                }
-                return false
-            }
-        } else {
-            self.tocItems = self.book.flatTableOfContents
+        guard self.folioReader.structuralStyle == .bundle else { return }
+        let tocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
+        self.tocItems = self.book.flatTableOfContents.filter {
+            $0.level == tocLevel - 1
         }
-        
       
-        // Jump to the current chapter
+        // Jump to the current book
         DispatchQueue.main.async {
             guard let index = self.tocItems.firstIndex(where: { self.highlightResourceIds.contains($0.resource?.id ?? "___NIL___") }) else { return }
             let indexPath = IndexPath(row: index, section: 0)
@@ -90,26 +74,46 @@ class FolioReaderChapterList: UITableViewController {
     override func viewWillAppear(_ animated: Bool) {
         highlightResourceIds.removeAll()
         
-        guard var pageNumber = self.folioReader.readerCenter?.currentPageNumber else { return }
+        guard let currentPage = self.folioReader.readerCenter?.currentPage else { return }
         
-        while( pageNumber > 0 ) {
-            guard let reference = self.book.spine.spineReferences[safe: pageNumber - 1] else { return }
-            if let tocReferences = self.book.resourceTocMap[reference.resource] {
-                tocReferences.forEach {
-                    guard let id = $0.resource?.id else { return }
-                    highlightResourceIds.insert(id)
-                }
-                break
-            } else {
-                pageNumber -= 1
-            }
-        }
+        highlightResourceIds.formUnion(currentPage.getChapterTocReferences(for: .zero, by: .zero).compactMap { $0.resource?.id })
+//        currentPage.getChapterNames(for: .zero, by: currentPage.webViewFrame().size()).map { $0. }
+        
+        
+        
+//        while( tocRef != nil ) {
+//            if let id = tocRef?.resource?.id {
+//                highlightResourceIds.insert(id)
+//            }
+//            tocRef = tocRef?.parent
+//        }
+        
+//        while( pageNumber > 0 ) {
+//            guard let reference = self.book.spine.spineReferences[safe: pageNumber - 1] else { return }
+//            if let tocReferences = self.book.resourceTocMap[reference.resource] {
+//                tocReferences.forEach {
+//                    if let id = $0.resource?.id {
+//                        highlightResourceIds.insert(id)
+//                    }
+//                    var parent = $0.parent
+//                    while( parent != nil ) {
+//                        if let id = parent?.resource?.id {
+//                            highlightResourceIds.insert(id)
+//                        }
+//                        parent = parent?.parent
+//                    }
+//                }
+//                break
+//            } else {
+//                pageNumber -= 1
+//            }
+//        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        // Jump to the current chapter
+        // Jump to the current book
         DispatchQueue.main.async {
             guard let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
                   let reference = self.book.spine.spineReferences[safe: currentPageNumber - 1],
@@ -132,11 +136,10 @@ class FolioReaderChapterList: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderChapterListCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderBookListCell
 
         cell.setup(withConfiguration: self.readerConfig)
         let tocReference = tocItems[indexPath.row]
-        let isSection = tocReference.children.count > 0
 
         cell.indexLabel?.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -151,13 +154,13 @@ class FolioReaderChapterList: UITableViewController {
             }
         }
 
-        // Mark current reading chapter
+        // Mark current reading book
         cell.indexLabel?.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
         cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(tocReference.level ?? 0) * 1.5)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
-        cell.contentView.backgroundColor = isSection ? UIColor(white: 0.7, alpha: 0.1) : UIColor.clear
+        cell.contentView.backgroundColor = UIColor.clear
         cell.backgroundColor = UIColor.clear
         return cell
     }
@@ -166,11 +169,11 @@ class FolioReaderChapterList: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let tocReference = tocItems[(indexPath as NSIndexPath).row]
-        delegate?.chapterList(self, didSelectRowAtIndexPath: indexPath, withTocReference: tocReference)
+        delegate?.bookList(self, didSelectRowAtIndexPath: indexPath, withTocReference: tocReference)
         
         tableView.deselectRow(at: indexPath, animated: true)
         dismiss { 
-            self.delegate?.chapterList(didDismissedChapterList: self)
+            self.delegate?.bookList(didDismissedBookList: self)
         }
     }
 }

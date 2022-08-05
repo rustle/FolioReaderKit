@@ -314,7 +314,7 @@ open class FolioReaderWebView: WKWebView {
                 
                 let contentOffset = CGPoint(x: boundingRect!.left, y: boundingRect!.top)
             
-                let highlightChapterNames = self.folioReader.readerCenter?.currentPage?.getChapterNames(for: contentOffset, by: self.frame.size) ?? ["TODO"]
+                let highlightChapterNames = self.folioReader.readerCenter?.currentPage?.getChapterTocReferences(for: contentOffset, by: self.frame.size).compactMap { $0.title } ?? ["TODO"]
                 highlight.tocFamilyTitles = highlightChapterNames.reversed()
                 
                 highlight.spineName = self.book.spine.spineReferences[highlight.page - 1].resource.href

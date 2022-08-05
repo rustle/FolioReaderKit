@@ -43,7 +43,37 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
             tempReference = nil
         }
     }
-    
-    
 }
 
+extension FolioReaderCenter: FolioReaderBookListDelegate {
+    func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        let item = findPageByResource(reference)
+        
+        if item < totalPages {
+            let indexPath = IndexPath(row: item, section: 0)
+            changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
+                //self.updateCurrentPage(navigating: indexPath) //no need
+                self.currentPage?.updatePageInfo {
+                    self.currentPage?.updatePageOffsetRate()
+                }
+            })
+            tempReference = reference
+        } else {
+            print("Failed to load book because the requested resource is missing.")
+        }
+    }
+    
+    func bookList(didDismissedBookList bookList: FolioReaderBookList) {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        // Move to #fragment
+        if let reference = tempReference {
+            if let fragmentID = reference.fragmentID, let currentPage = currentPage , fragmentID != "" {
+                currentPage.handleAnchor(reference.fragmentID!, offsetInWindow: self.navigationController?.toolbar.frame.height ?? 0, avoidBeginningAnchors: true, animated: true)
+            }
+            tempReference = nil
+        }
+    }
+}

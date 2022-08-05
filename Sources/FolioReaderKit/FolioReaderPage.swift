@@ -44,7 +44,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     /// The index of the current page. Note: The index start at 1!
     open var pageNumber: Int! {
         didSet {
-            self.pageChapterNames = self.folioReader.readerCenter?.getChapterNames(pageNumber: self.pageNumber)
+            self.pageChapterTocReferences = self.folioReader.readerCenter?.getChapterNames(pageNumber: self.pageNumber)
         }
     }
     open var webView: FolioReaderWebView?
@@ -78,7 +78,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     var currentChapterName: String?
-    var pageChapterNames: [(id: String?, name: String, parent: FRTocReference?)]?
+    var pageChapterTocReferences: [FRTocReference]?
     var idOffsets: [String: Int]?
     
     fileprivate var colorView: UIView!
@@ -706,22 +706,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
               let webViewFrameSize = self.webView?.frame.size else { return }
         
         DispatchQueue.global(qos: .utility).async {
-            if let names = self.pageChapterNames,
-               let idOffsets = self.idOffsets,
-               let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, offset: Int, distance: CGFloat)? in
-                   guard let id = name.id else { return nil }
-                   guard let offset = idOffsets[id] else { return nil }
-                   return (
-                    id: id,
-                    name: name.name,
-                    offset: offset,
-                    distance: self.byWritingMode(
-                        contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
-                        -(contentOffset.x - CGFloat(offset))
-                        )
-                   )
-               }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
-                self.currentChapterName = firstChapterName.name
+            if let firstChapterTocReference = self.getChapterTocReferences(for: contentOffset, by: webViewFrameSize).first {
+                self.currentChapterName = firstChapterTocReference.title
             } else {
                 self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)?.title
             }
@@ -734,36 +720,35 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
-    func getChapterNames(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [String] {
-        var highlightChapterName = [self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)?.title ?? "TODO"]
+    func getChapterTocReferences(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [FRTocReference] {
+        var firstChapterTocReference = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? self.book.tableOfContents.first
         
-        if let names = self.pageChapterNames,
-           let idOffsets = self.idOffsets,
-           let firstChapterName = names.compactMap({ (name) -> (id: String, name: String, parent: FRTocReference?, offset: Int, distance: CGFloat)? in
-               guard let id = name.id else { return nil }
-               guard let offset = idOffsets[id] else { return nil }
-               return (
-                id: id,
-                name: name.name,
-                parent: name.parent,
-                offset: offset,
-                distance: self.byWritingMode(
-                    contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
-                    -(contentOffset.x - CGFloat(offset))
-                    )
-               )
-           }).filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance }) {
-//                    self.currentChapterName = firstChapterName.name
-            highlightChapterName.removeAll()
-            highlightChapterName.append(firstChapterName.name)
-            var parent = firstChapterName.parent
-            while( parent != nil ) {
-                highlightChapterName.append(parent!.title)
-                parent = parent!.parent
+        if let pageChapterTocReferences = self.pageChapterTocReferences,
+           let idOffsets = self.idOffsets {
+            let tocRefWithDistance = pageChapterTocReferences.compactMap({ (toc) -> (toc: FRTocReference, offset: Int, distance: CGFloat)? in
+                guard let id = toc.fragmentID,
+                      let offset = idOffsets[id] else { return nil }
+                return (
+                 toc: toc,
+                 offset: offset,
+                 distance: self.byWritingMode(
+                     contentOffset.forDirection(withConfiguration: self.readerConfig) + webViewFrameSize.forDirection(withConfiguration: self.readerConfig) / 2 - CGFloat(offset),
+                     -(contentOffset.x - CGFloat(offset))
+                     )
+                )
+            })
+            
+            if let toc = tocRefWithDistance.filter({ $0.distance > 0 }).min(by: { $0.distance < $1.distance })?.toc {
+                firstChapterTocReference = toc
             }
         }
-        
-        return highlightChapterName
+           
+        var chapterTocReferences = [FRTocReference]()
+        while (firstChapterTocReference != nil) {
+            chapterTocReferences.append(firstChapterTocReference!)
+            firstChapterTocReference = firstChapterTocReference?.parent
+        }
+        return chapterTocReferences
     }
     
     open func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
@@ -1277,7 +1262,7 @@ writingMode
                 
                 let contentOffset = CGPoint(x: boundingRect.left, y: boundingRect.top)
                 
-                let highlightChapterNames = self.getChapterNames(for: contentOffset, by: webViewFrameSize)
+                let highlightChapterNames = self.getChapterTocReferences(for: contentOffset, by: webViewFrameSize).compactMap { $0.title }
                 
                 guard highlightChapterNames.first != "TODO" else { return }
                 

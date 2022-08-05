@@ -131,6 +131,10 @@
 		B0D69CCA1D0387F7003B4CCD /* SMSegmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */; };
 		E784D2DC289904E700ED205A /* FolioReaderLastReadPositionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = E784D2DB289904E600ED205A /* FolioReaderLastReadPositionProvider.swift */; };
 		E784D2DE289905B500ED205A /* LastReadPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = E784D2DD289905B500ED205A /* LastReadPosition.swift */; };
+		E7968BEA289CFA8500E8CC14 /* FolioReaderBookList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */; };
+		E7968BEB289CFA8500E8CC14 /* FolioReaderBookList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */; };
+		E7968BED289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */; };
+		E7968BEE289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */; };
 		E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */; };
 		E7EA4E102841EDF0006F79C9 /* FolioReaderResourceListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */; };
 		E7EA4E122841F1D7006F79C9 /* ResourceListDelegation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */; };
@@ -230,6 +234,8 @@
 		B0D69C471D0387F7003B4CCD /* SMSegmentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SMSegmentView.swift; sourceTree = "<group>"; };
 		E784D2DB289904E600ED205A /* FolioReaderLastReadPositionProvider.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderLastReadPositionProvider.swift; sourceTree = "<group>"; };
 		E784D2DD289905B500ED205A /* LastReadPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LastReadPosition.swift; sourceTree = "<group>"; };
+		E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderBookList.swift; sourceTree = "<group>"; };
+		E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderBookListCell.swift; sourceTree = "<group>"; };
 		E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceList.swift; sourceTree = "<group>"; };
 		E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceListCell.swift; sourceTree = "<group>"; };
 		E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceListDelegation.swift; sourceTree = "<group>"; };
@@ -475,14 +481,16 @@
 		E7968BE8289CF96B00E8CC14 /* ListViews */ = {
 			isa = PBXGroup;
 			children = (
-				1A958F241D397BE900D56699 /* PageViewController.swift */,
 				2AEE910626F03D1C00B012B0 /* ChapterListDelegation.swift */,
-				E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */,
+				E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */,
+				E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */,
 				1A958F111D397BE900D56699 /* FolioReaderChapterList.swift */,
-				E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */,
 				1A958F121D397BE900D56699 /* FolioReaderChapterListCell.swift */,
-				E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */,
 				1A958F161D397BE900D56699 /* FolioReaderHighlightList.swift */,
+				E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */,
+				E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */,
+				1A958F241D397BE900D56699 /* PageViewController.swift */,
+				E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */,
 			);
 			path = ListViews;
 			sourceTree = "<group>";
@@ -641,6 +649,7 @@
 				2AEE910A26F03D7F00B012B0 /* PageDelegation.swift in Sources */,
 				2AEE911C26F0432800B012B0 /* CenterDelegate.swift in Sources */,
 				1A958FAD1D397BE900D56699 /* Highlight.swift in Sources */,
+				E7968BED289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */,
 				2AEE912526F062E500B012B0 /* CenterViewModel.swift in Sources */,
 				E784D2DC289904E700ED205A /* FolioReaderLastReadPositionProvider.swift in Sources */,
 				2AA1D55D26FC11CC00F8CAB2 /* FolioReaderPageMenu.swift in Sources */,
@@ -650,6 +659,7 @@
 				2ABB909C261C28A3004AA7C0 /* StarDictView.swift in Sources */,
 				1A41E8912031E22300A8F70C /* MediaType.swift in Sources */,
 				2AEE912B26F0939200B012B0 /* CenterLayout.swift in Sources */,
+				E7968BEA289CFA8500E8CC14 /* FolioReaderBookList.swift in Sources */,
 				3A27F08E1FD9BE5800D84A57 /* Extensions.swift in Sources */,
 				1A958F9D1D397BE900D56699 /* FolioReaderChapterList.swift in Sources */,
 				1A958F951D397BE900D56699 /* FRResource.swift in Sources */,
@@ -684,6 +694,7 @@
 				2AEE911426F0413500B012B0 /* Sharing.swift in Sources */,
 				3A27F0A41FD9C24A00D84A57 /* FRSmils.swift in Sources */,
 				2AEE912C26F0939200B012B0 /* CenterLayout.swift in Sources */,
+				E7968BEB289CFA8500E8CC14 /* FolioReaderBookList.swift in Sources */,
 				3A27F0B31FD9C25500D84A57 /* FolioReaderChapterListCell.swift in Sources */,
 				3A27F0BD1FD9C25500D84A57 /* FolioReaderSharingProvider.swift in Sources */,
 				B0D6991B1D035FA2003B4CCD /* FolioReaderKitTests.swift in Sources */,
@@ -715,6 +726,7 @@
 				3A27F09D1FD9C24A00D84A57 /* FRBook.swift in Sources */,
 				1AC255D42202195200841FA2 /* HADiscreteSlider.swift in Sources */,
 				1AC255D52202196D00841FA2 /* FolioReaderAddHighlightNote.swift in Sources */,
+				E7968BEE289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */,
 				3A27F0C41FD9C25C00D84A57 /* ScrollScrubber.swift in Sources */,
 				2AEE90EB26EF9F5500B012B0 /* UICollectionViewDelegation.swift in Sources */,
 				3A27F0C31FD9C25C00D84A57 /* QuoteImage.swift in Sources */,

@@ -18,17 +18,22 @@ extension FolioReaderCenter {
 
         folioReader.saveReaderState()
 
-        //let book = FolioReaderBookList()
+        let bookList = FolioReaderBookList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let chapter = FolioReaderChapterList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
         let resoruce = FolioReaderResourceList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         
         let pageController = PageViewController(folioReader: folioReader, readerConfig: readerConfig)
 
+        pageController.viewControllerZero = bookList
         pageController.viewControllerOne = chapter
         pageController.viewControllerTwo = highlight
         pageController.viewControllerThree = resoruce
+        
         pageController.segmentedControlItems = [readerConfig.localizedContentsTitle, readerConfig.localizedHighlightsTitle, readerConfig.localizedResourcesTitle]
+        if self.folioReader.structuralStyle == .bundle {
+            pageController.segmentedControlItems.insert(readerConfig.localizedBooksTitle, at: 0)
+        }
 
         let nav = UINavigationController(rootViewController: pageController)
         present(nav, animated: true, completion: nil)
