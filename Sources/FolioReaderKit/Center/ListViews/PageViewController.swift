@@ -13,6 +13,8 @@ class PageViewController: UIPageViewController {
     var segmentedControl: UISegmentedControl!
     var viewList = [UIViewController]()
     var segmentedControlItems = [String]()
+    
+    var viewControllerZero: UIViewController!
     var viewControllerOne: UIViewController!
     var viewControllerTwo: UIViewController!
     var viewControllerThree: UIViewController!
@@ -52,6 +54,11 @@ class PageViewController: UIPageViewController {
         viewControllerOne.didMove(toParent: self)
         viewControllerTwo.didMove(toParent: self)
         viewControllerThree.didMove(toParent: self)
+        
+        if self.folioReader.structuralStyle == .bundle {
+            viewList.insert(viewControllerZero, at: 0)
+            viewControllerZero.didMove(toParent: self)
+        }
 
         self.delegate = self
         self.dataSource = self

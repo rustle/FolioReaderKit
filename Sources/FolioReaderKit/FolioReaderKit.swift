@@ -119,6 +119,8 @@ public enum StyleOverrideTypes: Int, CaseIterable {
     @objc optional func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider
     
     @objc optional func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider
+    
+    @objc optional func folioReaderLastReadPositionProvider(_ folioReader: FolioReader) -> FolioReaderLastReadPositionProvider
 }
 
 /// Main Library class with some useful constants and methods
@@ -533,6 +535,32 @@ extension FolioReader {
         set {
             guard let value = newValue else { return }
             delegate?.folioReaderPreferenceProvider?(self).preference(setSavedPosition: value)
+        }
+    }
+    
+    open var structuralStyle: FolioReaderStructuralStyle {
+        get {
+            guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(structuralStyle: FolioReaderStructuralStyle.atom.rawValue),
+                  let value = FolioReaderStructuralStyle(rawValue: rawValue) else {
+                      return FolioReaderStructuralStyle.atom
+                  }
+            return value
+        }
+        set {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setStructuralStyle: newValue.rawValue)
+        }
+    }
+    
+    open var structuralTrackingTocLevel: FolioReaderPositionTrackingStyle {
+        get {
+            guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(structuralTocLevel: FolioReaderPositionTrackingStyle.linear.rawValue),
+                  let value = FolioReaderPositionTrackingStyle(rawValue: rawValue) else {
+                      return FolioReaderPositionTrackingStyle.linear
+                  }
+            return value
+        }
+        set {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setStructuralTocLevel: newValue.rawValue)
         }
     }
 }

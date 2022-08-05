@@ -18,9 +18,11 @@ extension FolioReaderCenter {
 
         folioReader.saveReaderState()
 
+        //let book = FolioReaderBookList()
         let chapter = FolioReaderChapterList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
         let resoruce = FolioReaderResourceList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
+        
         let pageController = PageViewController(folioReader: folioReader, readerConfig: readerConfig)
 
         pageController.viewControllerOne = chapter

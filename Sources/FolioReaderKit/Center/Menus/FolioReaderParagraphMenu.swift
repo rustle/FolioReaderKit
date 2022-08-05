@@ -21,6 +21,7 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
     let textIndentValue = UILabel()
     let textIndentHeight = CGFloat(32)
     let textIndentTopPadding = CGFloat(24)
+    let textIndentStepper = UIStepper()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -230,7 +231,6 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             textIndentValue.heightAnchor.constraint(equalToConstant: textIndentHeight)
         ])
         
-        let textIndentStepper = UIStepper()
 //            frame: CGRect(
 //                x: textIndentValue.frame.maxX + 4,
 //                y: textIndentLabel.frame.minY,

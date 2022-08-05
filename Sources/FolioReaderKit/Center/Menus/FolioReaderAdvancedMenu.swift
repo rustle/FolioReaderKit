@@ -15,6 +15,15 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     let noticeLabel = UILabel()
     let noticeLabelHeight = CGFloat(24)
     
+    let structuralStyleLabel = UILabel()
+    let structuralStyleLabelHeight: CGFloat = 32
+    let structuralStyleSegment = UISegmentedControl()
+    let structuralStyleSegmentHeight: CGFloat = 40
+    let structuralTocLevelLabel = UILabel()
+    let structuralTocLevelLabelHeight: CGFloat = 32
+    let structuralTocLevelValue = UILabel()
+    let structuralTocLevelStepper = UIStepper()
+    
     let wrapParaLabel = UILabel()
     let wrapParaLabelHeight = CGFloat(32)
     let wrapParaSwitch = UISwitch()
@@ -29,6 +38,8 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     let styleOverrideSegment = UISegmentedControl()
     let styleOverrideSegmentHeight = CGFloat(40)
 
+    var structuralStyleIndexMap = [Int:FolioReaderStructuralStyle]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -38,7 +49,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
         
-        let menuHeight: CGFloat = noticeLabelHeight + wrapParaLabelHeight + clearClassLabelHeight + styleOverrideLabelHeight + styleOverrideSegmentHeight + 8 + 4 + 4 + 4 + 8 + 8
+        let menuHeight: CGFloat = noticeLabelHeight + wrapParaLabelHeight + clearClassLabelHeight + styleOverrideLabelHeight + styleOverrideSegmentHeight + structuralStyleLabelHeight + structuralStyleSegmentHeight + structuralTocLevelLabelHeight + 8 + 4 + 4 + 4 + 8 + 8 + 4 + 4
         let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
         let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
         let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
@@ -82,6 +93,78 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             noticeLabel.heightAnchor.constraint(equalToConstant: noticeLabelHeight)
         ])
         
+        structuralStyleLabel.text = "Book structure"
+        structuralStyleLabel.font = .systemFont(ofSize: labelFontSize)
+        structuralStyleLabel.adjustsFontForContentSizeCategory = true
+        structuralStyleLabel.adjustsFontSizeToFitWidth = true
+        structuralStyleLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        FolioReaderStructuralStyle.allCases.forEach {
+            structuralStyleSegment.insertSegment(withTitle: $0.description, at: $0.segmentIndex, animated: false)
+            structuralStyleIndexMap[$0.segmentIndex] = $0
+        }
+        structuralStyleSegment.translatesAutoresizingMaskIntoConstraints = false
+        structuralStyleSegment.selectedSegmentIndex = self.folioReader.structuralStyle.segmentIndex
+        structuralStyleSegment.addTarget(self, action: #selector(structuralStyleValueChanged(_:)), for: .valueChanged)
+        
+        structuralTocLevelLabel.text = "Track Reading Position By"
+        structuralTocLevelLabel.font = .systemFont(ofSize: labelFontSize)
+        structuralTocLevelLabel.adjustsFontForContentSizeCategory = true
+        structuralTocLevelLabel.adjustsFontSizeToFitWidth = true
+        structuralTocLevelLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        structuralTocLevelValue.text = "Linear"
+        structuralTocLevelValue.textAlignment = .center
+        structuralTocLevelValue.font = .systemFont(ofSize: labelFontSize)
+        structuralTocLevelValue.adjustsFontForContentSizeCategory = true
+        structuralTocLevelValue.adjustsFontSizeToFitWidth = true
+        structuralTocLevelValue.translatesAutoresizingMaskIntoConstraints = false
+        
+        structuralTocLevelStepper.isContinuous = false
+        structuralTocLevelStepper.autorepeat = false
+        structuralTocLevelStepper.wraps = false
+        structuralTocLevelStepper.minimumValue = 1
+        structuralTocLevelStepper.maximumValue = Double(FolioReaderPositionTrackingStyle.allCases.count-2)
+        structuralTocLevelStepper.stepValue = 1
+        structuralTocLevelStepper.translatesAutoresizingMaskIntoConstraints = false
+        structuralTocLevelStepper.value = Double(folioReader.structuralTrackingTocLevel.rawValue)
+        structuralTocLevelStepper.addTarget(self, action: #selector(structuralTocLevelValueChanged(_:)), for: .valueChanged)
+        
+        menuView.addSubview(structuralStyleLabel)
+        menuView.addSubview(structuralStyleSegment)
+        menuView.addSubview(structuralTocLevelLabel)
+        menuView.addSubview(structuralTocLevelValue)
+        menuView.addSubview(structuralTocLevelStepper)
+        
+        structuralStyleValueChanged(structuralStyleSegment)
+        
+        NSLayoutConstraint.activate([
+            structuralStyleLabel.topAnchor.constraint(equalTo: noticeLabel.bottomAnchor, constant: 4),
+            structuralStyleLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            structuralStyleLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            structuralStyleLabel.heightAnchor.constraint(equalToConstant: structuralStyleLabelHeight),
+            
+            structuralStyleSegment.topAnchor.constraint(equalTo: structuralStyleLabel.bottomAnchor, constant: 4),
+            structuralStyleSegment.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            structuralStyleSegment.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
+            structuralStyleSegment.heightAnchor.constraint(equalToConstant: structuralStyleSegmentHeight),
+            
+            structuralTocLevelLabel.topAnchor.constraint(equalTo: structuralStyleSegment.bottomAnchor, constant: 8),
+            structuralTocLevelLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
+            structuralTocLevelLabel.widthAnchor.constraint(equalTo: menuView.widthAnchor, constant: -160-16-16-4-8),
+            structuralTocLevelLabel.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight),
+            
+            structuralTocLevelValue.centerYAnchor.constraint(equalTo: structuralTocLevelLabel.centerYAnchor),
+            structuralTocLevelValue.leadingAnchor.constraint(equalTo: structuralTocLevelLabel.trailingAnchor, constant: 4),
+            structuralTocLevelValue.widthAnchor.constraint(equalToConstant: 64),
+            structuralTocLevelValue.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight),
+            
+            structuralTocLevelStepper.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
+            structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 8),
+            structuralTocLevelStepper.widthAnchor.constraint(equalToConstant: 96),
+            structuralTocLevelStepper.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
+        ])
+
         styleOverrideLabel.text = "Style overriden intensity"
         styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)
         styleOverrideLabel.adjustsFontForContentSizeCategory = true
@@ -99,7 +182,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         menuView.addSubview(styleOverrideSegment)
         
         NSLayoutConstraint.activate([
-            styleOverrideLabel.topAnchor.constraint(equalTo: noticeLabel.bottomAnchor, constant: 4),
+            styleOverrideLabel.topAnchor.constraint(equalTo: structuralTocLevelLabel.bottomAnchor, constant: 4),
             styleOverrideLabel.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 16),
             styleOverrideLabel.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -16),
             styleOverrideLabel.heightAnchor.constraint(equalToConstant: styleOverrideLabelHeight),
@@ -135,7 +218,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         ])
         
         // clear body&table styles
-        clearClassLabel.text = "Remove unsuitable html styles"
+        clearClassLabel.text = "Deactive unsuitable html styles"
         clearClassLabel.font = .systemFont(ofSize: labelFontSize)
         clearClassLabel.adjustsFontForContentSizeCategory = true
         clearClassLabel.adjustsFontSizeToFitWidth = true
@@ -176,6 +259,33 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     @objc func styleOverrideSegmentValueChanged(_ sender: UISegmentedControl) {
         guard let styleOverride = StyleOverrideTypes(rawValue: sender.selectedSegmentIndex) else { return }
         self.folioReader.styleOverride = styleOverride
+    }
+    
+    @objc func structuralStyleValueChanged(_ sender: UISegmentedControl) {
+        guard let structuralStyle = self.structuralStyleIndexMap[sender.selectedSegmentIndex] else { return }
+        self.folioReader.structuralStyle = structuralStyle
+        
+        self.structuralTocLevelValue.isEnabled = structuralStyle == .bundle
+        self.structuralTocLevelStepper.isEnabled = structuralStyle == .bundle
+        
+        structuralTocLevelValueChanged(self.structuralTocLevelStepper)
+    }
+    
+    @objc func structuralTocLevelValueChanged(_ sender: UIStepper) {
+        var structuralTrackingTocLevel = FolioReaderPositionTrackingStyle.levelMax
+        if Int(sender.value) < structuralTrackingTocLevel.rawValue {
+            structuralTrackingTocLevel = .init(rawValue: Int(sender.value)) ?? .level1
+        }
+        self.folioReader.structuralTrackingTocLevel = structuralTrackingTocLevel
+        
+        switch self.folioReader.structuralStyle {
+        case .atom:
+            self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.linear.description
+        case .item:
+            self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.levelMax.description
+        case .bundle:
+            self.structuralTocLevelValue.text = structuralTrackingTocLevel.description
+        }
     }
     
     // MARK: - Gestures

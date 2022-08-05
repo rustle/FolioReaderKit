@@ -100,6 +100,14 @@ import Foundation
     @objc func preference(styleOverride defaults: Int) -> Int
     
     @objc func preference(setStyleOverride value: Int)
+    
+    @objc func preference(structuralStyle defaults: Int) -> Int
+    
+    @objc func preference(setStructuralStyle value: Int)
+    
+    @objc func preference(structuralTocLevel defaults: Int) -> Int
+    
+    @objc func preference(setStructuralTocLevel value: Int)
 }
 
 public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
@@ -310,4 +318,19 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
         
     }
     
+    public func preference(structuralStyle defaults: Int) -> Int {
+        return defaults
+    }
+    
+    public func preference(setStructuralTocLevel value: Int) {
+        
+    }
+    
+    public func preference(structuralTocLevel defaults: Int) -> Int {
+        return defaults
+    }
+    
+    public func preference(setStructuralStyle value: Int) {
+        
+    }
 }
