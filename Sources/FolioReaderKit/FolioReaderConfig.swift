@@ -201,7 +201,7 @@ open class FolioReaderConfig: NSObject {
     /// Go to saved position when open a book
     open var loadSavedPositionForCurrentBook = true
     
-    open var savedPositionForCurrentBook: [String: Any]?
+    open var savedPositionForCurrentBook: FolioReaderReadPosition?
     
     // MARK: Quote image share
 

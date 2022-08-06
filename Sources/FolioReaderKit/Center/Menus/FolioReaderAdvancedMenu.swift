@@ -281,7 +281,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         switch self.folioReader.structuralStyle {
         case .atom:
             self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.linear.description
-        case .item:
+        case .topic:
             self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.levelMax.description
         case .bundle:
             self.structuralTocLevelValue.text = structuralTrackingTocLevel.description

@@ -81,7 +81,11 @@ open class FolioReaderCenter: UIViewController {
     var pointNow = CGPoint.zero
     var tempReference: FRTocReference?
 //    var isFirstLoad = true
-    var currentWebViewScrollPositions = [Int: [String: Any]]()
+    
+    /**
+     key: IndexPath.row
+     */
+    var currentWebViewScrollPositions = [Int: FolioReaderReadPosition]()
     var navigateWebViewScrollPositions = Array<(Int, CGPoint)>()
 
     var tempCollectionViewInset: CGFloat = 0.0
@@ -277,9 +281,8 @@ open class FolioReaderCenter: UIViewController {
 
         if self.readerConfig.loadSavedPositionForCurrentBook,
            let position = folioReader.savedPositionForCurrentBook,
-           let pageNumber = position["pageNumber"] as? Int,
-           pageNumber > 0 {
-            self.changePageWith(page: pageNumber)
+           position.pageNumber > 0 {
+            self.changePageWith(page: position.pageNumber)
         }
     }
 

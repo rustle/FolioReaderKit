@@ -45,12 +45,12 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 // if self.readerConfig.loadSavedPositionForCurrentBook,
                 // let position = self.folioReader.savedPositionForCurrentBook {
                 //      if self.pageNumber == position["pageNumber"] as? Int {
-                var pageOffset = self.readerConfig.isDirection(position["pageOffsetY"], position["pageOffsetX"], position["pageOffsetY"]) as? CGFloat ?? 0
+                var pageOffset = position.pageOffset.forDirection(withConfiguration: self.readerConfig)
                 
                 let fileSize = self.book.spine.spineReferences[safe: page.pageNumber-1]?.resource.size ?? 102400
                 let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horitonzalWithPagedContent ? 0.25 : 0.1)
                 delay(delaySec) {
-                    guard let chapterProgress = position["chapterProgress"] as? CGFloat else { return }
+                    let chapterProgress = position.chapterProgress
                     
                     let contentSize = webView.scrollView.contentSize
                     let webViewFrameSize = webView.frame.size

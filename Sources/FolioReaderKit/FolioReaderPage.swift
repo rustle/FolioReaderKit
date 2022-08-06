@@ -550,29 +550,62 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //        }
     }
     
-    func getWebViewScrollPosition(completion: ((_ position: [String: Any]) -> Void)? = nil) {
+    func getWebViewScrollPosition(completion: ((_ position: FolioReaderReadPosition) -> Void)? = nil) {
         guard let webView = webView else {
             return
         }
 
-//        for symbol: String in Thread.callStackSymbols {
-//            folioLogger(symbol)
-//        }
+        for symbol: String in Thread.callStackSymbols {
+            folioLogger(symbol)
+        }
 
         let isHorizontal: Bool = self.byWritingMode(
             self.folioReader.readerConfig?.isDirection(false, true, false),
             true) ?? false
         webView.js("getVisibleCFI(\(isHorizontal))") { cfi in
-            let position: [String : Any] = [
-                "pageNumber": self.pageNumber ?? 0,
-                "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
-                "pageOffsetX": webView.scrollView.contentOffset.x,
-                "pageOffsetY": webView.scrollView.contentOffset.y,
-                "chapterProgress": CGFloat(self.getPageProgress()),
-                "chapterName": self.currentChapterName ?? "Untitled Chapter",
-                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
-                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
-                ]
+            let structuralStyle = self.folioReader.structuralStyle
+            let structuralTrackingTocLevel = self.folioReader.structuralTrackingTocLevel
+            let structuralRootPageNumber = { () -> Int in
+                switch structuralStyle {
+                case .atom:
+                    return 0
+                case .bundle:
+                    let tocRefs = self.getChapterTocReferences(for: webView.scrollView.contentOffset, by: webView.frame.size)
+                    if let rootTocRef = tocRefs.filter({ $0.level == structuralTrackingTocLevel.rawValue - 1 }).first,
+                       let rootPageNum = self.folioReader.readerCenter?.findPageByResource(rootTocRef) {
+                        return rootPageNum
+                    }
+                    return 0
+                case .topic:
+                    return self.pageNumber
+                }
+            }()
+            
+            let position = FolioReaderReadPosition(
+                deviceId: UIDevice().name,
+                structuralStyle: structuralStyle,
+                positionTrackingStyle: structuralTrackingTocLevel,
+                structuralRootPageNumber: structuralRootPageNumber,
+                pageNumber: self.pageNumber,
+                cfi: "epubcfi(/\((self.pageNumber ?? 1) * 2)\(cfi ?? ""))"
+            )
+            
+            position.maxPage = self.readerContainer?.book.spine.spineReferences.count ?? 1
+            position.pageOffset = webView.scrollView.contentOffset
+            position.chapterProgress = self.getPageProgress()
+            position.chapterName = self.currentChapterName ?? "Untitled Chapter"
+            position.bookProgress = self.folioReader.readerCenter?.getBookProgress() ?? 0
+            
+//            let position: [String : Any] = [
+//                "pageNumber": self.pageNumber ?? 0,
+//                "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
+//                "pageOffsetX": webView.scrollView.contentOffset.x,
+//                "pageOffsetY": webView.scrollView.contentOffset.y,
+//                "chapterProgress": CGFloat(self.getPageProgress()),
+//                "chapterName": self.currentChapterName ?? "Untitled Chapter",
+//                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
+//                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
+//                ]
 
             completion?(position)
         }
@@ -720,6 +753,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
+    /**
+     return: array from child to each level of parent
+     */
     func getChapterTocReferences(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [FRTocReference] {
         var firstChapterTocReference = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? self.book.tableOfContents.first
         

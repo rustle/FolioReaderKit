@@ -235,7 +235,7 @@ open class FolioReaderWebView: WKWebView {
             }
             
             let highlight = Highlight()
-            highlight.bookId = (self.book.name as NSString?)?.deletingPathExtension
+            highlight.bookId = self.book.name?.deletingPathExtension
             highlight.startOffset = startOffsetInt
             highlight.endOffset = endOffsetInt
             highlight.content = dic["content"]

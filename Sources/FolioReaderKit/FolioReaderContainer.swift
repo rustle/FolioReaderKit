@@ -213,9 +213,11 @@ open class FolioReaderContainer: UIViewController {
                         }
                         
                         if let position = self.readerConfig.savedPositionForCurrentBook,
-                           let pageNumber = position["pageNumber"] as? Int {
+                           position.structuralStyle == self.folioReader.structuralStyle,
+                           position.positionTrackingStyle == self.folioReader.structuralTrackingTocLevel {
+                            self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
+                            position.takePrecedence = true
                             self.folioReader.savedPositionForCurrentBook = position
-                            self.folioReader.readerCenter?.currentWebViewScrollPositions[pageNumber - 1] = position
                         }
 
                         // Add audio player if needed

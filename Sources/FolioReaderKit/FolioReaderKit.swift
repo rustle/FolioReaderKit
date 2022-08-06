@@ -120,7 +120,7 @@ public enum StyleOverrideTypes: Int, CaseIterable {
     
     @objc optional func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider
     
-    @objc optional func folioReaderLastReadPositionProvider(_ folioReader: FolioReader) -> FolioReaderLastReadPositionProvider
+    @objc optional func folioReaderReadPositionProvider(_ folioReader: FolioReader) -> FolioReaderReadPositionProvider
 }
 
 /// Main Library class with some useful constants and methods
@@ -528,13 +528,25 @@ extension FolioReader {
         }
     }
     
-    @objc dynamic open var savedPositionForCurrentBook: [String: Any]? {
+    @available(*, deprecated, message: "use delegate")
+    @objc dynamic open var savedPositionForCurrentBook: FolioReaderReadPosition? {
         get {
-            delegate?.folioReaderPreferenceProvider?(self).preference(savedPosition: nil)
+            guard let bookId = self.readerCenter?.book.name?.deletingPathExtension else { return nil }
+            return delegate?.folioReaderReadPositionProvider?(self).folioReaderReadPosition(self, allByBookId: bookId).max(by: { $0.epoch < $1.epoch })
         }
         set {
-            guard let value = newValue else { return }
-            delegate?.folioReaderPreferenceProvider?(self).preference(setSavedPosition: value)
+            guard let position = newValue,
+                  let bookId = self.readerCenter?.book.name?.deletingPathExtension,
+                  let provider = delegate?.folioReaderReadPositionProvider?(self) else { return }
+            
+            provider.folioReaderReadPosition(self, allByBookId: bookId)
+                .forEach {
+                    guard $0.takePrecedence else { return }
+                    $0.takePrecedence = false
+                    provider.folioReaderReadPosition(self, bookId: bookId, set: $0, completion: nil)
+                }
+            
+            provider.folioReaderReadPosition(self, bookId: bookId, set: position, completion: nil)
         }
     }
     
@@ -572,7 +584,8 @@ extension FolioReader {
     /// Save Reader state, book, page and scroll offset.
     @objc open func saveReaderState(completion: (() -> Void)? = nil) {
         guard isReaderOpen,
-              let currentPage = self.readerCenter?.currentPage,
+              let readerCenter = self.readerCenter,
+              let currentPage = readerCenter.currentPage,
               let webView = currentPage.webView else {
             completion?()
             return

@@ -8,19 +8,41 @@
 
 import Foundation
 
-@objc open class FolioReaderLastReadPosition: NSObject {
-    open var deviceId: String!
-    open var pageNumber: Int!   //counting from 1
-    open var cfi: String!
+@objc open class FolioReaderReadPosition: NSObject {
     
-    open var structuralStyle: FolioReaderStructuralStyle = .atom
-    open var positionTrackingStyle: FolioReaderPositionTrackingStyle = .linear
+    public let deviceId: String
+    public let structuralStyle: FolioReaderStructuralStyle
+    public let positionTrackingStyle: FolioReaderPositionTrackingStyle
+    public let structuralRootPageNumber: Int
+    
+    public let pageNumber: Int   //counting from 1
+    public let cfi: String
+    
+    open var maxPage: Int = 1
+    open var pageOffset: CGPoint = .zero
+    
+    open var chapterProgress: Double = .zero
+    open var chapterName: String = "Untitled Chapter"
+    open var bookProgress: Double = .zero
+    
+    open var epoch: Date = Date()
+    
+    open var takePrecedence: Bool = false
+    
+    public init(deviceId: String, structuralStyle: FolioReaderStructuralStyle, positionTrackingStyle: FolioReaderPositionTrackingStyle, structuralRootPageNumber: Int, pageNumber: Int, cfi: String) {
+        self.deviceId = deviceId
+        self.structuralStyle = structuralStyle
+        self.positionTrackingStyle = positionTrackingStyle
+        self.structuralRootPageNumber = structuralRootPageNumber
+        self.pageNumber = pageNumber
+        self.cfi = cfi
+    }
 }
 
 public enum FolioReaderStructuralStyle: Int, CaseIterable {
     case atom = 0
     case bundle = 1
-    case item = 9
+    case topic = 9
     
     var description: String {
         switch (self) {
@@ -28,7 +50,7 @@ public enum FolioReaderStructuralStyle: Int, CaseIterable {
             return "Linear Reading"
         case .bundle:
             return "Bundle/Collected"
-        case .item:
+        case .topic:
             return "Independent Items"
         }
     }
@@ -39,7 +61,7 @@ public enum FolioReaderStructuralStyle: Int, CaseIterable {
             return 0
         case .bundle:
             return 1
-        case .item:
+        case .topic:
             return 2
         }
     }
