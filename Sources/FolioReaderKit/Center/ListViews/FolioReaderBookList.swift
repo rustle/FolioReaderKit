@@ -25,6 +25,7 @@ class FolioReaderBookList: UITableViewController {
 
     weak var delegate: FolioReaderBookListDelegate?
     fileprivate var tocItems = [FRTocReference]()
+    fileprivate var tocPositions = [FRTocReference: FolioReaderReadPosition]()
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
@@ -63,6 +64,15 @@ class FolioReaderBookList: UITableViewController {
             $0.level == tocLevel - 1
         }
       
+        self.tocItems.forEach {
+            if let bookTocIndexPathRow = self.folioReader.readerCenter?.findPageByResource($0),
+                let bookId = self.folioReader.readerContainer?.book.name?.deletingPathExtension {
+                let bookTocPageNumber = bookTocIndexPathRow + 1
+                if let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber) {
+                    self.tocPositions[$0] = readPosition
+                }
+            }
+        }
         // Jump to the current book
         DispatchQueue.main.async {
             guard let index = self.tocItems.firstIndex(where: { self.highlightResourceIds.contains($0.resource?.id ?? "___NIL___") }) else { return }
@@ -136,12 +146,13 @@ class FolioReaderBookList: UITableViewController {
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier)
         let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderBookListCell
 
         cell.setup(withConfiguration: self.readerConfig)
         let tocReference = tocItems[indexPath.row]
 
-        cell.indexLabel?.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        cell.indexLabel.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Add audio duration for Media Ovelay
         if let resource = tocReference.resource {
@@ -149,14 +160,18 @@ class FolioReaderBookList: UITableViewController {
                 let duration = self.book.duration(for: "#"+mediaOverlay)
 
                 if let durationFormatted = (duration != nil ? duration : "")?.clockTimeToMinutesString() {
-                    cell.indexLabel?.text = (cell.indexLabel?.text ?? "") + (duration != nil ? (" - " + durationFormatted) : "")
+                    cell.indexLabel.text = (cell.indexLabel.text ?? "") + (duration != nil ? (" - " + durationFormatted) : "")
                 }
             }
         }
 
         // Mark current reading book
-        cell.indexLabel?.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
-        cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(tocReference.level ?? 0) * 1.5)
+        cell.indexLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
+        cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 17.0)
+        
+        cell.positionLabel.text = tocPositions[tocReference]?.chapterName ?? "Not Started"
+        cell.positionLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
+        cell.positionLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
@@ -169,6 +184,9 @@ class FolioReaderBookList: UITableViewController {
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let tocReference = tocItems[(indexPath as NSIndexPath).row]
+        if let position = tocPositions[tocReference] {
+            self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
+        }
         delegate?.bookList(self, didSelectRowAtIndexPath: indexPath, withTocReference: tocReference)
         
         tableView.deselectRow(at: indexPath, animated: true)

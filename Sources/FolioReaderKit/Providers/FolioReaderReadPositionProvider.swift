@@ -14,6 +14,8 @@ import Foundation
      */
     @objc func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String) -> FolioReaderReadPosition?
     
+    @objc func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String, by rootPageNumber: Int) -> FolioReaderReadPosition?
+    
     @objc func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String, set readPosition: FolioReaderReadPosition, completion: Completion?)
     
     @objc func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String, remove readPosition: FolioReaderReadPosition)
@@ -37,6 +39,14 @@ public class FolioReaderNaiveReadPositionProvider: FolioReaderReadPositionProvid
             }
             return $1.takePrecedence
         }
+    }
+    
+    public func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String, by rootTocPageNumner: Int) -> FolioReaderReadPosition? {
+        return self.positions[bookId]?.filter {
+            $0.value.structuralStyle == folioReader.structuralStyle
+            && $0.value.positionTrackingStyle == folioReader.structuralTrackingTocLevel
+            && $0.value.structuralRootPageNumber == rootTocPageNumner
+        }.first?.value
     }
     
     public func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String, set lastReadPosition: FolioReaderReadPosition, completion: Completion?) {

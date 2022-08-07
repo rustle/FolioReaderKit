@@ -381,7 +381,7 @@ extension FolioReaderCenter {
     }
 
     /**
-     Find a page by FRTocReference.
+     Find a page by FRTocReference, i.e IndexPath.row or pageNumber-1
      */
     public func findPageByResource(_ reference: FRTocReference) -> Int {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
@@ -492,52 +492,75 @@ extension FolioReaderCenter {
     }
 
     /**
-     Find and return the chapter name.
+     Find and return the chapter name, first of current page, or last of previous pages
      */
     public func getChapterName(pageNumber: Int) -> FRTocReference? {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         var foundChapterName: FRTocReference?
         
-        func search(_ items: [FRTocReference]) {
-            for item in items {
-                guard foundChapterName == nil else { break }
-                
-                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
-                    let resource = item.resource,
-                    resource == reference.resource,
-                   item.title != nil {
-                    foundChapterName = item
-                } else if let children = item.children, children.isEmpty == false {
-                    search(children)
+//        func search(_ items: [FRTocReference]) {
+//            for item in items {
+//                guard foundChapterName == nil else { break }
+//
+//                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
+//                    let resource = item.resource,
+//                    resource == reference.resource,
+//                   item.title != nil {
+//                    foundChapterName = item
+//                } else if let children = item.children, children.isEmpty == false {
+//                    search(children)
+//                }
+//            }
+//        }
+//        search(self.book.flatTableOfContents)
+        
+        var findPageNumber = pageNumber
+        
+        while( findPageNumber > 0 ) {
+            if let reference = self.book.spine.spineReferences[safe: findPageNumber - 1],
+               let tocReferences = self.book.resourceTocMap[reference.resource],
+               tocReferences.isEmpty == false {
+                if findPageNumber == pageNumber {
+                    foundChapterName = tocReferences.first
+                } else {
+                    foundChapterName = tocReferences.last
                 }
+                break
+            } else {
+                findPageNumber -= 1
             }
         }
-        search(self.book.flatTableOfContents)
         
         return foundChapterName
     }
 
     /**
-     Find and return the chapter name.
+     Find and return the chapter name, limit to current page only
      */
     public func getChapterNames(pageNumber: Int) -> [FRTocReference] {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         var foundChapterNames = [FRTocReference]()
         
-        func search(_ items: [FRTocReference]) {
-            for item in items {
-                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
-                    let resource = item.resource,
-                    resource == reference.resource {
-                    foundChapterNames.append(item)
-                } else if let children = item.children, children.isEmpty == false {
-                    search(children)
-                }
-            }
+//        func search(_ items: [FRTocReference]) {
+//            for item in items {
+//                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
+//                    let resource = item.resource,
+//                    resource == reference.resource {
+//                    foundChapterNames.append(item)
+//                } else if let children = item.children, children.isEmpty == false {
+//                    search(children)
+//                }
+//            }
+//        }
+//        search(self.book.flatTableOfContents)
+        
+        if let reference = self.book.spine.spineReferences[safe: pageNumber - 1],
+           let tocReferences = self.book.resourceTocMap[reference.resource],
+           tocReferences.isEmpty {
+            foundChapterNames.append(contentsOf: tocReferences)
         }
-        search(self.book.flatTableOfContents)
         
         return foundChapterNames
     }

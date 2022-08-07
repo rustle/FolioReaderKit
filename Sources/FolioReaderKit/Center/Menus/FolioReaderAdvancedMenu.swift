@@ -272,20 +272,20 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     }
     
     @objc func structuralTocLevelValueChanged(_ sender: UIStepper) {
-        var structuralTrackingTocLevel = FolioReaderPositionTrackingStyle.levelMax
-        if Int(sender.value) < structuralTrackingTocLevel.rawValue {
-            structuralTrackingTocLevel = .init(rawValue: Int(sender.value)) ?? .level1
-        }
-        self.folioReader.structuralTrackingTocLevel = structuralTrackingTocLevel
-        
         switch self.folioReader.structuralStyle {
         case .atom:
-            self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.linear.description
+            self.folioReader.structuralTrackingTocLevel = .linear
         case .topic:
-            self.structuralTocLevelValue.text = FolioReaderPositionTrackingStyle.levelMax.description
+            self.folioReader.structuralTrackingTocLevel = .levelMax
         case .bundle:
+            var structuralTrackingTocLevel = FolioReaderPositionTrackingStyle.levelMax
+            if Int(sender.value) < structuralTrackingTocLevel.rawValue {
+                structuralTrackingTocLevel = .init(rawValue: Int(sender.value)) ?? .level1
+            }
+            self.folioReader.structuralTrackingTocLevel = structuralTrackingTocLevel
             self.structuralTocLevelValue.text = structuralTrackingTocLevel.description
         }
+        self.structuralTocLevelValue.text = self.folioReader.structuralTrackingTocLevel.description
     }
     
     // MARK: - Gestures

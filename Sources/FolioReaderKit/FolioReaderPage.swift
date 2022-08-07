@@ -72,9 +72,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             
             guard layoutAdapting == false else { return }       //FIXME: prevent overriding last known good position
             
-            getWebViewScrollPosition { position in
-                self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
-            }
+            getAndRecordScrollPosition()
         }
     }
     var currentChapterName: String?
@@ -527,7 +525,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         folioLogger("updatePages pageNumber=\(self.pageNumber!) totalPages=\(self.totalPages!) contentSize=\(contentSize) pageSize=\(pageSize)")
 //        if self.byWritingMode(pageOffSet + pageSize <= contentSize, pageOffSet >= 0) {
         self.currentPage = pageForOffset(pageOffSet, pageHeight: pageSize)
-            
+        
+        self.updateCurrentChapterName()
+        
 //        if (self.readerConfig.scrollDirection == .horizontalWithVerticalContent) {
 //        let currentIndexPathRow = (self.pageNumber - 1)
             
@@ -537,17 +537,22 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 //                // MARK: - FIXME
 //            } else {
         guard !(webView.isHidden || layoutAdapting) else { return }
+        
         guard updateWebViewScrollPosition else { return }
+        getAndRecordScrollPosition()
         
-        getWebViewScrollPosition { position in
-            readerCenter.currentWebViewScrollPositions[self.pageNumber - 1] = position
-        }
         
-        self.updateCurrentChapterName()
 //            }
 //        }
             
 //        }
+    }
+    
+    func getAndRecordScrollPosition() {
+        getWebViewScrollPosition { position in
+            self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
+            self.folioReader.savedPositionForCurrentBook = position
+        }
     }
     
     func getWebViewScrollPosition(completion: ((_ position: FolioReaderReadPosition) -> Void)? = nil) {
@@ -573,7 +578,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     let tocRefs = self.getChapterTocReferences(for: webView.scrollView.contentOffset, by: webView.frame.size)
                     if let rootTocRef = tocRefs.filter({ $0.level == structuralTrackingTocLevel.rawValue - 1 }).first,
                        let rootPageNum = self.folioReader.readerCenter?.findPageByResource(rootTocRef) {
-                        return rootPageNum
+                        return rootPageNum + 1
                     }
                     return 0
                 case .topic:
@@ -726,12 +731,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {
         folioLogger("pageNumber=\(pageNumber!) contentOffset=\(contentOffset)")
         webView?.scrollView.setContentOffset(contentOffset, animated: animated)
-//        if self.readerConfig.scrollDirection == .horizontalWithVerticalContent {
-            let currentIndexPathRow = pageNumber - 1
-            self.getWebViewScrollPosition { position in
-                self.folioReader.readerCenter?.currentWebViewScrollPositions[currentIndexPathRow] = position
-            }
-//        }
+        getAndRecordScrollPosition()
     }
     
     func updateCurrentChapterName() {
@@ -757,7 +757,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
      return: array from child to each level of parent
      */
     func getChapterTocReferences(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [FRTocReference] {
-        var firstChapterTocReference = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber) ?? self.book.tableOfContents.first
+        var firstChapterTocReference = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
         
         if let pageChapterTocReferences = self.pageChapterTocReferences,
            let idOffsets = self.idOffsets {

@@ -64,6 +64,9 @@ class PageViewController: UIPageViewController {
         self.dataSource = self
 
         self.view.backgroundColor = UIColor.white
+        if index >= viewList.count {
+            index = 0
+        }
         self.setViewControllers([viewList[index]], direction: .forward, animated: false, completion: nil)
 
         // FIXME: This disable scroll because of highlight swipe to delete, if you can fix this would be awesome
