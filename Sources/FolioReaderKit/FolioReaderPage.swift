@@ -756,13 +756,13 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                    let bookTitle = bookToc.title,
                    let bundleTitle = self.book.title {
                     if readerCenter.navigationItem.titleView == nil {
-                        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 50))
+                        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
                         readerCenter.navigationItem.titleView = titleView
                         titleView.translatesAutoresizingMaskIntoConstraints = false
                         
                         let bookTitleLabel = UILabel()
                         bookTitleLabel.tag = 101
-                        bookTitleLabel.font = .systemFont(ofSize: 15)
+                        bookTitleLabel.font = .systemFont(ofSize: 16)
                         bookTitleLabel.textAlignment = .center
                         bookTitleLabel.translatesAutoresizingMaskIntoConstraints = false
                         bookTitleLabel.adjustsFontSizeToFitWidth = true
@@ -771,7 +771,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                         
                         let bundleTitleLabel = UILabel()
                         bundleTitleLabel.tag = 102
-                        bundleTitleLabel.font = .systemFont(ofSize: 10)
+                        bundleTitleLabel.font = .systemFont(ofSize: 11)
                         bundleTitleLabel.textAlignment = .center
                         bundleTitleLabel.translatesAutoresizingMaskIntoConstraints = false
                         bundleTitleLabel.adjustsFontSizeToFitWidth = true

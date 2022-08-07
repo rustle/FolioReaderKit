@@ -532,7 +532,8 @@ extension FolioReader {
     @objc dynamic open var savedPositionForCurrentBook: FolioReaderReadPosition? {
         get {
             guard let bookId = self.readerCenter?.book.name?.deletingPathExtension else { return nil }
-            return delegate?.folioReaderReadPositionProvider?(self).folioReaderReadPosition(self, allByBookId: bookId).max(by: { $0.epoch < $1.epoch })
+            folioLogger("savedPositionForCurrentBook get")
+            return delegate?.folioReaderReadPositionProvider?(self).folioReaderReadPosition(self, bookId: bookId)
         }
         set {
             guard let position = newValue,
@@ -542,6 +543,7 @@ extension FolioReader {
             provider.folioReaderReadPosition(self, allByBookId: bookId)
                 .forEach {
                     guard $0.takePrecedence else { return }
+                    folioLogger("savedPositionForCurrentBook clear")
                     $0.takePrecedence = false
                     provider.folioReaderReadPosition(self, bookId: bookId, set: $0, completion: nil)
                 }

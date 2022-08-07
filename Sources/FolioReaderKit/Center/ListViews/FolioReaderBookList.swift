@@ -59,14 +59,12 @@ class FolioReaderBookList: UITableViewController {
 
         // Create TOC list
         guard self.folioReader.structuralStyle == .bundle else { return }
-        let tocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
-        self.tocItems = self.book.flatTableOfContents.filter {
-            $0.level == tocLevel - 1
-        }
+        
+        self.tocItems = self.book.bundleRootTableOfContents
       
         self.tocItems.forEach {
-            if let bookTocIndexPathRow = self.folioReader.readerCenter?.findPageByResource($0),
-                let bookId = self.folioReader.readerContainer?.book.name?.deletingPathExtension {
+            let bookTocIndexPathRow = self.book.findPageByResource($0)
+            if let bookId = self.folioReader.readerContainer?.book.name?.deletingPathExtension {
                 let bookTocPageNumber = bookTocIndexPathRow + 1
                 if let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber) {
                     self.tocPositions[$0] = readPosition
@@ -169,10 +167,24 @@ class FolioReaderBookList: UITableViewController {
         cell.indexLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
         cell.indexLabel.font = UIFont(name: "Avenir-Light", size: 17.0)
         
-        cell.positionLabel.text = tocPositions[tocReference]?.chapterName ?? "Not Started"
         cell.positionLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
-        cell.positionLabel.font = UIFont(name: "Avenir-Light", size: 11.0)
+        cell.positionLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
 
+        cell.percentageLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
+        cell.percentageLabel.font = UIFont(name: "Avenir-Light", size: 11.0)
+        
+        if let position = tocPositions[tocReference] {
+            cell.positionLabel.text = position.chapterName
+            let formatter = NumberFormatter()
+            formatter.numberStyle = .percent
+            formatter.minimumFractionDigits = 1
+            formatter.maximumFractionDigits = 1
+            cell.percentageLabel.text = (formatter.string(from: NSNumber(value: position.chapterProgress / 100.0)) ?? "0.0%") + " / " + (formatter.string(from: NSNumber(value: position.bookProgress / 100.0)) ?? "0.0%")
+        } else {
+            cell.positionLabel.text = "Not Started"
+            cell.percentageLabel.text = ""
+        }
+        
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
         cell.contentView.backgroundColor = UIColor.clear
