@@ -11,6 +11,7 @@ import UIKit
 class FolioReaderBookListCell: UITableViewCell {
     let indexLabel = UILabel()
     let positionLabel = UILabel()
+    let percentageLabel = UILabel()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -29,14 +30,25 @@ class FolioReaderBookListCell: UITableViewCell {
         self.positionLabel.textColor = readerConfig.menuTextColor
         self.positionLabel.textAlignment = .right
         
+        self.percentageLabel.lineBreakMode = .byWordWrapping
+        self.percentageLabel.numberOfLines = 0
+        self.percentageLabel.translatesAutoresizingMaskIntoConstraints = false
+        self.percentageLabel.textColor = readerConfig.menuTextColor
+        self.percentageLabel.textAlignment = .right
+        
         self.contentView.addSubview(self.indexLabel)
         self.contentView.addSubview(self.positionLabel)
+        self.contentView.addSubview(self.percentageLabel)
 
         // Configure cell contraints
         var constraints = [NSLayoutConstraint]()
-        let views = ["label": self.indexLabel, "pos": self.positionLabel]
+        let views = ["label": self.indexLabel, "pos": self.positionLabel, "percent": self.percentageLabel]
         
         NSLayoutConstraint.constraints(withVisualFormat: "H:|-15-[label]-[pos]-15-|", options: [], metrics: nil, views: views).forEach {
+            constraints.append($0 as NSLayoutConstraint)
+        }
+        
+        NSLayoutConstraint.constraints(withVisualFormat: "H:|-15-[percent]-15-|", options: [], metrics: nil, views: views).forEach {
             constraints.append($0 as NSLayoutConstraint)
         }
         
@@ -44,7 +56,7 @@ class FolioReaderBookListCell: UITableViewCell {
             constraints.append($0 as NSLayoutConstraint)
         }
         
-        NSLayoutConstraint.constraints(withVisualFormat: "V:|-16-[pos]-16-|", options: [], metrics: nil, views: views).forEach {
+        NSLayoutConstraint.constraints(withVisualFormat: "V:|-[pos]-[percent]-|", options: [], metrics: nil, views: views).forEach {
             constraints.append($0 as NSLayoutConstraint)
         }
         

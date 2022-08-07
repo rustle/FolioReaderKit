@@ -171,7 +171,7 @@ class FolioReaderBookList: UITableViewController {
         
         cell.positionLabel.text = tocPositions[tocReference]?.chapterName ?? "Not Started"
         cell.positionLabel.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
-        cell.positionLabel.font = UIFont(name: "Avenir-Light", size: 15.0)
+        cell.positionLabel.font = UIFont(name: "Avenir-Light", size: 11.0)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false

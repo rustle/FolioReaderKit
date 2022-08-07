@@ -284,6 +284,8 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             }
             self.folioReader.structuralTrackingTocLevel = structuralTrackingTocLevel
             self.structuralTocLevelValue.text = structuralTrackingTocLevel.description
+            
+            self.folioReader.readerContainer?.book.updateBundleInfo(rootTocLevel: structuralTrackingTocLevel.rawValue)
         }
         self.structuralTocLevelValue.text = self.folioReader.structuralTrackingTocLevel.description
     }

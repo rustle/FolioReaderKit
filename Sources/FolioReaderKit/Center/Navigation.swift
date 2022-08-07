@@ -381,22 +381,6 @@ extension FolioReaderCenter {
     }
 
     /**
-     Find a page by FRTocReference, i.e IndexPath.row or pageNumber-1
-     */
-    public func findPageByResource(_ reference: FRTocReference) -> Int {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        var count = 0
-        for item in self.book.spine.spineReferences {
-            if let resource = reference.resource, item.resource == resource {
-                return count
-            }
-            count += 1
-        }
-        return count
-    }
-
-    /**
      Find a page by href.
      */
     public func findPageByHref(_ href: String) -> Int {
@@ -437,31 +421,67 @@ extension FolioReaderCenter {
         return foundResource
     }
 
-    /**
-     Return the current chapter progress based on current chapter and total of chapters.
-     */
-    public func getCurrentChapterProgress() -> Double {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-        
-        guard book.spine.size > 0 else { return 0 }
-        guard currentPageNumber > 0 else { return 0 }
-        
-        let total = book.spine.size
-        let current = book.spine.spineReferences[currentPageNumber - 1].sizeUpTo
-        
-        return 100.0 * Double(current) / Double(total)
-    }
-
     public func getBookProgress() -> Double {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
         
-        guard book.spine.size > 0 else { return 0 }
-        guard let currentPage = currentPage else { return 0 }
+        guard book.spine.size > 0 else { return .zero }
+        guard let currentPage = currentPage else { return .zero }
+    
+        if self.folioReader.structuralStyle == .bundle,
+           self.book.bundleRootTableOfContents.isEmpty == false,
+           let bookTocIndex = getBundleRootTocIndex(),
+           let bookSize = self.book.bundleBookSizes[safe: bookTocIndex] {
+            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
+            let bookTocSizeUpto = self.book.spine.spineReferences[bookTocSpineIndex].sizeUpTo
+            
+            if bookSize > 0 {
+                let chapterProgress = 100.0 * Double(book.spine.spineReferences[currentPageNumber - 1].sizeUpTo - bookTocSizeUpto) / Double(bookSize)
+                let pageProgress = currentPage.getPageProgress()
+                
+                return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(bookSize)
+            }
+        }
+    
         
-        let chapterProgress = getCurrentChapterProgress()
+        let chapterProgress = 100.0 * Double(book.spine.spineReferences[currentPageNumber - 1].sizeUpTo) / Double(book.spine.size)
         let pageProgress = currentPage.getPageProgress()
         
         return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(book.spine.size)
+    }
+    
+    public func getBundleRootTocIndex() -> Int? {
+        guard self.book.bundleRootTableOfContents.isEmpty == false,
+              let currentPage = currentPage else { return nil }
+
+        var tocRef = self.getChapterName(pageNumber: currentPage.pageNumber)
+        var bookTocIndex: Int? = nil
+        while( tocRef != nil ) {
+            bookTocIndex = self.book.bundleRootTableOfContents.firstIndex(of: tocRef!)
+            tocRef = tocRef?.parent
+        }
+        
+        return bookTocIndex
+    }
+    
+    public func getBundleProgress() -> Double {
+        guard self.folioReader.structuralStyle == .bundle,
+              self.book.spine.size > 0,
+              let bookId = self.book.name?.deletingPathExtension else { return .zero }
+        
+        var bundleProgress = Double.zero
+        
+        (self.book.bundleRootTableOfContents.startIndex..<self.book.bundleRootTableOfContents.endIndex).forEach { bookTocIndex in
+            let bookSize = self.book.bundleBookSizes[bookTocIndex]
+            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
+            
+            if let position = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocSpineIndex + 1) {
+                bundleProgress += position.bookProgress * Double(bookSize)
+            }
+        }
+        
+        bundleProgress /= Double(book.spine.size)
+        
+        return bundleProgress
     }
     
     /**

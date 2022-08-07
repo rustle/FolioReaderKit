@@ -182,6 +182,9 @@ open class FolioReaderContainer: UIViewController {
                     
                     // Reload data
                     DispatchQueue.main.async {
+                        let structuralTrackingTocLevel = self.folioReader.structuralTrackingTocLevel
+                        self.book.updateBundleInfo(rootTocLevel: structuralTrackingTocLevel.rawValue)
+                        
                         //FIXME: temp fix for highlights
                         if let highlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
                            let bookId = (self.book.name as NSString?)?.deletingPathExtension {

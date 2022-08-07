@@ -40,6 +40,20 @@ open class FRBook: NSObject {
         return metadata.creators.first?.name
     }
 
+    /**
+     Find a page by FRTocReference, i.e IndexPath.row or pageNumber-1
+     */
+    public func findPageByResource(_ reference: FRTocReference) -> Int {
+        var count = 0
+        for item in spine.spineReferences {
+            if let resource = reference.resource, item.resource == resource {
+                return count
+            }
+            count += 1
+        }
+        return count
+    }
+
     // MARK: - Media Overlay Metadata
     // http://www.idpf.org/epub/301/spec/epub-mediaoverlays.html#sec-package-metadata
 
@@ -87,5 +101,27 @@ open class FRBook: NSObject {
     // @NOTE: should "#" be automatically prefixed with the ID?
     func duration(for ID: String) -> String? {
         return metadata.find(byProperty: "media:duration", refinedBy: ID)?.value
+    }
+    
+    // MARK: - for Bundle Book
+    public var bundleRootTableOfContents: [FRTocReference]!
+    public var bundleBookSizes: [Int]!
+
+    public func updateBundleInfo(rootTocLevel: Int) {
+        self.bundleRootTableOfContents = self.flatTableOfContents.filter {
+            $0.level == rootTocLevel - 1
+        }
+        
+        self.bundleBookSizes = (bundleRootTableOfContents.startIndex..<bundleRootTableOfContents.endIndex).map { bookTocIndex in
+            let bookTocAfterIndex = bundleRootTableOfContents.index(bookTocIndex, offsetBy: 1, limitedBy: bundleRootTableOfContents.endIndex - 1) ?? bookTocIndex
+            
+            let bookTocSpineIndex = self.findPageByResource(bundleRootTableOfContents[bookTocIndex])
+            let bookTocAfterSpineIndex = self.findPageByResource(bundleRootTableOfContents[bookTocAfterIndex])
+                
+            let bookTocSizeUpto = spine.spineReferences[bookTocSpineIndex].sizeUpTo
+            let bookTocAfterSizeUpto = spine.spineReferences[bookTocAfterSpineIndex].sizeUpTo
+            
+            return bookTocAfterSpineIndex == bookTocSpineIndex ? spine.size - bookTocSizeUpto : bookTocAfterSizeUpto - bookTocSizeUpto
+        }
     }
 }

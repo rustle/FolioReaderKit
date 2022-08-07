@@ -13,7 +13,7 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
     func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        let item = findPageByResource(reference)
+        let item = self.book.findPageByResource(reference)
         
         if item < totalPages {
             let indexPath = IndexPath(row: item, section: 0)
@@ -89,7 +89,7 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
             indexPath = IndexPath(row: position.key, section: 0)
         } else {
             folioLogger("maxPosition=noPosition")
-            let item = findPageByResource(reference)
+            let item = self.book.findPageByResource(reference)
             if item < totalPages {
                 indexPath = IndexPath(row: item, section: 0)
             }
