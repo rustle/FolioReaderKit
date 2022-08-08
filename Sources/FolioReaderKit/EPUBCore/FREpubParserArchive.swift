@@ -464,11 +464,10 @@ class FREpubParserArchive: NSObject {
                 linear = tag.attributes["linear"] == "yes" ? true : false
             }
 
-            if book.resources.containsById(idref) {
-                guard let resource = book.resources.findById(idref) else { continue }
-                spine.spineReferences.append(Spine(resource: resource, linear: linear, sizeUpto: sizeUpto))
-                sizeUpto += Int(resource.size ?? 0)
-            }
+            guard let resource = book.resources.findById(idref) else { continue }
+            resource.spineIndices.append(spine.spineReferences.count)
+            spine.spineReferences.append(Spine(resource: resource, linear: linear, sizeUpto: sizeUpto))
+            sizeUpto += Int(resource.size ?? 0)
         }
         spine.size = sizeUpto
         

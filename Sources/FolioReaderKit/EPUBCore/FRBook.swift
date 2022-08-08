@@ -44,14 +44,21 @@ open class FRBook: NSObject {
      Find a page by FRTocReference, i.e IndexPath.row or pageNumber-1
      */
     public func findPageByResource(_ reference: FRTocReference) -> Int {
-        var count = 0
-        for item in spine.spineReferences {
-            if let resource = reference.resource, item.resource == resource {
-                return count
-            }
-            count += 1
+        if let resHref = reference.resource?.href,
+           let index = resources.findByHref(resHref)?.spineIndices.first {
+            return index
         }
-        return count
+            
+        return spine.spineReferences.count
+        
+//        var count = 0
+//        for item in spine.spineReferences {
+//            if let resource = reference.resource, item.resource == resource {
+//                return count
+//            }
+//            count += 1
+//        }
+//        return count
     }
 
     // MARK: - Media Overlay Metadata

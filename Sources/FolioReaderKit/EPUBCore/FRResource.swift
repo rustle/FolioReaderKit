@@ -17,6 +17,7 @@ open class FRResource: NSObject {
     public var href: String!
     public var fullHref: String!
     public var size: UInt64?
+    public var spineIndices = [Int]()
 
     func basePath() -> String! {
         if href == nil || href.isEmpty { return nil }

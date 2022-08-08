@@ -10,13 +10,22 @@ import UIKit
 
 open class FRResources: NSObject {
     
+    /**
+     key: resource.href
+     */
     var resources = [String: FRResource]()
+    
+    /**
+     id to href
+     */
+    var idMap = [String: String]()
 
     /**
      Adds a resource to the resources.
      */
     func add(_ resource: FRResource) {
         self.resources[resource.href] = resource
+        self.idMap[resource.id] = resource.href
     }
 
     // MARK: Find
@@ -27,12 +36,13 @@ open class FRResources: NSObject {
      Useful for looking up the table of contents as it's supposed to be the only resource with NCX mediatype.
      */
     func findByMediaType(_ mediaType: MediaType) -> FRResource? {
-        for resource in resources.values {
-            if resource.mediaType != nil && resource.mediaType == mediaType {
-                return resource
-            }
-        }
-        return nil
+        return resources.values.first { $0.mediaType != nil && $0.mediaType == mediaType }
+//        for resource in resources.values {
+//            if resource.mediaType != nil && resource.mediaType == mediaType {
+//                return resource
+//            }
+//        }
+//        return nil
     }
 
     /**
@@ -41,12 +51,13 @@ open class FRResources: NSObject {
      Useful for looking up the table of contents as it's supposed to be the only resource with NCX extension.
      */
     func findByExtension(_ ext: String) -> FRResource? {
-        for resource in resources.values {
-            if resource.mediaType != nil && resource.mediaType.defaultExtension == ext {
-                return resource
-            }
-        }
-        return nil
+        return resources.values.first { $0.mediaType != nil && $0.mediaType.defaultExtension == ext }
+//        for resource in resources.values {
+//            if resource.mediaType != nil && resource.mediaType.defaultExtension == ext {
+//                return resource
+//            }
+//        }
+//        return nil
     }
 
     /**
@@ -56,12 +67,13 @@ open class FRResources: NSObject {
      - returns: The Resource.
      */
     func findByProperty(_ properties: String) -> FRResource? {
-        for resource in resources.values {
-            if resource.properties == properties {
-                return resource
-            }
-        }
-        return nil
+        return resources.values.first { $0.properties == properties }
+//        for resource in resources.values {
+//            if resource.properties == properties {
+//                return resource
+//            }
+//        }
+//        return nil
     }
 
     /**
@@ -79,36 +91,16 @@ open class FRResources: NSObject {
      Gets the resource with the given href.
      */
     func findById(_ id: String?) -> FRResource? {
-        guard let id = id else { return nil }
+        guard let id = id, let href = idMap[id] else { return nil }
 
-        for resource in resources.values {
-            if let resourceID = resource.id, resourceID == id {
-                return resource
-            }
-        }
-        return nil
+        return resources[href]
+        
+//        for resource in resources.values {
+//            if let resourceID = resource.id, resourceID == id {
+//                return resource
+//            }
+//        }
+//        return nil
     }
 
-    /**
-     Whether there exists a resource with the given href.
-     */
-    func containsByHref(_ href: String) -> Bool {
-        guard !href.isEmpty else { return false }
-
-        return resources.keys.contains(href)
-    }
-
-    /**
-     Whether there exists a resource with the given id.
-     */
-    func containsById(_ id: String?) -> Bool {
-        guard let id = id else { return false }
-
-        for resource in resources.values {
-            if let resourceID = resource.id, resourceID == id {
-                return true
-            }
-        }
-        return false
-    }
 }
