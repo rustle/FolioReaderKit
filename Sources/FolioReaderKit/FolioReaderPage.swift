@@ -560,9 +560,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return
         }
 
-        for symbol: String in Thread.callStackSymbols {
-            folioLogger(symbol)
-        }
+//        for symbol: String in Thread.callStackSymbols {
+//            folioLogger(symbol)
+//        }
 
         let isHorizontal: Bool = self.byWritingMode(
             self.folioReader.readerConfig?.isDirection(false, true, false),
@@ -598,8 +598,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             position.pageOffset = webView.scrollView.contentOffset
             position.chapterProgress = self.getPageProgress()
             position.chapterName = self.currentChapterName ?? "Untitled Chapter"
-            position.bookProgress = self.folioReader.readerCenter?.getBookProgress() ?? .zero
-            position.bundleProgress = self.folioReader.readerCenter?.getBundleProgress() ?? .zero
+            position.bookProgress = self.getBookProgress()
+            position.bundleProgress = self.getBundleProgress()
             
 //            let position: [String : Any] = [
 //                "pageNumber": self.pageNumber ?? 0,
@@ -670,6 +670,121 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
         
         return 0
+    }
+    
+    func getBookProgress() -> Double {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+        
+        guard book.spine.size > 0 else { return .zero }
+    
+        if self.folioReader.structuralStyle == .bundle,
+           self.book.bundleRootTableOfContents.isEmpty == false,
+           let bookTocIndex = getBundleRootTocIndex(),
+           let bookSize = self.book.bundleBookSizes[safe: bookTocIndex] {
+            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
+            let bookTocSizeUpto = self.book.spine.spineReferences[bookTocSpineIndex].sizeUpTo
+            
+            if bookSize > 0 {
+                let chapterProgress = 100.0 * Double(book.spine.spineReferences[pageNumber - 1].sizeUpTo - bookTocSizeUpto) / Double(bookSize)
+                let pageProgress = getPageProgress()
+                
+                return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[pageNumber - 1].resource.size ?? 0) / Double(bookSize)
+            }
+        }
+    
+        let chapterProgress = 100.0 * Double(book.spine.spineReferences[pageNumber - 1].sizeUpTo) / Double(book.spine.size)
+        let pageProgress = getPageProgress()
+        
+        return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[pageNumber - 1].resource.size ?? 0) / Double(book.spine.size)
+    }
+    
+    public func getBundleRootTocIndex() -> Int? {
+        guard self.book.bundleRootTableOfContents.isEmpty == false else { return nil }
+
+        var tocRef = self.folioReader.readerCenter?.getChapterName(pageNumber: pageNumber)
+        var bookTocIndex: Int? = nil
+        while( tocRef != nil ) {
+            bookTocIndex = self.book.bundleRootTableOfContents.firstIndex(of: tocRef!)
+            tocRef = tocRef?.parent
+        }
+        
+        return bookTocIndex
+    }
+    
+    public func getBundleProgress() -> Double {
+        guard self.folioReader.structuralStyle == .bundle,
+              self.book.spine.size > 0,
+              let bookId = self.book.name?.deletingPathExtension else { return .zero }
+        
+        var bundleProgress = Double.zero
+        
+        (self.book.bundleRootTableOfContents.startIndex..<self.book.bundleRootTableOfContents.endIndex).forEach { bookTocIndex in
+            let bookSize = self.book.bundleBookSizes[bookTocIndex]
+            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
+            
+            if let position = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocSpineIndex + 1) {
+                bundleProgress += position.bookProgress * Double(bookSize)
+            }
+        }
+        
+        bundleProgress /= Double(book.spine.size)
+        
+        return bundleProgress
+    }
+    
+
+    /**
+     Find and return the current chapter resource.
+     */
+    public func getChapter() -> FRResource? {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        var foundResource: FRResource?
+
+        func search(_ items: [FRTocReference]) {
+            for item in items {
+                guard foundResource == nil else { break }
+
+                if let reference = book.spine.spineReferences[safe: (pageNumber - 1)], let resource = item.resource, resource == reference.resource {
+                    foundResource = resource
+                    break
+                } else if let children = item.children, children.isEmpty == false {
+                    search(children)
+                }
+            }
+        }
+        search(book.flatTableOfContents)
+
+        return foundResource
+    }
+
+    
+    
+    /**
+     Find and return the current chapter name.
+     */
+    public func getChapterName() -> String? {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        var foundChapterName: String?
+        
+        func search(_ items: [FRTocReference]) {
+            for item in items {
+                guard foundChapterName == nil else { break }
+                
+                if let reference = self.book.spine.spineReferences[safe: pageNumber - 1],
+                    let resource = item.resource,
+                    resource == reference.resource,
+                    let title = item.title {
+                    foundChapterName = title
+                } else if let children = item.children, children.isEmpty == false {
+                    search(children)
+                }
+            }
+        }
+        search(self.book.flatTableOfContents)
+        
+        return foundChapterName
     }
 
     /// Get internal page offset before layout change.
@@ -747,11 +862,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             
             
             DispatchQueue.main.async {
-                guard let readerCenter = self.folioReader.readerCenter else { return }
+                guard let readerCenter = self.folioReader.readerCenter,
+                      self.pageNumber == readerCenter.currentPageNumber else { return }
                 
                 if self.folioReader.structuralStyle == .bundle,
                    self.readerConfig.displayTitle,
-                   let bookTocIndex = self.folioReader.readerCenter?.getBundleRootTocIndex(),
+                   let bookTocIndex = self.getBundleRootTocIndex(),
                    let bookToc = self.book.bundleRootTableOfContents[safe: bookTocIndex],
                    let bookTitle = bookToc.title,
                    let bundleTitle = self.book.title {
@@ -783,7 +899,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                         
                         constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[book]-|", options: [], metrics: nil, views: views))
                         constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[bundle]-|", options: [], metrics: nil, views: views))
-                        constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "V:|-[book]-[bundle]-|", options: [], metrics: nil, views: views))
+                        constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "V:|-[book]-2-[bundle]-|", options: [], metrics: nil, views: views))
                         
                         titleView.addConstraints(constraints)
                     }
@@ -800,9 +916,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     readerCenter.navigationItem.titleView = nil
                 }
                 
-                if self.pageNumber == readerCenter.currentPageNumber {
-                    readerCenter.pageIndicatorView?.reloadViewWithPage(self.currentPage)
-                }
+                readerCenter.pageIndicatorView?.reloadViewWithPage(self.currentPage)
             }
         }
     }
@@ -1145,7 +1259,7 @@ writingMode
             guard let decoded = url.absoluteString.removingPercentEncoding else { return false }
             let index = decoded.index(decoded.startIndex, offsetBy: 13)
             let playID = String(decoded[index...])
-            let chapter = self.folioReader.readerCenter?.getCurrentChapter()
+            let chapter = self.getChapter()
             let href = chapter?.href ?? ""
             self.folioReader.readerAudioPlayer?.playAudio(href, fragmentID: playID)
 
@@ -1177,7 +1291,7 @@ writingMode
                 }
 
                 let href = splitedPath[1].trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-                let hrefPage = (self.folioReader.readerCenter?.findPageByHref(href) ?? 0) + 1
+                let hrefPage = (self.book.resources.findByHref(href)?.spineIndices.first ?? 0) + 1
 
                 if (hrefPage == pageNumber) {
                     // Handle internal #anchor

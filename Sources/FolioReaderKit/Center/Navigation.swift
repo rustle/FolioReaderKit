@@ -76,7 +76,7 @@ extension FolioReaderCenter {
             return true
         }
         
-        folioLogger("visibleIndexPath=\(indexPaths)")
+//        folioLogger("visibleIndexPath=\(indexPaths)")
 
         let indexPath = indexPaths.min {
             abs($0.layoutAttributes.frame.minX - contentOffset.x) + abs($0.layoutAttributes.frame.minY - contentOffset.y) <
@@ -137,7 +137,7 @@ extension FolioReaderCenter {
     open func changePageWith(href: String, animated: Bool = false, completion: (() -> Void)? = nil) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        let item = findPageByHref(href)
+        guard let item = self.book.resources.findByHref(href)?.spineIndices.first else { return }
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: animated, completion: { () -> Void in
 //            self.updateCurrentPage(navigating: indexPath) {
@@ -152,7 +152,7 @@ extension FolioReaderCenter {
         if recentlyScrolled { return } // if user recently scrolled, do not change pages or scroll the webview
         guard let currentPage = currentPage else { return }
 
-        let item = findPageByHref(href)
+        guard let item = self.book.resources.findByHref(href)?.spineIndices.first else { return }
         let pageUpdateNeeded = item+1 != currentPage.pageNumber
         let indexPath = IndexPath(row: item, section: 0)
         changePageWith(indexPath: indexPath, animated: true) { () -> Void in
@@ -378,137 +378,6 @@ extension FolioReaderCenter {
                 completion?()
             }
         }
-    }
-
-    /**
-     Find a page by href.
-     */
-    public func findPageByHref(_ href: String) -> Int {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        var count = 0
-        for item in self.book.spine.spineReferences {
-            if item.resource.href == href {
-                return count
-            }
-            count += 1
-        }
-        return count
-    }
-
-    /**
-     Find and return the current chapter resource.
-     */
-    public func getCurrentChapter() -> FRResource? {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        var foundResource: FRResource?
-
-        func search(_ items: [FRTocReference]) {
-            for item in items {
-                guard foundResource == nil else { break }
-
-                if let reference = book.spine.spineReferences[safe: (currentPageNumber - 1)], let resource = item.resource, resource == reference.resource {
-                    foundResource = resource
-                    break
-                } else if let children = item.children, children.isEmpty == false {
-                    search(children)
-                }
-            }
-        }
-        search(book.flatTableOfContents)
-
-        return foundResource
-    }
-
-    public func getBookProgress() -> Double {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-        
-        guard book.spine.size > 0 else { return .zero }
-        guard let currentPage = currentPage else { return .zero }
-    
-        if self.folioReader.structuralStyle == .bundle,
-           self.book.bundleRootTableOfContents.isEmpty == false,
-           let bookTocIndex = getBundleRootTocIndex(),
-           let bookSize = self.book.bundleBookSizes[safe: bookTocIndex] {
-            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
-            let bookTocSizeUpto = self.book.spine.spineReferences[bookTocSpineIndex].sizeUpTo
-            
-            if bookSize > 0 {
-                let chapterProgress = 100.0 * Double(book.spine.spineReferences[currentPageNumber - 1].sizeUpTo - bookTocSizeUpto) / Double(bookSize)
-                let pageProgress = currentPage.getPageProgress()
-                
-                return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(bookSize)
-            }
-        }
-    
-        
-        let chapterProgress = 100.0 * Double(book.spine.spineReferences[currentPageNumber - 1].sizeUpTo) / Double(book.spine.size)
-        let pageProgress = currentPage.getPageProgress()
-        
-        return chapterProgress + Double(pageProgress) * Double( book.spine.spineReferences[currentPageNumber - 1].resource.size ?? 0) / Double(book.spine.size)
-    }
-    
-    public func getBundleRootTocIndex() -> Int? {
-        guard self.book.bundleRootTableOfContents.isEmpty == false,
-              let currentPage = currentPage else { return nil }
-
-        var tocRef = self.getChapterName(pageNumber: currentPage.pageNumber)
-        var bookTocIndex: Int? = nil
-        while( tocRef != nil ) {
-            bookTocIndex = self.book.bundleRootTableOfContents.firstIndex(of: tocRef!)
-            tocRef = tocRef?.parent
-        }
-        
-        return bookTocIndex
-    }
-    
-    public func getBundleProgress() -> Double {
-        guard self.folioReader.structuralStyle == .bundle,
-              self.book.spine.size > 0,
-              let bookId = self.book.name?.deletingPathExtension else { return .zero }
-        
-        var bundleProgress = Double.zero
-        
-        (self.book.bundleRootTableOfContents.startIndex..<self.book.bundleRootTableOfContents.endIndex).forEach { bookTocIndex in
-            let bookSize = self.book.bundleBookSizes[bookTocIndex]
-            let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
-            
-            if let position = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocSpineIndex + 1) {
-                bundleProgress += position.bookProgress * Double(bookSize)
-            }
-        }
-        
-        bundleProgress /= Double(book.spine.size)
-        
-        return bundleProgress
-    }
-    
-    /**
-     Find and return the current chapter name.
-     */
-    public func getCurrentChapterName() -> String? {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-        var foundChapterName: String?
-        
-        func search(_ items: [FRTocReference]) {
-            for item in items {
-                guard foundChapterName == nil else { break }
-                
-                if let reference = self.book.spine.spineReferences[safe: (self.currentPageNumber - 1)],
-                    let resource = item.resource,
-                    resource == reference.resource,
-                    let title = item.title {
-                    foundChapterName = title
-                } else if let children = item.children, children.isEmpty == false {
-                    search(children)
-                }
-            }
-        }
-        search(self.book.flatTableOfContents)
-        
-        return foundChapterName
     }
 
     /**

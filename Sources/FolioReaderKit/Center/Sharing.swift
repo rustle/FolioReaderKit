@@ -38,7 +38,7 @@ extension FolioReaderCenter {
             }
 
             // Get chapter name
-            if let chapter = self.getCurrentChapterName() {
+            if let chapter = currentPage.getChapterName() {
                 chapterName = chapter
             }
 
@@ -99,7 +99,7 @@ extension FolioReaderCenter {
         }
 
         // Get chapter name
-        if let chapter = getCurrentChapterName() {
+        if let chapter = currentPage?.getChapterName() {
             chapterName = chapter
         }
 

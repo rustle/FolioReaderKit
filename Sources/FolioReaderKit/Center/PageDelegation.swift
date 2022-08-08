@@ -18,6 +18,28 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         
 //        updateCurrentPage(page)
         
+        if self.folioReader.structuralStyle == .bundle,
+           page.pageNumber > 1,
+           self.pageScrollDirection == page.byWritingMode(.left, .right),
+           let bundleRootTocIndex = page.getBundleRootTocIndex(),
+           let bundleRootToc = self.book.bundleRootTableOfContents[safe: bundleRootTocIndex],
+           let bundleRootResourceSpineIndices = bundleRootToc.resource?.spineIndices,
+           bundleRootResourceSpineIndices.contains(page.pageNumber - 1),
+           let bookId = self.book.name?.deletingPathExtension,
+           let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: page.pageNumber),
+           readPosition.pageNumber != page.pageNumber {
+            
+            folioLogger("NEW_BOOK_NAV readPosition=\(readPosition.pageNumber)")
+            currentWebViewScrollPositions[readPosition.pageNumber - 1] = readPosition
+            let indexPath = IndexPath(row: readPosition.pageNumber - 1, section: 0)
+            changePageWith(indexPath: indexPath, animated: true) {
+                self.currentPage?.updatePageInfo {
+                    self.currentPage?.updatePageOffsetRate()
+                }
+            }
+            return
+        }
+        
         guard let webView = page.webView else { return }
         
         // UGLYFIX: to make share menu item appear on first attempt

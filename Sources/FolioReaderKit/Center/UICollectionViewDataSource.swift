@@ -15,8 +15,6 @@ extension FolioReaderCenter: UICollectionViewDataSource {
     }
 
     open func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
         return totalPages
     }
 
