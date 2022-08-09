@@ -12,7 +12,7 @@ class FolioReaderHighlightList: UITableViewController {
 
 //    fileprivate var highlights = [Highlight]()
     fileprivate var sections = [Int]()
-    fileprivate var sectionHighlights = [Int: [Highlight]]()
+    fileprivate var sectionHighlights = [Int: [FolioReaderHighlight]]()
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
 
@@ -154,12 +154,12 @@ class FolioReaderHighlightList: UITableViewController {
         text.addAttribute(NSAttributedString.Key.font, value: UIFont(name: "Avenir-Light", size: 16)!, range: range)
         text.addAttribute(NSAttributedString.Key.foregroundColor, value: textColor, range: range)
 
-        if (highlight.type == HighlightStyle.underline.rawValue) {
+        if (highlight.type == FolioReaderHighlightStyle.underline.rawValue) {
             text.addAttribute(NSAttributedString.Key.backgroundColor, value: UIColor.clear, range: range)
-            text.addAttribute(NSAttributedString.Key.underlineColor, value: HighlightStyle.colorForStyle(highlight.type, nightMode: self.folioReader.nightMode), range: range)
+            text.addAttribute(NSAttributedString.Key.underlineColor, value: FolioReaderHighlightStyle.colorForStyle(highlight.type, nightMode: self.folioReader.nightMode), range: range)
             text.addAttribute(NSAttributedString.Key.underlineStyle, value: NSNumber(value: NSUnderlineStyle.single.rawValue as Int), range: range)
         } else {
-            text.addAttribute(NSAttributedString.Key.backgroundColor, value: HighlightStyle.colorForStyle(highlight.type, nightMode: self.folioReader.nightMode), range: range)
+            text.addAttribute(NSAttributedString.Key.backgroundColor, value: FolioReaderHighlightStyle.colorForStyle(highlight.type, nightMode: self.folioReader.nightMode), range: range)
         }
 
         // Text
@@ -271,7 +271,7 @@ class FolioReaderHighlightList: UITableViewController {
 
             if (highlight.page == self.folioReader.readerCenter?.currentPageNumber),
                 let page = self.folioReader.readerCenter?.currentPage {
-                Highlight.removeFromHTMLById(withinPage: page, highlightId: highlight.highlightId) // Remove from HTML
+                FolioReaderHighlight.removeFromHTMLById(withinPage: page, highlightId: highlight.highlightId) // Remove from HTML
             }
 
             folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(folioReader, removedId: highlight.highlightId)
@@ -292,7 +292,7 @@ class FolioReaderHighlightList: UITableViewController {
         tableView.reloadData()
     }
     
-    func presentLocatingHighlightError(_ message: String, highlight: Highlight, at: IndexPath) {
+    func presentLocatingHighlightError(_ message: String, highlight: FolioReaderHighlight, at: IndexPath) {
         let textView = UITextView()
         textView.text = message
         
@@ -324,7 +324,7 @@ class FolioReaderHighlightList: UITableViewController {
         present(alert, animated: true, completion: nil)
     }
     
-    func presentLocatingHighlightFailure(_ message: String, highlight: Highlight, at: IndexPath) {
+    func presentLocatingHighlightFailure(_ message: String, highlight: FolioReaderHighlight, at: IndexPath) {
         let textView = UITextView()
         textView.text = message
         

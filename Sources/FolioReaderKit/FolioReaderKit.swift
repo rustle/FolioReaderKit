@@ -334,8 +334,8 @@ extension FolioReader {
     open var currentHighlightStyle: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
-                .preference(currentHighlightStyle: HighlightStyle.yellow.rawValue)
-                ?? HighlightStyle.yellow.rawValue
+                .preference(currentHighlightStyle: FolioReaderHighlightStyle.yellow.rawValue)
+                ?? FolioReaderHighlightStyle.yellow.rawValue
         }
         set (value) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentHighlightStyle: value)

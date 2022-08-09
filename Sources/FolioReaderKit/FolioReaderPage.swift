@@ -599,6 +599,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             position.chapterProgress = self.getPageProgress()
             position.chapterName = self.currentChapterName ?? "Untitled Chapter"
             position.bookProgress = self.getBookProgress()
+            position.bookName = self.book.title ?? self.book.name ?? "Unnamed Book"
+            if self.folioReader.structuralStyle == .bundle,
+                let bookRootTocIndex = self.getBundleRootTocIndex(),
+               let bookRootToc = self.book.bundleRootTableOfContents[safe: bookRootTocIndex] {
+                position.bookName = bookRootToc.title
+            }
             position.bundleProgress = self.getBundleProgress()
             
 //            let position: [String : Any] = [
@@ -1411,16 +1417,16 @@ writingMode
     func injectHighlights(completion: (() -> Void)? = nil) {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
               let folioReaderHighlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
-              let highlights = folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({
+              let highlights = folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({ hl -> FolioReaderHighlight in
                   let prefix = "/2"
-                  if let cfiStart = $0.cfiStart, cfiStart.hasPrefix(prefix) {
-                      $0.cfiStart = String(cfiStart[cfiStart.index(cfiStart.startIndex, offsetBy: prefix.count)..<cfiStart.endIndex])
+                  if let cfiStart = hl.cfiStart, cfiStart.hasPrefix(prefix) {
+                      hl.cfiStart = String(cfiStart[cfiStart.index(cfiStart.startIndex, offsetBy: prefix.count)..<cfiStart.endIndex])
                   }
-                  if let cfiEnd = $0.cfiEnd, cfiEnd.hasPrefix(prefix) {
-                      $0.cfiEnd = String(cfiEnd[cfiEnd.index(cfiEnd.startIndex, offsetBy: prefix.count)..<cfiEnd.endIndex])
+                  if let cfiEnd = hl.cfiEnd, cfiEnd.hasPrefix(prefix) {
+                      hl.cfiEnd = String(cfiEnd[cfiEnd.index(cfiEnd.startIndex, offsetBy: prefix.count)..<cfiEnd.endIndex])
                   }
-                  return $0
-              }) as [Highlight]?,
+                  return hl
+              }) as [FolioReaderHighlight]?,
               highlights.isEmpty == false
         else {
             completion?()
@@ -1479,7 +1485,7 @@ writingMode
         }
     }
     
-    func relocateHighlights(highlight: Highlight, completion: ((Highlight?, HighlightError?) -> Void)? = nil) {
+    func relocateHighlights(highlight: FolioReaderHighlight, completion: ((FolioReaderHighlight?, FolioReaderHighlightError?) -> Void)? = nil) {
         let encodedData = ((try? JSONEncoder().encode([highlight])) ?? .init()).base64EncodedString()
         
         self.webView?.js("relocateHighlights('\(encodedData)')") { results in
@@ -1492,7 +1498,7 @@ writingMode
             guard let resultsData = results?.data(using: .utf8),
                   let result = try? JSONDecoder().decode([NodeBoundingClientRect].self, from: resultsData).first
             else {
-                completion?(highlight, HighlightError.runtimeError("Unknown Exception"))
+                completion?(highlight, FolioReaderHighlightError.runtimeError("Unknown Exception"))
                 return
             }
             
@@ -1500,7 +1506,7 @@ writingMode
 
             guard let highlightData = result.err.data(using: .utf8)
             else {
-                completion?(highlight, HighlightError.runtimeError("Unknown Exception"))
+                completion?(highlight, FolioReaderHighlightError.runtimeError("Unknown Exception"))
                 return
             }
             

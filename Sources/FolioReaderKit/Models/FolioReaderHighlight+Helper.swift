@@ -11,7 +11,7 @@ import UIKit
 /**
  HighlightStyle type, default is .Yellow.
  */
-@objc public enum HighlightStyle: Int {
+@objc public enum FolioReaderHighlightStyle: Int {
     case yellow
     case green
     case blue
@@ -26,7 +26,7 @@ import UIKit
     /**
      Return HighlightStyle for CSS class.
      */
-    public static func styleForClass(_ className: String) -> HighlightStyle {
+    public static func styleForClass(_ className: String) -> FolioReaderHighlightStyle {
         switch className {
         case "highlight-yellow": return .yellow
         case "highlight-green": return .green
@@ -46,7 +46,7 @@ import UIKit
      Return CSS class for HighlightStyle.
      */
     public static func classForStyle(_ style: Int) -> String {
-        let enumStyle = (HighlightStyle(rawValue: style) ?? HighlightStyle())
+        let enumStyle = (FolioReaderHighlightStyle(rawValue: style) ?? FolioReaderHighlightStyle())
         switch enumStyle {
         case .yellow: return "highlight-yellow"
         case .green: return "highlight-green"
@@ -57,7 +57,7 @@ import UIKit
     }
 
     public static func classForStyleCalibre(_ style: Int) -> String {
-        let enumStyle = (HighlightStyle(rawValue: style) ?? HighlightStyle())
+        let enumStyle = (FolioReaderHighlightStyle(rawValue: style) ?? FolioReaderHighlightStyle())
         switch enumStyle {
         case .yellow: return "yellow"
         case .green: return "green"
@@ -84,7 +84,7 @@ import UIKit
      Return CSS class for HighlightStyle.
      */
     public static func colorForStyle(_ style: Int, nightMode: Bool = false) -> UIColor {
-        let enumStyle = (HighlightStyle(rawValue: style) ?? HighlightStyle())
+        let enumStyle = (FolioReaderHighlightStyle(rawValue: style) ?? FolioReaderHighlightStyle())
         let colors = enumStyle.colorComponents()
         return UIColor(red: colors.red/255, green: colors.green/255, blue: colors.blue/255, alpha: (nightMode ? colors.alpha : 1))
     }

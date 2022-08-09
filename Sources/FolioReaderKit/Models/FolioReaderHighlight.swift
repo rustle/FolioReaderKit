@@ -9,7 +9,7 @@
 import Foundation
 
 /// A Highlight object
-@objc open class Highlight: NSObject, Codable {
+@objc open class FolioReaderHighlight: NSObject, Codable {
     open var bookId: String!
     open var content: String!
     open var contentPost: String!
@@ -41,13 +41,13 @@ import Foundation
     }
 }
 
-enum HighlightError: Error {
+enum FolioReaderHighlightError: Error {
     case runtimeError(String)
 }
 
 // MARK: - HTML Methods
 
-extension Highlight {
+extension FolioReaderHighlight {
 
     public struct MatchingHighlight {
         var text: String
@@ -61,27 +61,27 @@ extension Highlight {
     /**
      Match a highlight on string.
      */
-    public static func matchHighlight(_ matchingHighlight: MatchingHighlight) -> Highlight? {
+    public static func matchHighlight(_ matchingHighlight: MatchingHighlight) -> FolioReaderHighlight? {
         let pattern = "<highlight id=\"\(matchingHighlight.id)\" onclick=\".*?\" class=\"(.*?)\">((.|\\s)*?)</highlight>"
         let regex = try? NSRegularExpression(pattern: pattern, options: [])
         let matches = regex?.matches(in: matchingHighlight.text, options: [], range: NSRange(location: 0, length: matchingHighlight.text.utf16.count))
         let str = (matchingHighlight.text as NSString)
 
-        let mapped = matches?.map { (match) -> Highlight in
+        let mapped = matches?.map { (match) -> FolioReaderHighlight in
             var contentPre = str.substring(with: NSRange(location: match.range.location-kHighlightRange, length: kHighlightRange))
             var contentPost = str.substring(with: NSRange(location: match.range.location + match.range.length, length: kHighlightRange))
 
             // Normalize string before save
-            contentPre = Highlight.subString(ofContent: contentPre, fromRangeOfString: ">", withPattern: "((?=[^>]*$)(.|\\s)*$)")
-            contentPost = Highlight.subString(ofContent: contentPost, fromRangeOfString: "<", withPattern: "^((.|\\s)*?)(?=<)")
+            contentPre = FolioReaderHighlight.subString(ofContent: contentPre, fromRangeOfString: ">", withPattern: "((?=[^>]*$)(.|\\s)*$)")
+            contentPost = FolioReaderHighlight.subString(ofContent: contentPost, fromRangeOfString: "<", withPattern: "^((.|\\s)*?)(?=<)")
 
-            let highlight = Highlight()
+            let highlight = FolioReaderHighlight()
             highlight.highlightId = matchingHighlight.id
-            highlight.type = HighlightStyle.styleForClass(str.substring(with: match.range(at: 1))).rawValue
+            highlight.type = FolioReaderHighlightStyle.styleForClass(str.substring(with: match.range(at: 1))).rawValue
             highlight.date = Date()
-            highlight.content = Highlight.removeSentenceSpam(str.substring(with: match.range(at: 2)))
-            highlight.contentPre = Highlight.removeSentenceSpam(contentPre)
-            highlight.contentPost = Highlight.removeSentenceSpam(contentPost)
+            highlight.content = FolioReaderHighlight.removeSentenceSpam(str.substring(with: match.range(at: 2)))
+            highlight.contentPre = FolioReaderHighlight.removeSentenceSpam(contentPre)
+            highlight.contentPost = FolioReaderHighlight.removeSentenceSpam(contentPost)
             highlight.page = matchingHighlight.currentPage
             highlight.bookId = matchingHighlight.bookId
             highlight.startOffset = (Int(matchingHighlight.startOffset) ?? -1)
@@ -151,8 +151,8 @@ extension Highlight {
     }
 }
 
-extension Highlight: Comparable {
-    public static func < (lhs: Highlight, rhs: Highlight) -> Bool {
+extension FolioReaderHighlight: Comparable {
+    public static func < (lhs: FolioReaderHighlight, rhs: FolioReaderHighlight) -> Bool {
         if lhs.page != rhs.page {
             return lhs.page < rhs.page
         }

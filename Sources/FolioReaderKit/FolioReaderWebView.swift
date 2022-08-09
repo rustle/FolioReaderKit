@@ -190,7 +190,7 @@ open class FolioReaderWebView: WKWebView {
     }
 
     @objc func highlight(_ sender: UIMenuController?) {
-        js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', false)") { highlightAndReturn in
+        js("highlightStringCFI('\(FolioReaderHighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', false)") { highlightAndReturn in
             guard let highlightAndReturn = highlightAndReturn else { return }
             
             print(highlightAndReturn)
@@ -202,7 +202,7 @@ open class FolioReaderWebView: WKWebView {
     }
     
     @objc func highlightWithNote(_ sender: UIMenuController?) {
-        js("highlightStringCFI('\(HighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', true)") { highlightAndReturn in
+        js("highlightStringCFI('\(FolioReaderHighlightStyle.classForStyle(self.folioReader.currentHighlightStyle))', true)") { highlightAndReturn in
             guard let highlightAndReturn = highlightAndReturn else { return }
 
             print(highlightAndReturn)
@@ -215,26 +215,26 @@ open class FolioReaderWebView: WKWebView {
     }
     
     // will keep original's id and date if presented
-    func handleHighlightReturn(_ jsonData: Data, withNote: Bool = false, original: Highlight? = nil, completion: ((Highlight?, HighlightError?) -> Void)? = nil) {
+    func handleHighlightReturn(_ jsonData: Data, withNote: Bool = false, original: FolioReaderHighlight? = nil, completion: ((FolioReaderHighlight?, FolioReaderHighlightError?) -> Void)? = nil) {
         do {
             guard let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? NSArray,
                   let dic = json.firstObject as? [String: String] else {
-                      throw HighlightError.runtimeError("no json result, string=\(String(data: jsonData, encoding: .utf8) ?? "(invalid data)")")
+                      throw FolioReaderHighlightError.runtimeError("no json result, string=\(String(data: jsonData, encoding: .utf8) ?? "(invalid data)")")
             }
             guard let startOffset = dic["startOffset"], let startOffsetInt = Int(startOffset) else {
-                throw HighlightError.runtimeError("no start offset")
+                throw FolioReaderHighlightError.runtimeError("no start offset")
             }
             guard let endOffset = dic["endOffset"], let endOffsetInt = Int(endOffset) else {
-                throw HighlightError.runtimeError("no end offset")
+                throw FolioReaderHighlightError.runtimeError("no end offset")
             }
             guard let prevHighlightLengthStart = dic["prevHighlightLengthStart"], let prevHighlightLengthStartInt = Int(prevHighlightLengthStart) else {
-                throw HighlightError.runtimeError("no prevHighlightLengthStart")
+                throw FolioReaderHighlightError.runtimeError("no prevHighlightLengthStart")
             }
             guard let prevHighlightLengthEnd = dic["prevHighlightLengthEnd"], let prevHighlightLengthEndInt = Int(prevHighlightLengthEnd) else {
-                throw HighlightError.runtimeError("no prevHighlightLengthEnd")
+                throw FolioReaderHighlightError.runtimeError("no prevHighlightLengthEnd")
             }
             
-            let highlight = Highlight()
+            let highlight = FolioReaderHighlight()
             highlight.bookId = self.book.name?.deletingPathExtension
             highlight.startOffset = startOffsetInt
             highlight.endOffset = endOffsetInt
@@ -251,7 +251,7 @@ open class FolioReaderWebView: WKWebView {
             highlight.highlightId = original?.highlightId ?? dic["id"]
             highlight.page = self.folioReader.readerCenter?.currentPageNumber ?? 1
             highlight.type = self.folioReader.currentHighlightStyle
-            highlight.style = HighlightStyle.classForStyle(highlight.type)
+            highlight.style = FolioReaderHighlightStyle.classForStyle(highlight.type)
 
             if prevHighlightLengthStartInt > 0,
                let cfiStart = highlight.cfiStart,
@@ -280,7 +280,7 @@ open class FolioReaderWebView: WKWebView {
                     if original == nil {
                         self.folioReader.readerCenter?.presentAddHighlightError(errMsg)
                     } else {
-                        completion?(original, HighlightError.runtimeError(errMsg))
+                        completion?(original, FolioReaderHighlightError.runtimeError(errMsg))
                     }
                     return
                 }
@@ -346,7 +346,7 @@ open class FolioReaderWebView: WKWebView {
                             if original == nil {
                                 self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)
                             } else {
-                                completion?(highlight, HighlightError.runtimeError(error!.localizedDescription))
+                                completion?(highlight, FolioReaderHighlightError.runtimeError(error!.localizedDescription))
                             }
                             return
                         }
@@ -363,10 +363,10 @@ open class FolioReaderWebView: WKWebView {
                 deferred = nil
             }
             
-        } catch HighlightError.runtimeError(let hlError) {
-            completion?(original, HighlightError.runtimeError(hlError))
+        } catch FolioReaderHighlightError.runtimeError(let hlError) {
+            completion?(original, FolioReaderHighlightError.runtimeError(hlError))
         } catch {
-            completion?(original, HighlightError.runtimeError("\(error.localizedDescription)"))
+            completion?(original, FolioReaderHighlightError.runtimeError("\(error.localizedDescription)"))
         }
     }
     
@@ -446,10 +446,10 @@ open class FolioReaderWebView: WKWebView {
         changeHighlightStyle(sender, style: .underline)
     }
 
-    func changeHighlightStyle(_ sender: UIMenuController?, style: HighlightStyle) {
+    func changeHighlightStyle(_ sender: UIMenuController?, style: FolioReaderHighlightStyle) {
         self.folioReader.currentHighlightStyle = style.rawValue
 
-        js("setHighlightStyle('\(HighlightStyle.classForStyle(style.rawValue))')") { updateId in
+        js("setHighlightStyle('\(FolioReaderHighlightStyle.classForStyle(style.rawValue))')") { updateId in
             guard let updateId = updateId else { return }
             self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, updateById: updateId, type: style)
         }

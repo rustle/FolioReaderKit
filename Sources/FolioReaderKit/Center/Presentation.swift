@@ -125,7 +125,7 @@ extension FolioReaderCenter {
     /**
      Present add highlight note
      */
-    func presentAddHighlightNote(_ highlight: Highlight, edit: Bool) {
+    func presentAddHighlightNote(_ highlight: FolioReaderHighlight, edit: Bool) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         let addHighlightView = FolioReaderAddHighlightNote(withHighlight: highlight, folioReader: folioReader, readerConfig: readerConfig)

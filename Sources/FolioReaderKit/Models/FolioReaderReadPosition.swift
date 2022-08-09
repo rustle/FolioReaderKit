@@ -24,6 +24,7 @@ import Foundation
     open var chapterProgress: Double = .zero
     open var chapterName: String = "Untitled Chapter"
     open var bookProgress: Double = .zero
+    open var bookName: String = ""
     open var bundleProgress: Double = .zero
     
     open var epoch: Date = Date()
