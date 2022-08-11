@@ -551,6 +551,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     func getAndRecordScrollPosition() {
         getWebViewScrollPosition { position in
             self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
+            
+            //prevent invisible pages updating read positions
+            guard self.pageNumber == self.folioReader.readerCenter?.currentPageNumber else { return }
             self.folioReader.savedPositionForCurrentBook = position
         }
     }
