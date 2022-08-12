@@ -447,7 +447,7 @@ extension FolioReaderCenter {
         
         if let reference = self.book.spine.spineReferences[safe: pageNumber - 1],
            let tocReferences = self.book.resourceTocMap[reference.resource],
-           tocReferences.isEmpty {
+           tocReferences.isEmpty == false {
             foundChapterNames.append(contentsOf: tocReferences)
         }
         

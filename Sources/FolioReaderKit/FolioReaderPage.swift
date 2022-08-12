@@ -609,17 +609,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 position.bookName = bookRootToc.title
             }
             position.bundleProgress = self.getBundleProgress()
-            
-//            let position: [String : Any] = [
-//                "pageNumber": self.pageNumber ?? 0,
-//                "maxPage": self.readerContainer?.book.spine.spineReferences.count ?? 1,
-//                "pageOffsetX": webView.scrollView.contentOffset.x,
-//                "pageOffsetY": webView.scrollView.contentOffset.y,
-//                "chapterProgress": CGFloat(self.getPageProgress()),
-//                "chapterName": self.currentChapterName ?? "Untitled Chapter",
-//                "bookProgress": self.folioReader.readerCenter?.getBookProgress() ?? 0,
-//                "cfi": "epubcfi(/\((self.pageNumber ?? 0) * 2)\(cfi ?? ""))"
-//                ]
 
             completion?(position)
         }
