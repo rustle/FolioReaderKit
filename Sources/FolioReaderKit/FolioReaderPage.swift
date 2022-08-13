@@ -851,71 +851,68 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         guard let contentOffset = self.webView?.scrollView.contentOffset,
               let webViewFrameSize = self.webView?.frame.size else { return }
         
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.main.async {
             if let firstChapterTocReference = self.getChapterTocReferences(for: contentOffset, by: webViewFrameSize).first {
                 self.currentChapterName = firstChapterTocReference.title
             } else {
                 self.currentChapterName = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)?.title
             }
             
+            guard let readerCenter = self.folioReader.readerCenter,
+                  self.pageNumber == readerCenter.currentPageNumber else { return }
             
-            DispatchQueue.main.async {
-                guard let readerCenter = self.folioReader.readerCenter,
-                      self.pageNumber == readerCenter.currentPageNumber else { return }
-                
-                if self.folioReader.structuralStyle == .bundle,
-                   self.readerConfig.displayTitle,
-                   let bookTocIndex = self.getBundleRootTocIndex(),
-                   let bookToc = self.book.bundleRootTableOfContents[safe: bookTocIndex],
-                   let bookTitle = bookToc.title,
-                   let bundleTitle = self.book.title {
-                    if readerCenter.navigationItem.titleView == nil {
-                        let titleView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
-                        readerCenter.navigationItem.titleView = titleView
-                        titleView.translatesAutoresizingMaskIntoConstraints = false
-                        
-                        let bookTitleLabel = UILabel()
-                        bookTitleLabel.tag = 101
-                        bookTitleLabel.font = .systemFont(ofSize: 16)
-                        bookTitleLabel.textAlignment = .center
-                        bookTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-                        bookTitleLabel.adjustsFontSizeToFitWidth = true
-                        bookTitleLabel.adjustsFontForContentSizeCategory = true
-                        titleView.addSubview(bookTitleLabel)
-                        
-                        let bundleTitleLabel = UILabel()
-                        bundleTitleLabel.tag = 102
-                        bundleTitleLabel.font = .systemFont(ofSize: 11)
-                        bundleTitleLabel.textAlignment = .center
-                        bundleTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-                        bundleTitleLabel.adjustsFontSizeToFitWidth = true
-                        bundleTitleLabel.adjustsFontForContentSizeCategory = true
-                        titleView.addSubview(bundleTitleLabel)
-                        
-                        var constraints = [NSLayoutConstraint]()
-                        let views = ["book": bookTitleLabel, "bundle": bundleTitleLabel]
-                        
-                        constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[book]-|", options: [], metrics: nil, views: views))
-                        constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[bundle]-|", options: [], metrics: nil, views: views))
-                        constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "V:|-[book]-2-[bundle]-|", options: [], metrics: nil, views: views))
-                        
-                        titleView.addConstraints(constraints)
-                    }
-                    if let bookTitleLabel = readerCenter.navigationItem.titleView?.viewWithTag(101) as? UILabel {
-                        bookTitleLabel.text = bookTitle
-                        bookTitleLabel.sizeToFit()
-                    }
-                    if let bundleTitleLabel = readerCenter.navigationItem.titleView?.viewWithTag(102) as? UILabel {
-                        bundleTitleLabel.text = bundleTitle
-                        bundleTitleLabel.sizeToFit()
-                    }
-                    readerCenter.navigationItem.titleView?.sizeToFit()
-                } else {
-                    readerCenter.navigationItem.titleView = nil
+            if self.folioReader.structuralStyle == .bundle,
+               self.readerConfig.displayTitle,
+               let bookTocIndex = self.getBundleRootTocIndex(),
+               let bookToc = self.book.bundleRootTableOfContents[safe: bookTocIndex],
+               let bookTitle = bookToc.title,
+               let bundleTitle = self.book.title {
+                if readerCenter.navigationItem.titleView == nil {
+                    let titleView = UIView(frame: CGRect(x: 0, y: 0, width: 200, height: 50))
+                    readerCenter.navigationItem.titleView = titleView
+                    titleView.translatesAutoresizingMaskIntoConstraints = false
+                    
+                    let bookTitleLabel = UILabel()
+                    bookTitleLabel.tag = 101
+                    bookTitleLabel.font = .systemFont(ofSize: 16)
+                    bookTitleLabel.textAlignment = .center
+                    bookTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+                    bookTitleLabel.adjustsFontSizeToFitWidth = true
+                    bookTitleLabel.adjustsFontForContentSizeCategory = true
+                    titleView.addSubview(bookTitleLabel)
+                    
+                    let bundleTitleLabel = UILabel()
+                    bundleTitleLabel.tag = 102
+                    bundleTitleLabel.font = .systemFont(ofSize: 11)
+                    bundleTitleLabel.textAlignment = .center
+                    bundleTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+                    bundleTitleLabel.adjustsFontSizeToFitWidth = true
+                    bundleTitleLabel.adjustsFontForContentSizeCategory = true
+                    titleView.addSubview(bundleTitleLabel)
+                    
+                    var constraints = [NSLayoutConstraint]()
+                    let views = ["book": bookTitleLabel, "bundle": bundleTitleLabel]
+                    
+                    constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[book]-|", options: [], metrics: nil, views: views))
+                    constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "H:|-[bundle]-|", options: [], metrics: nil, views: views))
+                    constraints.append(contentsOf: NSLayoutConstraint.constraints(withVisualFormat: "V:|-[book]-2-[bundle]-|", options: [], metrics: nil, views: views))
+                    
+                    titleView.addConstraints(constraints)
                 }
-                
-                readerCenter.pageIndicatorView?.reloadViewWithPage(self.currentPage)
+                if let bookTitleLabel = readerCenter.navigationItem.titleView?.viewWithTag(101) as? UILabel {
+                    bookTitleLabel.text = bookTitle
+                    bookTitleLabel.sizeToFit()
+                }
+                if let bundleTitleLabel = readerCenter.navigationItem.titleView?.viewWithTag(102) as? UILabel {
+                    bundleTitleLabel.text = bundleTitle
+                    bundleTitleLabel.sizeToFit()
+                }
+                readerCenter.navigationItem.titleView?.sizeToFit()
+            } else {
+                readerCenter.navigationItem.titleView = nil
             }
+            
+            readerCenter.pageIndicatorView?.reloadViewWithPage(self.currentPage)
         }
     }
     
@@ -949,6 +946,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         while (firstChapterTocReference != nil) {
             chapterTocReferences.append(firstChapterTocReference!)
             firstChapterTocReference = firstChapterTocReference?.parent
+            if self.folioReader.structuralStyle != .atom, firstChapterTocReference?.level < self.folioReader.structuralTrackingTocLevel.rawValue - 1 {
+                break
+            }
         }
         return chapterTocReferences
     }
