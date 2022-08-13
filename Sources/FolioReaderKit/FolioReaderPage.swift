@@ -702,7 +702,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         var tocRef = self.folioReader.readerCenter?.getChapterName(pageNumber: pageNumber)
         var bookTocIndex: Int? = nil
         while( tocRef != nil ) {
-            bookTocIndex = self.book.bundleRootTableOfContents.firstIndex(of: tocRef!)
+            bookTocIndex = self.book.bundleRootTableOfContents.firstIndex(of: tocRef!) ?? bookTocIndex
             tocRef = tocRef?.parent
         }
         
