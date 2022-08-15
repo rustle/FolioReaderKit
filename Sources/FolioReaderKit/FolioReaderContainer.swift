@@ -182,6 +182,14 @@ open class FolioReaderContainer: UIViewController {
                     
                     // Reload data
                     DispatchQueue.main.async {
+                        if let position = self.readerConfig.savedPositionForCurrentBook {
+                            self.folioReader.structuralStyle = position.structuralStyle
+                            self.folioReader.structuralTrackingTocLevel = position.positionTrackingStyle
+                            self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
+                            position.takePrecedence = true
+                            self.folioReader.savedPositionForCurrentBook = position
+                        }
+
                         let structuralTrackingTocLevel = self.folioReader.structuralTrackingTocLevel
                         self.book.updateBundleInfo(rootTocLevel: structuralTrackingTocLevel.rawValue)
                         
@@ -215,14 +223,6 @@ open class FolioReaderContainer: UIViewController {
                                 }
                         }
                         
-                        if let position = self.readerConfig.savedPositionForCurrentBook,
-                           position.structuralStyle == self.folioReader.structuralStyle,
-                           position.positionTrackingStyle == self.folioReader.structuralTrackingTocLevel {
-                            self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
-                            position.takePrecedence = true
-                            self.folioReader.savedPositionForCurrentBook = position
-                        }
-
                         // Add audio player if needed
                         if self.book.hasAudio || self.readerConfig.enableTTS {
                             self.addAudioPlayer()

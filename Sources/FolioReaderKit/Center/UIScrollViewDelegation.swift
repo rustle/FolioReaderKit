@@ -19,7 +19,7 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         pointNow = scrollView.contentOffset
         
         if (scrollView is UICollectionView) {
-            scrollView.isUserInteractionEnabled = false
+//            scrollView.isUserInteractionEnabled = false
         }
 
         if let currentPage = currentPage {
@@ -58,7 +58,7 @@ extension FolioReaderCenter: UIScrollViewDelegate {
         self.isScrolling = false
         
         if (scrollView is UICollectionView) {
-            scrollView.isUserInteractionEnabled = true
+//            scrollView.isUserInteractionEnabled = true
         }
 
         // Perform the page after a short delay as the collection view hasn't completed it's transition if this method is called (the index paths aren't right during fast scrolls).
