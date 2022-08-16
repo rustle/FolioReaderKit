@@ -243,6 +243,8 @@ function injectHighlight(oHighlight) {
     window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight oHighlight " + JSON.stringify(oHighlight))
     
     var cfiStart = "epubcfi(" + oHighlight.cfiStart + ")"
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("injectHighlight cfiStart " + cfiStart + " " + encodeURI(cfiStart))
+    
     var startNode = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(cfiStart), document, [], ["highlight"], []).get(0)
     var startTextInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(cfiStart), document, [], ["highlight"], [])
     var startTextInfoOffset = startTextInfo.textOffset
@@ -855,6 +857,31 @@ var getAnchorOffset = function(target, horizontal) {
         elem = document.getElementsByName(target)[0];
     }
     
+    if (!elem && target.startsWith("epubcfi(")) {
+        var reg = new RegExp("epubcfi\\(/\\d+/\\d+")
+        var reg2 = new RegExp("/\\d+:\\d+\\)$")
+        var partialCFI = target.replace(reg, "epubcfi(")
+        
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI " + partialCFI);
+        try {
+            elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
+            while (elem && elem.nodeType == 3) {
+                elem = elem.parentNode
+            }
+        } catch(e) {
+            
+        }
+        
+        if (!elem) {
+            partialCFI = partialCFI.replace(reg2, ")")
+            try {
+                elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
+            } catch(e) {
+                
+            }
+        }
+    }
+    
     if (writingMode == "vertical-rl") {
         return elem.offsetLeft + elem.offsetWidth;
     }
@@ -862,6 +889,7 @@ var getAnchorOffset = function(target, horizontal) {
     if (horizontal) {
         return document.body.clientWidth * Math.floor(elem.offsetTop / window.innerHeight);
     }
+    
     
     return elem.offsetTop;
 }

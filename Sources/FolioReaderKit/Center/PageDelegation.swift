@@ -18,6 +18,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         
 //        updateCurrentPage(page)
         
+        //if scrolling to a new book (bundle style), jump to its last read position
         if self.folioReader.structuralStyle == .bundle,
            page.pageNumber > 1,
            self.pageScrollDirection == page.byWritingMode(.left, .right),

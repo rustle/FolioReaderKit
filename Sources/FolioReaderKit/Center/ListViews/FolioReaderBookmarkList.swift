@@ -169,15 +169,38 @@ class FolioReaderBookmarkList: UITableViewController {
         return cell
     }
 
+    override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row] else {
+            return 0.0
+        }
+
+        let cleanString = bookmark.title ?? "Untitled Bookmark"
+        let text = NSMutableAttributedString(string: cleanString)
+        let range = NSRange(location: 0, length: text.length)
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.lineSpacing = 3
+        text.addAttribute(NSAttributedString.Key.paragraphStyle, value: paragraph, range: range)
+        text.addAttribute(NSAttributedString.Key.font, value: UIFont(name: "Avenir-Light", size: 16)!, range: range)
+
+        let s = text.boundingRect(with: CGSize(width: view.frame.width-40, height: CGFloat.greatestFiniteMagnitude),
+                                  options: [NSStringDrawingOptions.usesLineFragmentOrigin, NSStringDrawingOptions.usesFontLeading],
+                                  context: nil)
+
+        let totalHeight = s.size.height + 66
+        
+        return totalHeight
+    }
+    
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row] else {
+        guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row],
+              let pos = bookmark.pos else {
             return
         }
         guard let readerCenter = self.folioReader.readerCenter else { return }
         
-        if let pos = bookmark.pos, let error = readerCenter.bookmarkErrors[pos] {
+        if let error = readerCenter.bookmarkErrors[pos] {
             presentLocatingBookmarkError(error, bookmark: bookmark, at: indexPath)
         } else {
             if let currentPageNumber = readerCenter.currentPage?.pageNumber,
@@ -186,7 +209,7 @@ class FolioReaderBookmarkList: UITableViewController {
                 readerCenter.navigationItem.leftBarButtonItems?[2].isEnabled = true
             }
             
-            readerCenter.changePageWith(page: bookmark.page)
+            readerCenter.changePageWith(page: bookmark.page, andFragment: pos)
             self.dismiss()
         }
     }

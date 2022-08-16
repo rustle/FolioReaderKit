@@ -31,6 +31,12 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
 
         self.edgesForExtendedLayout = UIRectEdge()
         self.extendedLayoutIncludesOpaqueBars = true
+        
+        if self.index == 0 {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Test", style: .plain, target: nil, action: nil)
+        } else {
+            self.navigationItem.rightBarButtonItem = nil
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -93,6 +99,12 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
         let direction: UIPageViewController.NavigationDirection = (index == 0 ? .reverse : .forward)
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
         self.folioReader.currentMenuIndex = index
+        
+        if self.index == 0 {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Test", style: .plain, target: nil, action: nil)
+        } else {
+            self.navigationItem.rightBarButtonItem = nil
+        }
     }
 
     // MARK: - Status Bar

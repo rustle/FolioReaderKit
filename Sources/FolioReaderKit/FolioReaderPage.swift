@@ -1401,7 +1401,10 @@ writingMode
         if response.starts(with: "injectHighlight") {
             print("userContentController response \(response)")
         }
-        if response.starts(with: "highlightStringCFI") {
+//        if response.starts(with: "highlightStringCFI") {
+//            print("userContentController response \(response)")
+//        }
+        if response.starts(with: "getAnchorOffset") {
             print("userContentController response \(response)")
         }
     }

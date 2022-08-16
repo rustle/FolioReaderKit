@@ -44,6 +44,14 @@ public class FolioReaderNaiveBookmarkProvider: FolioReaderBookmarkProvider {
     var bookmarks = [String:FolioReaderBookmark]()  //key: pos
     
     public init() {
+        let bookmark = FolioReaderBookmark()
+        bookmark.pos_type = "epubcfi"
+        bookmark.pos = "epubcfi(/22/2/4/10/1:316)"
+        bookmark.page = 11
+        bookmark.bookId = ""
+        bookmark.title = "Test Bookmark"
+        bookmark.date = Date(timeIntervalSince1970: 1660614468.141)
+        bookmarks[bookmark.pos!] = bookmark
         
     }
     public func folioReaderBookmark(_ folioReader: FolioReader, added bookmark: FolioReaderBookmark, completion: Completion?) {
