@@ -8,16 +8,14 @@
 
 import UIKit
 
-class PageViewController: UIPageViewController {
+class FolioReaderBookmarkPageVC: UIPageViewController {
 
     var segmentedControl: UISegmentedControl!
     var viewList = [UIViewController]()
     var segmentedControlItems = [String]()
     
-    var viewControllerZero: UIViewController!
     var viewControllerOne: UIViewController!
     var viewControllerTwo: UIViewController!
-    var viewControllerThree: UIViewController!
 
     var index: Int
     fileprivate var readerConfig: FolioReaderConfig
@@ -43,22 +41,16 @@ class PageViewController: UIPageViewController {
         super.viewDidLoad()
 
         segmentedControl = UISegmentedControl(items: segmentedControlItems)
-        segmentedControl.addTarget(self, action: #selector(PageViewController.didSwitchMenu(_:)), for: UIControl.Event.valueChanged)
+        segmentedControl.addTarget(self, action: #selector(FolioReaderBookmarkPageVC.didSwitchMenu(_:)), for: UIControl.Event.valueChanged)
         segmentedControl.selectedSegmentIndex = index
         segmentedControl.setWidth(100, forSegmentAt: 0)
         segmentedControl.setWidth(100, forSegmentAt: 1)
         self.navigationItem.titleView = segmentedControl
 
-        viewList = [viewControllerOne, viewControllerTwo, viewControllerThree]
+        viewList = [viewControllerOne, viewControllerTwo]
 
         viewControllerOne.didMove(toParent: self)
         viewControllerTwo.didMove(toParent: self)
-        viewControllerThree.didMove(toParent: self)
-        
-        if self.folioReader.structuralStyle == .bundle {
-            viewList.insert(viewControllerZero, at: 0)
-            viewControllerZero.didMove(toParent: self)
-        }
 
         self.delegate = self
         self.dataSource = self
@@ -112,7 +104,7 @@ class PageViewController: UIPageViewController {
 
 // MARK: UIPageViewControllerDelegate
 
-extension PageViewController: UIPageViewControllerDelegate {
+extension FolioReaderBookmarkPageVC: UIPageViewControllerDelegate {
 
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
 
@@ -125,7 +117,7 @@ extension PageViewController: UIPageViewControllerDelegate {
 
 // MARK: UIPageViewControllerDataSource
 
-extension PageViewController: UIPageViewControllerDataSource {
+extension FolioReaderBookmarkPageVC: UIPageViewControllerDataSource {
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
 

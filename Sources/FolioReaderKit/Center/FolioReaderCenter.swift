@@ -95,6 +95,8 @@ open class FolioReaderCenter: UIViewController {
     
     var highlightErrors: [String: String] = [:]
     
+    var bookmarkErrors: [String: String] = [:]
+    
     var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }
         return readerContainer.readerConfig

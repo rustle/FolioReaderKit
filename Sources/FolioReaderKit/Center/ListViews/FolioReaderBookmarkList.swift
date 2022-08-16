@@ -1,0 +1,255 @@
+//
+//  FolioReaderBookmarkList.swift
+//  FolioReaderKit
+//
+//  Created by Heberti Almeida on 01/09/15.
+//  Copyright (c) 2015 Folio Reader. All rights reserved.
+//
+
+import UIKit
+
+class FolioReaderBookmarkList: UITableViewController {
+
+    fileprivate var sections = [Int]()
+    fileprivate var sectionBookmarks = [Int: [FolioReaderBookmark]]()
+    fileprivate var readerConfig: FolioReaderConfig
+    fileprivate var folioReader: FolioReader
+
+    private let dateFormatter = DateFormatter()
+    
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
+        self.readerConfig = readerConfig
+        self.folioReader = folioReader
+
+        super.init(style: UITableView.Style.plain)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init with coder not supported")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        self.dateFormatter.dateStyle = .medium
+        self.dateFormatter.timeStyle = .medium
+        self.dateFormatter.doesRelativeDateFormatting = true
+        
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
+//        self.tableView.register(UITableViewHeaderFooterView.self, forHeaderFooterViewReuseIdentifier: kReuseHeaderFooterIdentifier)
+        
+        self.tableView.separatorInset = UIEdgeInsets.zero
+        //self.tableView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.menuBackgroundColor)
+        self.tableView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+        self.tableView.separatorColor = self.folioReader.isNight(self.readerConfig.nightModeSeparatorColor, self.readerConfig.menuSeparatorColor)
+        
+        guard let bookId = (self.folioReader.readerContainer?.book.name as NSString?)?.deletingPathExtension,
+              let bookmarks = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(self.folioReader, allByBookId: bookId, andPage: nil)
+        else {
+            return
+        }
+
+        sectionBookmarks = bookmarks.reduce(into: sectionBookmarks) { partialResult, bookmark in
+            if partialResult[bookmark.page] != nil {
+                partialResult[bookmark.page]?.append(bookmark)
+                partialResult[bookmark.page]?.sort(by: { $0.pos < $1.pos })
+            } else {
+                partialResult[bookmark.page] = [bookmark]
+            }
+        }
+        sections = sectionBookmarks.keys.sorted()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        // Jump to the current chapter
+        DispatchQueue.main.async {
+            guard let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
+                  let sectionPageNumber = self.sections.filter({ $0 <= currentPageNumber }).last,
+                  let section = self.sections.firstIndex(of: sectionPageNumber)
+            else { return }
+            self.tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
+        }
+    }
+    
+    // MARK: - Table view data source
+
+    override func numberOfSections(in tableView: UITableView) -> Int {
+        return sections.count
+    }
+
+    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return sectionBookmarks[sections[section]]?.count ?? 0
+    }
+
+    override func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        guard let pageNumber = sections[safe: section] else { return nil }
+        guard let tocItem = self.folioReader.readerCenter?.getChapterName(pageNumber: pageNumber) else {
+            return "  Book Item \(pageNumber)"
+        }
+        var title = [tocItem.title!]
+        var parent = tocItem.parent
+        while (parent != nil) {
+            if parent?.title != nil {
+                title.append(parent!.title!)
+            }
+            parent = parent?.parent
+        }
+        return "  " + title.reversed().joined(separator: ", ")
+    }
+    
+    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath)
+        cell.backgroundColor = UIColor.clear
+
+        guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row] else {
+            return cell
+        }
+
+        // Format date
+        
+        let dateString = dateFormatter.string(from: bookmark.date)
+
+        // Date
+        var dateLabel: UILabel!
+        if cell.contentView.viewWithTag(456) == nil {
+            dateLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 16))
+            dateLabel.tag = 456
+            dateLabel.autoresizingMask = UIView.AutoresizingMask.flexibleWidth
+            dateLabel.font = UIFont(name: "Avenir-Medium", size: 12)
+            cell.contentView.addSubview(dateLabel)
+        } else {
+            dateLabel = cell.contentView.viewWithTag(456) as? UILabel
+        }
+
+        dateLabel.text = dateString.uppercased()
+        dateLabel.textColor = self.folioReader.isNight(UIColor(white: 5, alpha: 0.3), UIColor.lightGray)
+        dateLabel.frame = CGRect(x: 20, y: 20, width: view.frame.width-40, height: dateLabel.frame.height)
+        
+        if let pos = bookmark.pos, let error = self.folioReader.readerCenter?.bookmarkErrors[pos] {
+            var errorLabel: UILabel!
+            if cell.contentView.viewWithTag(4567) == nil {
+                errorLabel = UILabel(frame: CGRect(x: view.frame.width-40, y: 0, width: 40, height: 16))
+                errorLabel.tag = 4567
+                errorLabel.autoresizingMask = UIView.AutoresizingMask.flexibleWidth
+                errorLabel.font = UIFont(name: "Avenir-Medium", size: 12)
+                cell.contentView.addSubview(errorLabel)
+            } else {
+                errorLabel = cell.contentView.viewWithTag(4567) as? UILabel
+            }
+            errorLabel.text = "Cannot Locate, Touch to Fix"
+            errorLabel.textColor = UIColor.systemRed
+            errorLabel.sizeToFit()
+            errorLabel.frame = CGRect(x: view.frame.width-180, y: 20, width: 160, height: errorLabel.frame.height)
+        } else {
+            cell.contentView.viewWithTag(4567)?.removeFromSuperview()
+        }
+
+        // Text
+        var bookmarkLabel: UILabel!
+        if cell.contentView.viewWithTag(123) == nil {
+            bookmarkLabel = UILabel(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 0))
+            bookmarkLabel.tag = 123
+            bookmarkLabel.autoresizingMask = UIView.AutoresizingMask.flexibleWidth
+            bookmarkLabel.numberOfLines = 0
+            bookmarkLabel.textColor = UIColor.black
+            cell.contentView.addSubview(bookmarkLabel)
+        } else {
+            bookmarkLabel = cell.contentView.viewWithTag(123) as? UILabel
+        }
+
+        bookmarkLabel.text = bookmark.title
+        bookmarkLabel.sizeToFit()
+        bookmarkLabel.frame = CGRect(x: 20, y: 46, width: view.frame.width-40, height: bookmarkLabel.frame.height)
+        
+        cell.layoutMargins = UIEdgeInsets.zero
+        cell.preservesSuperviewLayoutMargins = false
+        
+        return cell
+    }
+
+    // MARK: - Table view delegate
+
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row] else {
+            return
+        }
+        guard let readerCenter = self.folioReader.readerCenter else { return }
+        
+        if let pos = bookmark.pos, let error = readerCenter.bookmarkErrors[pos] {
+            presentLocatingBookmarkError(error, bookmark: bookmark, at: indexPath)
+        } else {
+            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
+                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
+                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+                readerCenter.navigationItem.leftBarButtonItems?[2].isEnabled = true
+            }
+            
+            readerCenter.changePageWith(page: bookmark.page)
+            self.dismiss()
+        }
+    }
+
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            guard let bookmark = sectionBookmarks[sections[indexPath.section]]?[indexPath.row], let pos = bookmark.pos else {
+                return
+            }
+
+            folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(folioReader, removed: pos)
+            
+            sectionBookmarks[sections[indexPath.section]]?.remove(at: indexPath.row)
+            if sectionBookmarks[sections[indexPath.section]]?.isEmpty == true {
+                sectionBookmarks.removeValue(forKey: sections[indexPath.section])
+                sections.remove(at: indexPath.section)
+            }
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        }
+    }
+    
+    
+    // MARK: - Handle rotation transition
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        tableView.reloadData()
+    }
+    
+    func presentLocatingBookmarkError(_ message: String, bookmark: FolioReaderBookmark, at: IndexPath) {
+        let textView = UITextView()
+        textView.text = message
+        
+        let vc = UIViewController()
+        vc.view = textView
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .formSheet
+        
+        let alert = UIAlertController(title: "Cannot Find", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func presentLocatingBookmarkFailure(_ message: String, bookmark: FolioReaderBookmark, at: IndexPath) {
+        let textView = UITextView()
+        textView.text = message
+        
+        let vc = UIViewController()
+        vc.view = textView
+        
+        let nav = UINavigationController(rootViewController: vc)
+        nav.modalPresentationStyle = .formSheet
+        
+        let alert = UIAlertController(title: "Cannot Fix", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        
+        present(alert, animated: true, completion: nil)
+    }
+}

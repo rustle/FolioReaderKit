@@ -20,25 +20,40 @@ extension FolioReaderCenter {
 
         let bookList = FolioReaderBookList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let chapter = FolioReaderChapterList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
-        let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
         let resoruce = FolioReaderResourceList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
+        let pageController = FolioReaderNavigationPageVC(folioReader: folioReader, readerConfig: readerConfig)
         
-        let pageController = PageViewController(folioReader: folioReader, readerConfig: readerConfig)
-
         pageController.viewControllerZero = bookList
         pageController.viewControllerOne = chapter
-        pageController.viewControllerTwo = highlight
-        pageController.viewControllerThree = resoruce
+        pageController.viewControllerTwo = resoruce
         
-        pageController.segmentedControlItems = [readerConfig.localizedContentsTitle, readerConfig.localizedHighlightsTitle, readerConfig.localizedResourcesTitle]
+        pageController.segmentedControlItems = [readerConfig.localizedContentsTitle, readerConfig.localizedResourcesTitle]
         if self.folioReader.structuralStyle == .bundle {
             pageController.segmentedControlItems.insert(readerConfig.localizedBooksTitle, at: 0)
         }
-
+        
         let nav = UINavigationController(rootViewController: pageController)
         present(nav, animated: true, completion: nil)
     }
 
+    @objc func presentBookmarkList(_ sender: UIBarButtonItem) {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        folioReader.saveReaderState()
+
+        let bookmark = FolioReaderBookmarkList(folioReader: folioReader, readerConfig: readerConfig)
+        let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
+        let pageController = FolioReaderBookmarkPageVC(folioReader: folioReader, readerConfig: readerConfig)
+
+        pageController.viewControllerOne = bookmark
+        pageController.viewControllerTwo = highlight
+        
+        pageController.segmentedControlItems = [readerConfig.localizedBookmarksTitle, readerConfig.localizedHighlightsTitle]
+
+        let nav = UINavigationController(rootViewController: pageController)
+        present(nav, animated: true, completion: nil)
+    }
+    
     /**
      Present fonts and settings menu
      */
