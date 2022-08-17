@@ -15,6 +15,9 @@ class FolioReaderBookmarkList: UITableViewController {
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
 
+    fileprivate var addingBookmarkPos: String?
+    fileprivate var editingBookmarkPos: String?
+    
     private let dateFormatter = DateFormatter()
     
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
@@ -43,13 +46,17 @@ class FolioReaderBookmarkList: UITableViewController {
         self.tableView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         self.tableView.separatorColor = self.folioReader.isNight(self.readerConfig.nightModeSeparatorColor, self.readerConfig.menuSeparatorColor)
         
+        loadSections()
+    }
+
+    func loadSections() {
         guard let bookId = (self.folioReader.readerContainer?.book.name as NSString?)?.deletingPathExtension,
               let bookmarks = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(self.folioReader, allByBookId: bookId, andPage: nil)
         else {
             return
         }
 
-        sectionBookmarks = bookmarks.reduce(into: sectionBookmarks) { partialResult, bookmark in
+        sectionBookmarks = bookmarks.reduce(into: [:]) { partialResult, bookmark in
             if partialResult[bookmark.page] != nil {
                 partialResult[bookmark.page]?.append(bookmark)
                 partialResult[bookmark.page]?.sort(by: { $0.pos < $1.pos })
@@ -59,7 +66,7 @@ class FolioReaderBookmarkList: UITableViewController {
         }
         sections = sectionBookmarks.keys.sorted()
     }
-
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -71,6 +78,15 @@ class FolioReaderBookmarkList: UITableViewController {
             else { return }
             self.tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
         }
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        if let addingBookmarkPos = addingBookmarkPos,
+           let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) {
+            provider.folioReaderBookmark(self.folioReader, removed: addingBookmarkPos)
+        }
+        
+        super.viewWillDisappear(animated)
     }
     
     // MARK: - Table view data source
@@ -163,6 +179,44 @@ class FolioReaderBookmarkList: UITableViewController {
         bookmarkLabel.sizeToFit()
         bookmarkLabel.frame = CGRect(x: 20, y: 46, width: view.frame.width-40, height: bookmarkLabel.frame.height)
         
+        var bookmarkTitleEdit: UITextField!
+        if let view = cell.contentView.viewWithTag(1234){
+            bookmarkTitleEdit = view as? UITextField
+        } else {
+            bookmarkTitleEdit = UITextField(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 0))
+            bookmarkTitleEdit.tag = 1234
+            bookmarkTitleEdit.autoresizingMask = .flexibleWidth
+            bookmarkTitleEdit.textColor = .black
+            cell.contentView.addSubview(bookmarkTitleEdit)
+        }
+        
+        let isEditingItem = (bookmark.pos == self.editingBookmarkPos) || (bookmark.pos == self.addingBookmarkPos)
+        bookmarkTitleEdit.isHidden = !isEditingItem
+        bookmarkTitleEdit.backgroundColor = isEditingItem ? .white : .clear
+        
+        if isEditingItem {
+            bookmarkTitleEdit.becomeFirstResponder()
+        }
+        
+        bookmarkTitleEdit.text = bookmark.title
+        bookmarkTitleEdit.sizeToFit()
+        bookmarkTitleEdit.frame = CGRect(x: 20, y: 46, width: view.frame.width-40, height: bookmarkLabel.frame.height)
+        
+        var bookmarkTitleSaveButton: UIButton!
+        if let view = cell.contentView.viewWithTag(987) {
+            bookmarkTitleSaveButton = view as? UIButton
+        } else {
+            bookmarkTitleSaveButton = UIButton(frame: CGRect(x: 0, y: 0, width: view.frame.width-40, height: 0))
+            bookmarkTitleSaveButton.tag = 987
+            bookmarkTitleSaveButton.setTitle("Save", for: .normal)
+            bookmarkTitleSaveButton.setTitleColor(self.readerConfig.tintColor, for: .normal)
+            bookmarkTitleSaveButton.addTarget(self, action: #selector(saveBookmarkTitleAction(_:)), for: .primaryActionTriggered)
+            cell.contentView.addSubview(bookmarkTitleSaveButton)
+        }
+        bookmarkTitleSaveButton.sizeToFit()
+        bookmarkTitleSaveButton.isHidden = !isEditingItem
+        bookmarkTitleSaveButton.frame = CGRect(x: view.frame.width-60, y: 20, width: 40, height: dateLabel.frame.height)
+
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
         
@@ -274,5 +328,79 @@ class FolioReaderBookmarkList: UITableViewController {
         }))
         
         present(alert, animated: true, completion: nil)
+    }
+    
+    func presentAddingBookmarkFailure(_ message: String) {
+        
+        let alert = UIAlertController(title: "Cannot Add Bookmark", message: message, preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { (action) in
+            alert.dismiss()
+        }))
+        
+        present(alert, animated: true, completion: nil)
+    }
+    
+    func addBookmark(completion: (() -> Void)? = nil) {
+        guard let currentPage = self.folioReader.readerCenter?.currentPage,
+              let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader)
+        else {
+            completion?()
+            return
+        }
+        
+        currentPage.getWebViewScrollPosition { position in
+            let bookmark = FolioReaderBookmark()
+            bookmark.pos_type = "epubcfi"
+            bookmark.page = currentPage.pageNumber
+            bookmark.pos = position.cfi
+            bookmark.bookId = self.readerConfig.identifier
+            bookmark.title = "[\(position.chapterName)] \(position.snippet.prefix(32))..."
+            bookmark.date = Date()
+            
+            provider.folioReaderBookmark(self.folioReader, added: bookmark) { error in
+                if let error = error {
+                    var message = "Unknown Error"
+                    switch error as! FolioReaderBookmarkError {
+                    case .emptyError(_):
+                        message = "Cannot generate location marker"
+                    case .duplicateError(let msg):
+                        message = "There exists a bookmark with the same location with title \(msg)"
+                    case .runtimeError(let msg):
+                        message = msg
+                    }
+                    self.presentAddingBookmarkFailure(message)
+                } else {
+                    self.loadSections()
+                    self.addingBookmarkPos = bookmark.pos
+                    
+                    self.tableView.reloadData()
+                }
+                
+                completion?()
+            }
+        }
+    }
+    
+    @objc func saveBookmarkTitleAction(_ sender: UIButton) {
+        guard let editingPos = addingBookmarkPos ?? editingBookmarkPos else { return }
+        
+        guard let cellContentView = sender.superview,
+              let editView = cellContentView.viewWithTag(1234) as? UITextField,
+              let title = editView.text else { return }
+        
+        guard let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) else { return }
+        
+        provider.folioReaderBookmark(self.folioReader, updated: editingPos, title: title)
+        
+        addingBookmarkPos = nil
+        editingBookmarkPos = nil
+        
+        
+        (cellContentView.viewWithTag(123) as? UILabel)?.text = title
+        (cellContentView.viewWithTag(123) as? UILabel)?.backgroundColor = .clear
+        cellContentView.viewWithTag(1234)?.isHidden = true
+        cellContentView.viewWithTag(1234)?.resignFirstResponder()
+        cellContentView.viewWithTag(987)?.isHidden = true
     }
 }

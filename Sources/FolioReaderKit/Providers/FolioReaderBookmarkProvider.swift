@@ -55,9 +55,22 @@ public class FolioReaderNaiveBookmarkProvider: FolioReaderBookmarkProvider {
         
     }
     public func folioReaderBookmark(_ folioReader: FolioReader, added bookmark: FolioReaderBookmark, completion: Completion?) {
-        if let pos = bookmark.pos {
-            bookmarks[pos] = bookmark
+        var error:NSError? = nil
+        defer {
+            completion?(error)
         }
+        
+        guard let pos = bookmark.pos else {
+            error = FolioReaderBookmarkError.emptyError("") as NSError
+            return
+        }
+        
+        guard bookmarks[pos] == nil else {
+            error = FolioReaderBookmarkError.duplicateError(bookmarks[pos]?.title ?? "Untitled Bookmark") as NSError
+            return
+        }
+        
+        bookmarks[pos] = bookmark
     }
     
     public func folioReaderBookmark(_ folioReader: FolioReader, removed bookmarkPos: String) {

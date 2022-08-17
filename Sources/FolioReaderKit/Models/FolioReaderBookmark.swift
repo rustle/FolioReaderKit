@@ -20,6 +20,8 @@ import Foundation
 }
 
 enum FolioReaderBookmarkError: Error {
+    case emptyError(String)
+    case duplicateError(String)
     case runtimeError(String)
 }
 

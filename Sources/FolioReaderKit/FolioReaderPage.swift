@@ -570,7 +570,18 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         let isHorizontal: Bool = self.byWritingMode(
             self.folioReader.readerConfig?.isDirection(false, true, false),
             true) ?? false
-        webView.js("getVisibleCFI(\(isHorizontal))") { cfi in
+        webView.js("getVisibleCFI(\(isHorizontal))") { jsonString in
+            var cfi = ""
+            var snippet = ""
+            if let jsonString = jsonString,
+               let jsonData = jsonString.data(using: .utf8),
+               let jsonDict = try? JSONSerialization.jsonObject(with: jsonData) as? [String:Any],
+               let jsonCFI = jsonDict["cfi"] as? String,
+               let jsonSnippet = jsonDict["snippet"] as? String {
+                cfi = jsonCFI
+                snippet = jsonSnippet
+            }
+            
             let structuralStyle = self.folioReader.structuralStyle
             let structuralTrackingTocLevel = self.folioReader.structuralTrackingTocLevel
             let structuralRootPageNumber = { () -> Int in
@@ -594,9 +605,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 positionTrackingStyle: structuralTrackingTocLevel,
                 structuralRootPageNumber: structuralRootPageNumber,
                 pageNumber: self.pageNumber,
-                cfi: "epubcfi(/\((self.pageNumber ?? 1) * 2)\(cfi ?? ""))"
+                cfi: "epubcfi(/\((self.pageNumber ?? 1) * 2)/2\(cfi))"    //partial cfi to full cfi
             )
-            
+            position.snippet = .init(snippet.prefix(64))
             position.maxPage = self.readerContainer?.book.spine.spineReferences.count ?? 1
             position.pageOffset = webView.scrollView.contentOffset
             position.chapterProgress = self.getPageProgress()

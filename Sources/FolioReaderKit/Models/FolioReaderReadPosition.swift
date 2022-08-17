@@ -18,6 +18,8 @@ import Foundation
     public let pageNumber: Int   //counting from 1
     public let cfi: String
     
+    open var snippet: String = ""
+    
     open var maxPage: Int = 1
     open var pageOffset: CGPoint = .zero
     

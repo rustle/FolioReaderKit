@@ -33,7 +33,7 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
         self.extendedLayoutIncludesOpaqueBars = true
         
         if self.index == 0 {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Test", style: .plain, target: nil, action: nil)
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))
         } else {
             self.navigationItem.rightBarButtonItem = nil
         }
@@ -101,7 +101,7 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
         self.folioReader.currentMenuIndex = index
         
         if self.index == 0 {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Test", style: .plain, target: nil, action: nil)
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))
         } else {
             self.navigationItem.rightBarButtonItem = nil
         }
@@ -111,6 +111,20 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
 
     override var preferredStatusBarStyle : UIStatusBarStyle {
         return self.folioReader.isNight(.lightContent, .default)
+    }
+    
+    // MARK: - NavBar Button
+    
+    @objc func addBookmark(_ sender: UIBarButtonItem) {
+        folioLogger("bookmark")
+        
+        guard let bookmarkList = self.viewControllerOne as? FolioReaderBookmarkList else { return }
+        
+        sender.isEnabled = false
+        bookmarkList.addBookmark() {
+            sender.isEnabled = true
+        }
+        
     }
 }
 

@@ -1416,15 +1416,16 @@ function getVisibleCFI(horizontal) {
         }
     }
     
-    if (!first) {
-        return "/"
+    var cfiStart = ""
+    var snippet = ""
+    if (first) {
+        cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
+        snippet = first.innerText
     }
-    
-    var cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
 
     window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI " + cfiStart + " " + first.outerHTML);
     
-    return cfiStart
+    return JSON.stringify({cfi: cfiStart, snippet: snippet})
 }
 
 function getElementOffsetByCFI(cfi) {
