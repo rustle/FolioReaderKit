@@ -35,7 +35,7 @@ extension FolioReaderCenter: FolioReaderResourceListDelegate {
         // Move to #fragment
         if let reference = tempReference {
             if let fragmentID = reference.fragmentID, let currentPage = currentPage , fragmentID != "" {
-                currentPage.handleAnchor(reference.fragmentID!, offsetInWindow: self.navigationController?.toolbar.frame.height ?? 0, avoidBeginningAnchors: true, animated: true)
+                currentPage.handleAnchor(reference.fragmentID!, offsetInWindow: self.navigationController?.toolbar.frame.height ?? 0, avoidBeginningAnchors: false, animated: true)
             }
             tempReference = nil
         }

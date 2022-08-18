@@ -59,7 +59,7 @@ class FolioReaderBookmarkList: UITableViewController {
         sectionBookmarks = bookmarks.reduce(into: [:]) { partialResult, bookmark in
             if partialResult[bookmark.page] != nil {
                 partialResult[bookmark.page]?.append(bookmark)
-                partialResult[bookmark.page]?.sort(by: { $0.pos < $1.pos })
+                partialResult[bookmark.page]?.sort()
             } else {
                 partialResult[bookmark.page] = [bookmark]
             }

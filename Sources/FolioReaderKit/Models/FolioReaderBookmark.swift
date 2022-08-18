@@ -19,7 +19,7 @@ import Foundation
     open var pos: String?       //like epubcfi(/2/4/4/1:10)
 }
 
-enum FolioReaderBookmarkError: Error {
+public enum FolioReaderBookmarkError: Error {
     case emptyError(String)
     case duplicateError(String)
     case runtimeError(String)
@@ -31,8 +31,8 @@ extension FolioReaderBookmark: Comparable {
             return lhs.page < rhs.page
         }
         if let lStart = lhs.pos, let rStart = rhs.pos {
-            let lSplit = lStart.split { $0 == "/" || $0 == ":" }
-            let rSplit = rStart.split { $0 == "/" || $0 == ":" }
+            let lSplit = lStart.split { $0 == "/" || $0 == ":" || $0 == "(" || $0 == ")" }
+            let rSplit = rStart.split { $0 == "/" || $0 == ":" || $0 == "(" || $0 == ")" }
             for i in 0..<min(lSplit.count, rSplit.count) {
                 let l = Int(lSplit[i]) ?? 0
                 let r = Int(rSplit[i]) ?? 0

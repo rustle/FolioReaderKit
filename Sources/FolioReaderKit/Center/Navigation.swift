@@ -123,7 +123,7 @@ extension FolioReaderCenter {
 
         if (self.currentPageNumber == page) {
             if let currentPage = currentPage , fragment != "" {
-                currentPage.handleAnchor(fragment, offsetInWindow: 0, avoidBeginningAnchors: true, animated: animated)
+                currentPage.handleAnchor(fragment, offsetInWindow: 0, avoidBeginningAnchors: false, animated: animated)
             }
             completion?()
         } else {
