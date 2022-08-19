@@ -21,9 +21,9 @@ import Foundation
     ///
     @objc func folioReaderBookmark(_ folioReader: FolioReader, updated bookmarkPos: String, title: String)
     
-    /// Return a Bookmark by Title
+    /// Return a Bookmark by Pos
     ///
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, getBy bookmarkTitle: String) -> FolioReaderBookmark?
+    @objc func folioReaderBookmark(_ folioReader: FolioReader, getBy bookmarkPos: String) -> FolioReaderBookmark?
     
     /// Return a list of Bookmarks with specified book and optionally page
     ///
@@ -81,8 +81,8 @@ public class FolioReaderNaiveBookmarkProvider: FolioReaderBookmarkProvider {
         bookmarks[bookmarkPos]?.title = title
     }
     
-    public func folioReaderBookmark(_ folioReader: FolioReader, getBy bookmarkTitle: String) -> FolioReaderBookmark? {
-        return bookmarks.values.filter { $0.title == bookmarkTitle }.first
+    public func folioReaderBookmark(_ folioReader: FolioReader, getBy bookmarkPos: String) -> FolioReaderBookmark? {
+        return bookmarks[bookmarkPos]
     }
     
     public func folioReaderBookmark(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [FolioReaderBookmark] {
