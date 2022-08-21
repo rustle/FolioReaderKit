@@ -295,12 +295,12 @@ extension FolioReader {
     }
 
     static let FontSizes = ["15.5px", "17px", "18.5px", "20px", "22px", "24px", "26px", "28px", "30.5px", "33px", "35.5px"]
-    static let defaultFontSize = FolioReader.FontSizes[3]
+    public static let DefaultFontSize = FolioReader.FontSizes[3]
     
     /// Check current font size. Default .m
     open var currentFontSize: String {
         get {
-            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: FolioReader.defaultFontSize) ?? FolioReader.defaultFontSize
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: FolioReader.DefaultFontSize) ?? FolioReader.DefaultFontSize
         }
         set (fontSize) {
             delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentFontSize: fontSize)
@@ -312,6 +312,7 @@ extension FolioReader {
         return Int(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20
     }
 
+    public static let DefaultFontWeight = "500"
     open var currentFontWeight: String {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontWeight: "500") ?? "500"
@@ -394,9 +395,12 @@ extension FolioReader {
         }
     }
     
+    public var defaultMarginTop: Int {
+        (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+    }
     open var currentMarginTop: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            let defaults = self.defaultMarginTop
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: defaults) ?? defaults
         }
         set (value) {
@@ -410,9 +414,12 @@ extension FolioReader {
         }
     }
 
+    public var defaultMarginBottom: Int {
+        (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+    }
     open var currentMarginBottom: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
+            let defaults = defaultMarginBottom
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: defaults) ?? defaults
         }
         set (value) {
@@ -435,9 +442,12 @@ extension FolioReader {
         }
     }
     
+    public var defaultMarginLeft: Int {
+        (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).horizontalSizeClass == .regular ? 30 : 5    //15% for regular size, otherwise 2.5%
+    }
     open var currentMarginLeft: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 20 : 5    //10% for regular size, otherwise 2.5%
+            let defaults = self.defaultMarginLeft
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: defaults) ?? defaults
         }
         set (value) {
@@ -451,9 +461,12 @@ extension FolioReader {
         }
     }
 
+    public var defaultMarginRight: Int {
+        (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).horizontalSizeClass == .regular ? 30 : 5     //15% for regular size, otherwise 2.5%
+    }
     open var currentMarginRight: Int {
         get {
-            let defaults = self.readerCenter?.traitCollection.horizontalSizeClass == .regular ? 20 : 5    //10% for regular size, otherwise 2.5%
+            let defaults = self.defaultMarginRight
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: defaults) ?? defaults
         }
         set (value) {
@@ -467,6 +480,7 @@ extension FolioReader {
         }
     }
     
+    public static let DefaultLetterSpacing = 2
     open var currentLetterSpacing: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentLetterSpacing: 2) ?? 2
@@ -477,6 +491,7 @@ extension FolioReader {
         }
     }
     
+    public static let DefaultLineHeight = 3
     open var currentLineHeight: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentLineHeight: 3) ?? 3
@@ -488,6 +503,7 @@ extension FolioReader {
     }
 
     //in em
+    public static let DefaultTextIndent = 2
     open var currentTextIndent: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentTextIndent: 2) ?? 2

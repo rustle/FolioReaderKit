@@ -120,10 +120,9 @@ extension FolioReaderCenter {
 
         let menu = UIBarButtonItem(image: closeIcon, style: .plain, target: self, action:#selector(closeReader(_:)))
         let toc = UIBarButtonItem(image: tocIcon, style: .plain, target: self, action:#selector(presentChapterList(_:)))
-        let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(logoButtonAction(_:)))
-        lrp.isEnabled = false
-
-        navigationItem.leftBarButtonItems = [menu, toc, lrp]
+        let bookmark = UIBarButtonItem(image: bookmarkIcon, style: .plain, target: self, action: #selector(presentBookmarkList(_:)))
+        
+        navigationItem.leftBarButtonItems = [menu, toc, bookmark]
 
         var rightBarIcons = [UIBarButtonItem]()
 
@@ -136,12 +135,10 @@ extension FolioReaderCenter {
         }
 
         let font = UIBarButtonItem(image: fontIcon, style: .plain, target: self, action: #selector(presentFontsMenu))
-//        font.width = space
+        let lrp = UIBarButtonItem(image: logoIcon, style: .plain, target: self, action: #selector(logoButtonAction(_:)))
+        lrp.isEnabled = false
 
-        let bookmark = UIBarButtonItem(image: bookmarkIcon, style: .plain, target: self, action: #selector(presentBookmarkList(_:)))
-        
-        
-        rightBarIcons.append(contentsOf: [font, bookmark])
+        rightBarIcons.append(contentsOf: [font, lrp])
         navigationItem.rightBarButtonItems = rightBarIcons
         
         if (self.readerConfig.displayTitle) {

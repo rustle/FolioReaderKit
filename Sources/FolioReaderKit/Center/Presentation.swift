@@ -81,6 +81,10 @@ extension FolioReaderCenter {
         menuAdvancedTab.tabBarItem = .init(title: "Advanced", image: UIImage(readerImageNamed: "icon-menu-adv"), tag: 3)
         menuTabs.append(menuAdvancedTab)
         
+        let menuProfileTab = FolioReaderProfileMenu(folioReader: folioReader, readerConfig: readerConfig)
+        menuProfileTab.tabBarItem = .init(title: "Profile", image: UIImage(readerImageNamed: "icon-menu-adv"), tag: 4)
+        menuTabs.append(menuProfileTab)
+        
         menuBarController.setViewControllers(menuTabs, animated: true)
         menuBarController.modalPresentationStyle = .custom
         menuBarController.selectedIndex = lastMenuSelectedIndex

@@ -93,10 +93,6 @@ import Foundation
 
     @objc func preference(setDoClearClass value: Bool)
 
-    @objc func preference(savedPosition defaults: [String: Any]?) -> [String: Any]?
-    
-    @objc func preference(setSavedPosition value: [String: Any])
-    
     @objc func preference(styleOverride defaults: Int) -> Int
     
     @objc func preference(setStyleOverride value: Int)
@@ -108,6 +104,16 @@ import Foundation
     @objc func preference(structuralTocLevel defaults: Int) -> Int
     
     @objc func preference(setStructuralTocLevel value: Int)
+    
+    
+    //MARK: - Profile
+    @objc func preference(listProfile filter: String?) -> [String]
+    
+    @objc func preference(saveProfile name: String)
+    
+    @objc func preference(loadProfile name: String)
+    
+    @objc func preference(removeProfile name: String)
 }
 
 public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
@@ -301,15 +307,6 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
         
     }
     
-    public func preference(savedPosition defaults: [String : Any]?) -> [String : Any]? {
-        return defaults
-
-    }
-    
-    public func preference(setSavedPosition value: [String : Any]) {
-        
-    }
-    
     public func preference(styleOverride defaults: Int) -> Int {
         return defaults
     }
@@ -331,6 +328,24 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
     }
     
     public func preference(setStructuralStyle value: Int) {
+        
+    }
+    
+    public func preference(listProfile filter: String?) -> [String] {
+        return ["Default"]
+    }
+    
+    
+    
+    public func preference(saveProfile name: String) {
+        
+    }
+    
+    public func preference(loadProfile name: String) {
+        
+    }
+    
+    public func preference(removeProfile name: String) {
         
     }
 }
