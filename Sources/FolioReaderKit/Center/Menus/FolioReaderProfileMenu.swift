@@ -28,7 +28,7 @@ class FolioReaderProfileMenu: FolioReaderMenu {
         tapGesture.delegate = self
         view.addGestureRecognizer(tapGesture)
         
-        let menuHeight: CGFloat = 200
+        let menuHeight: CGFloat = 220
         let tabBarHeight: CGFloat = self.folioReader.readerCenter?.menuBarController.tabBar.frame.height ?? 0
         let safeAreaInsetBottom: CGFloat = UIApplication.shared.windows.first?.safeAreaInsets.bottom ?? 0
         let visibleHeight = menuHeight + tabBarHeight + safeAreaInsetBottom
@@ -66,8 +66,8 @@ class FolioReaderProfileMenu: FolioReaderMenu {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: menuView.topAnchor, constant: 8),
             tableView.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 20),
-            tableView.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: 20),
-            tableView.heightAnchor.constraint(equalToConstant: 120)
+            tableView.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -20),
+            tableView.heightAnchor.constraint(equalToConstant: 160)
         ])
         
         loadButton.setTitle("Load", for: .normal)
@@ -90,15 +90,15 @@ class FolioReaderProfileMenu: FolioReaderMenu {
             loadButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 8),
             loadButton.leadingAnchor.constraint(equalTo: tableView.leadingAnchor),
             loadButton.widthAnchor.constraint(equalTo: tableView.widthAnchor, multiplier: 0.3),
-            loadButton.bottomAnchor.constraint(equalTo: menuView.bottomAnchor),
+            loadButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 40),
             overwriteButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 8),
             overwriteButton.leadingAnchor.constraint(equalTo: loadButton.trailingAnchor),
             overwriteButton.trailingAnchor.constraint(equalTo: saveAsButton.leadingAnchor),
-            overwriteButton.bottomAnchor.constraint(equalTo: menuView.bottomAnchor),
+            overwriteButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 40),
             saveAsButton.topAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 8),
             saveAsButton.trailingAnchor.constraint(equalTo: tableView.trailingAnchor),
             saveAsButton.widthAnchor.constraint(equalTo: menuView.widthAnchor, multiplier: 0.3),
-            saveAsButton.bottomAnchor.constraint(equalTo: menuView.bottomAnchor)
+            saveAsButton.bottomAnchor.constraint(equalTo: tableView.bottomAnchor, constant: 40)
         ])
         
         reloadColors()
@@ -157,7 +157,7 @@ class FolioReaderProfileMenu: FolioReaderMenu {
 
 extension FolioReaderProfileMenu: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 32
+        return 40
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -186,7 +186,7 @@ extension FolioReaderProfileMenu: UITableViewDataSource {
         } else {
             let label = UILabel()
             label.tag = 123
-            label.frame = .init(x: 20, y: 4, width: cell.contentView.frame.width - 20, height: 24)
+            label.frame = .init(x: 20, y: 4, width: cell.contentView.frame.width - 20, height: 32)
             label.text = profileNames[indexPath.row]
             label.textColor = .black
             cell.contentView.addSubview(label)
@@ -229,17 +229,26 @@ extension FolioReaderProfileMenu {
               let profileName = profileNames[safe: selectedIndex.row]
         else { return }
         
-        provider.preference(loadProfile: profileName)
-        
-        self.folioReader.readerCenter?.collectionView.visibleCells.forEach {
-            guard let page = $0 as? FolioReaderPage else { return }
+        let alertVC = UIAlertController(title: "Confirm Load", message: "Load and apply existing profile \"\(profileName)\"", preferredStyle: .actionSheet)
+        alertVC.popoverPresentationController?.sourceView = sender
+        alertVC.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            alertVC.dismiss()
+        }))
+        alertVC.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
+            provider.preference(loadProfile: profileName)
             
-            page.webView?.isHidden = true
-            page.layoutAdapting = true
-            page.webView?.reload()
-        }
+            self.folioReader.readerCenter?.collectionView.visibleCells.forEach {
+                guard let page = $0 as? FolioReaderPage else { return }
+                
+                page.webView?.isHidden = true
+                page.layoutAdapting = true
+                page.webView?.reload()
+            }
+            
+            self.dismiss()
+        }))
         
-        self.dismiss()
+        self.present(alertVC, animated: true, completion: nil)
     }
     
     @objc func overwriteButtonAction(_ sender: UIButton?) {
@@ -248,9 +257,18 @@ extension FolioReaderProfileMenu {
               let profileName = profileNames[safe: selectedIndex.row]
         else { return }
         
-        provider.preference(saveProfile: profileName)
+        let alertVC = UIAlertController(title: "Confirm Overwrite", message: "Overwrite existing profile \"\(profileName)\"", preferredStyle: .actionSheet)
+        alertVC.popoverPresentationController?.sourceView = sender
+        alertVC.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            alertVC.dismiss()
+        }))
+        alertVC.addAction(UIAlertAction(title: "Yes", style: .destructive, handler: { _ in
+            provider.preference(saveProfile: profileName)
+            
+            self.tableView.deselectRow(at: selectedIndex, animated: true)
+        }))
         
-        self.tableView.deselectRow(at: selectedIndex, animated: true)
+        self.present(alertVC, animated: true, completion: nil)
     }
     
     @objc func saveasButtonAction(_ sender: UIButton?) {
@@ -258,17 +276,29 @@ extension FolioReaderProfileMenu {
         
         guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader) else { return }
         
+        var profileName: String!
         if let bookTitle = self.folioReader.readerCenter?.book.title ?? self.folioReader.readerCenter?.book.name ?? self.folioReader.readerConfig?.identifier {
-            provider.preference(saveProfile: "Based on \(bookTitle)")
+            profileName = "Based on \(bookTitle)"
         } else {
             var i = 1
-            while( profileNames.contains("New Profile #\(i)") ) {
+            while( profileNames.contains("Profile #\(i)") ) {
                 i+=1
             }
-            provider.preference(saveProfile: "New Profile #\(i)")
+            profileName = "Profile #\(i)"
         }
         
-        loadProfileNames()
-        self.tableView.reloadData()
+        let alertVC = UIAlertController(title: "Confirm Save As", message: "Save current style as profile \"\(profileName!)\"", preferredStyle: .actionSheet)
+        alertVC.popoverPresentationController?.sourceView = sender
+        alertVC.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { _ in
+            alertVC.dismiss()
+        }))
+        alertVC.addAction(UIAlertAction(title: "Yes", style: profileNames.contains(profileName) ? .destructive : .default, handler: { _ in
+            provider.preference(saveProfile: profileName)
+            
+            self.loadProfileNames()
+            self.tableView.reloadData()
+        }))
+        
+        self.present(alertVC, animated: true, completion: nil)
     }
 }
