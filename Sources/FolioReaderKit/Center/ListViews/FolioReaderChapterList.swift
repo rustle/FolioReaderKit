@@ -138,7 +138,8 @@ class FolioReaderChapterList: UITableViewController {
         let tocReference = tocItems[indexPath.row]
         let isSection = tocReference.children.count > 0
 
-        cell.indexLabel?.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let indentCount = max(0, (tocReference.level ?? 0) - self.folioReader.structuralTrackingTocLevel.rawValue)
+        cell.indexLabel?.text = Array.init(repeating: " ", count: indentCount * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Add audio duration for Media Ovelay
         if let resource = tocReference.resource {
@@ -153,7 +154,7 @@ class FolioReaderChapterList: UITableViewController {
 
         // Mark current reading chapter
         cell.indexLabel?.textColor = highlightResourceIds.contains(tocReference.resource?.id ?? "___NIL___") ? self.readerConfig.menuTextColorSelected : self.readerConfig.menuTextColor
-        cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(tocReference.level ?? 0) * 1.5)
+        cell.indexLabel?.font = UIFont(name: "Avenir-Light", size: 17.0 - CGFloat(indentCount) * 1.5)
 
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
