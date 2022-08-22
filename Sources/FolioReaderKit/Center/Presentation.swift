@@ -41,16 +41,24 @@ extension FolioReaderCenter {
 
         folioReader.saveReaderState()
 
+        let reference = FolioReaderReferenceList(folioReader: folioReader, readerConfig: readerConfig)
         let bookmark = FolioReaderBookmarkList(folioReader: folioReader, readerConfig: readerConfig)
         let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
         let pageController = FolioReaderBookmarkPageVC(folioReader: folioReader, readerConfig: readerConfig)
 
+        pageController.viewControllerZero = reference
         pageController.viewControllerOne = bookmark
         pageController.viewControllerTwo = highlight
         
         pageController.segmentedControlItems = [readerConfig.localizedBookmarksTitle, readerConfig.localizedHighlightsTitle]
 
+        if let refText = tempRefText {
+            pageController.segmentedControlItems.insert("Reference", at: 0)
+            pageController.tabBarItem = UITabBarItem(title: refText, image: nil, tag: 101)
+        }
+        
         let nav = UINavigationController(rootViewController: pageController)
+        
         present(nav, animated: true, completion: nil)
     }
     

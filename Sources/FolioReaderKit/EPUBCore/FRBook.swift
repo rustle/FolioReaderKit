@@ -28,6 +28,13 @@ open class FRBook: NSObject {
 
     public var epubArchive: Archive?
     
+    public var threadEpubArchive: Archive? {
+        guard let archiveURL = self.epubArchive?.url,
+              let epubArchive = Archive(url: archiveURL, accessMode: .read)
+        else { return nil }
+        return epubArchive
+    }
+    
     var hasAudio: Bool {
         return smils.smils.count > 0
     }

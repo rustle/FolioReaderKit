@@ -14,6 +14,7 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
     var viewList = [UIViewController]()
     var segmentedControlItems = [String]()
     
+    var viewControllerZero: UIViewController!
     var viewControllerOne: UIViewController!
     var viewControllerTwo: UIViewController!
 
@@ -31,12 +32,6 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
 
         self.edgesForExtendedLayout = UIRectEdge()
         self.extendedLayoutIncludesOpaqueBars = true
-        
-        if self.index == 0 {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))
-        } else {
-            self.navigationItem.rightBarButtonItem = nil
-        }
     }
 
     required init?(coder: NSCoder) {
@@ -57,6 +52,11 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
 
         viewControllerOne.didMove(toParent: self)
         viewControllerTwo.didMove(toParent: self)
+        
+        if (self.folioReader.readerCenter?.tempRefText) != nil {
+            viewList.insert(viewControllerZero, at: 0)
+            viewControllerZero.didMove(toParent: self)
+        }
 
         self.delegate = self
         self.dataSource = self
@@ -81,8 +81,18 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         configureNavBar()
+        
+        if self.index == viewList.firstIndex(of: viewControllerOne) {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))
+        } else {
+            self.navigationItem.rightBarButtonItem = nil
+        }
     }
 
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+    }
+    
     func configureNavBar() {
         //let navBackground = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.daysModeNavBackground)
         let navBackground = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
@@ -95,12 +105,12 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
     // MARK: - Segmented control changes
 
     @objc func didSwitchMenu(_ sender: UISegmentedControl) {
+        let direction: UIPageViewController.NavigationDirection = (index > sender.selectedSegmentIndex ? .reverse : .forward)
         self.index = sender.selectedSegmentIndex
-        let direction: UIPageViewController.NavigationDirection = (index == 0 ? .reverse : .forward)
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
         self.folioReader.currentMenuIndex = index
         
-        if self.index == 0 {
+        if self.index == viewList.firstIndex(of: viewControllerOne) {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))
         } else {
             self.navigationItem.rightBarButtonItem = nil

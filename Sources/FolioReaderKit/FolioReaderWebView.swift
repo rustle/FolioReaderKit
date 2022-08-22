@@ -98,13 +98,14 @@ open class FolioReaderWebView: WKWebView {
             result = false
         } else {
             let canPerform = action == #selector(highlight(_:))
-                || action == #selector(highlightWithNote(_:))
-                || action == #selector(updateHighlightNote(_:))
-                || (action == #selector(define(_:)))
-                || (action == #selector(lookup(_:)) && self.mDictView != nil)
-                || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
-                || (action == #selector(share(_:)) && readerConfig.allowSharing)
-                || (action == #selector(copy(_:)) && readerConfig.allowCopy)
+            || action == #selector(highlightWithNote(_:))
+            || action == #selector(updateHighlightNote(_:))
+            || (action == #selector(define(_:)))
+            || (action == #selector(reference(_:)))
+            || (action == #selector(lookup(_:)) && self.mDictView != nil)
+            || (action == #selector(play(_:)) && (book.hasAudio || readerConfig.enableTTS))
+            || (action == #selector(share(_:)) && readerConfig.allowSharing)
+            || (action == #selector(copy(_:)) && readerConfig.allowCopy)
             print("\(#function) canPerform=\(canPerform) action=\(action)")
             if canPerform {
                 result = true
@@ -416,6 +417,23 @@ open class FolioReaderWebView: WKWebView {
         }
     }
     
+    @objc func reference(_ sender: UIMenuController?) {
+        js("getSelectedText()") { selectedText in
+            guard let selectedText = selectedText else { return }
+            
+            self.clearTextSelection()
+            self.setMenuVisible(false)
+            
+            guard let readerCenter = self.readerContainer?.centerViewController,
+                  let bookmarkBarButtonItem = readerCenter.navigationItem.leftBarButtonItems?[safe: 2],
+                  let selector = bookmarkBarButtonItem.action else { return }
+            
+            readerCenter.tempRefText = selectedText
+            
+            UIApplication.shared.sendAction(selector, to: readerCenter, from: bookmarkBarButtonItem, for: nil)
+        }
+    }
+    
     @objc func play(_ sender: UIMenuController?) {
         self.folioReader.readerAudioPlayer?.play()
 
@@ -458,6 +476,7 @@ open class FolioReaderWebView: WKWebView {
         setMenuVisible(false)
     }
 
+    
     // MARK: - Create and show menu
 
     func createMenu(onHighlight: Bool) {
@@ -484,6 +503,7 @@ open class FolioReaderWebView: WKWebView {
         let editNoteItem = UIMenuItem(title: self.readerConfig.localizedHighlightNote, action: #selector(updateHighlightNote(_:)))
         let playAudioItem = UIMenuItem(title: self.readerConfig.localizedPlayMenu, action: #selector(play(_:)))
         let defineItem = UIMenuItem(title: self.readerConfig.localizedDefineMenu, action: #selector(define(_:)))
+        let referenceItem = UIMenuItem(title: "Ref.", action: #selector(reference(_:)))
         
         let mDictItem = UIMenuItem(title: self.readerConfig.localizedMDictMenu, image: mdictImage) { [weak self] _ in
             self?.lookup(menuController)
@@ -529,7 +549,7 @@ open class FolioReaderWebView: WKWebView {
             menuItems = [yellowItem, greenItem, blueItem, pinkItem, underlineItem]
         } else {
             // default menu
-            menuItems = [highlightItem, defineItem, highlightNoteItem]
+            menuItems = [highlightItem, defineItem, referenceItem, highlightNoteItem]
             if self.readerConfig.enableMDictViewer {
                 menuItems.append(mDictItem)
             }

@@ -140,6 +140,7 @@
 		E7968BEB289CFA8500E8CC14 /* FolioReaderBookList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */; };
 		E7968BED289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */; };
 		E7968BEE289CFAA200E8CC14 /* FolioReaderBookListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */; };
+		E7D3A0EB28B3684D008FA534 /* FolioReaderReferenceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7D3A0EA28B3684D008FA534 /* FolioReaderReferenceList.swift */; };
 		E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */; };
 		E7EA4E102841EDF0006F79C9 /* FolioReaderResourceListCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */; };
 		E7EA4E122841F1D7006F79C9 /* ResourceListDelegation.swift in Sources */ = {isa = PBXBuildFile; fileRef = E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */; };
@@ -247,6 +248,7 @@
 		E78DD42528AA7D1A00923A22 /* FolioReaderBookmarkList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderBookmarkList.swift; sourceTree = "<group>"; };
 		E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderBookList.swift; sourceTree = "<group>"; };
 		E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderBookListCell.swift; sourceTree = "<group>"; };
+		E7D3A0EA28B3684D008FA534 /* FolioReaderReferenceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderReferenceList.swift; sourceTree = "<group>"; };
 		E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceList.swift; sourceTree = "<group>"; };
 		E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FolioReaderResourceListCell.swift; sourceTree = "<group>"; };
 		E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResourceListDelegation.swift; sourceTree = "<group>"; };
@@ -507,12 +509,13 @@
 				2AEE910626F03D1C00B012B0 /* ChapterListDelegation.swift */,
 				E7968BE9289CFA8500E8CC14 /* FolioReaderBookList.swift */,
 				E7968BEC289CFAA200E8CC14 /* FolioReaderBookListCell.swift */,
+				E78DD42528AA7D1A00923A22 /* FolioReaderBookmarkList.swift */,
 				E78DD42128AA7BC200923A22 /* FolioReaderBookmarkPageVC.swift */,
 				1A958F111D397BE900D56699 /* FolioReaderChapterList.swift */,
 				1A958F121D397BE900D56699 /* FolioReaderChapterListCell.swift */,
 				1A958F161D397BE900D56699 /* FolioReaderHighlightList.swift */,
-				E78DD42528AA7D1A00923A22 /* FolioReaderBookmarkList.swift */,
 				E78DD41F28AA7B9600923A22 /* FolioReaderNavigationPageVC.swift */,
+				E7D3A0EA28B3684D008FA534 /* FolioReaderReferenceList.swift */,
 				E7EA4E0D2841EDE0006F79C9 /* FolioReaderResourceList.swift */,
 				E7EA4E0F2841EDF0006F79C9 /* FolioReaderResourceListCell.swift */,
 				E7EA4E112841F1D7006F79C9 /* ResourceListDelegation.swift */,
@@ -644,6 +647,7 @@
 			files = (
 				2AA1D55E26FC11CC00F8CAB2 /* FolioReaderParagraphMenu.swift in Sources */,
 				2AA1D55F26FC11CC00F8CAB2 /* FolioReaderMenu.swift in Sources */,
+				E7D3A0EB28B3684D008FA534 /* FolioReaderReferenceList.swift in Sources */,
 				E7EA4E0E2841EDE0006F79C9 /* FolioReaderResourceList.swift in Sources */,
 				6EB47B9C266F428700189F63 /* FolioReaderCenter.swift in Sources */,
 				E784D2DE289905B500ED205A /* FolioReaderReadPosition.swift in Sources */,
