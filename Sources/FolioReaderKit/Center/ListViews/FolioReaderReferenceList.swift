@@ -52,7 +52,7 @@ class FolioReaderReferenceList: UITableViewController {
         loadSections()
     }
 
-    func loadSection(bookId: String, book: FRBook, pageNumber: Int, refText: String) -> [FolioReaderBookmark] {
+    func loadSection(bookId: String, book: FRBook, pageNumber: Int, refText: String, deepest: FolioReaderBookmark) -> [FolioReaderBookmark] {
         guard let epubArchive = book.threadEpubArchive,
               let spine = book.spine.spineReferences[safe: pageNumber - 1],
               let epubEntry = epubArchive[book.opfResource.href.deletingLastPathComponent.trimmingCharacters(in: ["/"]) + "/" + spine.resource.href.trimmingCharacters(in: ["/"])]
@@ -81,6 +81,7 @@ class FolioReaderReferenceList: UITableViewController {
                 bookmark.page = pageNumber
                 bookmark.pos_type = "epubcfi"
                 bookmark.pos = "epubcfi(" + pos + ")"
+                guard bookmark < deepest else { return nil }
                 return bookmark
             }
 
@@ -96,9 +97,21 @@ class FolioReaderReferenceList: UITableViewController {
         let currentPageNumber = readerCenter.currentPageNumber
         guard currentPageNumber > 0 else { return }
         
-        for pageNumber in (1...currentPageNumber).reversed() {
+        var startPageNumber = 1
+        if self.folioReader.structuralStyle == .bundle,
+           let currentPage = readerCenter.currentPage,
+           let webView = currentPage.webView {
+            let tocRefs = currentPage.getChapterTocReferences(for: webView.scrollView.contentOffset, by: webView.frame.size)
+            if let rootTocRef = tocRefs.filter({ $0.level == self.folioReader.structuralTrackingTocLevel.rawValue - 1 }).first {
+                startPageNumber = readerCenter.book.findPageByResource(rootTocRef) + 1
+            }
+        }
+        let deepestBookmark = FolioReaderBookmark()
+        deepestBookmark.page = currentPageNumber
+        deepestBookmark.pos = readerCenter.currentWebViewScrollPositions[currentPageNumber - 1]?.cfi
+        for pageNumber in (startPageNumber...currentPageNumber).reversed() {
             DispatchQueue.global(qos: .userInitiated).async {
-                let bookmarks = self.loadSection(bookId: bookId, book: readerCenter.book, pageNumber: pageNumber, refText: refText)
+                let bookmarks = self.loadSection(bookId: bookId, book: readerCenter.book, pageNumber: pageNumber, refText: refText, deepest: deepestBookmark)
                 guard bookmarks.isEmpty == false else { return }
                 DispatchQueue.main.async {
                     self.sectionBookmarks[pageNumber] = bookmarks
