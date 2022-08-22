@@ -1279,7 +1279,7 @@ writingMode
                 let currentPageNumber = self.pageNumber,
                 let currentOffset = self.webView?.scrollView.contentOffset {
                 self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                self.folioReader.readerCenter?.navigationItem.leftBarButtonItems?[2].isEnabled = true
+                self.folioReader.readerCenter?.navigationItem.rightBarButtonItems?.last?.isEnabled = true
             }
             
             guard let anchorFromURL = url.fragment else { return true }

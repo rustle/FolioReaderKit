@@ -12,10 +12,18 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
     
     func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
+        
+        guard let readerCenter = self.folioReader.readerCenter else { return }
+        
         let item = self.book.findPageByResource(reference)
         
         if item < totalPages {
+            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
+                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
+                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+                readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
+            }
+            
             let indexPath = IndexPath(row: item, section: 0)
             changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
                 //self.updateCurrentPage(navigating: indexPath) //no need

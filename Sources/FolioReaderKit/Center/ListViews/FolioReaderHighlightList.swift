@@ -255,7 +255,7 @@ class FolioReaderHighlightList: UITableViewController {
             if let currentPageNumber = readerCenter.currentPage?.pageNumber,
                 let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
                 readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                readerCenter.navigationItem.leftBarButtonItems?[2].isEnabled = true
+                readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
             }
             
             readerCenter.changePageWith(page: highlight.page, andFragment: highlight.highlightId)
