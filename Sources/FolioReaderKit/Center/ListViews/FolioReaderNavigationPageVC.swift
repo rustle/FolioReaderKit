@@ -97,8 +97,8 @@ class FolioReaderNavigationPageVC: UIPageViewController {
     // MARK: - Segmented control changes
 
     @objc func didSwitchMenu(_ sender: UISegmentedControl) {
+        let direction: UIPageViewController.NavigationDirection = (index > sender.selectedSegmentIndex ? .reverse : .forward)
         self.index = sender.selectedSegmentIndex
-        let direction: UIPageViewController.NavigationDirection = (index == 0 ? .reverse : .forward)
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
         self.folioReader.currentMenuIndex = index
     }

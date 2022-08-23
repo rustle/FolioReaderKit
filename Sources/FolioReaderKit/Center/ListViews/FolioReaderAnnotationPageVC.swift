@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FolioReaderBookmarkPageVC: UIPageViewController {
+class FolioReaderAnnotationPageVC: UIPageViewController {
 
     var segmentedControl: UISegmentedControl!
     var viewList = [UIViewController]()
@@ -42,7 +42,7 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
         super.viewDidLoad()
 
         segmentedControl = UISegmentedControl(items: segmentedControlItems)
-        segmentedControl.addTarget(self, action: #selector(FolioReaderBookmarkPageVC.didSwitchMenu(_:)), for: UIControl.Event.valueChanged)
+        segmentedControl.addTarget(self, action: #selector(FolioReaderAnnotationPageVC.didSwitchMenu(_:)), for: UIControl.Event.valueChanged)
         segmentedControl.selectedSegmentIndex = index
         segmentedControl.setWidth(100, forSegmentAt: 0)
         segmentedControl.setWidth(100, forSegmentAt: 1)
@@ -140,7 +140,7 @@ class FolioReaderBookmarkPageVC: UIPageViewController {
 
 // MARK: UIPageViewControllerDelegate
 
-extension FolioReaderBookmarkPageVC: UIPageViewControllerDelegate {
+extension FolioReaderAnnotationPageVC: UIPageViewControllerDelegate {
 
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
 
@@ -153,7 +153,7 @@ extension FolioReaderBookmarkPageVC: UIPageViewControllerDelegate {
 
 // MARK: UIPageViewControllerDataSource
 
-extension FolioReaderBookmarkPageVC: UIPageViewControllerDataSource {
+extension FolioReaderAnnotationPageVC: UIPageViewControllerDataSource {
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
 

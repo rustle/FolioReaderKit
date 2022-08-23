@@ -44,7 +44,7 @@ extension FolioReaderCenter {
         let reference = FolioReaderReferenceList(folioReader: folioReader, readerConfig: readerConfig)
         let bookmark = FolioReaderBookmarkList(folioReader: folioReader, readerConfig: readerConfig)
         let highlight = FolioReaderHighlightList(folioReader: folioReader, readerConfig: readerConfig)
-        let pageController = FolioReaderBookmarkPageVC(folioReader: folioReader, readerConfig: readerConfig)
+        let pageController = FolioReaderAnnotationPageVC(folioReader: folioReader, readerConfig: readerConfig)
 
         pageController.viewControllerZero = reference
         pageController.viewControllerOne = bookmark

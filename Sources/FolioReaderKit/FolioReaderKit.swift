@@ -558,6 +558,15 @@ extension FolioReader {
                   let bookId = self.readerCenter?.book.name?.deletingPathExtension,
                   let provider = delegate?.folioReaderReadPositionProvider?(self) else { return }
             
+            if let debug = readerConfig?.debug, debug.contains(.functionTrace) {
+                Thread.callStackSymbols.forEach {
+                    folioLogger($0)
+                }
+                if position.bookProgress < 5.0 {
+                    folioLogger(position.bookProgress.description)
+                }
+            }
+            
             provider.folioReaderReadPosition(self, allByBookId: bookId)
                 .forEach {
                     guard $0.takePrecedence else { return }
@@ -606,7 +615,11 @@ extension FolioReader {
         guard isReaderOpen,
               let readerCenter = self.readerCenter,
               let currentPage = readerCenter.currentPage,
-              let webView = currentPage.webView else {
+              let webView = currentPage.webView,
+              currentPage.layoutAdapting == false,
+              webView.isHidden == false
+        else {
+            //haven't finished loading, do not overwrite position
             completion?()
             return
         }
