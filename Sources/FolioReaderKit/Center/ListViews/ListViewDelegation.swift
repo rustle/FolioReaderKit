@@ -121,3 +121,40 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
 //        }
     }
 }
+
+extension FolioReaderCenter: FolioReaderResourceListDelegate {
+    
+    func resourceList(_ resourceList: FolioReaderResourceList, didSelectRowAtIndexPath indexPath: IndexPath) {
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        if indexPath.row < totalPages {
+            self.currentPage?.pushNavigateWebViewScrollPositions()
+            
+            let indexPath = IndexPath(row: indexPath.row, section: 0)
+            changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
+                //self.updateCurrentPage(navigating: indexPath) //no need
+                self.currentPage?.updatePageInfo {
+                    self.currentPage?.updatePageOffsetRate()
+                }
+            })
+        } else {
+            print("Failed to load book because the requested resource is missing.")
+        }
+    }
+    
+    func resourceList(didDismissedResourceList resourceList: FolioReaderResourceList) {
+        // MARK: should not need here
+        //updateCurrentPage()
+        
+        if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
+
+        // Move to #fragment
+        if let reference = tempReference {
+            if let fragmentID = reference.fragmentID, let currentPage = currentPage , fragmentID != "" {
+                currentPage.handleAnchor(reference.fragmentID!, offsetInWindow: self.navigationController?.toolbar.frame.height ?? 0, avoidBeginningAnchors: false, animated: true)
+            }
+            tempReference = nil
+        }
+    }
+    
+}
