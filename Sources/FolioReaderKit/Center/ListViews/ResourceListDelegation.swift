@@ -14,6 +14,8 @@ extension FolioReaderCenter: FolioReaderResourceListDelegate {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
         if indexPath.row < totalPages {
+            self.currentPage?.pushNavigateWebViewScrollPositions()
+            
             let indexPath = IndexPath(row: indexPath.row, section: 0)
             changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
                 //self.updateCurrentPage(navigating: indexPath) //no need

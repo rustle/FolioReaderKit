@@ -1275,11 +1275,8 @@ writingMode
             return false
         } else if scheme == "file" || (url.scheme == "http" && url.host == "localhost" && (url.port ?? 0) == readerConfig.serverPort) {
             
-            if navigationAction.navigationType == .linkActivated,
-                let currentPageNumber = self.pageNumber,
-                let currentOffset = self.webView?.scrollView.contentOffset {
-                self.folioReader.readerCenter?.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                self.folioReader.readerCenter?.navigationItem.rightBarButtonItems?.last?.isEnabled = true
+            if navigationAction.navigationType == .linkActivated {
+                self.pushNavigateWebViewScrollPositions()
             }
             
             guard let anchorFromURL = url.fragment else { return true }
@@ -1561,6 +1558,16 @@ writingMode
         }
     }
 
+    open func pushNavigateWebViewScrollPositions() {
+        guard let readerCenter = self.folioReader.readerCenter,
+              let currentPageNumber = self.pageNumber,
+              let currentOffset = self.webView?.scrollView.contentOffset
+        else { return }
+        
+        readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
+        readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
+    }
+    
     // MARK: - Public scroll postion setter
 
     /**

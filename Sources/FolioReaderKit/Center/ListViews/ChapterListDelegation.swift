@@ -18,11 +18,7 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
         let item = self.book.findPageByResource(reference)
         
         if item < totalPages {
-            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
-                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
-                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
-            }
+            readerCenter.currentPage?.pushNavigateWebViewScrollPositions()
             
             let indexPath = IndexPath(row: item, section: 0)
             changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
@@ -103,6 +99,8 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
             }
             tempReference = reference
         }
+        
+        self.currentPage?.pushNavigateWebViewScrollPositions()
         
         changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
             self.currentPage?.updatePageInfo {

@@ -349,11 +349,7 @@ class FolioReaderReferenceList: UITableViewController {
         if let error = readerCenter.bookmarkErrors[pos] {
             presentLocatingBookmarkError(error, bookmark: bookmark, at: indexPath)
         } else {
-            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
-                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
-                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
-            }
+            readerCenter.currentPage?.pushNavigateWebViewScrollPositions()
             
             readerCenter.changePageWith(page: bookmark.page, andFragment: pos)
             self.dismiss()

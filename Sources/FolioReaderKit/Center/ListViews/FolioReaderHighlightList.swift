@@ -252,11 +252,7 @@ class FolioReaderHighlightList: UITableViewController {
         if let error = readerCenter.highlightErrors[highlight.highlightId] {
             presentLocatingHighlightError(error, highlight: highlight, at: indexPath)
         } else {
-            if let currentPageNumber = readerCenter.currentPage?.pageNumber,
-                let currentOffset = readerCenter.currentPage?.webView?.scrollView.contentOffset {
-                readerCenter.navigateWebViewScrollPositions.append((currentPageNumber, currentOffset))
-                readerCenter.navigationItem.rightBarButtonItems?.last?.isEnabled = true
-            }
+            readerCenter.currentPage?.pushNavigateWebViewScrollPositions()
             
             readerCenter.changePageWith(page: highlight.page, andFragment: highlight.highlightId)
             self.dismiss()
