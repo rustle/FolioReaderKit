@@ -28,7 +28,7 @@ class FolioReaderNavigationPageVC: UIPageViewController {
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
         self.folioReader = folioReader
         self.readerConfig = readerConfig
-        self.index = self.folioReader.currentMenuIndex
+        self.index = self.folioReader.currentNavigationMenuIndex
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
 
         self.edgesForExtendedLayout = UIRectEdge()
@@ -100,7 +100,7 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         let direction: UIPageViewController.NavigationDirection = (index > sender.selectedSegmentIndex ? .reverse : .forward)
         self.index = sender.selectedSegmentIndex
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
-        self.folioReader.currentMenuIndex = index
+        self.folioReader.currentNavigationMenuIndex = index
     }
 
     // MARK: - Status Bar

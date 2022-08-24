@@ -47,8 +47,6 @@ class FolioReaderReferenceList: UITableViewController {
         self.tableView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         self.tableView.separatorColor = self.folioReader.isNight(self.readerConfig.nightModeSeparatorColor, self.readerConfig.menuSeparatorColor)
         
-        guard let readerCenter = self.folioReader.readerCenter else { return }
-        
         loadSections()
     }
 

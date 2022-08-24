@@ -98,7 +98,13 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                         pageOffset = 0
                     }
                     page.pageOffsetRate = pageOffset / page.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
-                    page.scrollWebViewByPageOffsetRate(animated: false)
+                    page.scrollWebViewByPageOffsetRate(animated: false) {
+                        delay(2.0) {
+                            page.getWebViewScrollPosition { position in
+                                self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+                            }
+                        }
+                    }
                 }
                 //      readerCenter.isFirstLoad = false
                 // } else if position["pageNumber"] as? Int == 0 {

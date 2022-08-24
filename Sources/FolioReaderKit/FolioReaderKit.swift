@@ -377,12 +377,21 @@ extension FolioReader {
         }
     }
 
-    open var currentMenuIndex: Int {
+    open var currentNavigationMenuIndex: Int {
         get {
-            return delegate?.folioReaderPreferenceProvider?(self).preference(currentMenuIndex: 0) ?? 0
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuIndex: 0) ?? 0
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: value)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentNavigationMenuIndex: value)
+        }
+    }
+    
+    open var currentAnnotationMenuIndex: Int {
+        get {
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentAnnotationMenuIndex: 0) ?? 0
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentAnnotationMenuIndex: value)
         }
     }
     
@@ -643,7 +652,6 @@ extension FolioReader {
             self.isReaderOpen = false
             self.isReaderReady = false
             self.readerAudioPlayer?.stop(immediate: true)
-            self.delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentMenuIndex: 0)
             self.delegate?.folioReaderDidClose?(self)
         }
     }

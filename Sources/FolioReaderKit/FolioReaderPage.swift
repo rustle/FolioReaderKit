@@ -830,7 +830,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
-    open func scrollWebViewByPageOffsetRate(animated: Bool = true) {
+    open func scrollWebViewByPageOffsetRate(animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let webViewFrameSize = webView?.frame.size,
               webViewFrameSize.width > 0, webViewFrameSize.height > 0,
               let contentSize = webView?.scrollView.contentSize else { return }
@@ -849,7 +849,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             pageOffset = byWritingMode(page * webViewFrameSize.width, contentSize.width - page * webViewFrameSize.width)
         }
         
-        scrollPageToOffset(pageOffset, animated: animated, retry: 0)
+        scrollPageToOffset(pageOffset, animated: animated, retry: 0, completion: completion)
     }
     
     open func setScrollViewContentOffset(_ contentOffset: CGPoint, animated: Bool) {

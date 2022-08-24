@@ -27,7 +27,7 @@ class FolioReaderAnnotationPageVC: UIPageViewController {
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig) {
         self.folioReader = folioReader
         self.readerConfig = readerConfig
-        self.index = self.folioReader.currentMenuIndex
+        self.index = self.folioReader.currentAnnotationMenuIndex
         super.init(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)
 
         self.edgesForExtendedLayout = UIRectEdge()
@@ -108,7 +108,7 @@ class FolioReaderAnnotationPageVC: UIPageViewController {
         let direction: UIPageViewController.NavigationDirection = (index > sender.selectedSegmentIndex ? .reverse : .forward)
         self.index = sender.selectedSegmentIndex
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
-        self.folioReader.currentMenuIndex = index
+        self.folioReader.currentAnnotationMenuIndex = index
         
         if self.index == viewList.firstIndex(of: viewControllerOne) {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Add", style: .plain, target: self, action: #selector(addBookmark(_:)))

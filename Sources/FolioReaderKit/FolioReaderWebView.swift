@@ -429,7 +429,7 @@ open class FolioReaderWebView: WKWebView {
                   let selector = bookmarkBarButtonItem.action else { return }
             
             readerCenter.tempRefText = selectedText
-            
+            self.folioReader.currentAnnotationMenuIndex = 0
             UIApplication.shared.sendAction(selector, to: readerCenter, from: bookmarkBarButtonItem, for: nil)
         }
     }
