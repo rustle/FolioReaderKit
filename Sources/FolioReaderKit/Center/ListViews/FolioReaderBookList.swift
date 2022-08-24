@@ -55,13 +55,7 @@ class FolioReaderBookList: UICollectionViewController {
 
         // Register cell classes
         self.collectionView.register(FolioReaderBookListCell.self, forCellWithReuseIdentifier: kReuseCellIdentifier)
-//        self.collectionView.separatorInset = UIEdgeInsets.zero
-        //self.tableView.backgroundColor = self.folioReader.isNight(self.readerConfig.nightModeMenuBackground, self.readerConfig.menuBackgroundColor)
         self.collectionView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
-//        self.collectionView.separatorColor = self.folioReader.isNight(self.readerConfig.nightModeSeparatorColor, self.readerConfig.menuSeparatorColor)
-
-//        self.collectionView.rowHeight = UITableView.automaticDimension
-//        self.collectionView.estimatedRowHeight = 50
 
         // Create TOC list
         guard self.folioReader.structuralStyle == .bundle else { return }
@@ -182,34 +176,34 @@ class FolioReaderBookList: UICollectionViewController {
                   let bookId = self.folioReader.readerConfig?.identifier,
                   let archive = book.threadEpubArchive,
                   let resource = tocReference.resource,
-                  let tocPage = resource.spineIndices.first,
-                  let opfURL = URL(string: book.opfResource.href)
+                  let tocPage = resource.spineIndices.first
             else { return }
             
+            let opfURL = URL(fileURLWithPath: book.opfResource.href, isDirectory: false)
             var imgNodes = [AEXMLElement]()
             var coverURL = opfURL
             
             for page in (max(0,tocPage-2) ... tocPage).reversed() {
-                if let resource = book.spine.spineReferences[safe: page]?.resource,
-                   let entryURL = URL(string: resource.href, relativeTo: opfURL),
-                   let entry = archive[entryURL.absoluteString.trimmingCharacters(in: ["/"])] {
-                    var entryData = Data()
-                    let _ = try? archive.extract(entry, consumer: { data in
-                        entryData.append(data)
-                    })
-                    if let xmlDoc = try? AEXMLDocument(xml: entryData) {
-                        imgNodes = xmlDoc.allDescendants { $0.name == "img" || $0.name == "IMG" || $0.name == "image" || $0.name == "IMAGE" }
-                    }
-                    if imgNodes.isEmpty == false {
-                        coverURL = entryURL
-                        break
-                    }
+                let resource = book.spine.spineReferences[page].resource
+                let entryURL = URL(fileURLWithPath: resource.href, isDirectory: false, relativeTo: opfURL)
+                guard let entry = archive[entryURL.path.trimmingCharacters(in: ["/"])] else { continue }
+                
+                var entryData = Data()
+                let _ = try? archive.extract(entry, consumer: { data in
+                    entryData.append(data)
+                })
+                guard let xmlDoc = try? AEXMLDocument(xml: entryData) else { continue }
+                
+                imgNodes = xmlDoc.allDescendants { $0.name == "img" || $0.name == "IMG" || $0.name == "image" || $0.name == "IMAGE" }
+                
+                if imgNodes.isEmpty == false {
+                    coverURL = entryURL
+                    break
                 }
             }
             
             guard let imgSrc = imgNodes.first?.attributes["src"] ?? imgNodes.first?.attributes["xlink:href"] ?? book.coverImage?.href,
-                  let imgURL = URL(string: imgSrc, relativeTo: URL(string: coverURL.absoluteString.trimmingCharacters(in: ["/"]))),
-                  let imgEntry = archive[imgURL.absoluteString.trimmingCharacters(in: ["/"])]
+                  let imgEntry = archive[URL(fileURLWithPath: imgSrc, relativeTo: coverURL).path.trimmingCharacters(in: ["/"])]
             else { return }
             
             let tempFile = URL(
@@ -224,7 +218,6 @@ class FolioReaderBookList: UICollectionViewController {
             if let image = UIImage(contentsOfFile: tempFile.path) {
                 DispatchQueue.main.async {
                     cell.coverImage.image = image
-                    cell.coverImage.contentMode = .scaleAspectFit
                 }
             }
         }
