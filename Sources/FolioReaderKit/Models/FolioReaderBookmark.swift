@@ -26,16 +26,28 @@ public enum FolioReaderBookmarkError: Error {
 }
 
 extension FolioReaderBookmark: Comparable {
+    public static let SeperatorSet: CharacterSet = ["/", ":", "(", ")"]
+    
     public static func < (lhs: FolioReaderBookmark, rhs: FolioReaderBookmark) -> Bool {
         if lhs.page != rhs.page {
             return lhs.page < rhs.page
         }
         if let lStart = lhs.pos, let rStart = rhs.pos {
-            let lSplit = lStart.split { $0 == "/" || $0 == ":" || $0 == "(" || $0 == ")" }
-            let rSplit = rStart.split { $0 == "/" || $0 == ":" || $0 == "(" || $0 == ")" }
+            let lSplit = lStart.split { $0.unicodeScalars.allSatisfy { scalar in
+                SeperatorSet.contains(scalar)
+            } }
+            let rSplit = rStart.split { $0.unicodeScalars.allSatisfy { scalar in
+                SeperatorSet.contains(scalar)
+            } }
             for i in 0..<min(lSplit.count, rSplit.count) {
-                let l = Int(lSplit[i]) ?? 0
-                let r = Int(rSplit[i]) ?? 0
+                var l = Int(lSplit[i]) ?? 0
+                var r = Int(rSplit[i]) ?? 0
+                if let square = lSplit[i].firstIndex(of: "[") {
+                    l = Int(lSplit[i][lSplit[i].startIndex..<square]) ?? 0
+                }
+                if let square = rSplit[i].firstIndex(of: "[") {
+                    r = Int(rSplit[i][rSplit[i].startIndex..<square]) ?? 0
+                }
                 if l != r {
                     return l < r
                 }
