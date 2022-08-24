@@ -40,7 +40,6 @@ class FolioReaderBookList: UICollectionViewController {
         
         layout.itemSize = .init(width: 300, height: 400)
         layout.minimumInteritemSpacing = 0
-        layout.minimumLineSpacing = 16
         layout.scrollDirection = .vertical
         
         super.init(collectionViewLayout: layout)
@@ -59,9 +58,12 @@ class FolioReaderBookList: UICollectionViewController {
 
         // Create TOC list
         guard self.folioReader.structuralStyle == .bundle else { return }
+        let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
         
-        self.tocItems = self.book.bundleRootTableOfContents
-      
+        self.tocItems = self.book.flatTableOfContents.filter {
+            ($0.level ?? 0) < rootTocLevel
+        }
+        
         self.tocItems.forEach {
             let bookTocIndexPathRow = self.book.findPageByResource($0)
             if let bookId = self.folioReader.readerContainer?.book.name?.deletingPathExtension {
@@ -105,14 +107,20 @@ class FolioReaderBookList: UICollectionViewController {
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         
-        let minWidth = 200.0
-        
-        let itemCount = floor(self.collectionView.frame.size.width / minWidth)
-        let itemWidth = floor((self.collectionView.frame.size.width - layout.minimumInteritemSpacing*(itemCount-1)) / itemCount)
-        let itemHeight = itemWidth * 1.333 + 80
-        layout.itemSize = .init(width: itemWidth, height: itemHeight)
-        
-//        layout.invalidateLayout()
+        if self.folioReader.currentNavigationMenuBookListSyle == 0 {    //grid
+            let minWidth = 200.0
+            
+            let itemCount = floor(self.collectionView.frame.size.width / minWidth)
+            let itemWidth = floor((self.collectionView.frame.size.width - layout.minimumInteritemSpacing*(itemCount-1)) / itemCount)
+            let itemHeight = itemWidth * 1.333 + 80
+            layout.itemSize = .init(width: itemWidth, height: itemHeight)
+            layout.minimumLineSpacing = 16
+        } else {    //list
+            let itemWidth = self.collectionView.frame.size.width
+            let itemHeight = 64.0
+            layout.itemSize = .init(width: itemWidth, height: itemHeight)
+            layout.minimumLineSpacing = 0
+        }
     }
 
     // MARK: - collection view data source
@@ -166,10 +174,22 @@ class FolioReaderBookList: UICollectionViewController {
         
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
-        cell.contentView.backgroundColor = UIColor.clear
-        cell.backgroundColor = UIColor.clear
         
         cell.coverImage.image = nil
+        
+        if tocReference.level != self.folioReader.structuralTrackingTocLevel.rawValue - 1 {
+            cell.positionLabel.isHidden = true
+            cell.percentageLabel.isHidden = true
+            cell.contentView.backgroundColor = UIColor(white: 0.7, alpha: 0.1)
+            cell.backgroundColor = UIColor(white: 0.7, alpha: 0.1)
+        } else {
+            cell.positionLabel.isHidden = false
+            cell.percentageLabel.isHidden = false
+            cell.contentView.backgroundColor = .clear
+            cell.backgroundColor = UIColor.clear
+        }
+        
+        guard self.folioReader.currentNavigationMenuBookListSyle == 0 else { return cell }
         
         DispatchQueue.global(qos: .userInitiated).async {
             guard let book = self.folioReader.readerContainer?.book,
@@ -183,7 +203,7 @@ class FolioReaderBookList: UICollectionViewController {
             var imgNodes = [AEXMLElement]()
             var coverURL = opfURL
             
-            for page in (max(0,tocPage-2) ... tocPage).reversed() {
+            for page in (max(0,tocPage-1) ... tocPage).reversed() {
                 let resource = book.spine.spineReferences[page].resource
                 let entryURL = URL(fileURLWithPath: resource.href, isDirectory: false, relativeTo: opfURL)
                 guard let entry = archive[entryURL.path.trimmingCharacters(in: ["/"])] else { continue }
@@ -227,8 +247,13 @@ class FolioReaderBookList: UICollectionViewController {
 
     // MARK: - Table view delegate
 
+    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
+        let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
+        return tocItems[indexPath.row].level == rootTocLevel - 1
+    }
+    
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let tocReference = tocItems[(indexPath as NSIndexPath).row]
+        let tocReference = tocItems[indexPath.row]
         if let position = tocPositions[tocReference] {
             self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
         }

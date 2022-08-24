@@ -395,6 +395,19 @@ extension FolioReader {
         }
     }
     
+    /**
+     0: Grid
+     1: List
+     */
+    open var currentNavigationMenuBookListSyle: Int {
+        get {
+            return delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuBookListSyle: 0) ?? 0
+        }
+        set (value) {
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentNavigationMenuBookListStyle: value)
+        }
+    }
+    
     open var currentVMarginLinked: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentVMarginLinked: true) ?? true

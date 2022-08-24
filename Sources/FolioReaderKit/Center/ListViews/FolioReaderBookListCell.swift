@@ -19,7 +19,6 @@ class FolioReaderBookListCell: UICollectionViewCell {
         
         self.titleLabel.font = UIFont(name: "Avenir", size: 19.0)
         self.titleLabel.adjustsFontSizeToFitWidth = true
-        self.titleLabel.textAlignment = .center
         self.titleLabel.lineBreakMode = .byWordWrapping
         self.titleLabel.numberOfLines = 1
 
@@ -27,7 +26,6 @@ class FolioReaderBookListCell: UICollectionViewCell {
 
         self.positionLabel.lineBreakMode = .byWordWrapping
         self.positionLabel.numberOfLines = 1
-        self.positionLabel.textAlignment = .left
         
         self.percentageLabel.lineBreakMode = .byWordWrapping
         self.percentageLabel.numberOfLines = 1
@@ -40,25 +38,50 @@ class FolioReaderBookListCell: UICollectionViewCell {
     }
     
     func setup(withConfiguration readerConfig: FolioReaderConfig) {
-        self.titleLabel.frame = .init(x: 8, y: 8, width: self.frame.width - 16, height: 32)
-        self.titleLabel.textColor = readerConfig.menuTextColor
+        if self.frame.height > 200 {
+            self.titleLabel.frame = .init(x: 16, y: 8, width: self.frame.width - 16, height: 32)
+            self.titleLabel.textAlignment = .center
 
-        self.coverImage.frame = .init(x: 16, y: 40, width: self.frame.width - 32, height: self.frame.height - 80)
+            self.coverImage.frame = .init(x: 16, y: 40, width: self.frame.width - 32, height: self.frame.height - 80)
+            
+            self.positionLabel.frame = .init(
+                x: 16,
+                y: self.coverImage.frame.maxY + 2,
+                width: self.frame.width - 32 - 80,
+                height: 28
+            )
+            self.positionLabel.textAlignment = .left
+            
+            self.percentageLabel.frame = .init(
+                x: self.frame.width - 16 - 80,
+                y: self.coverImage.frame.maxY + 2,
+                width: 80,
+                height: 28
+            )
+        } else {
+            self.titleLabel.frame = .init(x: 16, y: 8, width: self.frame.width - 16, height: 32)
+            self.titleLabel.textAlignment = .left
+
+            self.coverImage.frame = .zero
+            
+            self.positionLabel.frame = .init(
+                x: self.frame.width - 120 - 16,
+                y: 2,
+                width: 120,
+                height: 28
+            )
+            self.positionLabel.textAlignment = .right
+            
+            self.percentageLabel.frame = .init(
+                x: self.frame.width - 120 - 16,
+                y: self.positionLabel.frame.maxY + 4,
+                width: 120,
+                height: 28
+            )
+        }
         
-        self.positionLabel.frame = .init(
-            x: 16,
-            y: self.coverImage.frame.maxY + 2,
-            width: self.frame.width - 32 - 80,
-            height: 28
-        )
+        self.titleLabel.textColor = readerConfig.menuTextColor
         self.positionLabel.textColor = readerConfig.menuTextColor
-        
-        self.percentageLabel.frame = .init(
-            x: self.frame.width - 16 - 80,
-            y: self.coverImage.frame.maxY + 2,
-            width: 80,
-            height: 28
-        )
         self.percentageLabel.textColor = readerConfig.menuTextColor
     }
 

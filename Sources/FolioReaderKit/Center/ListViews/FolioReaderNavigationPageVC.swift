@@ -92,6 +92,17 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         let navText = self.folioReader.isNight(UIColor.white, UIColor.black)
         let font = UIFont(name: "Avenir-Light", size: 17)!
         setTranslucentNavigation(false, color: navBackground, tintColor: tintColor, titleColor: navText, andFont: font)
+        
+        if self.index == viewList.firstIndex(of: viewControllerZero) {
+            self.navigationItem.rightBarButtonItem = UIBarButtonItem(
+                title: self.folioReader.currentNavigationMenuBookListSyle == 0 ? "List" : "Grid",
+                style: .plain,
+                target: self,
+                action: #selector(switchBookListStyle(_:))
+            )
+        } else {
+            self.navigationItem.rightBarButtonItem = nil
+        }
     }
 
     // MARK: - Segmented control changes
@@ -101,6 +112,7 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         self.index = sender.selectedSegmentIndex
         setViewControllers([viewList[index]], direction: direction, animated: true, completion: nil)
         self.folioReader.currentNavigationMenuIndex = index
+        configureNavBar()
     }
 
     // MARK: - Status Bar
@@ -108,6 +120,21 @@ class FolioReaderNavigationPageVC: UIPageViewController {
     override var preferredStatusBarStyle : UIStatusBarStyle {
         return self.folioReader.isNight(.lightContent, .default)
     }
+    
+    // MARK: - NavBar Button
+    
+    @objc func switchBookListStyle(_ sender: UIBarButtonItem) {
+        if self.folioReader.currentNavigationMenuBookListSyle == 0 {
+            self.folioReader.currentNavigationMenuBookListSyle = 1
+        } else {
+            self.folioReader.currentNavigationMenuBookListSyle = 0
+        }
+        configureNavBar()
+        guard let bookList = self.viewControllerZero as? FolioReaderBookList else { return }
+        //bookList.collectionViewLayout.invalidateLayout()
+        bookList.collectionView.reloadData()
+    }
+    
 }
 
 // MARK: UIPageViewControllerDelegate

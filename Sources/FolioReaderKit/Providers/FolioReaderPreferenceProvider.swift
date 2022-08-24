@@ -53,6 +53,10 @@ import Foundation
     
     @objc func preference(setCurrentAnnotationMenuIndex value: Int)
     
+    @objc func preference(currentNavigationMenuBookListSyle defaults: Int) -> Int
+    
+    @objc func preference(setCurrentNavigationMenuBookListStyle value: Int)
+    
     @objc func preference(currentVMarginLinked defaults: Bool) -> Bool
     
     @objc func preference(setCurrentVMarginLinked value: Bool)
@@ -221,6 +225,14 @@ public class FolioReaderDummyPreferenceProvider: FolioReaderPreferenceProvider {
     }
     
     public func preference(setCurrentAnnotationMenuIndex value: Int) {
+        
+    }
+    
+    public func preference(currentNavigationMenuBookListSyle defaults: Int) -> Int {
+        return defaults
+    }
+    
+    public func preference(setCurrentNavigationMenuBookListStyle value: Int) {
         
     }
     
