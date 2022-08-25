@@ -131,9 +131,20 @@ open class FRBook: NSObject {
             
             let bookTocSpineIndex = self.findPageByResource(bundleRootTableOfContents[bookTocIndex])
             let bookTocAfterSpineIndex = self.findPageByResource(bundleRootTableOfContents[bookTocAfterIndex])
-                
+            
             let bookTocSizeUpto = spine.spineReferences[bookTocSpineIndex].sizeUpTo
-            let bookTocAfterSizeUpto = spine.spineReferences[bookTocAfterSpineIndex].sizeUpTo
+            var bookTocAfterSizeUpto = spine.spineReferences[bookTocAfterSpineIndex].sizeUpTo
+            
+            var bookTocParent = bundleRootTableOfContents[bookTocIndex].parent
+            var bookTocAfterParent = bundleRootTableOfContents[bookTocAfterIndex].parent
+            while bookTocParent != bookTocAfterParent {
+                if let parent = bookTocAfterParent {
+                    let parentIndex = self.findPageByResource(parent)
+                    bookTocAfterSizeUpto = spine.spineReferences[parentIndex].sizeUpTo
+                }
+                bookTocParent = bookTocParent?.parent
+                bookTocAfterParent = bookTocAfterParent?.parent
+            }
             
             return bookTocAfterSpineIndex == bookTocSpineIndex ? spine.size - bookTocSizeUpto : bookTocAfterSizeUpto - bookTocSizeUpto
         }
