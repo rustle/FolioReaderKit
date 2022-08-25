@@ -107,7 +107,6 @@ class FolioReaderBookList: UICollectionViewController {
                 else { return }
                 partialResult[tocRef] = readPosition
             })
-            break;
         case .atom:
             break
         }
@@ -336,6 +335,21 @@ class FolioReaderBookList: UICollectionViewController {
         collectionView.deselectItem(at: indexPath, animated: true)
         dismiss { 
             self.delegate?.bookList(didDismissedBookList: self)
+        }
+    }
+}
+
+extension FolioReaderBookList {
+    open func pickRandomTopic() {
+        guard let index = self.tocItems.indices.randomElement(),
+              let section = self.sectionTocItems.indices.randomElement(),
+              let sectionItem = self.sectionTocItems[section].1.indices.randomElement()
+        else { return }
+        
+        if sectionTocItems.isEmpty {
+            self.collectionView(self.collectionView, didSelectItemAt: IndexPath(row: index, section: 0))
+        } else {
+            self.collectionView(self.collectionView, didSelectItemAt: IndexPath(row: sectionItem, section: section))
         }
     }
 }
