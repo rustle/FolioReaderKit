@@ -93,14 +93,25 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         let font = UIFont(name: "Avenir-Light", size: 17)!
         setTranslucentNavigation(false, color: navBackground, tintColor: tintColor, titleColor: navText, andFont: font)
         
-        if self.index == viewList.firstIndex(of: viewControllerZero),
-           self.folioReader.structuralStyle == .bundle {
-            self.navigationItem.rightBarButtonItem = UIBarButtonItem(
-                title: self.folioReader.currentNavigationMenuBookListSyle == .Grid ? "List" : "Grid",
-                style: .plain,
-                target: self,
-                action: #selector(switchBookListStyle(_:))
-            )
+        if self.index == viewList.firstIndex(of: viewControllerZero) {
+            switch self.folioReader.structuralStyle {
+            case .bundle:
+                self.navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    title: self.folioReader.currentNavigationMenuBookListSyle == .Grid ? "List" : "Grid",
+                    style: .plain,
+                    target: self,
+                    action: #selector(switchBookListStyle(_:))
+                )
+            case .topic:
+                self.navigationItem.rightBarButtonItem = UIBarButtonItem(
+                    title: "Random",
+                    style: .plain,
+                    target: self,
+                    action: #selector(randomTopic(_:))
+                )
+            case .atom:
+                break
+            }
         } else {
             self.navigationItem.rightBarButtonItem = nil
         }
@@ -134,6 +145,11 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         guard let bookList = self.viewControllerZero as? FolioReaderBookList else { return }
         //bookList.collectionViewLayout.invalidateLayout()
         bookList.collectionView.reloadData()
+    }
+    
+    @objc func randomTopic(_ sender: UIBarButtonItem) {
+        guard let bookList = self.viewControllerZero as? FolioReaderBookList else { return }
+        bookList.pickRandomTopic()
     }
     
 }
