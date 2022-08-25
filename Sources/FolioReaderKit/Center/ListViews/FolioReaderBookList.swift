@@ -42,7 +42,6 @@ class FolioReaderBookList: UICollectionViewController {
         layout.itemSize = .init(width: 300, height: 400)
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .vertical
-        layout.headerReferenceSize = .init(width: 200, height: 40)
         
         super.init(collectionViewLayout: layout)
     }
@@ -159,11 +158,17 @@ class FolioReaderBookList: UICollectionViewController {
             let itemHeight = itemWidth * 1.333 + 80
             layout.itemSize = .init(width: itemWidth, height: itemHeight)
             layout.minimumLineSpacing = 16
+            layout.headerReferenceSize = .zero
         case .List:
             let itemWidth = self.collectionView.frame.size.width
             let itemHeight = 64.0
             layout.itemSize = .init(width: itemWidth, height: itemHeight)
             layout.minimumLineSpacing = 0
+            if self.folioReader.structuralTrackingTocLevel == .level1 {
+                layout.headerReferenceSize = .zero
+            } else {
+                layout.headerReferenceSize = .init(width: 200, height: 40)
+            }
         }
     }
 
@@ -304,7 +309,7 @@ class FolioReaderBookList: UICollectionViewController {
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: kReuseHeaderFooterIdentifier, for: indexPath)
         
         guard let cell = headerView as? FolioReaderBookListHeader else { return headerView }
-        var sectionToc: FRTocReference? = self.sectionTocItems[indexPath.section].0
+        var sectionToc: FRTocReference? = self.sectionTocItems[safe: indexPath.section]?.0
         var titles = [String]()
         while let title = sectionToc?.title {
             titles.append(title)
