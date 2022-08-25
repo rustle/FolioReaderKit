@@ -25,6 +25,7 @@ import AEXML
 class FolioReaderBookList: UICollectionViewController {
     weak var delegate: FolioReaderBookListDelegate?
     fileprivate var tocItems = [FRTocReference]()
+    fileprivate var sectionTocItems = [(FRTocReference, [FRTocReference])]()
     fileprivate var tocPositions = [FRTocReference: FolioReaderReadPosition]()
     fileprivate var book: FRBook
     fileprivate var readerConfig: FolioReaderConfig
@@ -41,6 +42,7 @@ class FolioReaderBookList: UICollectionViewController {
         layout.itemSize = .init(width: 300, height: 400)
         layout.minimumInteritemSpacing = 0
         layout.scrollDirection = .vertical
+        layout.headerReferenceSize = .init(width: 200, height: 40)
         
         super.init(collectionViewLayout: layout)
     }
@@ -54,31 +56,35 @@ class FolioReaderBookList: UICollectionViewController {
 
         // Register cell classes
         self.collectionView.register(FolioReaderBookListCell.self, forCellWithReuseIdentifier: kReuseCellIdentifier)
+        self.collectionView.register(FolioReaderBookListHeader.self, forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: kReuseHeaderFooterIdentifier)
         self.collectionView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
 
         // Create TOC list
         guard self.folioReader.structuralStyle == .bundle else { return }
         let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
         
-        self.tocItems = self.book.flatTableOfContents.filter {
-            ($0.level ?? 0) < rootTocLevel
-        }
-        
-        self.tocItems.forEach {
-            let bookTocIndexPathRow = self.book.findPageByResource($0)
-            if let bookId = self.folioReader.readerContainer?.book.name?.deletingPathExtension {
-                let bookTocPageNumber = bookTocIndexPathRow + 1
-                if let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber) {
-                    self.tocPositions[$0] = readPosition
-                }
+        self.sectionTocItems = self.book.flatTableOfContents.reduce(into: [], { partialResult, tocRef in
+            guard let tocLevel = tocRef.level,
+                  tocLevel == rootTocLevel - 1 else { return }
+            
+            self.tocItems.append(tocRef)
+            
+            guard let tocParent = tocRef.parent else { return }
+            
+            if partialResult.last?.0 != tocParent {
+                partialResult.append((tocParent, []))
             }
-        }
-        // Jump to the current book
-        DispatchQueue.main.async {
-            guard let index = self.tocItems.firstIndex(where: { self.highlightResourceIds.contains($0.resource?.id ?? "___NIL___") }) else { return }
-            let indexPath = IndexPath(row: index, section: 0)
-            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
-        }
+            partialResult[partialResult.endIndex - 1].1.append(tocRef)
+        })
+        
+        guard let bookId = self.folioReader.readerConfig?.identifier else { return }
+        self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
+            let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
+            let bookTocPageNumber = bookTocIndexPathRow + 1
+            guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
+            else { return }
+            partialResult[tocRef] = readPosition
+        })
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -93,21 +99,34 @@ class FolioReaderBookList: UICollectionViewController {
         super.viewDidAppear(animated)
         
         // Jump to the current book
-        DispatchQueue.main.async {
-            guard let currentPageNumber = self.folioReader.readerCenter?.currentPageNumber,
-                  let reference = self.book.spine.spineReferences[safe: currentPageNumber - 1],
-                  let index = self.tocItems.firstIndex(where: { $0.resource == reference.resource })
-            else { return }
-            
-            let indexPath = IndexPath(row: index, section: 0)
-            self.collectionView.scrollToItem(at: indexPath, at: .centeredHorizontally, animated: true)
+        delay(0.2) {
+            guard let index = self.tocItems.firstIndex(where: { self.highlightResourceIds.contains($0.resource?.id ?? "___NIL___") }) else { return }
+            guard let indexPath = { () -> IndexPath? in
+            switch self.folioReader.currentNavigationMenuBookListSyle {
+            case .Grid:
+                return IndexPath(row: index, section: 0)
+            case .List:
+                if self.sectionTocItems.isEmpty {
+                    return IndexPath(row: index, section: 0)
+                } else {
+                    let tocRef = self.tocItems[index]
+                    guard let tocParent = tocRef.parent,
+                          let section = self.sectionTocItems.firstIndex(where: { $0.0 == tocParent }),
+                          let row = self.sectionTocItems[section].1.firstIndex(of: tocRef)
+                    else { return nil }
+                    return IndexPath(row: row, section: section)
+                }
+            }
+            }() else { return }
+            self.collectionView.scrollToItem(at: indexPath, at: .centeredVertically, animated: true)
         }
     }
     
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         
-        if self.folioReader.currentNavigationMenuBookListSyle == 0 {    //grid
+        switch self.folioReader.currentNavigationMenuBookListSyle {
+        case .Grid:
             let minWidth = 200.0
             
             let itemCount = floor(self.collectionView.frame.size.width / minWidth)
@@ -115,7 +134,7 @@ class FolioReaderBookList: UICollectionViewController {
             let itemHeight = itemWidth * 1.333 + 80
             layout.itemSize = .init(width: itemWidth, height: itemHeight)
             layout.minimumLineSpacing = 16
-        } else {    //list
+        case .List:
             let itemWidth = self.collectionView.frame.size.width
             let itemHeight = 64.0
             layout.itemSize = .init(width: itemWidth, height: itemHeight)
@@ -125,20 +144,38 @@ class FolioReaderBookList: UICollectionViewController {
 
     // MARK: - collection view data source
     override func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1
+        switch self.folioReader.currentNavigationMenuBookListSyle {
+        case .Grid:
+            return 1
+        case .List:
+            return sectionTocItems.isEmpty ? 1 : sectionTocItems.count
+        }
     }
     
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return tocItems.count
+        switch self.folioReader.currentNavigationMenuBookListSyle {
+        case .Grid:
+            return tocItems.count
+        case .List:
+            return sectionTocItems.isEmpty ? tocItems.count : sectionTocItems[section].1.count
+        }
     }
-
+    
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderBookListCell
 
         cell.setup(withConfiguration: self.readerConfig)
-        let tocReference = tocItems[indexPath.row]
+        guard let tocReference = { () -> FRTocReference? in
+            switch self.folioReader.currentNavigationMenuBookListSyle{
+            case .Grid:
+                return tocItems[indexPath.row]
+            case .List:
+                return sectionTocItems.isEmpty ? tocItems[indexPath.row] : sectionTocItems[indexPath.section].1[indexPath.row]
+            }
+        }()
+        else { return cell }
 
-        cell.titleLabel.text = Array.init(repeating: " ", count: (tocReference.level ?? 0) * 2).joined() + tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        cell.titleLabel.text = tocReference.title.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Add audio duration for Media Ovelay
         if let resource = tocReference.resource {
@@ -177,19 +214,12 @@ class FolioReaderBookList: UICollectionViewController {
         
         cell.coverImage.image = nil
         
-        if tocReference.level != self.folioReader.structuralTrackingTocLevel.rawValue - 1 {
-            cell.positionLabel.isHidden = true
-            cell.percentageLabel.isHidden = true
-            cell.contentView.backgroundColor = UIColor(white: 0.7, alpha: 0.1)
-            cell.backgroundColor = UIColor(white: 0.7, alpha: 0.1)
-        } else {
-            cell.positionLabel.isHidden = false
-            cell.percentageLabel.isHidden = false
-            cell.contentView.backgroundColor = .clear
-            cell.backgroundColor = UIColor.clear
-        }
+        cell.positionLabel.isHidden = false
+        cell.percentageLabel.isHidden = false
+        cell.contentView.backgroundColor = .clear
+        cell.backgroundColor = UIColor.clear
         
-        guard self.folioReader.currentNavigationMenuBookListSyle == 0 else { return cell }
+        guard self.folioReader.currentNavigationMenuBookListSyle == .Grid else { return cell }
         
         DispatchQueue.global(qos: .userInitiated).async {
             guard let book = self.folioReader.readerContainer?.book,
@@ -245,15 +275,33 @@ class FolioReaderBookList: UICollectionViewController {
         return cell
     }
 
-    // MARK: - Table view delegate
-
-    override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
-        return tocItems[indexPath.row].level == rootTocLevel - 1
+    override func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: kReuseHeaderFooterIdentifier, for: indexPath)
+        
+        guard let cell = headerView as? FolioReaderBookListHeader else { return headerView }
+        var sectionToc: FRTocReference? = self.sectionTocItems[indexPath.section].0
+        var titles = [String]()
+        while let title = sectionToc?.title {
+            titles.append(title)
+            sectionToc = sectionToc?.parent
+        }
+        cell.label.text = titles.reversed().joined(separator: " - ")
+        
+        return cell
     }
     
+    // MARK: - Table view delegate
+
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        let tocReference = tocItems[indexPath.row]
+        
+        let tocReference = { () -> FRTocReference in
+            switch self.folioReader.currentNavigationMenuBookListSyle {
+            case .Grid:
+                return self.tocItems[indexPath.row]
+            case .List:
+                return self.sectionTocItems.isEmpty ? self.tocItems[indexPath.row] : self.sectionTocItems[indexPath.section].1[indexPath.row]
+            }
+        }()
         if let position = tocPositions[tocReference] {
             self.folioReader.readerCenter?.currentWebViewScrollPositions[position.pageNumber - 1] = position
         }

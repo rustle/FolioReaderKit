@@ -89,3 +89,20 @@ class FolioReaderBookListCell: UICollectionViewCell {
         fatalError("storyboards are incompatible with truth and beauty")
     }
 }
+
+class FolioReaderBookListHeader: UICollectionViewCell {
+    let label = UILabel()
+    
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        
+        self.label.frame = .init(x: 8, y: 4, width: frame.width-16, height: 32)
+        self.contentView.addSubview(label)
+        
+        self.contentView.backgroundColor = .init(white: 0.7, alpha: 0.2)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}

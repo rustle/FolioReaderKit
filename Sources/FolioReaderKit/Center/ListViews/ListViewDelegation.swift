@@ -52,21 +52,6 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
 extension FolioReaderCenter: FolioReaderBookListDelegate {
     func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
-
-//        let item = findPageByResource(reference)
-//
-//        if item < totalPages {
-//            let indexPath = IndexPath(row: item, section: 0)
-//            changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in
-//                //self.updateCurrentPage(navigating: indexPath) //no need
-//                self.currentPage?.updatePageInfo {
-//                    self.currentPage?.updatePageOffsetRate()
-//                }
-//            })
-//            tempReference = reference
-//        } else {
-//            print("Failed to load book because the requested resource is missing.")
-//        }
         
         func countTocChild(_ item: FRTocReference) -> [FRTocReference] {
             var tocItems = [FRTocReference]()
@@ -84,7 +69,7 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
         
         let resourceSet = Set<String>(tocItems.compactMap { $0.resource?.href })
         
-        var indexPath = indexPath
+        var indexPath: IndexPath?
         if let position = self.currentWebViewScrollPositions.filter ({
             guard let href = self.book.spine.spineReferences[safe: $0.key]?.resource.href else { return false }
             return resourceSet.contains(href)
@@ -100,6 +85,10 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
             tempReference = reference
         }
         
+        guard let indexPath = indexPath else {
+            return
+        }
+
         self.currentPage?.pushNavigateWebViewScrollPositions()
         
         changePageWith(indexPath: indexPath, animated: true, completion: { () -> Void in

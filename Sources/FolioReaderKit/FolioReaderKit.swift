@@ -97,6 +97,11 @@ public enum StyleOverrideTypes: Int, CaseIterable {
     }
 }
 
+public enum NavigationMenuBookListStyle: Int, CaseIterable {
+    case Grid = 0
+    case List = 1
+}
+
 /// FolioReader actions delegate
 @objc public protocol FolioReaderDelegate: AnyObject {
     
@@ -399,12 +404,16 @@ extension FolioReader {
      0: Grid
      1: List
      */
-    open var currentNavigationMenuBookListSyle: Int {
+    open var currentNavigationMenuBookListSyle: NavigationMenuBookListStyle {
         get {
-            return delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuBookListSyle: 0) ?? 0
+            let defaults: NavigationMenuBookListStyle = self.structuralTrackingTocLevel == .level1 ? .Grid : .List
+            guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuBookListSyle: defaults.rawValue),
+                  let style = NavigationMenuBookListStyle(rawValue: rawValue)
+            else { return defaults }
+            return style
         }
         set (value) {
-            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentNavigationMenuBookListStyle: value)
+            delegate?.folioReaderPreferenceProvider?(self).preference(setCurrentNavigationMenuBookListStyle: value.rawValue)
         }
     }
     
