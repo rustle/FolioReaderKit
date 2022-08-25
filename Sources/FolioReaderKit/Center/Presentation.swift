@@ -31,6 +31,9 @@ extension FolioReaderCenter {
         if self.folioReader.structuralStyle == .bundle {
             pageController.segmentedControlItems.insert(readerConfig.localizedBooksTitle, at: 0)
         }
+        if self.folioReader.structuralStyle == .topic {
+            pageController.segmentedControlItems.insert(readerConfig.localizedTopicsTitle, at: 0)
+        }
         
         let nav = UINavigationController(rootViewController: pageController)
         present(nav, animated: true, completion: nil)

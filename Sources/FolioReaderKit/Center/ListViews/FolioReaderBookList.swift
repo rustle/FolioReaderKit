@@ -60,31 +60,57 @@ class FolioReaderBookList: UICollectionViewController {
         self.collectionView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
 
         // Create TOC list
-        guard self.folioReader.structuralStyle == .bundle else { return }
-        let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
-        
-        self.sectionTocItems = self.book.flatTableOfContents.reduce(into: [], { partialResult, tocRef in
-            guard let tocLevel = tocRef.level,
-                  tocLevel == rootTocLevel - 1 else { return }
+        switch self.folioReader.structuralStyle {
+        case .bundle:
+            let rootTocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
+            self.sectionTocItems = self.book.flatTableOfContents.reduce(into: [], { partialResult, tocRef in
+                guard let tocLevel = tocRef.level,
+                      tocLevel == rootTocLevel - 1 else { return }
+                
+                self.tocItems.append(tocRef)
+                
+                guard let tocParent = tocRef.parent else { return }
+                
+                if partialResult.last?.0 != tocParent {
+                    partialResult.append((tocParent, []))
+                }
+                partialResult[partialResult.endIndex - 1].1.append(tocRef)
+            })
             
-            self.tocItems.append(tocRef)
+            guard let bookId = self.folioReader.readerConfig?.identifier else { return }
+            self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
+                let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
+                let bookTocPageNumber = bookTocIndexPathRow + 1
+                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
+                else { return }
+                partialResult[tocRef] = readPosition
+            })
+        case .topic:
+            self.sectionTocItems = self.book.flatTableOfContents.reduce(into: [], { partialResult, tocRef in
+                guard tocRef.children.isEmpty else { return }
+                
+                self.tocItems.append(tocRef)
+                
+                guard let tocParent = tocRef.parent else { return }
+                
+                if partialResult.last?.0 != tocParent {
+                    partialResult.append((tocParent, []))
+                }
+                partialResult[partialResult.endIndex - 1].1.append(tocRef)
+            })
             
-            guard let tocParent = tocRef.parent else { return }
-            
-            if partialResult.last?.0 != tocParent {
-                partialResult.append((tocParent, []))
-            }
-            partialResult[partialResult.endIndex - 1].1.append(tocRef)
-        })
-        
-        guard let bookId = self.folioReader.readerConfig?.identifier else { return }
-        self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
-            let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
-            let bookTocPageNumber = bookTocIndexPathRow + 1
-            guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
-            else { return }
-            partialResult[tocRef] = readPosition
-        })
+            guard let bookId = self.folioReader.readerConfig?.identifier else { return }
+            self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
+                let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
+                let bookTocPageNumber = bookTocIndexPathRow + 1
+                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
+                else { return }
+                partialResult[tocRef] = readPosition
+            })
+            break;
+        case .atom:
+            break
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {

@@ -55,7 +55,7 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         viewControllerTwo.didMove(toParent: self)
 //        viewControllerThree.didMove(toParent: self)
         
-        if self.folioReader.structuralStyle == .bundle {
+        if self.folioReader.structuralStyle == .bundle || self.folioReader.structuralStyle == .topic {
             viewList.insert(viewControllerZero, at: 0)
             viewControllerZero.didMove(toParent: self)
         }
@@ -93,7 +93,8 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         let font = UIFont(name: "Avenir-Light", size: 17)!
         setTranslucentNavigation(false, color: navBackground, tintColor: tintColor, titleColor: navText, andFont: font)
         
-        if self.index == viewList.firstIndex(of: viewControllerZero) {
+        if self.index == viewList.firstIndex(of: viewControllerZero),
+           self.folioReader.structuralStyle == .bundle {
             self.navigationItem.rightBarButtonItem = UIBarButtonItem(
                 title: self.folioReader.currentNavigationMenuBookListSyle == .Grid ? "List" : "Grid",
                 style: .plain,

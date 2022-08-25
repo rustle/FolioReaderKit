@@ -406,6 +406,9 @@ extension FolioReader {
      */
     open var currentNavigationMenuBookListSyle: NavigationMenuBookListStyle {
         get {
+            guard self.structuralStyle == .bundle else {
+                return .List
+            }
             let defaults: NavigationMenuBookListStyle = self.structuralTrackingTocLevel == .level1 ? .Grid : .List
             guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuBookListSyle: defaults.rawValue),
                   let style = NavigationMenuBookListStyle(rawValue: rawValue)
