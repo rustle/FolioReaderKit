@@ -1666,8 +1666,6 @@ writingMode
                     self.scrollPageToOffset(offset + webView.frame.width, animated: animated)
                 }
             }
-
-            
             
             self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: self.pageNumber - 1)
             
