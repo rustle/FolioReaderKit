@@ -1625,12 +1625,12 @@ writingMode
      - parameter avoidBeginningAnchors: Sometimes the anchor is on the beggining of the text, there is not need to scroll
      - parameter animated:              Enable or not scrolling animation
      */
-    open func handleAnchor(_ anchor: String, offsetInWindow: CGFloat, avoidBeginningAnchors: Bool, animated: Bool) {
+    open func handleAnchor(_ anchor: String, offsetInWindow: CGFloat, avoidBeginningAnchors: Bool, animated: Bool, completion: (() -> Void)? = nil) {
         guard !anchor.isEmpty else { return }
         
         guard let webView = webView, webView.isHidden == false, self.layoutAdapting == false else {
             delay(0.1) {
-                self.handleAnchor(anchor, offsetInWindow: offsetInWindow, avoidBeginningAnchors: avoidBeginningAnchors, animated: animated)
+                self.handleAnchor(anchor, offsetInWindow: offsetInWindow, avoidBeginningAnchors: avoidBeginningAnchors, animated: animated, completion: completion)
             }
             return
         }
@@ -1670,6 +1670,8 @@ writingMode
             self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: self.pageNumber - 1)
             
             self.webView?.js("highlightAnchorText('\(anchor)', 'highlight-yellow', 3)")
+            
+            completion?()
         }
     }
 

@@ -58,11 +58,23 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
 //        }
         // Go to fragment if needed
         if let fragmentID = tempFragment, let currentPage = currentPage, fragmentID != "" {
-            currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
-            tempFragment = nil
+            currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
+                self.tempFragment = nil
+                delay(0.5) {
+                    page.getWebViewScrollPosition { position in
+                        self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+                    }
+                }
+            }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1],
                   position.cfi.starts(with: "epubcfi(") {
-            page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true)
+            page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
+                delay(0.5) {
+                    page.getWebViewScrollPosition { position in
+                        self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+                    }
+                }
+            }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1] {
             folioLogger("bridgeFinished isFirstLoad pageNumber=\(page.pageNumber)")
             
@@ -100,7 +112,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 }
                 page.pageOffsetRate = pageOffset / page.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
                 page.scrollWebViewByPageOffsetRate(animated: false) {
-                    delay(2.0) {
+                    delay(0.5) {
                         page.getWebViewScrollPosition { position in
                             self.currentWebViewScrollPositions[page.pageNumber - 1] = position
                         }
