@@ -242,12 +242,14 @@ class FolioReaderBookList: UICollectionViewController {
         cell.layoutMargins = UIEdgeInsets.zero
         cell.preservesSuperviewLayoutMargins = false
         
-        cell.coverImage.image = nil
         
         cell.positionLabel.isHidden = false
         cell.percentageLabel.isHidden = false
         cell.contentView.backgroundColor = .clear
         cell.backgroundColor = UIColor.clear
+        
+        cell.coverImage.image = nil
+        let titleLabelText = cell.titleLabel.text
         
         guard self.folioReader.currentNavigationMenuBookListSyle == .Grid else { return cell }
         
@@ -297,6 +299,9 @@ class FolioReaderBookList: UICollectionViewController {
             }
             if let image = UIImage(contentsOfFile: tempFile.path) {
                 DispatchQueue.main.async {
+                    guard titleLabelText == cell.titleLabel.text,
+                          cell.coverImage.image == nil
+                    else { return }
                     cell.coverImage.image = image
                 }
             }
