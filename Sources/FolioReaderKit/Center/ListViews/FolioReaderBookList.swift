@@ -32,6 +32,7 @@ class FolioReaderBookList: UICollectionViewController {
     fileprivate var folioReader: FolioReader
     fileprivate var highlightResourceIds = Set<String>()
     fileprivate var layout = UICollectionViewFlowLayout()
+    fileprivate var coverImage: UIImage?
     
     init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderBookListDelegate?) {
         self.readerConfig = readerConfig
@@ -86,7 +87,11 @@ class FolioReaderBookList: UICollectionViewController {
             })
         case .topic:
             self.sectionTocItems = self.book.flatTableOfContents.reduce(into: [], { partialResult, tocRef in
-                guard tocRef.children.isEmpty else { return }
+                guard tocRef.children.isEmpty
+                        || tocRef.children.allSatisfy({ $0.resource?.href == tocRef.resource?.href })
+                else { return }
+                
+                guard self.tocItems.last != tocRef.parent else { return }
                 
                 self.tocItems.append(tocRef)
                 
@@ -108,6 +113,29 @@ class FolioReaderBookList: UICollectionViewController {
             })
         case .atom:
             break
+        }
+        
+        if self.folioReader.structuralStyle == .bundle {
+            //prepare cover image
+            let opfURL = URL(fileURLWithPath: book.opfResource.href, isDirectory: false)
+            
+            guard let bookId = self.folioReader.readerConfig?.identifier,
+                  let imgSrc = book.coverImage?.href,
+                  let archive = book.epubArchive,
+                  let imgEntry = archive[URL(fileURLWithPath: imgSrc, relativeTo: opfURL).path.trimmingCharacters(in: ["/"])]
+            else { return }
+            
+            let tempFile = URL(
+                fileURLWithPath: imgEntry.path,
+                relativeTo: FileManager.default.temporaryDirectory.appendingPathComponent(bookId, isDirectory: true))
+            let tempDir = tempFile.deletingLastPathComponent()
+            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+            
+            if FileManager.default.fileExists(atPath: tempFile.path) == false {
+                let _ = try? archive.extract(imgEntry, to: tempFile)
+            }
+            
+            self.coverImage = UIImage(contentsOfFile: tempFile.path)
         }
     }
 
@@ -254,19 +282,19 @@ class FolioReaderBookList: UICollectionViewController {
         guard self.folioReader.currentNavigationMenuBookListSyle == .Grid else { return cell }
         
         DispatchQueue.global(qos: .userInitiated).async {
-            guard let book = self.folioReader.readerContainer?.book,
-                  let bookId = self.folioReader.readerConfig?.identifier,
-                  let archive = book.threadEpubArchive,
+            guard let bookId = self.folioReader.readerConfig?.identifier,
+                  let archive = self.book.threadEpubArchive,
                   let resource = tocReference.resource,
                   let tocPage = resource.spineIndices.first
             else { return }
             
-            let opfURL = URL(fileURLWithPath: book.opfResource.href, isDirectory: false)
+            let opfURL = URL(fileURLWithPath: self.book.opfResource.href, isDirectory: false)
             var imgNodes = [AEXMLElement]()
             var coverURL = opfURL
             
+            var image: UIImage?
             for page in (max(0,tocPage-1) ... tocPage).reversed() {
-                let resource = book.spine.spineReferences[page].resource
+                let resource = self.book.spine.spineReferences[page].resource
                 let entryURL = URL(fileURLWithPath: resource.href, isDirectory: false, relativeTo: opfURL)
                 guard let entry = archive[entryURL.path.trimmingCharacters(in: ["/"])] else { continue }
                 
@@ -278,32 +306,37 @@ class FolioReaderBookList: UICollectionViewController {
                 
                 imgNodes = xmlDoc.allDescendants { $0.name == "img" || $0.name == "IMG" || $0.name == "image" || $0.name == "IMAGE" }
                 
-                if imgNodes.isEmpty == false {
-                    coverURL = entryURL
-                    break
+                guard imgNodes.isEmpty == false else { continue }
+                
+                coverURL = entryURL
+                
+                guard let imgSrc = imgNodes.first?.attributes["src"] ?? imgNodes.first?.attributes["xlink:href"],
+                      let imgEntry = archive[URL(fileURLWithPath: imgSrc, relativeTo: coverURL).path.trimmingCharacters(in: ["/"])]
+                else { continue }
+                
+                let tempFile = URL(
+                    fileURLWithPath: imgEntry.path,
+                    relativeTo: FileManager.default.temporaryDirectory.appendingPathComponent(bookId, isDirectory: true))
+                let tempDir = tempFile.deletingLastPathComponent()
+                try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
+                
+                if FileManager.default.fileExists(atPath: tempFile.path) == false {
+                    let _ = try? archive.extract(imgEntry, to: tempFile)
                 }
+                
+                guard let tempImage = UIImage(contentsOfFile: tempFile.path),
+                      tempImage.size.width >= 250,
+                      tempImage.size.height >= 300 else { continue }
+                
+                image = tempImage
+                break
             }
             
-            guard let imgSrc = imgNodes.first?.attributes["src"] ?? imgNodes.first?.attributes["xlink:href"] ?? book.coverImage?.href,
-                  let imgEntry = archive[URL(fileURLWithPath: imgSrc, relativeTo: coverURL).path.trimmingCharacters(in: ["/"])]
-            else { return }
-            
-            let tempFile = URL(
-                fileURLWithPath: imgEntry.path,
-                relativeTo: FileManager.default.temporaryDirectory.appendingPathComponent(bookId, isDirectory: true))
-            let tempDir = tempFile.deletingLastPathComponent()
-            try? FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true, attributes: nil)
-            
-            if FileManager.default.fileExists(atPath: tempFile.path) == false {
-                let _ = try? archive.extract(imgEntry, to: tempFile)
-            }
-            if let image = UIImage(contentsOfFile: tempFile.path) {
-                DispatchQueue.main.async {
-                    guard titleLabelText == cell.titleLabel.text,
-                          cell.coverImage.image == nil
-                    else { return }
-                    cell.coverImage.image = image
-                }
+            DispatchQueue.main.async {
+                guard titleLabelText == cell.titleLabel.text,
+                      cell.coverImage.image == nil
+                else { return }
+                cell.coverImage.image = image ?? self.coverImage
             }
         }
         
