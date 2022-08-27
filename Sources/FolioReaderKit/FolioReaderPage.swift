@@ -1273,6 +1273,24 @@ writingMode
             self.folioReader.readerAudioPlayer?.playAudio(href, fragmentID: playID)
 
             return false
+        } else if let referer = request.value(forHTTPHeaderField: "Referer"),
+                  let refererURL = URL(string: referer),
+                  refererURL.host == "localhost",
+                  refererURL.port == readerConfig.serverPort,
+                  url.scheme == "http",
+                  url.host == "localhost",
+                  url.port == readerConfig.serverPort,
+                  let anchorFromURL = url.fragment {
+            self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                let snippetVC = FolioReaderAnchorPreview(self.folioReader, url)
+
+                snippetVC.anchorLabel.text = url.absoluteString
+
+                snippetVC.modalPresentationStyle = .overCurrentContext
+                
+                self.folioReader.readerCenter?.present(snippetVC, animated: true, completion: nil)
+            }
+            return false
         } else if scheme == "file" || (url.scheme == "http" && url.host == "localhost" && (url.port ?? 0) == readerConfig.serverPort) {
             
             if navigationAction.navigationType == .linkActivated {

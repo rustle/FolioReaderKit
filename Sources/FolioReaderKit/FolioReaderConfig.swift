@@ -157,6 +157,13 @@ open class FolioReaderConfig: NSObject {
         UIColor(rgba: "#1E1E1E")
     ]
 
+    open var themeModeTextColor = [
+        UIColor.black,
+        UIColor(rgba: "#5F4B32"),
+        UIColor(rgba: "#37453F"),
+        UIColor(rgba: "#B6B6B6"),
+        UIColor(rgba: "#767676")
+    ]
     
     /// Night mode separator color
     open var nightModeSeparatorColor = UIColor(white: 0.5, alpha: 0.2)
