@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import AEXML
 import SwiftSoup
 
 class FolioReaderAnchorPreview: UIViewController {
@@ -99,13 +98,16 @@ class FolioReaderAnchorPreview: UIViewController {
               var snippet = try? soupElement.text(trimAndNormaliseWhitespace: true)
         else { return }
         
-        
-        
         if snippet.isEmpty
             || (snippetTestRegex?.matches(in: snippet, options: [], range: NSMakeRange(0, snippet.count)).isEmpty == false) {
             var elements = [soupElement as Node]
             while let sibling = elements.last?.nextSibling() {
                 guard sibling.hasAttr("id") == false else { break }
+                if let element = sibling as? Element,
+                   let elementsWithID = try? element.getElementsByAttribute("id"),
+                   elementsWithID.count > 0 {
+                    break
+                }
                 elements.append(sibling)
             }
             
@@ -122,19 +124,6 @@ class FolioReaderAnchorPreview: UIViewController {
         
         anchorLabel.text = snippet.trimmingCharacters(in: .whitespacesAndNewlines)
         anchorLabel.sizeToFit()
-    }
-    
-    func joinElementValue(element: AEXMLElement) -> [String] {
-        var values = [String]()
-        if let value = element.value {
-            values.append(value)
-        }
-        
-        values = element.children.reduce(into: values) { partialResult, child in
-            partialResult.append(contentsOf: joinElementValue(element: child))
-        }
-        
-        return values
     }
     
     @objc func gotoButtonAction(_ sender: UIButton) {

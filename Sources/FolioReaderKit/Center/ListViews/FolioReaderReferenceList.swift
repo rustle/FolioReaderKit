@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import AEXML
+import SwiftSoup
 
 class FolioReaderReferenceList: UITableViewController {
 
@@ -51,37 +51,36 @@ class FolioReaderReferenceList: UITableViewController {
     }
 
     func loadSection(bookId: String, book: FRBook, pageNumber: Int, refText: String, deepest: FolioReaderBookmark) -> [FolioReaderBookmark] {
+        var epubEntryData = Data()
+        
         guard let epubArchive = book.threadEpubArchive,
               let spine = book.spine.spineReferences[safe: pageNumber - 1],
-              let epubEntry = epubArchive[book.opfResource.href.deletingLastPathComponent.trimmingCharacters(in: ["/"]) + "/" + spine.resource.href.trimmingCharacters(in: ["/"])]
+              let opfURL = URL(fileURLWithPath: book.opfResource.href, isDirectory: false) as URL?,
+              let spineURL = URL(fileURLWithPath: spine.resource.href, isDirectory: false, relativeTo: opfURL) as URL?,
+              let epubEntry = epubArchive[spineURL.path.trimmingCharacters(in: ["/"])],
+              let _ = try? epubArchive.extract(epubEntry, consumer: { data in
+                  epubEntryData.append(data)
+              }),
+              let epubEntryString = String(data: epubEntryData, encoding: .utf8),
+              let document = try? SwiftSoup.parse(epubEntryString),
+              let _ = try? document.attr("CFI", "/\(pageNumber * 2)")
         else { return [] }
         
-        var epubEntryData = Data()
-        let _ = try? epubArchive.extract(epubEntry) { data in
-            epubEntryData.append(data)
-        }
+        tagCFItoDoc(document)
         
-        guard epubEntryData.isEmpty == false else { return [] }
-        
-        guard let xmlDoc = try? AEXMLDocument(xml: epubEntryData) else { return [] }
-        xmlDoc.attributes["CFI"] = "/\(pageNumber * 2)"
-        tagCFItoDoc(xmlDoc)
-        
-        let bookmarks: [FolioReaderBookmark] = xmlDoc
-            .allDescendants { $0.name == "p" || $0.name == "P" }
-            .filter { $0.value?.contains(refText) == true }
-            .compactMap {
-                guard let pos = $0.attributes["CFI"] else { return nil }
+        let bookmarks: [FolioReaderBookmark] = (try? document.getElementsMatchingOwnText(Pattern.compile(refText))
+            .compactMap { element -> FolioReaderBookmark? in
+                guard let pos = try? element.attr("CFI") else { return nil }
                 let bookmark = FolioReaderBookmark()
                 bookmark.date = .init()
-                bookmark.title = $0.value
+                bookmark.title = element.ownText()
                 bookmark.bookId = bookId
                 bookmark.page = pageNumber
                 bookmark.pos_type = "epubcfi"
                 bookmark.pos = "epubcfi(" + pos + ")"
                 guard bookmark < deepest else { return nil }
                 return bookmark
-            }
+            }) ?? []
 
         return bookmarks
     }
@@ -109,6 +108,7 @@ class FolioReaderReferenceList: UITableViewController {
         deepestBookmark.pos = readerCenter.currentWebViewScrollPositions[currentPageNumber - 1]?.cfi
         for pageNumber in (startPageNumber...currentPageNumber).reversed() {
             DispatchQueue.global(qos: .userInitiated).async {
+//            DispatchQueue.main.async {
                 let bookmarks = self.loadSection(bookId: bookId, book: readerCenter.book, pageNumber: pageNumber, refText: refText, deepest: deepestBookmark)
                 guard bookmarks.isEmpty == false else { return }
                 DispatchQueue.main.async {
@@ -124,11 +124,13 @@ class FolioReaderReferenceList: UITableViewController {
         }
     }
     
-    func tagCFItoDoc(_ element: AEXMLElement) {
-        guard let cfi = element.attributes["CFI"] else { return }
-        for i in 0..<element.children.count {
-            element.children[i].attributes["CFI"] = cfi + "/" + ((i+1)*2).description
-            tagCFItoDoc(element.children[i])
+    func tagCFItoDoc(_ element: Element) {
+        guard let cfi = try? element.attr("CFI") else { return }
+        let children = element.children()
+        for i in children.startIndex..<children.endIndex {
+            guard let _ = try? children[i].attr("CFI", cfi + "/" + ((i+1)*2).description)
+            else { continue }
+            tagCFItoDoc(children[i])
         }
     }
     
