@@ -575,11 +575,16 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             var snippet = ""
             if let jsonString = jsonString,
                let jsonData = jsonString.data(using: .utf8),
-               let jsonDict = try? JSONSerialization.jsonObject(with: jsonData) as? [String:Any],
-               let jsonCFI = jsonDict["cfi"] as? String,
-               let jsonSnippet = jsonDict["snippet"] as? String {
-                cfi = jsonCFI
-                snippet = jsonSnippet
+               let jsonDict = try? JSONSerialization.jsonObject(with: jsonData) as? [String:Any] {
+                if let offsetComponent = jsonDict["offsetComponent"] as? String,
+                   let offsetSnippet = jsonDict["offsetSnippet"] as? String {
+                    cfi = offsetComponent
+                    snippet = offsetSnippet
+                } else if let jsonCFI = jsonDict["cfi"] as? String,
+                   let jsonSnippet = jsonDict["snippet"] as? String {
+                    cfi = jsonCFI
+                    snippet = jsonSnippet
+                }
             }
             
             let structuralStyle = self.folioReader.structuralStyle
@@ -1421,18 +1426,18 @@ writingMode
             try? FileManager.default.removeItem(atPath: tempFile.path)
             FileManager.default.createFile(atPath: tempFile.path, contents: response.suffix(response.count - "bridgeFinished ".count).data(using: .utf8), attributes: nil)
         }
-//        if response.starts(with: "getVisibleCFI") {
-//            print("userContentController response \(response)")
-//        }
-        if response.starts(with: "injectHighlight") {
-            print("userContentController response \(response)")
+        var prefix = [String]();
+        prefix.append("getVisibleCFI")
+//        prefix.append("injectHighlight")
+//        prefix.append("highlightStringCFI")
+        prefix.append("getAnchorOffset")
+        
+        prefix.forEach {
+            if response.starts(with: $0) {
+                print("userContentController response \(response)")
+            }
         }
-//        if response.starts(with: "highlightStringCFI") {
-//            print("userContentController response \(response)")
-//        }
-        if response.starts(with: "getAnchorOffset") {
-            print("userContentController response \(response)")
-        }
+
     }
     
     func injectHighlights(completion: (() -> Void)? = nil) {

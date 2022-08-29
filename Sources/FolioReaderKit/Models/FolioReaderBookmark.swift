@@ -17,6 +17,18 @@ import Foundation
     open var page: Int = 0
     open var pos_type: String?      //should be epubcfi
     open var pos: String?       //like epubcfi(/2/4/4/1:10)
+    
+    open override func copy() -> Any {
+        let bookmark = FolioReaderBookmark()
+        bookmark.bookId = self.bookId
+        bookmark.date = self.date
+        bookmark.title = self.title
+        bookmark.page = self.page
+        bookmark.pos_type = self.pos_type
+        bookmark.pos = self.pos
+        
+        return bookmark
+    }
 }
 
 public enum FolioReaderBookmarkError: Error {

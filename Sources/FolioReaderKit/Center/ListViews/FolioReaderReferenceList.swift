@@ -68,19 +68,47 @@ class FolioReaderReferenceList: UITableViewController {
         
         tagCFItoDoc(document)
         
-        let bookmarks: [FolioReaderBookmark] = (try? document.getElementsMatchingOwnText(Pattern.compile(refText))
-            .compactMap { element -> FolioReaderBookmark? in
-                guard let pos = try? element.attr("CFI") else { return nil }
-                let bookmark = FolioReaderBookmark()
-                bookmark.date = .init()
-                bookmark.title = element.ownText()
-                bookmark.bookId = bookId
-                bookmark.page = pageNumber
-                bookmark.pos_type = "epubcfi"
-                bookmark.pos = "epubcfi(" + pos + ")"
-                guard bookmark < deepest else { return nil }
-                return bookmark
-            }) ?? []
+        guard let bookmarks = try? document.getElementsMatchingOwnText(Pattern.compile(refText))
+                .map({ element -> [FolioReaderBookmark] in
+                    var bookmarks = [FolioReaderBookmark]()
+                    
+                    guard let pos = try? element.attr("CFI") else { return bookmarks }
+                    let bookmark = FolioReaderBookmark()
+                    bookmark.date = .init()
+                    bookmark.bookId = bookId
+                    bookmark.page = pageNumber
+                    bookmark.pos_type = "epubcfi"
+                    bookmark.pos = "epubcfi(" + pos + ")"
+                    guard bookmark < deepest else { return bookmarks }
+                    
+                    let elementOwnText = element.ownText()
+                    if elementOwnText.count > 200 {
+                        var findRangeStart = elementOwnText.startIndex
+                        
+                        while let refRange = elementOwnText.range(of: refText, options: [], range: findRangeStart..<elementOwnText.endIndex, locale: nil) {
+                            var bmStart = refRange.lowerBound
+                            var bmEnd = refRange.upperBound
+                            let _ = elementOwnText.formIndex(&bmStart, offsetBy: -30, limitedBy: elementOwnText.startIndex)
+                            let _ = elementOwnText.formIndex(&bmEnd, offsetBy: 70, limitedBy: elementOwnText.endIndex)
+                            
+                            if let bookmark = bookmark.copy() as? FolioReaderBookmark {
+                                bookmark.title = (bmStart > elementOwnText.startIndex ? "..." : "")
+                                + String(elementOwnText[bmStart..<bmEnd])
+                                + (bmEnd < elementOwnText.endIndex ? "..." : "")
+                                bookmark.pos = "epubcfi(" + pos + "/1:\(bmStart)" + ")"
+                                bookmarks.append(bookmark)
+                            }
+                            
+                            findRangeStart = bmEnd
+                        }
+                    } else {
+                        bookmark.title = elementOwnText
+                        bookmarks.append(bookmark)
+                    }
+                    
+                    return bookmarks
+                }).flatMap({ $0 })
+        else { return [] }
 
         return bookmarks
     }

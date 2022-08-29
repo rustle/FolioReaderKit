@@ -862,6 +862,32 @@ var getAnchorOffset = function(target, horizontal) {
         var reg2 = new RegExp("/\\d+:\\d+\\)$")
         var partialCFI = target.replace(reg, "epubcfi(")
         
+        try {
+            const textInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(partialCFI), document, [], [], [])
+            window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI textInfo ${textInfo.textNode.textContent.trim()} ${textInfo.textOffset}`);
+            
+            if (textInfo && textInfo.textNode) {
+                let range = document.createRange()
+                range.setStart(textInfo.textNode, textInfo.textOffset)
+                range.setEnd(textInfo.textNode, textInfo.textNode.textContent.length)
+                
+                let rangeClientBounds = range.getBoundingClientRect()
+                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds ${rangeClientBounds.top} ${rangeClientBounds.left}`);
+                
+                if (writingMode == "vertical-rl") {
+                    return rangeClientBounds.right;
+                }
+                
+                if (horizontal) {
+                    return document.body.clientWidth * Math.floor(rangeClientBounds.top / window.innerHeight);
+                }
+                
+                return rangeClientBounds.top;
+            }
+        } catch (e) {
+            
+        }
+        
         window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI " + partialCFI);
         try {
             elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
@@ -869,7 +895,7 @@ var getAnchorOffset = function(target, horizontal) {
                 elem = elem.parentNode
             }
         } catch(e) {
-            
+            window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI error whole ${error}");
         }
         
         if (!elem) {
@@ -877,8 +903,13 @@ var getAnchorOffset = function(target, horizontal) {
             try {
                 elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
             } catch(e) {
-                
+                window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI error prefix ${error}");
             }
+        }
+        
+        if (elem) {
+            const clientBounds = elem.getBoundingClientRect()
+            window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI bounds prefix top=${clientBounds.top}}`);
         }
     }
     
@@ -889,7 +920,6 @@ var getAnchorOffset = function(target, horizontal) {
     if (horizontal) {
         return document.body.clientWidth * Math.floor(elem.offsetTop / window.innerHeight);
     }
-    
     
     return elem.offsetTop;
 }
@@ -1370,6 +1400,7 @@ function visible(elem) {
 function getVisibleCFI(horizontal) {
     let first;
     let firstOff;
+    let firstRange;
     let firstHorizontalTop;
     //let allVisible = Array.from(document.querySelectorAll('body > *')).filter(visible)
     let allVisible = getTextNodesIn(document.body, false).filter(visible)
@@ -1377,6 +1408,9 @@ function getVisibleCFI(horizontal) {
     for(const textNode of allVisible) {
         let elem = textNode.parentNode
         if (!elem || elem == first) {
+            continue
+        }
+        if (elem.tagName == "A" || elem.tagName == "SPAN" || elem.tagName == "B" || elem.tagName == "I" || elem.tagName == "FONT" || elem.tagName == "HIGHLIGHT") {
             continue
         }
         //Calculate the offset to the document
@@ -1397,7 +1431,7 @@ function getVisibleCFI(horizontal) {
                      + " " + window.innerWidth + " " + window.innerHeight + " " + elem.outerHTML
                      );
         
-        if (horizontal ? (offX > window.innerWidth || offXR < 0) : (offY > window.innerHeight || offYB < 0)) {
+        if (!isVisible) {
             continue
         }
         
@@ -1413,34 +1447,69 @@ function getVisibleCFI(horizontal) {
             firstOff = horizontal ? offX : offY;
             firstHorizontalTop = horizontal ? offY : 0;
             window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI first " + horizontal + " " + first.outerHTML);
+            
+            for (var i = 0; i < first.childNodes.length; i++) {
+                if (first.childNodes[i].nodeType == 1) {    //element
+                    
+                }
+                if (first.childNodes[i].nodeType == 3) {    //text
+                    if (!first.childNodes[i].textContent) {
+                        continue
+                    }
+                    
+                    let range = document.createRange();
+                    
+                    range.setStart(first.childNodes[i], 0);
+                    range.setEnd(first.childNodes[i], first.childNodes[i].textContent.length);
+                    
+                    const clientRect = range.getBoundingClientRect();
+                    if (clientRect.width == 0 || clientRect.height == 0) {
+                        continue
+                    }
+                    
+                    const isVisible = !(horizontal ?
+                                        (clientRect.left > window.innerWidth || clientRect.right < 0) :
+                                        (clientRect.top > window.innerHeight || clientRect.bottom < 0)
+                                        )
+                    window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range ${isVisible} ${clientRect.width} ${clientRect.height} ${first.childNodes[i].textContent.trim()}`);
+                    
+                    if (isVisible) {
+                        firstRange = range;
+                        break;
+                    }
+                }
+            }
         }
     }
     
     var cfiStart = ""
     var snippet = ""
+    var rangeComponent = ""
+    var rangeSnippet = ""
+    var offsetComponent = ""
     if (first) {
         cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
         snippet = first.innerText
+        
+        if (firstRange) {
+            rangeComponent = window.EPUBcfi.generateDocumentRangeComponent(firstRange, [], ["highlight"], [])
+            rangeSnippet = firstRange.toString()
+            
+            offsetComponent = window.EPUBcfi.generateCharacterOffsetCFIComponent(firstRange.startContainer, 0, [], ["highlight"], [])
+            offsetSnippet = rangeSnippet
+        }
     }
 
     window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI " + cfiStart + " " + first.outerHTML);
     
-    return JSON.stringify({cfi: cfiStart, snippet: snippet})
-}
-
-function getElementOffsetByCFI(cfi) {
-    try {
-        let elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI("epubcfi(/4/94)"), document, [], [], []).get(0)
-    
-        window.webkit.messageHandlers.FolioReaderPage.postMessage("getElementOffsetByCFI " + elem.outerHTML);
-        
-        let bounds = elem.getBoundingClientRect()
-        
-        return JSON.stringify({top: bounds.top, left: bounds.left})
-    } catch (e) {
-        window.webkit.messageHandlers.FolioReaderPage.postMessage("getElementOffsetByCFI " + e.toString());
-        return "__NOT_FOUND__"
-    }
+    return JSON.stringify({
+        cfi: cfiStart,
+        snippet: snippet,
+        rangeComponent: rangeComponent,
+        rangeSnippet: rangeSnippet,
+        offsetComponent: offsetComponent,
+        offsetSnippet: offsetSnippet
+    })
 }
 
 // Class based onClick listener
