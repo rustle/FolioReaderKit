@@ -872,7 +872,7 @@ var getAnchorOffset = function(target, horizontal) {
                 range.setEnd(textInfo.textNode, textInfo.textNode.textContent.length)
                 
                 let rangeClientBounds = range.getBoundingClientRect()
-                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds ${rangeClientBounds.top} ${rangeClientBounds.left}`);
+                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds top=${rangeClientBounds.top} left=${rangeClientBounds.left} scrollX=${window.scrollX} scrollY=${window.scrollY}`);
                 
                 if (writingMode == "vertical-rl") {
                     return rangeClientBounds.right;
@@ -1442,7 +1442,9 @@ function getVisibleCFI(horizontal) {
         // for vertical:
         //    case 1: firstOff < 0, then next offY must be > 0, replace first
         //    case 2: firstOff > 0, then pick smaller offY (>0)
-        if ((first == null) || (horizontal ? ((firstOff < 0) || (offX >= 0 && offXR <= window.innerWidth && offY < firstHorizontalTop)) : ((firstOff < 0) || (offY >= 0 && offY < firstOff)) ) ) {
+        //if ((first == null) || (horizontal ? ((firstOff < 0) || (offX >= 0 && offXR <= window.innerWidth && offY < firstHorizontalTop)) : ((firstOff < 0) || (offY >= 0 && offY < firstOff)) ) ) {
+        
+        if ((first == null) || (horizontal ? (offX >= 0 && offXR <= window.innerWidth && offY < firstHorizontalTop) : (offY >= 0 && offY < firstOff) )) {
             first = elem;
             firstOff = horizontal ? offX : offY;
             firstHorizontalTop = horizontal ? offY : 0;
