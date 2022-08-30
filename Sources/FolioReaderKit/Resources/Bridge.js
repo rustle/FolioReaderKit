@@ -879,7 +879,7 @@ var getAnchorOffset = function(target, horizontal) {
                 }
                 
                 if (horizontal) {
-                    return document.body.clientWidth * Math.floor(rangeClientBounds.top / window.innerHeight);
+                    return document.body.clientWidth * Math.floor((window.scrollX + rangeClientBounds.left)/document.body.clientWidth);
                 }
                 
                 return rangeClientBounds.top;
@@ -1416,20 +1416,23 @@ function getVisibleCFI(horizontal) {
         //Calculate the offset to the document
         //See: https://stackoverflow.com/a/18673641/7448536
         const coord = elem.getBoundingClientRect()
-        const offY = coord.top// + document.documentElement.scrollTop
-        const offYB = coord.bottom// + document.documentElement.scrollTop
-        const offX = coord.left// + document.documentElement.scrollLeft
-        const offXR = coord.right// + document.documentElement.scrollLeft
+        let offY = coord.top// + document.documentElement.scrollTop
+        let offYB = coord.bottom// + document.documentElement.scrollTop
+        let offX = coord.left// + document.documentElement.scrollLeft
+        let offXR = coord.right// + document.documentElement.scrollLeft
+        
+        if (horizontal) {
+            if (offYB > window.innerHeight) {
+                offXR += window.innerWidth
+            }
+            if (offY < 0) {
+                offX -= window.innerWidth
+            }
+        }
         
         const isVisible = !(horizontal ? (offX > window.innerWidth || offXR < 0) : (offY > window.innerHeight || offYB < 0))
         window.webkit.messageHandlers.FolioReaderPage
-        .postMessage(
-                     "getVisibleCFI isVisible:" + isVisible
-                     + " " + horizontal
-                     + " " + (offX < firstOff) + ":" + (firstOff < 0) + ":" + (offX > 0) + ":" + (offX < window.innerWidth)
-                     + " " + offX + ":" + offXR + " " + offY + ":" + offYB
-                     + " " + window.innerWidth + " " + window.innerHeight + " " + elem.outerHTML
-                     );
+        .postMessage(`getVisibleCFI isVisible:${isVisible} horizontal:${horizontal} ${offX < firstOff}:${firstOff < 0}:${offX > 0}:${offX < window.innerWidth} offX:offXR=${offX}:${offXR} offY:offYB=${offY}:${offYB} innerWidth=${window.innerWidth} innerHeight=${window.innerHeight} outerHTML=${elem.outerHTML.trim()}`);
         
         if (!isVisible) {
             continue
