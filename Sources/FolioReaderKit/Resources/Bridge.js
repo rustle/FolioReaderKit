@@ -862,40 +862,47 @@ var getAnchorOffset = function(target, horizontal) {
         var reg2 = new RegExp("/\\d+:\\d+\\)$")
         var partialCFI = target.replace(reg, "epubcfi(")
         
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI " + partialCFI);
+        
         try {
+//            for (var i=0; i<40; i++) {
+//                partialCFI = `epubcfi(/4/4/2/2/4/${i*2+1}:0)`
+//                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI textInfo ${partialCFI}`);
+//                const textInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(partialCFI), document, [], [], [])
+//                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI textInfo ${textInfo.textNode.textContent.trim()} ${textInfo.textOffset}`);
+//            }
             const textInfo = window.EPUBcfi.getTextTerminusInfoWithPartialCFI(encodeURI(partialCFI), document, [], [], [])
             window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI textInfo ${textInfo.textNode.textContent.trim()} ${textInfo.textOffset}`);
             
             if (textInfo && textInfo.textNode) {
                 let range = document.createRange()
-                range.setStart(textInfo.textNode, textInfo.textOffset+1)    //need plus one, otherwise range bounds will span across page border
-                range.setEnd(textInfo.textNode, textInfo.textOffset+1)
+                range.setStart(textInfo.textNode, textInfo.textOffset)
+                range.setEnd(textInfo.textNode, textInfo.textOffset)
                 
                 let rangeClientBounds = range.getBoundingClientRect()
-                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds ${rangeClientBounds.left}:${rangeClientBounds.right}:${rangeClientBounds.top}:${rangeClientBounds.bottom} scrollX=${window.scrollX} scrollY=${window.scrollY} ${range.toString().trim()}`);
+                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds ${rangeClientBounds.left}:${rangeClientBounds.right}:${rangeClientBounds.top}:${rangeClientBounds.bottom} scrollX=${window.scrollX} scrollY=${window.scrollY} rangeText=${range.toString().trim()}`);
                 
                 if (writingMode == "vertical-rl") {
                     return rangeClientBounds.right;
                 }
                 
                 if (horizontal) {
-                    return document.body.clientWidth * Math.floor((window.scrollX + rangeClientBounds.left)/document.body.clientWidth);
+                    return document.body.clientWidth * Math.floor((window.scrollX + rangeClientBounds.right)/document.body.clientWidth);
                 }
                 
                 return rangeClientBounds.top + window.scrollY;
             }
         } catch (e) {
-            
+            window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI textInfo error ${e}`);
         }
         
-        window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI " + partialCFI);
         try {
             elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
             while (elem && elem.nodeType == 3) {
                 elem = elem.parentNode
             }
         } catch(e) {
-            window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI error whole ${error}");
+            window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI error whole ${e}`);
         }
         
         if (!elem) {
@@ -903,7 +910,7 @@ var getAnchorOffset = function(target, horizontal) {
             try {
                 elem = window.EPUBcfi.getTargetElementWithPartialCFI(encodeURI(partialCFI), document, [], [], []).get(0)
             } catch(e) {
-                window.webkit.messageHandlers.FolioReaderPage.postMessage("getAnchorOffset partialCFI error prefix ${error}");
+                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI error prefix ${e}`);
             }
         }
         
@@ -911,6 +918,10 @@ var getAnchorOffset = function(target, horizontal) {
             const clientBounds = elem.getBoundingClientRect()
             window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI bounds prefix top=${clientBounds.top}}`);
         }
+    }
+    
+    if (!elem) {
+        return 0
     }
     
     if (writingMode == "vertical-rl") {

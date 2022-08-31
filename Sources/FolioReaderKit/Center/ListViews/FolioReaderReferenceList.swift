@@ -81,29 +81,35 @@ class FolioReaderReferenceList: UITableViewController {
                     bookmark.pos = "epubcfi(" + pos + ")"
                     guard bookmark < deepest else { return bookmarks }
                     
-                    let elementOwnText = element.ownText()
-                    if elementOwnText.count > 200 {
-                        var findRangeStart = elementOwnText.startIndex
-                        
-                        while let refRange = elementOwnText.range(of: refText, options: [], range: findRangeStart..<elementOwnText.endIndex, locale: nil) {
-                            var bmStart = refRange.lowerBound
-                            var bmEnd = refRange.upperBound
-                            let _ = elementOwnText.formIndex(&bmStart, offsetBy: -30, limitedBy: elementOwnText.startIndex)
-                            let _ = elementOwnText.formIndex(&bmEnd, offsetBy: 70, limitedBy: elementOwnText.endIndex)
+                    let textNodes = element.textNodes()
+                    let offsetByOne = textNodes.first?.previousSibling() != nil     //Possible bug: first text node (before first child element) is omitted
+                    for i in 0..<textNodes.count {
+                        let elementOwnText = textNodes[i].getWholeText()
+                        guard elementOwnText.contains(refText) else { continue }
+                        if elementOwnText.count > 200 {
+                            var findRangeStart = elementOwnText.startIndex
                             
-                            if let bookmark = bookmark.copy() as? FolioReaderBookmark {
+                            while let refRange = elementOwnText.range(of: refText, options: [], range: findRangeStart..<elementOwnText.endIndex, locale: nil),
+                                  let bookmark = bookmark.copy() as? FolioReaderBookmark {
+                                var bmStart = refRange.lowerBound
+                                var bmEnd = refRange.upperBound
+                                let _ = elementOwnText.formIndex(&bmStart, offsetBy: -30, limitedBy: elementOwnText.startIndex)
+                                let _ = elementOwnText.formIndex(&bmEnd, offsetBy: 70, limitedBy: elementOwnText.endIndex)
+                                
                                 bookmark.title = (bmStart > elementOwnText.startIndex ? "..." : "")
                                 + String(elementOwnText[bmStart..<bmEnd])
                                 + (bmEnd < elementOwnText.endIndex ? "..." : "")
-                                bookmark.pos = "epubcfi(" + pos + "/1:\(bmStart)" + ")"
+                                bookmark.pos = "epubcfi(" + pos + "/\(i*2 + 1 + (offsetByOne ? 2 : 0)):\(bmStart.utf16Offset(in: elementOwnText))" + ")"
                                 bookmarks.append(bookmark)
+                                
+                                findRangeStart = bmEnd
                             }
-                            
-                            findRangeStart = bmEnd
+                        } else if let bookmark = bookmark.copy() as? FolioReaderBookmark,
+                                  let bmStart = elementOwnText.range(of: refText)?.upperBound {
+                            bookmark.title = elementOwnText.trimmingCharacters(in: .whitespacesAndNewlines)
+                            bookmark.pos = "epubcfi(" + pos + "/\(i*2 + 1 + (offsetByOne ? 2 : 0)):\(bmStart.utf16Offset(in: elementOwnText))" + ")"
+                            bookmarks.append(bookmark)
                         }
-                    } else {
-                        bookmark.title = elementOwnText
-                        bookmarks.append(bookmark)
                     }
                     
                     return bookmarks
