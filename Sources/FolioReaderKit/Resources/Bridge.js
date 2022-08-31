@@ -868,11 +868,11 @@ var getAnchorOffset = function(target, horizontal) {
             
             if (textInfo && textInfo.textNode) {
                 let range = document.createRange()
-                range.setStart(textInfo.textNode, textInfo.textOffset)
-                range.setEnd(textInfo.textNode, textInfo.textNode.textContent.length)
+                range.setStart(textInfo.textNode, textInfo.textOffset+1)    //need plus one, otherwise range bounds will span across page border
+                range.setEnd(textInfo.textNode, textInfo.textOffset+1)
                 
                 let rangeClientBounds = range.getBoundingClientRect()
-                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds top=${rangeClientBounds.top} left=${rangeClientBounds.left} scrollX=${window.scrollX} scrollY=${window.scrollY}`);
+                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getAnchorOffset partialCFI rangeClientBounds ${rangeClientBounds.left}:${rangeClientBounds.right}:${rangeClientBounds.top}:${rangeClientBounds.bottom} scrollX=${window.scrollX} scrollY=${window.scrollY} ${range.toString().trim()}`);
                 
                 if (writingMode == "vertical-rl") {
                     return rangeClientBounds.right;
@@ -882,7 +882,7 @@ var getAnchorOffset = function(target, horizontal) {
                     return document.body.clientWidth * Math.floor((window.scrollX + rangeClientBounds.left)/document.body.clientWidth);
                 }
                 
-                return rangeClientBounds.top;
+                return rangeClientBounds.top + window.scrollY;
             }
         } catch (e) {
             
@@ -1476,10 +1476,35 @@ function getVisibleCFI(horizontal) {
                                         (clientRect.left > window.innerWidth || clientRect.right < 0) :
                                         (clientRect.top > window.innerHeight || clientRect.bottom < 0)
                                         )
-                    window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range ${isVisible} ${clientRect.width} ${clientRect.height} ${first.childNodes[i].textContent.trim()}`);
+                    window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range ${isVisible} ${clientRect.left}:${clientRect.right}:${clientRect.top}:${clientRect.bottom} ${clientRect.width}:${clientRect.height} ${first.childNodes[i].textContent.trim()}`);
                     
                     if (isVisible) {
                         firstRange = range;
+                        
+                        if (horizontal ? (clientRect.left < 0) : (clientRect.top < 0)) {    //find first visible offset
+                            var varRange = firstRange
+                            while (varRange.startOffset < varRange.endOffset) {
+                                var medianOffset = Math.floor((varRange.startOffset + varRange.endOffset) / 2)
+                                if (medianOffset == varRange.startOffset) {
+                                    break
+                                }
+
+                                var medianRange = document.createRange()
+                                medianRange.setStart(varRange.startContainer, medianOffset)
+                                medianRange.setEnd(varRange.endContainer, varRange.endOffset)
+
+                                const medianClientRect = medianRange.getBoundingClientRect()
+
+                                if (horizontal ? (medianClientRect.left < 0) : (medianClientRect.top < 0)) {
+                                    varRange.setStart(varRange.startContainer, medianOffset)
+                                } else {
+                                    varRange.setEnd(varRange.endContainer, medianOffset)
+                                }
+                                
+                                window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range medianClientRect ${medianClientRect.left}:${medianClientRect.right}:${medianClientRect.top}:${medianClientRect.bottom} ${medianClientRect.width}:${medianClientRect.height} ${varRange.startOffset}:${medianOffset}:${varRange.endOffset} window=${window.scrollX}:${window.scrollY} medianRange=${medianRange.toString().trim()} varRange=${varRange.toString().trim()}`);
+                            }
+                        }
+                        
                         break;
                     }
                 }
@@ -1500,7 +1525,7 @@ function getVisibleCFI(horizontal) {
             rangeComponent = window.EPUBcfi.generateDocumentRangeComponent(firstRange, [], ["highlight"], [])
             rangeSnippet = firstRange.toString()
             
-            offsetComponent = window.EPUBcfi.generateCharacterOffsetCFIComponent(firstRange.startContainer, 0, [], ["highlight"], [])
+            offsetComponent = window.EPUBcfi.generateCharacterOffsetCFIComponent(firstRange.startContainer, firstRange.startOffset, [], ["highlight"], [])
             offsetSnippet = rangeSnippet
         }
     }
