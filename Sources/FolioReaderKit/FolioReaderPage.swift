@@ -1662,7 +1662,8 @@ writingMode
             self.byWritingMode {
                 switch self.readerConfig.scrollDirection {
                 case .horitonzalWithPagedContent:
-                    self.scrollPageToOffset(offset, animated: animated)
+                    let page = floor(offset / webView.frame.width)
+                    self.scrollPageToOffset(page * webView.frame.width, animated: animated)
                 default:
                     let isBeginning = (offset < self.frame.forDirection(withConfiguration: self.readerConfig) * 0.5)
                     
@@ -1683,8 +1684,8 @@ writingMode
             } vertical: {
                 switch self.readerConfig.scrollDirection {
                 case .horitonzalWithPagedContent:
-                    let page = ceil((webView.scrollView.contentSize.width - offset) / webView.frame.width)
-                    self.scrollPageToOffset(webView.scrollView.contentSize.width - page * webView.frame.width, animated: true)
+                    let page = ceil(offset / webView.frame.width)
+                    self.scrollPageToOffset(webView.scrollView.contentSize.width - (page+1) * webView.frame.width, animated: true)
                 default:
                     self.scrollPageToOffset(offset + webView.frame.width, animated: animated)
                 }
