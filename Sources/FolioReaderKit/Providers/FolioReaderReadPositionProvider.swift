@@ -25,12 +25,20 @@ import Foundation
     @objc func folioReaderReadPosition(_ folioReader: FolioReader, allByBookId bookId: String) -> [FolioReaderReadPosition]
     
     @objc func folioReaderReadPosition(_ folioReader: FolioReader) -> [FolioReaderReadPosition]
-        
+    
+    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String) -> [FolioReaderReadPositionHistory]
+    
+    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, start readPosition: FolioReaderReadPosition)
+    
+    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, finish readPosition: FolioReaderReadPosition)
+    
+    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, remove readPosition: FolioReaderReadPositionHistory)
 }
 
 public class FolioReaderNaiveReadPositionProvider: FolioReaderReadPositionProvider {
     
     var positions : [String: [String: FolioReaderReadPosition]] = [:]
+    var history: [FolioReaderReadPositionHistory] = []
     
     public func folioReaderReadPosition(_ folioReader: FolioReader, bookId: String) -> FolioReaderReadPosition? {
         return positions.flatMap { $0.value }.compactMap { $0.value }.max {
@@ -80,6 +88,10 @@ public class FolioReaderNaiveReadPositionProvider: FolioReaderReadPositionProvid
     
     public init() {
         
+    }
+    
+    public func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String) -> [FolioReaderReadPositionHistory] {
+        return history
     }
     
 }

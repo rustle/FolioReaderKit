@@ -1,5 +1,5 @@
 //
-//  LastReadPosition.swift
+//  FolioReaderReadPosition.swift
 //  FolioReaderKit
 //
 //  Created by Peter on 2022/8/2.
@@ -41,6 +41,12 @@ import Foundation
         self.pageNumber = pageNumber
         self.cfi = cfi
     }
+}
+
+@objc open class FolioReaderReadPositionHistory: NSObject {
+    open var startDatetime = Date()
+    open var startPosition: FolioReaderReadPosition?
+    open var endPosition: FolioReaderReadPosition?
 }
 
 public enum FolioReaderStructuralStyle: Int, CaseIterable {

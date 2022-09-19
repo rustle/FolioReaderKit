@@ -117,10 +117,6 @@ public enum NavigationMenuBookListStyle: Int, CaseIterable {
     /// - Parameter folioReader: The FolioReader instance
     @objc optional func folioReaderDidClose(_ folioReader: FolioReader)
     
-    /// Called when reader did closed.
-    @available(*, deprecated, message: "Use 'folioReaderDidClose(_ folioReader: FolioReader)' instead.")
-    @objc optional func folioReaderDidClosed()
-    
     @objc optional func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider
     
     @objc optional func folioReaderBookmarkProvider(_ folioReader: FolioReader) -> FolioReaderBookmarkProvider
