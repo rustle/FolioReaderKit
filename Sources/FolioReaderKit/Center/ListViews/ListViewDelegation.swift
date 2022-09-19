@@ -147,3 +147,19 @@ extension FolioReaderCenter: FolioReaderResourceListDelegate {
     }
     
 }
+
+extension FolioReaderCenter: FolioReaderHistoryListDelegate {
+    func historyList(_ HistoryList: FolioReaderHistoryList, didSelectRowAtIndexPath indexPath: IndexPath) {
+        guard let readerCenter = self.folioReader.readerCenter else { return }
+        
+        let history = HistoryList.historyList[indexPath.row]
+        
+        readerCenter.currentPage?.pushNavigateWebViewScrollPositions()
+        readerCenter.changePageWith(page: history.endPosition!.pageNumber, andFragment: history.endPosition!.cfi)
+        self.dismiss()
+    }
+    
+    func historyList(didDismissedHistoryList HistoryList: FolioReaderHistoryList) {
+        
+    }
+}

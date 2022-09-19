@@ -17,7 +17,7 @@ class FolioReaderNavigationPageVC: UIPageViewController {
     var viewControllerZero: UIViewController!
     var viewControllerOne: UIViewController!
     var viewControllerTwo: UIViewController!
-//    var viewControllerThree: UIViewController!
+    var viewControllerThree: UIViewController!
 
     var index: Int
     fileprivate var readerConfig: FolioReaderConfig
@@ -49,11 +49,11 @@ class FolioReaderNavigationPageVC: UIPageViewController {
         segmentedControl.setWidth(100, forSegmentAt: 1)
         self.navigationItem.titleView = segmentedControl
 
-        viewList = [viewControllerOne, viewControllerTwo]
+        viewList = [viewControllerOne, viewControllerTwo, viewControllerThree]
 
         viewControllerOne.didMove(toParent: self)
         viewControllerTwo.didMove(toParent: self)
-//        viewControllerThree.didMove(toParent: self)
+        viewControllerThree.didMove(toParent: self)
         
         if self.folioReader.structuralStyle == .bundle || self.folioReader.structuralStyle == .topic {
             viewList.insert(viewControllerZero, at: 0)

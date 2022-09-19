@@ -21,13 +21,15 @@ extension FolioReaderCenter {
         let bookList = FolioReaderBookList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let chapter = FolioReaderChapterList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let resoruce = FolioReaderResourceList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
+        let history = FolioReaderHistoryList(folioReader: folioReader, readerConfig: readerConfig, book: book, delegate: self)
         let pageController = FolioReaderNavigationPageVC(folioReader: folioReader, readerConfig: readerConfig)
         
         pageController.viewControllerZero = bookList
         pageController.viewControllerOne = chapter
         pageController.viewControllerTwo = resoruce
+        pageController.viewControllerThree = history
         
-        pageController.segmentedControlItems = [readerConfig.localizedContentsTitle, readerConfig.localizedResourcesTitle]
+        pageController.segmentedControlItems = [readerConfig.localizedContentsTitle, readerConfig.localizedResourcesTitle, readerConfig.localizedHistoryTitle]
         if self.folioReader.structuralStyle == .bundle {
             pageController.segmentedControlItems.insert(readerConfig.localizedBooksTitle, at: 0)
         }
