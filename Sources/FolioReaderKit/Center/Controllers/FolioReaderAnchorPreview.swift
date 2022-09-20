@@ -15,7 +15,7 @@ class FolioReaderAnchorPreview: UIViewController {
     let navBar = UIView()
     
     let gotoButton = UIButton()
-    let anchorLabel = UILabel()
+    let anchorLabel = UITextView()
     
     let anchorBackgroundView = UIView()
     
@@ -48,12 +48,10 @@ class FolioReaderAnchorPreview: UIViewController {
         ])
         
         anchorLabel.translatesAutoresizingMaskIntoConstraints = false
-        anchorLabel.numberOfLines = 0
-        anchorLabel.lineBreakMode = .byWordWrapping
+        anchorLabel.isEditable = false
         anchorLabel.font = UIFont(name: folioReader.currentFont, size: CGFloat(folioReader.currentFontSizeOnly - 2))
-        anchorLabel.adjustsFontSizeToFitWidth = true
-        anchorLabel.minimumScaleFactor = 0.5
         anchorLabel.textColor = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode]
+        anchorLabel.backgroundColor = .clear
         
         self.view.addSubview(anchorLabel)
         
