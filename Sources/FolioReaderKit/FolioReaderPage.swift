@@ -891,6 +891,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     let bookTitleLabel = UILabel()
                     bookTitleLabel.tag = 101
                     bookTitleLabel.font = .systemFont(ofSize: 16)
+                    bookTitleLabel.textColor = self.readerConfig.themeModeTextColor[self.folioReader.themeMode]
                     bookTitleLabel.textAlignment = .center
                     bookTitleLabel.translatesAutoresizingMaskIntoConstraints = false
                     bookTitleLabel.adjustsFontSizeToFitWidth = true
@@ -900,6 +901,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     let bundleTitleLabel = UILabel()
                     bundleTitleLabel.tag = 102
                     bundleTitleLabel.font = .systemFont(ofSize: 11)
+                    bundleTitleLabel.textColor = self.readerConfig.themeModeTextColor[self.folioReader.themeMode]
                     bundleTitleLabel.textAlignment = .center
                     bundleTitleLabel.translatesAutoresizingMaskIntoConstraints = false
                     bundleTitleLabel.adjustsFontSizeToFitWidth = true

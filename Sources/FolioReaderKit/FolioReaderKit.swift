@@ -240,7 +240,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider?(self).preference(setThemeMode: value)
             
             guard let readerCenter = self.readerCenter,
-                  let backgroundColor = self.readerContainer?.readerConfig.themeModeBackground[self.themeMode] else { return }
+                  let backgroundColor = self.readerConfig?.themeModeBackground[self.themeMode] else { return }
             
             UIView.transition(
                 with: readerCenter.menuBarController.tabBar,
@@ -269,7 +269,11 @@ extension FolioReader {
                 readerCenter.pageIndicatorView?.reloadColors()
                 readerCenter.configureNavBar()
                 readerCenter.scrollScrubber?.reloadColors()
-                
+                readerCenter.navigationItem.titleView?.subviews.forEach {
+                    if let label = $0 as? UILabel {
+                        label.textColor = self.readerConfig?.themeModeTextColor[self.themeMode]
+                    }
+                }
                 
                 readerCenter.collectionView.backgroundColor = backgroundColor
                 
