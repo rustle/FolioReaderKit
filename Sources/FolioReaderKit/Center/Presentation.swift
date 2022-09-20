@@ -38,6 +38,8 @@ extension FolioReaderCenter {
         }
         
         let nav = UINavigationController(rootViewController: pageController)
+        nav.navigationBar.backgroundColor = readerConfig.themeModeNavBackground[folioReader.themeMode]
+        
         present(nav, animated: true, completion: nil)
     }
 
@@ -63,7 +65,8 @@ extension FolioReaderCenter {
         }
         
         let nav = UINavigationController(rootViewController: pageController)
-        
+        nav.navigationBar.backgroundColor = readerConfig.themeModeNavBackground[folioReader.themeMode]
+
         present(nav, animated: true, completion: nil)
     }
     
