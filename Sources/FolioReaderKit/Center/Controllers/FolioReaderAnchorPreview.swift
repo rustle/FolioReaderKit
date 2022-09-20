@@ -17,6 +17,8 @@ class FolioReaderAnchorPreview: UIViewController {
     let gotoButton = UIButton()
     let anchorLabel = UILabel()
     
+    let anchorBackgroundView = UIView()
+    
     let tapGeatureRecognizer = UITapGestureRecognizer()
     
     let snippetTestRegex = try? NSRegularExpression(pattern: "^\\[\\d+\\]$")
@@ -33,13 +35,24 @@ class FolioReaderAnchorPreview: UIViewController {
     }
     
     override func viewDidLoad() {
+        anchorBackgroundView.translatesAutoresizingMaskIntoConstraints = false
+        anchorBackgroundView.backgroundColor = folioReader.readerConfig?.themeModeNavBackground[folioReader.themeMode]
+        
+        self.view.addSubview(anchorBackgroundView)
+        
+        NSLayoutConstraint.activate([
+            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            anchorBackgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
+            anchorBackgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            anchorBackgroundView.heightAnchor.constraint(equalToConstant: 160)
+        ])
+        
         anchorLabel.translatesAutoresizingMaskIntoConstraints = false
         anchorLabel.numberOfLines = 0
         anchorLabel.lineBreakMode = .byWordWrapping
         anchorLabel.font = UIFont(name: folioReader.currentFont, size: CGFloat(folioReader.currentFontSizeOnly - 2))
         anchorLabel.adjustsFontSizeToFitWidth = true
         anchorLabel.minimumScaleFactor = 0.5
-        anchorLabel.backgroundColor = folioReader.readerConfig?.themeModeBackground[folioReader.themeMode]
         anchorLabel.textColor = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode]
         
         self.view.addSubview(anchorLabel)
@@ -53,7 +66,6 @@ class FolioReaderAnchorPreview: UIViewController {
         
         
         navBar.translatesAutoresizingMaskIntoConstraints = false
-        navBar.backgroundColor = folioReader.readerConfig?.themeModeNavBackground[folioReader.themeMode]
         navBar.layer.cornerRadius = 4
         navBar.layer.borderColor = UIColor(white: 0.5, alpha: 0.2).cgColor
         navBar.layer.borderWidth = 1
