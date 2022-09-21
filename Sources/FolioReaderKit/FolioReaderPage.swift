@@ -1294,6 +1294,7 @@ writingMode
                 snippetVC.anchorLabel.text = url.absoluteString
 
                 snippetVC.modalPresentationStyle = .overCurrentContext
+                snippetVC.modalTransitionStyle = .crossDissolve
                 
                 self.folioReader.readerCenter?.present(snippetVC, animated: true, completion: nil)
             }
