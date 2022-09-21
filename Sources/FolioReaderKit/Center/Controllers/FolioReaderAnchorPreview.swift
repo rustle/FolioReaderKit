@@ -58,8 +58,8 @@ class FolioReaderAnchorPreview: UIViewController {
         NSLayoutConstraint.activate([
             anchorLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
             anchorLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
-            anchorLabel.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: 0),
-            anchorLabel.heightAnchor.constraint(equalToConstant: 120)
+            anchorLabel.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -10),
+            anchorLabel.heightAnchor.constraint(equalToConstant: 110)
         ])
         
         

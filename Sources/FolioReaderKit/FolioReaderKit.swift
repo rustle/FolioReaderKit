@@ -314,7 +314,7 @@ extension FolioReader {
     }
     
     open var currentFontSizeOnly: Int {
-        return Int(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20
+        return Int(Double(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20)
     }
 
     public static let DefaultFontWeight = "500"
