@@ -50,13 +50,29 @@ class FolioReaderBookmarkList: UITableViewController {
     }
 
     func loadSections() {
-        guard let bookId = (self.folioReader.readerContainer?.book.name as NSString?)?.deletingPathExtension,
+        guard let readerCenter = self.folioReader.readerCenter,
+              let book = self.folioReader.readerContainer?.book,
+              let bookId = (book.name as NSString?)?.deletingPathExtension,
               let bookmarks = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(self.folioReader, allByBookId: bookId, andPage: nil)
         else {
             return
         }
 
-        sectionBookmarks = bookmarks.reduce(into: [:]) { partialResult, bookmark in
+        let currentPageNumber = readerCenter.currentPageNumber
+        let currentPagePosition = readerCenter.currentWebViewScrollPositions[currentPageNumber - 1]
+        let bookRootIndex = readerCenter.book.bundleRootTableOfContents.firstIndex(where: {
+            $0.resource?.spineIndices.contains((currentPagePosition?.structuralRootPageNumber ?? 0) - 1) == true
+        })
+        
+        sectionBookmarks = bookmarks.filter({
+            guard self.folioReader.structuralStyle == .bundle,
+                  let bookRootIndex = bookRootIndex,
+                  let firstSpineIndex = book.bundleRootTableOfContents[bookRootIndex].resource?.spineIndices.first,
+                  let lastSpineIndex = book.bundleRootTableOfContents[safe: bookRootIndex + 1]?.resource?.spineIndices.first
+            else { return true }
+            
+            return $0.page > firstSpineIndex && ($0.page-1) < lastSpineIndex
+        }).reduce(into: [:]) { partialResult, bookmark in
             if partialResult[bookmark.page] != nil {
                 partialResult[bookmark.page]?.append(bookmark)
                 partialResult[bookmark.page]?.sort()
@@ -104,15 +120,22 @@ class FolioReaderBookmarkList: UITableViewController {
         guard let tocItem = self.folioReader.readerCenter?.getChapterName(pageNumber: pageNumber) else {
             return "  Book Item \(pageNumber)"
         }
-        var title = [tocItem.title!]
-        var parent = tocItem.parent
-        while (parent != nil) {
-            if parent?.title != nil {
-                title.append(parent!.title!)
-            }
-            parent = parent?.parent
+        var titleFrags = [String]()
+        if let title = tocItem.title {
+            titleFrags.append(title)
         }
-        return "  " + title.reversed().joined(separator: ", ")
+        var parent = tocItem.parent
+        while let item = parent {
+            if self.folioReader.structuralStyle == .bundle,
+               item.level < self.folioReader.structuralTrackingTocLevel.rawValue {
+                break
+            }
+            if let title = item.title {
+                titleFrags.append(title)
+            }
+            parent = item.parent
+        }
+        return "  " + titleFrags.reversed().joined(separator: ", ")
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

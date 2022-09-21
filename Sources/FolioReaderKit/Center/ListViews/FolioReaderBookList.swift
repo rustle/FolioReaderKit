@@ -179,7 +179,7 @@ class FolioReaderBookList: UICollectionViewController {
         
         switch self.folioReader.currentNavigationMenuBookListSyle {
         case .Grid:
-            let minWidth = 200.0
+            let minWidth = 185.0
             
             let itemCount = floor(self.collectionView.frame.size.width / minWidth)
             let itemWidth = floor((self.collectionView.frame.size.width - layout.minimumInteritemSpacing*(itemCount-1)) / itemCount)
