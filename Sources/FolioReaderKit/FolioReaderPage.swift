@@ -592,8 +592,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 message = "json fail"
             }
             #if DEBUG
-            if cfi.isEmpty {
-                let alertController = UIAlertController(title: "Empty CFI", message: message, preferredStyle: .alert)
+            if cfi.isEmpty, self.pageNumber > 1 {
+                let alertController = UIAlertController(title: "Empty CFI \(self.pageNumber ?? 0)", message: message, preferredStyle: .alert)
                 alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { action in
                     
                 }))
@@ -1305,7 +1305,7 @@ writingMode
                   url.port == readerConfig.serverPort,
                   let anchorFromURL = url.fragment {
             self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
-                let snippetVC = FolioReaderAnchorPreview(self.folioReader, url)
+                let snippetVC = FolioReaderAnchorPreview(self.folioReader, url, CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), self.frame.height)
 
                 snippetVC.anchorLabel.text = url.absoluteString
 

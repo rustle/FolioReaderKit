@@ -11,21 +11,31 @@ import SwiftSoup
 class FolioReaderAnchorPreview: UIViewController {
     let folioReader: FolioReader
     let anchorURL: URL
+    let anchorOffset: CGFloat
+    let pageHeight: CGFloat
     
     let navBar = UIView()
     
     let gotoButton = UIButton()
+    let expandButton = UIButton()
+    let closeButton = UIButton()
+    
     let anchorLabel = UITextView()
     
     let anchorBackgroundView = UIView()
     
     let tapGeatureRecognizer = UITapGestureRecognizer()
     
+    var normalConstraints = [NSLayoutConstraint]()
+    var expandConstraints = [NSLayoutConstraint]()
+    
     let snippetTestRegex = try? NSRegularExpression(pattern: "^\\[\\d+\\]$")
     
-    public init(_ folioReader: FolioReader, _ anchorURL: URL) {
+    public init(_ folioReader: FolioReader, _ anchorURL: URL, _ anchorOffset: CGFloat, _ pageHeight: CGFloat) {
         self.folioReader = folioReader
         self.anchorURL = anchorURL
+        self.anchorOffset = anchorOffset
+        self.pageHeight = pageHeight
         
         super.init(nibName: nil, bundle: Bundle.frameworkBundle())
     }
@@ -37,42 +47,53 @@ class FolioReaderAnchorPreview: UIViewController {
     override func viewDidLoad() {
         anchorBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         anchorBackgroundView.backgroundColor = folioReader.readerConfig?.themeModeNavBackground[folioReader.themeMode]
+        anchorBackgroundView.layer.borderColor = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode].cgColor
+        anchorBackgroundView.layer.borderWidth = 1.5
+        anchorBackgroundView.layer.cornerRadius = 12
         
         self.view.addSubview(anchorBackgroundView)
         
-        NSLayoutConstraint.activate([
-            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            anchorBackgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            anchorBackgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+        let frameOffset = min(pageHeight - 160, anchorOffset + 80)
+        normalConstraints = [
+            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: frameOffset),
             anchorBackgroundView.heightAnchor.constraint(equalToConstant: 160)
-        ])
-        
-        anchorLabel.translatesAutoresizingMaskIntoConstraints = false
-        anchorLabel.isEditable = false
-        anchorLabel.font = UIFont(name: folioReader.currentFont, size: CGFloat(folioReader.currentFontSizeOnly - 2))
-        anchorLabel.textColor = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode]
-        anchorLabel.backgroundColor = .clear
-        
-        self.view.addSubview(anchorLabel)
+        ]
+        expandConstraints = [
+            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 48),
+            anchorBackgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -32)
+        ]
         
         NSLayoutConstraint.activate([
-            anchorLabel.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 16),
-            anchorLabel.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -16),
-            anchorLabel.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -10),
-            anchorLabel.heightAnchor.constraint(equalToConstant: 110)
+            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 8),
+            anchorBackgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -8)
         ])
-        
+        NSLayoutConstraint.activate(normalConstraints)
         
         navBar.translatesAutoresizingMaskIntoConstraints = false
         navBar.layer.cornerRadius = 4
         navBar.layer.borderColor = UIColor(white: 0.5, alpha: 0.2).cgColor
         navBar.layer.borderWidth = 1
+        
         self.view.addSubview(navBar)
+        
         NSLayoutConstraint.activate([
-            navBar.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            navBar.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
-            navBar.bottomAnchor.constraint(equalTo: anchorLabel.topAnchor),
+            navBar.leadingAnchor.constraint(equalTo: self.anchorBackgroundView.leadingAnchor),
+            navBar.trailingAnchor.constraint(equalTo: self.anchorBackgroundView.trailingAnchor),
+            navBar.topAnchor.constraint(equalTo: self.anchorBackgroundView.topAnchor),
             navBar.heightAnchor.constraint(equalToConstant: 40)
+        ])
+        
+        anchorLabel.translatesAutoresizingMaskIntoConstraints = false
+        anchorLabel.isEditable = false
+        anchorLabel.backgroundColor = .clear
+        
+        self.view.addSubview(anchorLabel)
+        
+        NSLayoutConstraint.activate([
+            anchorLabel.leadingAnchor.constraint(equalTo: self.anchorBackgroundView.leadingAnchor, constant: 8),
+            anchorLabel.trailingAnchor.constraint(equalTo: self.anchorBackgroundView.trailingAnchor, constant: -8),
+            anchorLabel.topAnchor.constraint(equalTo: self.navBar.bottomAnchor),
+            anchorLabel.bottomAnchor.constraint(equalTo: self.anchorBackgroundView.bottomAnchor, constant: -10)
         ])
         
         gotoButton.translatesAutoresizingMaskIntoConstraints = false
@@ -87,6 +108,34 @@ class FolioReaderAnchorPreview: UIViewController {
             gotoButton.widthAnchor.constraint(equalToConstant: 60),
             gotoButton.centerYAnchor.constraint(equalTo: navBar.centerYAnchor),
             gotoButton.heightAnchor.constraint(equalTo: navBar.heightAnchor)
+        ])
+        
+        expandButton.translatesAutoresizingMaskIntoConstraints = false
+        expandButton.setTitle("Expand", for: .normal)
+        expandButton.setTitleColor(folioReader.readerConfig?.tintColor, for: .normal)
+        expandButton.addTarget(self, action: #selector(expandButtonAction(_:)), for: .primaryActionTriggered)
+        
+        navBar.addSubview(expandButton)
+        
+        NSLayoutConstraint.activate([
+            expandButton.trailingAnchor.constraint(equalTo: gotoButton.leadingAnchor, constant: -8),
+            expandButton.widthAnchor.constraint(equalToConstant: 60),
+            expandButton.centerYAnchor.constraint(equalTo: navBar.centerYAnchor),
+            expandButton.heightAnchor.constraint(equalTo: navBar.heightAnchor)
+        ])
+        
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
+        closeButton.setTitle("Close", for: .normal)
+        closeButton.setTitleColor(folioReader.readerConfig?.tintColor, for: .normal)
+        closeButton.addTarget(self, action: #selector(closeButtonAction(_:)), for: .primaryActionTriggered)
+        
+        navBar.addSubview(closeButton)
+        
+        NSLayoutConstraint.activate([
+            closeButton.leadingAnchor.constraint(equalTo: navBar.leadingAnchor, constant: 8),
+            closeButton.widthAnchor.constraint(equalToConstant: 60),
+            closeButton.centerYAnchor.constraint(equalTo: navBar.centerYAnchor),
+            closeButton.heightAnchor.constraint(equalTo: navBar.heightAnchor)
         ])
         
         tapGeatureRecognizer.addTarget(self, action: #selector(tapGesture(_:)))
@@ -131,9 +180,24 @@ class FolioReaderAnchorPreview: UIViewController {
                 return nil
             }).joined(separator: " ")
         }
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineHeightMultiple = 1.2
         
-        anchorLabel.text = snippet.trimmingCharacters(in: .whitespacesAndNewlines)
-        anchorLabel.sizeToFit()
+        var attributes: [NSAttributedString.Key : Any] = [.paragraphStyle: paragraphStyle]
+        if let font = UIFont(name: folioReader.currentFont, size: CGFloat(folioReader.currentFontSizeOnly - 2)) {
+            attributes[.font] = font
+        }
+        if let color = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode] {
+            attributes[.foregroundColor] = color
+        }
+        
+        let attribText = NSAttributedString(
+            string: snippet.trimmingCharacters(in: .whitespacesAndNewlines),
+            attributes: attributes
+        )
+        anchorLabel.attributedText = attribText
+        //anchorLabel.sizeToFit()
     }
     
     @objc func gotoButtonAction(_ sender: UIButton) {
@@ -149,10 +213,26 @@ class FolioReaderAnchorPreview: UIViewController {
         
     }
     
+    @objc func expandButtonAction(_ sender: UIButton) {
+        if sender.title(for: .normal) == "Expand" {
+            NSLayoutConstraint.deactivate(normalConstraints)
+            NSLayoutConstraint.activate(expandConstraints)
+            sender.setTitle("Shrink", for: .normal)
+        } else if sender.title(for: .normal) == "Shrink" {
+            NSLayoutConstraint.deactivate(expandConstraints)
+            NSLayoutConstraint.activate(normalConstraints)
+            sender.setTitle("Expand", for: .normal)
+        }
+    }
+    
+    @objc func closeButtonAction(_ sender: UIButton) {
+        self.dismiss()
+    }
+    
     @objc func tapGesture(_ sender: UITapGestureRecognizer) {
         guard sender.state == .ended else { return }
         
-        guard sender.location(in: self.view).y < self.navBar.frame.minY else { return }
+        guard sender.location(in: self.view).y < self.anchorBackgroundView.frame.minY || sender.location(in: self.view).y > self.anchorBackgroundView.frame.maxY else { return }
         
         self.dismiss()
     }
