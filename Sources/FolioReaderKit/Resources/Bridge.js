@@ -1581,7 +1581,7 @@ function getVisibleCFI(horizontal) {
     if (first) {
         cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
         snippet = first.innerText
-        message = `first \{cfiStart} ${snippet} ${first.outerHTML}`
+        message = `first ${cfiStart} ${snippet} ${first.outerHTML}`
         
         if (firstRange) {
             rangeComponent = window.EPUBcfi.generateDocumentRangeComponent(firstRange, [], ["highlight"], [])
@@ -1590,7 +1590,7 @@ function getVisibleCFI(horizontal) {
             offsetComponent = window.EPUBcfi.generateCharacterOffsetCFIComponent(firstRange.startContainer, firstRange.startOffset, [], ["highlight"], [])
             offsetSnippet = rangeSnippet
             
-            message = `firstRange \{rangeComponent} ${rangeSnippet} ${offsetComponent} ${offsetSnippet} ${first.outerHTML} ${firstRange.toString()}`
+            message = `firstRange ${rangeComponent} ${rangeSnippet} ${offsetComponent} ${offsetSnippet} ${first.outerHTML} ${firstRange.toString()}`
         }
         
         window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI cfiStart " + cfiStart + " " + first.outerHTML);

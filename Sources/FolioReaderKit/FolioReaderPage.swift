@@ -579,7 +579,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                let jsonDict = try? JSONSerialization.jsonObject(with: jsonData) as? [String:Any] {
                 message = (jsonDict["message"] as? String) ?? "Missing message in json"
                 if let offsetComponent = jsonDict["offsetComponent"] as? String,
-                   let offsetSnippet = jsonDict["offsetSnippet"] as? String {
+                   let offsetSnippet = jsonDict["offsetSnippet"] as? String,
+                   offsetComponent.isEmpty == false {
                     cfi = offsetComponent
                     snippet = offsetSnippet
                 } else if let jsonCFI = jsonDict["cfi"] as? String,
@@ -1445,10 +1446,10 @@ writingMode
             FileManager.default.createFile(atPath: tempFile.path, contents: response.suffix(response.count - "bridgeFinished ".count).data(using: .utf8), attributes: nil)
         }
         var prefix = [String]();
-        prefix.append("getVisibleCFI")
+//        prefix.append("getVisibleCFI")
 //        prefix.append("injectHighlight")
 //        prefix.append("highlightStringCFI")
-        prefix.append("getAnchorOffset")
+//        prefix.append("getAnchorOffset")
         
         prefix.forEach {
             if response.starts(with: $0) {
