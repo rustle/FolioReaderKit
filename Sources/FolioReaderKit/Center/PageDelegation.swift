@@ -62,7 +62,8 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 }
             }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1],
-                  position.cfi.starts(with: "epubcfi(") {
+                  position.cfi.starts(with: "epubcfi("),
+                  position.cfi != "epubcfi(/\(page.pageNumber * 2)/2)" {
             page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
                 delay(0.5) {
                     page.getWebViewScrollPosition { position in

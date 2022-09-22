@@ -573,9 +573,11 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         webView.js("getVisibleCFI(\(isHorizontal))") { jsonString in
             var cfi = ""
             var snippet = ""
+            var message = ""
             if let jsonString = jsonString,
                let jsonData = jsonString.data(using: .utf8),
                let jsonDict = try? JSONSerialization.jsonObject(with: jsonData) as? [String:Any] {
+                message = (jsonDict["message"] as? String) ?? "Missing message in json"
                 if let offsetComponent = jsonDict["offsetComponent"] as? String,
                    let offsetSnippet = jsonDict["offsetSnippet"] as? String {
                     cfi = offsetComponent
@@ -585,7 +587,20 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     cfi = jsonCFI
                     snippet = jsonSnippet
                 }
+            } else {
+                message = "json fail"
             }
+            #if DEBUG
+            if cfi.isEmpty {
+                let alertController = UIAlertController(title: "Empty CFI", message: message, preferredStyle: .alert)
+                alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: { action in
+                    
+                }))
+                self.folioReader.readerCenter?.present(alertController, animated: false, completion: {
+                    
+                })
+            }
+            #endif
             
             let structuralStyle = self.folioReader.structuralStyle
             let structuralTrackingTocLevel = self.folioReader.structuralTrackingTocLevel

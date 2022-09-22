@@ -1553,8 +1553,12 @@ function getVisibleCFI(horizontal) {
                             
                             let varClientRect = varRange.getBoundingClientRect()
                             if (horizontal ? (varClientRect.left < 0) : (varClientRect.top < 0)) {
-                                varRange.setStart(varRange.startContainer, varRange.startOffset + 1)
-                                varRange.setEnd(varRange.endContainer, varRange.endOffset + 1)
+                                if (varRange.startOffset < varRange.startContainer.textContent.length) {
+                                    varRange.setStart(varRange.startContainer, varRange.startOffset + 1)
+                                }
+                                if (varRange.endOffset < varRange.endContainer.textContent.length) {
+                                    varRange.setEnd(varRange.endContainer, varRange.endOffset + 1)
+                                }
                                 varClientRect = varRange.getBoundingClientRect()
                                 window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range varRange ${varClientRect.left}:${varClientRect.right}:${varClientRect.top}:${varClientRect.bottom} ${varClientRect.width}:${varClientRect.height} window=${window.scrollX}:${window.scrollY} varRange=${varRange.toString().trim()}`);
                             }
@@ -1572,9 +1576,11 @@ function getVisibleCFI(horizontal) {
     var rangeComponent = ""
     var rangeSnippet = ""
     var offsetComponent = ""
+    var message = ""
     if (first) {
         cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
         snippet = first.innerText
+        message = `first \{cfiStart} ${snippet} ${first.outerHTML}`
         
         if (firstRange) {
             rangeComponent = window.EPUBcfi.generateDocumentRangeComponent(firstRange, [], ["highlight"], [])
@@ -1582,9 +1588,13 @@ function getVisibleCFI(horizontal) {
             
             offsetComponent = window.EPUBcfi.generateCharacterOffsetCFIComponent(firstRange.startContainer, firstRange.startOffset, [], ["highlight"], [])
             offsetSnippet = rangeSnippet
+            
+            message = `firstRange \{rangeComponent} ${rangeSnippet} ${offsetComponent} ${offsetSnippet} ${first.outerHTML} ${firstRange.toString()}`
         }
         
-        window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI " + cfiStart + " " + first.outerHTML);
+        window.webkit.messageHandlers.FolioReaderPage.postMessage("getVisibleCFI cfiStart " + cfiStart + " " + first.outerHTML);
+    } else {
+        message = "Cannot locate first"
     }
 
     return JSON.stringify({
@@ -1593,7 +1603,8 @@ function getVisibleCFI(horizontal) {
         rangeComponent: rangeComponent,
         rangeSnippet: rangeSnippet,
         offsetComponent: offsetComponent,
-        offsetSnippet: offsetSnippet
+        offsetSnippet: offsetSnippet,
+        message: message
     })
 }
 
