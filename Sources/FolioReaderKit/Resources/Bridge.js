@@ -1576,6 +1576,7 @@ function getVisibleCFI(horizontal) {
     var rangeComponent = ""
     var rangeSnippet = ""
     var offsetComponent = ""
+    var offsetSnippet = ""
     var message = ""
     if (first) {
         cfiStart = window.EPUBcfi.generateElementCFIComponent(first,[],["highlight"],[])
