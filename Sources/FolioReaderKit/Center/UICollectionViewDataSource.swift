@@ -125,6 +125,7 @@ extension FolioReaderCenter: UICollectionViewDataSource {
             urlComponents.port = readerConfig.serverPort
             urlComponents.path = path
             guard let url = urlComponents.url else { return cell }
+            folioLogger("webView.load url=\(url.absoluteString)")
             cell.webView?.load(URLRequest(url: url))
 //        }
         

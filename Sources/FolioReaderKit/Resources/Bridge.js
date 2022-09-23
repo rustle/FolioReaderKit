@@ -203,11 +203,15 @@ function tweakStyleOnly() {
     })
     var imgs = [...document.getElementsByTagName('img')]
     imgs.forEach((item) => {
-        if( (item.parentNode.tagName == "P" || item.parentNode.tagName == "DIV") && item.parentNode.innerText.trim().length == 0 ) {
-            item.removeAttribute("height")
-            item.removeAttribute("width")
-            addClass(item, "folioImg")
+        if (item.parentNode.tagName != "P" && item.parentNode.tagName != "DIV" ) {
+            return
         }
+        if (item.parentNode.innerText.trim().length > 0 && item.previousSibling != null) {
+            return
+        }
+        item.removeAttribute("height")
+        item.removeAttribute("width")
+        addClass(item, "folioImg")
     })
 }
 
