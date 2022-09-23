@@ -84,8 +84,23 @@ class FolioReaderReferenceList: UITableViewController {
                     let textNodes = element.textNodes()
                     let offsetByOne = textNodes.first?.previousSibling() != nil     //Possible bug: first text node (before first child element) is omitted
                     for i in 0..<textNodes.count {
-                        let elementOwnText = textNodes[i].getWholeText()
+                        var elementOwnText = textNodes[i].getWholeText()
                         guard elementOwnText.contains(refText) else { continue }
+                        
+                        var prevSibling = textNodes[i].previousSibling()
+                        while let text = (prevSibling as? TextNode)?.text() ?? (try? (prevSibling as? Element)?.text()),
+                              text.contains(refText) == false {
+                            elementOwnText.insert(contentsOf: text.trimmingCharacters(in: .whitespacesAndNewlines), at: elementOwnText.startIndex)
+                            prevSibling = prevSibling?.previousSibling()
+                        }
+                        
+                        var nextSibling = textNodes[i].nextSibling()
+                        while let text = (nextSibling as? TextNode)?.text() ?? (try? (nextSibling as? Element)?.text()),
+                              text.contains(refText) == false {
+                            elementOwnText.insert(contentsOf: text.trimmingCharacters(in: .whitespacesAndNewlines), at: elementOwnText.endIndex)
+                            nextSibling = nextSibling?.nextSibling()
+                        }
+                        
                         if elementOwnText.count > 200 {
                             var findRangeStart = elementOwnText.startIndex
                             
@@ -140,6 +155,9 @@ class FolioReaderReferenceList: UITableViewController {
         let deepestBookmark = FolioReaderBookmark()
         deepestBookmark.page = currentPageNumber
         deepestBookmark.pos = readerCenter.currentWebViewScrollPositions[currentPageNumber - 1]?.cfi
+        if let tempRefCFI = readerCenter.tempRefCFI {
+            deepestBookmark.pos = "epubcfi(\(currentPageNumber*2)/2\(tempRefCFI))"
+        }
         for pageNumber in (startPageNumber...currentPageNumber).reversed() {
             DispatchQueue.global(qos: .userInitiated).async {
 //            DispatchQueue.main.async {
@@ -274,6 +292,7 @@ class FolioReaderReferenceList: UITableViewController {
             bookmarkLabel.tag = 123
             bookmarkLabel.autoresizingMask = UIView.AutoresizingMask.flexibleWidth
             bookmarkLabel.numberOfLines = 0
+            bookmarkLabel.lineBreakMode = .byWordWrapping
             bookmarkLabel.textColor = UIColor.black
             cell.contentView.addSubview(bookmarkLabel)
         } else {

@@ -793,6 +793,19 @@ var getSelectedText = function() {
     return selObj.toString();
 }
 
+var getSelectedTextCFI = function() {
+    var selObj = window.getSelection()
+    var selRange = selObj.getRangeAt(0)
+    var selContainer = selRange.startContainer
+    window.webkit.messageHandlers.FolioReaderPage.postMessage("Selection Container " + selContainer.outerHTML)
+
+    var selContainerCFI = window.EPUBcfi.generateElementCFIComponent(selContainer.parentNode,[],["highlight"],[])
+    return JSON.stringify({
+        sel: selObj.toString(),
+        cfi: selContainerCFI
+    })
+}
+
 // Method that gets the Rect of current selected text
 // and returns in a JSON format
 var getRectForSelectedText = function(elm) {

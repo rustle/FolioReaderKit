@@ -97,6 +97,7 @@ open class FolioReaderCenter: UIViewController {
     
     var bookmarkErrors: [String: String] = [:]
     var tempRefText: String?
+    var tempRefCFI: String?
     
     var readerConfig: FolioReaderConfig {
         guard let readerContainer = readerContainer else { return FolioReaderConfig() }

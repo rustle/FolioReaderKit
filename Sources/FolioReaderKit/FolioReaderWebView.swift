@@ -418,8 +418,12 @@ open class FolioReaderWebView: WKWebView {
     }
     
     @objc func reference(_ sender: UIMenuController?) {
-        js("getSelectedText()") { selectedText in
-            guard let selectedText = selectedText else { return }
+        js("getSelectedTextCFI()") { selJsonStr in
+            guard let selJsonData = selJsonStr?.data(using: .utf8),
+                  let selJson = try? JSONSerialization.jsonObject(with: selJsonData) as? [String:String],
+                  let selectedText = selJson["sel"],
+                  let selectedCFI = selJson["cfi"]
+            else { return }
             
             self.clearTextSelection()
             self.setMenuVisible(false)
@@ -429,6 +433,7 @@ open class FolioReaderWebView: WKWebView {
                   let selector = bookmarkBarButtonItem.action else { return }
             
             readerCenter.tempRefText = selectedText
+            readerCenter.tempRefCFI = selectedCFI
             self.folioReader.currentAnnotationMenuIndex = 0
             UIApplication.shared.sendAction(selector, to: readerCenter, from: bookmarkBarButtonItem, for: nil)
         }
