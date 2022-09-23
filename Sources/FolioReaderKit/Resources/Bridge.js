@@ -206,7 +206,7 @@ function tweakStyleOnly() {
         if (item.parentNode.tagName != "P" && item.parentNode.tagName != "DIV" ) {
             return
         }
-        if (item.parentNode.innerText.trim().length > 0 && item.previousSibling != null) {
+        if (item.parentNode.innerText.trim().length > 0 && (item.previousSibling != null && item.nextSibling != null)) {
             return
         }
         item.removeAttribute("height")
