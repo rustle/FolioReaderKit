@@ -134,6 +134,25 @@ function getTextNodesIn(node, includeWhitespaceNodes) {
     return textNodes;
 }
 
+function getTextAndImgNodesIn(node, includeWhitespaceNodes) {
+    var textNodes = [], whitespace = /^\s*$/;
+
+    function getTextAndImgNodes(node) {
+        if (node.nodeType == 3 || (node.nodeType == 1 && node.nodeName == "IMG")) {
+            if (includeWhitespaceNodes || !whitespace.test(node.nodeValue)) {
+                textNodes.push(node);
+            }
+        } else {
+            for (var i = 0, len = node.childNodes.length; i < len; ++i) {
+                getTextAndImgNodes(node.childNodes[i]);
+            }
+        }
+    }
+
+    getTextAndImgNodes(node);
+    return textNodes;
+}
+
 function removeOuterTable() {
     // table references the table DOM element
     var tables = Array.from(document.getElementsByTagName('table'));
@@ -1434,10 +1453,10 @@ function getVisibleCFI(horizontal) {
     let firstRange;
     let firstHorizontalTop;
     //let allVisible = Array.from(document.querySelectorAll('body > *')).filter(visible)
-    let allVisible = getTextNodesIn(document.body, false).filter(visible)
+    let allVisible = getTextAndImgNodesIn(document.body, false).filter(visible)
     let bodyWidth = document.body.clientWidth
     for(const textNode of allVisible) {
-        let elem = textNode.parentNode
+        let elem = textNode.nodeType == 3 ? textNode.parentNode : textNode
         if (!elem || elem == first) {
             continue
         }
