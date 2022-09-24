@@ -60,22 +60,28 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         }
         
         // Go to fragment if needed
-        if let fragmentID = tempFragment, let currentPage = currentPage, fragmentID != "" {
-            currentPage.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
-                self.tempFragment = nil
-                delay(0.5) {
-                    page.getWebViewScrollPosition { position in
-                        self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+        if let fragmentID = tempFragment,
+           fragmentID.isEmpty == false,
+           page.pageNumber == currentPage?.pageNumber {
+            delay(0.2) {
+                page.handleAnchor(fragmentID, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
+                    self.tempFragment = nil
+                    delay(0.5) {
+                        page.getWebViewScrollPosition { position in
+                            self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+                        }
                     }
                 }
             }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1],
                   position.cfi.starts(with: "epubcfi("),
                   position.cfi != "epubcfi(/\(page.pageNumber * 2)/2)" {
-            page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true) {
-                delay(0.5) {
-                    page.getWebViewScrollPosition { position in
-                        self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+            delay(0.2) {
+                page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true) {
+                    delay(0.5) {
+                        page.getWebViewScrollPosition { position in
+                            self.currentWebViewScrollPositions[page.pageNumber - 1] = position
+                        }
                     }
                 }
             }

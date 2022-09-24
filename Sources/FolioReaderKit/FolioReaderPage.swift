@@ -287,6 +287,27 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         )
     }
     
+    func anchorBoundsFrame() -> CGRect {
+        guard (self.readerConfig.hideBars == false) else {
+            return bounds
+        }
+        
+        let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
+        let topComponentTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : navBarHeight
+        let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
+        let paddingTop: CGFloat = floor(CGFloat(self.folioReader.currentMarginTop) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0)))
+        let paddingBottom: CGFloat = floor(CGFloat(self.folioReader.currentMarginBottom) / 200 * (self.folioReader.readerCenter?.pageHeight ?? CGFloat(0)))
+        let paddingLeft: CGFloat = floor(CGFloat(self.folioReader.currentMarginLeft) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0)))
+        let paddingRight: CGFloat = floor(CGFloat(self.folioReader.currentMarginRight) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0)))
+        
+        return CGRect(
+            x: bounds.origin.x + paddingLeft,
+            y: bounds.origin.y + topComponentTotal + paddingTop,
+            width: bounds.width - paddingLeft - paddingRight,
+            height: max(bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom, 0)
+        )
+    }
+    
     func webViewFrameVanilla() -> CGRect {
         guard (self.readerConfig.hideBars == false) else {
             return bounds
@@ -1305,7 +1326,12 @@ writingMode
                   url.port == readerConfig.serverPort,
                   let anchorFromURL = url.fragment {
             self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
-                let snippetVC = FolioReaderAnchorPreview(self.folioReader, url, CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), self.frame.height)
+                let snippetVC = FolioReaderAnchorPreview(
+                    self.folioReader,
+                    url,
+                    CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0),
+                    self.anchorBoundsFrame()
+                )
 
                 snippetVC.anchorLabel.text = url.absoluteString
 

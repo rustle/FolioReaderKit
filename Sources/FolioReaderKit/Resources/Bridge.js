@@ -1539,8 +1539,12 @@ function getVisibleCFI(horizontal) {
                                 
                                 let varClientRect = varRange.getBoundingClientRect()
                                 if (varClientRect.right > window.innerWidth) {
-                                    varRange.setStart(varRange.startContainer, varRange.startOffset + 1)
-                                    varRange.setEnd(varRange.endContainer, varRange.endOffset + 1)
+                                    if (varRange.startOffset < varRange.startContainer.textContent.length) {
+                                        varRange.setStart(varRange.startContainer, varRange.startOffset + 1)
+                                    }
+                                    if (varRange.endOffset < varRange.endContainer.textContent.length) {
+                                        varRange.setEnd(varRange.endContainer, varRange.endOffset + 1)
+                                    }
                                     varClientRect = varRange.getBoundingClientRect()
                                     window.webkit.messageHandlers.FolioReaderPage.postMessage(`getVisibleCFI range varRange ${varClientRect.left}:${varClientRect.right}:${varClientRect.top}:${varClientRect.bottom} ${varClientRect.width}:${varClientRect.height} window=${window.scrollX}:${window.scrollY} varRange=${varRange.toString().trim()}`);
                                 }

@@ -12,7 +12,7 @@ class FolioReaderAnchorPreview: UIViewController {
     let folioReader: FolioReader
     let anchorURL: URL
     let anchorOffset: CGFloat
-    let pageHeight: CGFloat
+    let anchorBounds: CGRect
     
     let navBar = UIView()
     
@@ -31,11 +31,11 @@ class FolioReaderAnchorPreview: UIViewController {
     
     let snippetTestRegex = try? NSRegularExpression(pattern: "^\\[\\d+\\]$")
     
-    public init(_ folioReader: FolioReader, _ anchorURL: URL, _ anchorOffset: CGFloat, _ pageHeight: CGFloat) {
+    public init(_ folioReader: FolioReader, _ anchorURL: URL, _ anchorOffset: CGFloat, _ anchorBounds: CGRect) {
         self.folioReader = folioReader
         self.anchorURL = anchorURL
         self.anchorOffset = anchorOffset
-        self.pageHeight = pageHeight
+        self.anchorBounds = anchorBounds
         
         super.init(nibName: nil, bundle: Bundle.frameworkBundle())
     }
@@ -53,19 +53,19 @@ class FolioReaderAnchorPreview: UIViewController {
         
         self.view.addSubview(anchorBackgroundView)
         
-        let frameOffset = min(pageHeight - 160, anchorOffset + 80)
-        normalConstraints = [
+        let frameOffset = anchorBounds.minY + min(anchorBounds.height - 160, anchorOffset + 80)
+        normalConstraints.append(contentsOf: [
             anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: frameOffset),
             anchorBackgroundView.heightAnchor.constraint(equalToConstant: 160)
-        ]
-        expandConstraints = [
-            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: 48),
-            anchorBackgroundView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -32)
-        ]
+        ])
+        expandConstraints.append(contentsOf: [
+            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: anchorBounds.minY + 8),
+            anchorBackgroundView.heightAnchor.constraint(equalToConstant: anchorBounds.height - 16)
+        ])
         
         NSLayoutConstraint.activate([
-            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: 8),
-            anchorBackgroundView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor, constant: -8)
+            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: anchorBounds.minX + 8),
+            anchorBackgroundView.widthAnchor.constraint(equalToConstant: anchorBounds.width - 16)
         ])
         NSLayoutConstraint.activate(normalConstraints)
         
