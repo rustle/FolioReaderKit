@@ -45,6 +45,10 @@ class FolioReaderAnchorPreview: UIViewController {
     }
     
     override func viewDidLoad() {
+        self.view.insetsLayoutMarginsFromSafeArea = false
+        
+        self.view.backgroundColor = .init(white: 0.2, alpha: 0.2)
+        
         anchorBackgroundView.translatesAutoresizingMaskIntoConstraints = false
         anchorBackgroundView.backgroundColor = folioReader.readerConfig?.themeModeNavBackground[folioReader.themeMode]
         anchorBackgroundView.layer.borderColor = folioReader.readerConfig?.themeModeTextColor[folioReader.themeMode].cgColor
@@ -53,14 +57,14 @@ class FolioReaderAnchorPreview: UIViewController {
         
         self.view.addSubview(anchorBackgroundView)
         
-        let frameOffset = anchorBounds.minY + min(anchorBounds.height - 160, anchorOffset + 80)
+        let frameOffset = anchorBounds.minY + min(anchorBounds.height - 160 - 16, anchorOffset + 32)
         normalConstraints.append(contentsOf: [
             anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: frameOffset),
             anchorBackgroundView.heightAnchor.constraint(equalToConstant: 160)
         ])
         expandConstraints.append(contentsOf: [
-            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: anchorBounds.minY + 8),
-            anchorBackgroundView.heightAnchor.constraint(equalToConstant: anchorBounds.height - 16)
+            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: anchorBounds.minY + 16),
+            anchorBackgroundView.heightAnchor.constraint(equalToConstant: anchorBounds.height - 32)
         ])
         
         NSLayoutConstraint.activate([
@@ -232,7 +236,7 @@ class FolioReaderAnchorPreview: UIViewController {
     @objc func tapGesture(_ sender: UITapGestureRecognizer) {
         guard sender.state == .ended else { return }
         
-        guard sender.location(in: self.view).y < self.anchorBackgroundView.frame.minY || sender.location(in: self.view).y > self.anchorBackgroundView.frame.maxY else { return }
+        guard self.anchorBackgroundView.frame.contains(sender.location(in: self.view)) == false else { return }
         
         self.dismiss()
     }

@@ -275,11 +275,17 @@ extension FolioReaderContainer {
             message: message,
             preferredStyle: UIAlertController.Style.alert
         )
-        let action = UIAlertAction(title: "OK", style: UIAlertAction.Style.cancel) { [weak self]
+        let action = UIAlertAction(title: "Close", style: UIAlertAction.Style.destructive) { [weak self]
             (result : UIAlertAction) -> Void in
             self?.dismiss()
         }
         alertController.addAction(action)
+        
+        let ignoreAction = UIAlertAction(title: "Ignore", style: .default) { action in
+            alertController.dismiss()
+        }
+        alertController.addAction(ignoreAction)
+        
         self.present(alertController, animated: true, completion: nil)
     }
 }

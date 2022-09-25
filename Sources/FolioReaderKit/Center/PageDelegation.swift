@@ -76,8 +76,9 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1],
                   position.cfi.starts(with: "epubcfi("),
                   position.cfi != "epubcfi(/\(page.pageNumber * 2)/2)" {
+            self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = position.cfi
             delay(0.2) {
-                page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: false, animated: true) {
+                page.handleAnchor(position.cfi, offsetInWindow: 0, avoidBeginningAnchors: true, animated: true) {
                     delay(0.5) {
                         page.getWebViewScrollPosition { position in
                             self.currentWebViewScrollPositions[page.pageNumber - 1] = position
@@ -86,6 +87,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                 }
             }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1] {
+            self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = position.cfi
             folioLogger("bridgeFinished isFirstLoad pageNumber=\(page.pageNumber)")
             
             // if self.readerConfig.loadSavedPositionForCurrentBook,
@@ -129,6 +131,8 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
                     }
                 }
             }
+        } else {
+            self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = "Missing Position"
         }
 
         // Pass the event to the centers `pageDelegate`

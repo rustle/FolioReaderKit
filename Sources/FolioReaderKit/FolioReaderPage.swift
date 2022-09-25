@@ -268,9 +268,9 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                     bounds.origin.y + topComponentTotal),
                 width: bounds.width,
                 height: max(self.readerConfig.isDirection(
-                    bounds.height - topComponentTotal,
-                    bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom,
-                    bounds.height - topComponentTotal), 0)
+                    bounds.height - topComponentTotal - bottomComponentTotal,
+                    bounds.height - topComponentTotal - bottomComponentTotal - paddingTop - paddingBottom,
+                    bounds.height - topComponentTotal - bottomComponentTotal), 0)
             ),
             CGRect(
                 x: self.readerConfig.isDirection(
@@ -292,6 +292,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             return bounds
         }
         
+        // bounds.height does not include statusbarHeight
+        let statusbarHeight = UIApplication.shared.statusBarFrame.size.height
         let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
         let topComponentTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : navBarHeight
         let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
@@ -300,11 +302,26 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         let paddingLeft: CGFloat = floor(CGFloat(self.folioReader.currentMarginLeft) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0)))
         let paddingRight: CGFloat = floor(CGFloat(self.folioReader.currentMarginRight) / 200 * (self.folioReader.readerCenter?.pageWidth ?? CGFloat(0)))
         
-        return CGRect(
-            x: bounds.origin.x + paddingLeft,
-            y: bounds.origin.y + topComponentTotal + paddingTop,
-            width: bounds.width - paddingLeft - paddingRight,
-            height: max(bounds.height - topComponentTotal - paddingTop - bottomComponentTotal - paddingBottom, 0)
+        return byWritingMode(
+            CGRect(
+                x: bounds.origin.x + paddingLeft,
+                y: self.readerConfig.isDirection(
+                    bounds.origin.y + topComponentTotal,
+                    bounds.origin.y + topComponentTotal + paddingTop,
+                    bounds.origin.y + topComponentTotal)
+                + statusbarHeight,
+                width: bounds.width - paddingLeft - paddingRight,
+                height: max(self.readerConfig.isDirection(
+                    bounds.height - topComponentTotal - bottomComponentTotal,
+                    bounds.height - topComponentTotal - bottomComponentTotal - paddingTop - paddingBottom,
+                    bounds.height - topComponentTotal - bottomComponentTotal), 0)
+            ),
+            CGRect(
+                x: bounds.origin.x + paddingLeft,
+                y: bounds.origin.y + topComponentTotal + paddingTop,
+                width: bounds.width - paddingLeft - paddingRight,
+                height: max(bounds.height - topComponentTotal - bottomComponentTotal - paddingTop - paddingBottom, 0)
+            )
         )
     }
     
@@ -1335,7 +1352,7 @@ writingMode
 
                 snippetVC.anchorLabel.text = url.absoluteString
 
-                snippetVC.modalPresentationStyle = .overCurrentContext
+                snippetVC.modalPresentationStyle = .overFullScreen
                 snippetVC.modalTransitionStyle = .crossDissolve
                 
                 self.folioReader.readerCenter?.present(snippetVC, animated: true, completion: nil)
@@ -1347,8 +1364,6 @@ writingMode
                 self.pushNavigateWebViewScrollPositions()
             }
             
-            guard let anchorFromURL = url.fragment else { return true }
-
             // Handle internal url
             if !url.pathExtension.isEmpty {
                 let pathComponent = (self.book.opfResource.href as NSString?)?.deletingLastPathComponent
@@ -1369,6 +1384,7 @@ writingMode
 
                 if (hrefPage == pageNumber) {
                     // Handle internal #anchor
+                    guard let anchorFromURL = url.fragment else { return true }
                     self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
                         print("getClickAnchorOffset offset=\(offset ?? "0")")
                         self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
@@ -1377,27 +1393,49 @@ writingMode
                 } else {
                     // self.folioReader.readerCenter?.tempFragment = anchorFromURL
                     self.folioReader.readerCenter?.currentWebViewScrollPositions.removeValue(forKey: hrefPage - 1)
-                    self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
-                        print("getClickAnchorOffset offset=\(offset ?? "0")")
-                        self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
-                            delay(0.2) {
-                                guard self.folioReader.readerCenter?.currentPageNumber == hrefPage else { return }
-                                self.folioReader.readerCenter?.currentPage?.waitForLayoutFinish {
-                                    self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
+                    if let anchorFromURL = url.fragment {
+                        self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                            print("getClickAnchorOffset offset=\(offset ?? "0")")
+                            self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
+                                delay(0.2) {
+                                    guard self.folioReader.readerCenter?.currentPageNumber == hrefPage else { return }
+                                    self.folioReader.readerCenter?.currentPage?.waitForLayoutFinish {
+                                        self.folioReader.readerCenter?.currentPage?.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: true)
+                                    }
                                 }
                             }
                         }
+                    } else if navigationAction.navigationType != .other {
+                        self.folioReader.readerCenter?.changePageWith(href: href, animated: true) {
+                            delay(0.2) {
+                                guard self.folioReader.readerCenter?.currentPageNumber == hrefPage else { return }
+                                guard let currentPage = self.folioReader.readerCenter?.currentPage else { return }
+                                currentPage.waitForLayoutFinish {
+                                    if self.folioReader.needsRTLChange {
+                                        currentPage.scrollPageToBottom()
+                                    } else {
+                                        currentPage.scrollPageToOffset(.zero, animated: false, retry: 0)
+                                    }
+                                }
+                            }
+                        }
+                    } else {    //triggered by datasource loading url
+                        return true
                     }
                 }
                 return false
             }
 
             // Handle internal #anchor
-            self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
-                print("getClickAnchorOffset offset=\(offset ?? "0")")
-                self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
+            if let anchorFromURL = url.fragment {
+                self.webView?.js("getClickAnchorOffset('\(anchorFromURL)')") { offset in
+                    print("getClickAnchorOffset offset=\(offset ?? "0")")
+                    self.handleAnchor(anchorFromURL, offsetInWindow: CGFloat(truncating: NumberFormatter().number(from: offset ?? "0") ?? 0), avoidBeginningAnchors: false, animated: false)
+                }
+                return false
+            } else {
+                return true
             }
-            return false
         } else if scheme == "mailto" {
             print("Email")
             return true
@@ -1704,6 +1742,9 @@ writingMode
         }
         
         getAnchorOffset(anchor) { offset in
+            if let infoLabelText = self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text {
+                self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = "\(offset) \(infoLabelText)"
+            }
             self.byWritingMode {
                 switch self.readerConfig.scrollDirection {
                 case .horitonzalWithPagedContent:

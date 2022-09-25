@@ -1460,7 +1460,7 @@ function getVisibleCFI(horizontal) {
         if (!elem || elem == first) {
             continue
         }
-        if (elem.tagName == "A" || elem.tagName == "B" || elem.tagName == "I" || elem.tagName == "FONT" || elem.tagName == "HIGHLIGHT") {
+        if (elem.tagName == "HIGHLIGHT") {
             continue
         }
         //Calculate the offset to the document

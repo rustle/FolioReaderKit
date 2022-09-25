@@ -11,6 +11,7 @@ import UIKit
 class FolioReaderPageIndicator: UIView {
     var pagesLabel: UILabel!
     var minutesLabel: UILabel!
+    var infoLabel: UILabel!
     
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
@@ -42,6 +43,11 @@ class FolioReaderPageIndicator: UIView {
         minutesLabel.textAlignment = NSTextAlignment.right
         //        minutesLabel.alpha = 0
         addSubview(minutesLabel)
+        
+        infoLabel = UILabel(frame: CGRect.zero)
+        infoLabel.font = UIFont(name: "Avenir-Light", size: 12)!
+        infoLabel.textAlignment = .center
+        addSubview(infoLabel)
     }
 
     required init?(coder aDecoder: NSCoder) {
@@ -51,10 +57,14 @@ class FolioReaderPageIndicator: UIView {
     func reloadView(updateShadow: Bool) {
         minutesLabel.sizeToFit()
         pagesLabel.sizeToFit()
-
+        
         let fullW = pagesLabel.frame.width + minutesLabel.frame.width
         minutesLabel.frame.origin = CGPoint(x: frame.width/2-fullW/2, y: 2)
         pagesLabel.frame.origin = CGPoint(x: minutesLabel.frame.origin.x+minutesLabel.frame.width, y: 2)
+        
+        #if DEBUG
+        infoLabel.frame = CGRect(origin: .init(x: 10, y: 22), size: .init(width: frame.width, height: 18))
+        #endif
         
         if updateShadow {
             layer.shadowPath = UIBezierPath(rect: bounds).cgPath
@@ -81,6 +91,7 @@ class FolioReaderPageIndicator: UIView {
 
         minutesLabel.textColor = self.folioReader.isNight(UIColor(white: 1, alpha: 0.3), UIColor(white: 0, alpha: 0.6))
         pagesLabel.textColor = self.folioReader.isNight(UIColor(white: 1, alpha: 0.6), UIColor(white: 0, alpha: 0.9))
+        infoLabel.textColor = self.folioReader.isNight(UIColor(white: 1, alpha: 0.6), UIColor(white: 0, alpha: 0.9))
     }
 
     func reloadViewWithPage(_ page: Int) {

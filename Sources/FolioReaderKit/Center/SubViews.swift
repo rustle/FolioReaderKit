@@ -40,6 +40,9 @@ extension FolioReaderCenter {
     func frameForPageIndicatorView(outerBounds: CGRect) -> CGRect {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
+        #if DEBUG
+        pageIndicatorHeight = 40
+        #endif
         var bounds = CGRect(x: 0, y: outerBounds.size.height-pageIndicatorHeight, width: outerBounds.size.width, height: pageIndicatorHeight)
         
         if #available(iOS 11.0, *) {
@@ -54,11 +57,15 @@ extension FolioReaderCenter {
 
         guard let currentPage = currentPage else { return .zero }
         
+        let navBarHeight = self.folioReader.readerCenter?.navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
+        let topComponentTotal = self.readerConfig.shouldHideNavigationOnTap ? 0 : navBarHeight
+        let bottomComponentTotal = self.readerConfig.hidePageIndicator ? 0 : self.folioReader.readerCenter?.pageIndicatorHeight ?? CGFloat(0)
+        
         let scrubberYforHorizontal: CGFloat = ((self.readerConfig.shouldHideNavigationOnTap == true || self.readerConfig.hideBars == true) ? 50 : 74)
         let scrubberYforVertical: CGFloat = self.pageHeight// + ((self.readerConfig.shouldHideNavigationOnTap == true || self.readerConfig.hideBars == true) ? 50 : 74)
         
         return currentPage.byWritingMode(
-            CGRect(x: self.pageWidth + 10, y: scrubberYforHorizontal, width: 40, height: (self.pageHeight - 100)),
+            CGRect(x: self.pageWidth + 10, y: scrubberYforHorizontal, width: 40, height: (self.pageHeight - 70 - topComponentTotal - bottomComponentTotal)),
             CGRect(x: self.pageWidth - 40, y: scrubberYforVertical, width: self.pageWidth - 100, height: 40)
         )
     }
@@ -66,7 +73,7 @@ extension FolioReaderCenter {
     func frameForCollectionView(outerBounds: CGRect) -> CGRect {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var bounds = CGRect(x: 0, y: 0, width: outerBounds.size.width, height: outerBounds.size.height-pageIndicatorHeight)
+        var bounds = CGRect(x: 0, y: 0, width: outerBounds.size.width, height: outerBounds.size.height)
         
         if #available(iOS 11.0, *) {
             bounds.size.height = bounds.size.height + view.safeAreaInsets.bottom
