@@ -592,6 +592,8 @@ extension FolioReader {
                   let bookId = self.readerCenter?.book.name?.deletingPathExtension,
                   let provider = delegate?.folioReaderReadPositionProvider?(self) else { return }
             
+            guard self.isReaderReady || position.takePrecedence else { return }
+            
             if let debug = readerConfig?.debug, debug.contains(.functionTrace) {
                 Thread.callStackSymbols.forEach {
                     folioLogger($0)

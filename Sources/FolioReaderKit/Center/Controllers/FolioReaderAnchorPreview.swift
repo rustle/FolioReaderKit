@@ -57,19 +57,28 @@ class FolioReaderAnchorPreview: UIViewController {
         
         self.view.addSubview(anchorBackgroundView)
         
-        let frameOffset = anchorBounds.minY + min(anchorBounds.height - 160 - 16, anchorOffset + 32)
+        let frameHeight = anchorBounds.height / 3
+        let frameOffset = anchorBounds.minY + min(anchorBounds.height - frameHeight - 16, anchorOffset + 32)
         normalConstraints.append(contentsOf: [
             anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: frameOffset),
-            anchorBackgroundView.heightAnchor.constraint(equalToConstant: 160)
+            anchorBackgroundView.heightAnchor.constraint(equalToConstant: frameHeight)
         ])
+        var headMargin = CGFloat(16)
+        var sideMargin = CGFloat(8)
+        if anchorBounds.height > anchorBounds.width * 1.5 {
+            headMargin *= 2
+        }
+        if anchorBounds.width > anchorBounds.height {
+            sideMargin *= 2
+        }
         expandConstraints.append(contentsOf: [
-            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: anchorBounds.minY + 16),
-            anchorBackgroundView.heightAnchor.constraint(equalToConstant: anchorBounds.height - 32)
+            anchorBackgroundView.topAnchor.constraint(equalTo: self.view.topAnchor, constant: anchorBounds.minY + headMargin),
+            anchorBackgroundView.heightAnchor.constraint(equalToConstant: anchorBounds.height - headMargin * 2)
         ])
         
         NSLayoutConstraint.activate([
-            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: anchorBounds.minX + 8),
-            anchorBackgroundView.widthAnchor.constraint(equalToConstant: anchorBounds.width - 16)
+            anchorBackgroundView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor, constant: anchorBounds.minX + sideMargin),
+            anchorBackgroundView.widthAnchor.constraint(equalToConstant: anchorBounds.width - sideMargin * 2)
         ])
         NSLayoutConstraint.activate(normalConstraints)
         
