@@ -125,7 +125,7 @@ class FREpubParserArchive: NSObject {
             }
         }
 
-        var entrySizeMap = [String:UInt64]()
+        var entrySizeMap = [String:Int]()
         archive.forEach { entry in
             entrySizeMap[entry.path] = entry.uncompressedSize
         }

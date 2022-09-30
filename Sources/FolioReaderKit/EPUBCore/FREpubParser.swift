@@ -164,7 +164,7 @@ class FREpubParser: NSObject, SSZipArchiveDelegate {
             resource.mediaType = MediaType.by(name: $0.attributes["media-type"] ?? "", fileName: resource.href)
             resource.mediaOverlay = $0.attributes["media-overlay"]
             
-            resource.size = try? FileManager.default.attributesOfItem(atPath: resource.fullHref)[.size] as? UInt64
+            resource.size = (try? FileManager.default.attributesOfItem(atPath: resource.fullHref)[.size] as? NSNumber)?.intValue
             
             // if a .smil file is listed in resources, go parse that file now and save it on book model
             if (resource.mediaType != nil && resource.mediaType == .smil) {
