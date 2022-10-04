@@ -889,6 +889,53 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     
+    open func scrollWebViewByPosition(pageOffset: CGFloat, pageProgress: Double, animated: Bool = true, completion: (() -> Void)? = nil) {
+        var pageOffset = pageOffset
+        let pageProgress = pageProgress
+        
+        let fileSize = self.book.spine.spineReferences[safe: self.pageNumber - 1]?.resource.size ?? 102400
+        let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horitonzalWithPagedContent ? 0.25 : 0.1)
+        delay(delaySec) {
+            guard let webView = self.webView,
+                  let readerCenter = self.folioReader.readerCenter else {
+                completion?()
+                return
+            }
+            
+            let contentSize = webView.scrollView.contentSize
+            let webViewFrameSize = webView.frame.size
+            
+            var pageOffsetByProgress = self.byWritingMode(
+                contentSize.forDirection(withConfiguration: self.readerConfig) * pageProgress,
+                contentSize.width * (100 - pageProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
+            if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
+                if self.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
+                    let pageInPage = self.byWritingMode(
+                        floor( pageOffsetByProgress / webViewFrameSize.width ),
+                        max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)
+                    )
+                    pageOffsetByProgress = self.byWritingMode(pageInPage * webViewFrameSize.width, contentSize.width - pageInPage * webViewFrameSize.width)
+                }
+                pageOffset = pageOffsetByProgress - self.byWritingMode(
+                    self.readerConfig.isDirection(readerCenter.pageHeight / 2, readerCenter.pageWidth / 2, readerCenter.pageHeight / 2),
+                    webViewFrameSize.width / 2
+                )
+            }
+            if pageOffset < 0 {
+                pageOffset = 0
+            }
+            self.pageOffsetRate = pageOffset / self.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
+            self.scrollWebViewByPageOffsetRate(animated: animated) {
+                delay(0.5) {
+                    self.getWebViewScrollPosition { position in
+                        readerCenter.currentWebViewScrollPositions[self.pageNumber - 1] = position
+                        completion?()
+                    }
+                }
+            }
+        }
+    }
+    
     open func scrollWebViewByPageOffsetRate(animated: Bool = true, completion: (() -> Void)? = nil) {
         guard let webViewFrameSize = webView?.frame.size,
               webViewFrameSize.width > 0, webViewFrameSize.height > 0,

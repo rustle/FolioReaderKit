@@ -26,13 +26,13 @@ import Foundation
     
     @objc func folioReaderReadPosition(_ folioReader: FolioReader) -> [FolioReaderReadPosition]
     
-    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String) -> [FolioReaderReadPositionHistory]
+    @objc func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String) -> [FolioReaderReadPositionHistory]
     
-    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, start readPosition: FolioReaderReadPosition)
+//    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, start readPosition: FolioReaderReadPosition)
     
-    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, finish readPosition: FolioReaderReadPosition)
+//    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, finish readPosition: FolioReaderReadPosition)
     
-    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, remove readPosition: FolioReaderReadPositionHistory)
+//    @objc optional func folioReaderPositionHistory(_ folioReader: FolioReader, bookId: String, remove readPosition: FolioReaderReadPositionHistory)
 }
 
 public class FolioReaderNaiveReadPositionProvider: FolioReaderReadPositionProvider {

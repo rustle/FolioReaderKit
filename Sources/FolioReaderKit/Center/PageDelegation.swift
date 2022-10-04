@@ -75,6 +75,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
             }
         } else if let position = self.folioReader.readerCenter?.currentWebViewScrollPositions[page.pageNumber - 1],
                   position.cfi.starts(with: "epubcfi("),
+                  (page.pageNumber > 1 ? position.cfi != "epubcfi(/2/2)" : true),
                   position.cfi != "epubcfi(/\(page.pageNumber * 2)/2)" {
             self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = position.cfi
             delay(0.2) {
@@ -90,47 +91,10 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
             self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = position.cfi
             folioLogger("bridgeFinished isFirstLoad pageNumber=\(page.pageNumber)")
             
-            // if self.readerConfig.loadSavedPositionForCurrentBook,
-            // let position = self.folioReader.savedPositionForCurrentBook {
-            //      if self.pageNumber == position["pageNumber"] as? Int {
-            var pageOffset = position.pageOffset.forDirection(withConfiguration: self.readerConfig)
-            
-            let fileSize = self.book.spine.spineReferences[safe: page.pageNumber-1]?.resource.size ?? 102400
-            let delaySec = 0.2 + Double(fileSize / 51200) * (self.readerConfig.scrollDirection == .horitonzalWithPagedContent ? 0.25 : 0.1)
-            delay(delaySec) {
-                let chapterProgress = position.chapterProgress
-                
-                let contentSize = webView.scrollView.contentSize
-                let webViewFrameSize = webView.frame.size
-                
-                var pageOffsetByProgress = page.byWritingMode(
-                    contentSize.forDirection(withConfiguration: self.readerConfig) * chapterProgress,
-                    contentSize.width * (100 - chapterProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
-                if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
-                    if page.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
-                        let pageInPage = page.byWritingMode(
-                            floor( pageOffsetByProgress / webViewFrameSize.width ),
-                            max(floor( (contentSize.width - pageOffsetByProgress) / webViewFrameSize.width), 1)
-                        )
-                        pageOffsetByProgress = page.byWritingMode(pageInPage * webViewFrameSize.width, contentSize.width - pageInPage * webViewFrameSize.width)
-                    }
-                    pageOffset = pageOffsetByProgress - page.byWritingMode(
-                        self.readerConfig.isDirection(self.pageHeight / 2, self.pageWidth / 2, self.pageHeight / 2),
-                        webViewFrameSize.width / 2
-                    )
-                }
-                if pageOffset < 0 {
-                    pageOffset = 0
-                }
-                page.pageOffsetRate = pageOffset / page.byWritingMode(contentSize.forDirection(withConfiguration: self.readerConfig), contentSize.width)
-                page.scrollWebViewByPageOffsetRate(animated: false) {
-                    delay(0.5) {
-                        page.getWebViewScrollPosition { position in
-                            self.currentWebViewScrollPositions[page.pageNumber - 1] = position
-                        }
-                    }
-                }
-            }
+            page.scrollWebViewByPosition(
+                pageOffset: position.pageOffset.forDirection(withConfiguration: self.readerConfig),
+                pageProgress: position.chapterProgress
+            )
         } else {
             self.readerContainer?.centerViewController?.pageIndicatorView?.infoLabel.text = "Missing Position"
         }

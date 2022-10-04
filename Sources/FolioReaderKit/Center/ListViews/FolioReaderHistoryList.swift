@@ -58,7 +58,7 @@ class FolioReaderHistoryList: UITableViewController {
         self.tableView.estimatedRowHeight = 50
 
         if let bookId = readerConfig.identifier,
-           let historyList = folioReader.delegate?.folioReaderReadPositionProvider?(folioReader).folioReaderPositionHistory?(folioReader, bookId: bookId) {
+           let historyList = folioReader.delegate?.folioReaderReadPositionProvider?(folioReader).folioReaderPositionHistory(folioReader, bookId: bookId) {
             self.historyList = historyList.filter({ $0.endPosition != nil }).sorted(by: { $0.startDatetime > $1.startDatetime })
         }
     }

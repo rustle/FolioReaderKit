@@ -154,8 +154,22 @@ extension FolioReaderCenter: FolioReaderHistoryListDelegate {
         
         let history = HistoryList.historyList[indexPath.row]
         
+        guard let endPosition = history.endPosition else { return }
+        
         readerCenter.currentPage?.pushNavigateWebViewScrollPositions()
-        readerCenter.changePageWith(page: history.endPosition!.pageNumber, andFragment: history.endPosition!.cfi)
+        readerCenter.currentWebViewScrollPositions.removeValue(forKey: endPosition.pageNumber - 1)
+        
+        if history.endPosition!.cfi != "" {
+            readerCenter.changePageWith(page: endPosition.pageNumber, andFragment: endPosition.cfi)
+        } else {
+            readerCenter.changePageWith(page: endPosition.pageNumber, animated: true) {
+                guard readerCenter.currentPageNumber == endPosition.pageNumber else { return }
+                readerCenter.currentPage?.scrollWebViewByPosition(
+                    pageOffset: endPosition.pageOffset.forDirection(withConfiguration: self.readerConfig),
+                    pageProgress: endPosition.chapterProgress
+                )
+            }
+        }
         self.dismiss()
     }
     
