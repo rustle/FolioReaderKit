@@ -13,6 +13,8 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
 
     let stylePicker = UIPickerView()
     let stylePickerHeight = CGFloat(300)
+    
+    let fontPickerView = UITableView()
    
     let styleSlider = HADiscreteSlider()
     let styleSliderHeight = CGFloat(40)
@@ -66,17 +68,36 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
             menuView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        stylePicker.dataSource = self
-        stylePicker.delegate = self
-        
-        stylePicker.translatesAutoresizingMaskIntoConstraints = false
-        menuView.addSubview(stylePicker)
-        NSLayoutConstraint.activate([
-            stylePicker.topAnchor.constraint(equalTo: menuView.topAnchor),
-            stylePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            stylePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            stylePicker.heightAnchor.constraint(equalToConstant: stylePickerHeight)
-        ])
+        if #available(macCatalyst 14.0, *),
+           self.traitCollection.userInterfaceIdiom == .mac {
+            fontPickerView.dataSource = self
+            fontPickerView.delegate = self
+            fontPickerView.register(FolioReaderFontsMenuFontPickerCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
+            
+            fontPickerView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+            fontPickerView.separatorStyle = .singleLine
+            fontPickerView.separatorColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
+            fontPickerView.translatesAutoresizingMaskIntoConstraints = false
+            menuView.addSubview(fontPickerView)
+            NSLayoutConstraint.activate([
+                fontPickerView.topAnchor.constraint(equalTo: menuView.topAnchor),
+                fontPickerView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                fontPickerView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                fontPickerView.heightAnchor.constraint(equalToConstant: stylePickerHeight)
+            ])
+        } else {
+            stylePicker.dataSource = self
+            stylePicker.delegate = self
+            
+            stylePicker.translatesAutoresizingMaskIntoConstraints = false
+            menuView.addSubview(stylePicker)
+            NSLayoutConstraint.activate([
+                stylePicker.topAnchor.constraint(equalTo: menuView.topAnchor),
+                stylePicker.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                stylePicker.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+                stylePicker.heightAnchor.constraint(equalToConstant: stylePickerHeight)
+            ])
+        }
         
         
         // Font size slider
@@ -103,12 +124,22 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
 
         styleSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(styleSlider)
-        NSLayoutConstraint.activate([
-            styleSlider.topAnchor.constraint(equalTo: stylePicker.bottomAnchor),
-            styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
-            styleSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
-            styleSlider.heightAnchor.constraint(equalToConstant: styleSliderHeight)
-        ])
+        if #available(macCatalyst 14.0, *),
+           self.traitCollection.userInterfaceIdiom == .mac {
+            NSLayoutConstraint.activate([
+                styleSlider.topAnchor.constraint(equalTo: fontPickerView.bottomAnchor),
+                styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+                styleSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+                styleSlider.heightAnchor.constraint(equalToConstant: styleSliderHeight)
+            ])
+        } else {
+            NSLayoutConstraint.activate([
+                styleSlider.topAnchor.constraint(equalTo: stylePicker.bottomAnchor),
+                styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
+                styleSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
+                styleSlider.heightAnchor.constraint(equalToConstant: styleSliderHeight)
+            ])
+        }
 
         // Font icons
         let fontSmallView = UIImageView()//frame: CGRect(x: 20, y: lineBeforeSizeSlider.frame.origin.y+14, width: 30, height: 30))
@@ -222,6 +253,7 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     override func reloadColors() {
         super.reloadColors()
 
+        fontPickerView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         stylePicker.reloadAllComponents()
     }
     
@@ -288,3 +320,52 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     }
 }
 
+extension FolioReaderFontsMenu: UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return fontFamilies.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderFontsMenuFontPickerCell
+        
+        let fontFamilyInfo = fontFamilies[indexPath.row]
+        
+        cell.nameLabel.textColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
+        cell.nameLabel.text = fontFamilyInfo.localizedName ?? fontFamilyInfo.familyName
+        cell.nameLabel.font = fontFamilyInfo.regularFont
+        cell.nameLabel.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+        
+        return cell
+    }
+    
+    
+}
+
+extension FolioReaderFontsMenu: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 40.0
+    }
+}
+
+class FolioReaderFontsMenuFontPickerCell: UITableViewCell {
+    let nameLabel = UILabel()
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        
+        nameLabel.textAlignment = .center
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(nameLabel)
+        
+        NSLayoutConstraint.activate([
+            nameLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
+            nameLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
+            nameLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            nameLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
+        ])
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+}

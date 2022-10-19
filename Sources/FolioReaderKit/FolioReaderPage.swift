@@ -907,7 +907,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             
             var pageOffsetByProgress = self.byWritingMode(
                 contentSize.forDirection(withConfiguration: self.readerConfig) * pageProgress,
-                contentSize.width * (100 - pageProgress - webViewFrameSize.width / contentSize.width * 100)) / 100
+                contentSize.width * (100 - pageProgress - webViewFrameSize.width * 100 / contentSize.width)) / 100
             if pageOffset < pageOffsetByProgress * 0.95 || pageOffset > pageOffsetByProgress * 1.05 {
                 if self.byWritingMode(self.readerConfig.scrollDirection == .horitonzalWithPagedContent, true) {
                     let pageInPage = self.byWritingMode(

@@ -134,7 +134,6 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         menuView.addSubview(structuralStyleSegment)
         menuView.addSubview(structuralTocLevelLabel)
         menuView.addSubview(structuralTocLevelValue)
-        menuView.addSubview(structuralTocLevelStepper)
         
         structuralStyleValueChanged(structuralStyleSegment)
         
@@ -157,13 +156,23 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             structuralTocLevelValue.centerYAnchor.constraint(equalTo: structuralTocLevelLabel.centerYAnchor),
             structuralTocLevelValue.leadingAnchor.constraint(equalTo: structuralTocLevelLabel.trailingAnchor, constant: 4),
             structuralTocLevelValue.widthAnchor.constraint(equalToConstant: 64),
-            structuralTocLevelValue.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight),
-            
-            structuralTocLevelStepper.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
-            structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 8),
-            structuralTocLevelStepper.widthAnchor.constraint(equalToConstant: 96),
-            structuralTocLevelStepper.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
+            structuralTocLevelValue.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
         ])
+        
+        if #available(macCatalyst 14.0, *),
+           self.traitCollection.userInterfaceIdiom == .mac {
+            //TODO
+            
+            
+        } else {
+            menuView.addSubview(structuralTocLevelStepper)
+            NSLayoutConstraint.activate([
+                structuralTocLevelStepper.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
+                structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 8),
+                structuralTocLevelStepper.widthAnchor.constraint(equalToConstant: 96),
+                structuralTocLevelStepper.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
+            ])
+        }
 
         styleOverrideLabel.text = "Style overriden intensity"
         styleOverrideLabel.font = .systemFont(ofSize: labelFontSize)

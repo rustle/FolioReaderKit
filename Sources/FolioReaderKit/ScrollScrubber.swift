@@ -93,20 +93,29 @@ class ScrollScrubber: NSObject, UIScrollViewDelegate {
         slider.alpha = 0
         self.reloadColors()
 
+        slider.addTarget(self, action: #selector(ScrollScrubber.sliderChange(_:)), for: .valueChanged)
+        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchDown(_:)), for: .touchDown)
+        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpInside)
+        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpOutside)
+        
+        if #available(macCatalyst 14.0, *) {
+            if self.readerContainer?.traitCollection.userInterfaceIdiom == .mac {
+                return
+            }
+        }
         // less obtrusive knob and fixes jump: http://stackoverflow.com/a/22301039/484780
         let thumbImg = UIImage(readerImageNamed: "knob")
         let thumbImgColor = thumbImg?.imageTintColor(readerConfig.tintColor)?.withRenderingMode(.alwaysOriginal)
         slider.setThumbImage(thumbImgColor, for: UIControl.State())
         slider.setThumbImage(thumbImgColor, for: .selected)
         slider.setThumbImage(thumbImgColor, for: .highlighted)
-
-        slider.addTarget(self, action: #selector(ScrollScrubber.sliderChange(_:)), for: .valueChanged)
-        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchDown(_:)), for: .touchDown)
-        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpInside)
-        slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpOutside)
     }
 
     func reloadColors() {
+        if #available(macCatalyst 14.0, *),
+           self.readerContainer?.traitCollection.userInterfaceIdiom == .mac {
+                return
+        }
         slider.minimumTrackTintColor = readerConfig.tintColor
         slider.maximumTrackTintColor = folioReader.isNight(readerConfig.nightModeSeparatorColor, readerConfig.menuSeparatorColor)
     }

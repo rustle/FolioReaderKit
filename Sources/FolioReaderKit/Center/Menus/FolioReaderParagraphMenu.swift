@@ -250,13 +250,19 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             action: #selector(textIndentStepperValueChanged(_:)),
             for: .valueChanged)
         textIndentStepper.translatesAutoresizingMaskIntoConstraints = false
-        menuView.addSubview(textIndentStepper)
-        NSLayoutConstraint.activate([
-            textIndentStepper.centerYAnchor.constraint(equalTo: textIndentValue.centerYAnchor),
-            textIndentStepper.leadingAnchor.constraint(equalTo: textIndentValue.trailingAnchor, constant: 4),
-            textIndentStepper.widthAnchor.constraint(equalToConstant: 96),
-            textIndentStepper.heightAnchor.constraint(equalTo: textIndentValue.heightAnchor)
-        ])
+        
+        if #available(macCatalyst 14.0, *),
+           self.traitCollection.userInterfaceIdiom == .mac {
+            //TODO
+        } else {
+            menuView.addSubview(textIndentStepper)
+            NSLayoutConstraint.activate([
+                textIndentStepper.centerYAnchor.constraint(equalTo: textIndentValue.centerYAnchor),
+                textIndentStepper.leadingAnchor.constraint(equalTo: textIndentValue.trailingAnchor, constant: 4),
+                textIndentStepper.widthAnchor.constraint(equalToConstant: 96),
+                textIndentStepper.heightAnchor.constraint(equalTo: textIndentValue.heightAnchor)
+            ])
+        }
         
         reloadColors()
     }
