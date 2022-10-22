@@ -98,7 +98,8 @@ class ScrollScrubber: NSObject, UIScrollViewDelegate {
         slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpInside)
         slider.addTarget(self, action: #selector(ScrollScrubber.sliderTouchUp(_:)), for: .touchUpOutside)
         
-        if #available(macCatalyst 14.0, *) {
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *) {
             if self.readerContainer?.traitCollection.userInterfaceIdiom == .mac {
                 return
             }
@@ -112,7 +113,8 @@ class ScrollScrubber: NSObject, UIScrollViewDelegate {
     }
 
     func reloadColors() {
-        if #available(macCatalyst 14.0, *),
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *),
            self.readerContainer?.traitCollection.userInterfaceIdiom == .mac {
                 return
         }

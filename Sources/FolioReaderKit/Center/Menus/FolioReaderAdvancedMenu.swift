@@ -159,7 +159,8 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             structuralTocLevelValue.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
         ])
         
-        if #available(macCatalyst 14.0, *),
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
             //TODO
             

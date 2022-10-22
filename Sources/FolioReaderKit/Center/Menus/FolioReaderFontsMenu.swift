@@ -68,7 +68,8 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
             menuView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
         
-        if #available(macCatalyst 14.0, *),
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
             fontPickerView.dataSource = self
             fontPickerView.delegate = self
@@ -124,7 +125,8 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
 
         styleSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(styleSlider)
-        if #available(macCatalyst 14.0, *),
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
             NSLayoutConstraint.activate([
                 styleSlider.topAnchor.constraint(equalTo: fontPickerView.bottomAnchor),

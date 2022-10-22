@@ -251,7 +251,8 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
             for: .valueChanged)
         textIndentStepper.translatesAutoresizingMaskIntoConstraints = false
         
-        if #available(macCatalyst 14.0, *),
+        if #available(iOS 14.0, *),
+           #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
             //TODO
         } else {
