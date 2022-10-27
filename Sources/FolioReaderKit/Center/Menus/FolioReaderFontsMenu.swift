@@ -75,7 +75,6 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
             fontPickerView.delegate = self
             fontPickerView.register(FolioReaderFontsMenuFontPickerCell.self, forCellReuseIdentifier: kReuseCellIdentifier)
             
-            fontPickerView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
             fontPickerView.separatorStyle = .singleLine
             fontPickerView.separatorColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
             fontPickerView.translatesAutoresizingMaskIntoConstraints = false
@@ -125,16 +124,16 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
 
         styleSlider.translatesAutoresizingMaskIntoConstraints = false
         menuView.addSubview(styleSlider)
-        if #available(iOS 14.0, *),
-           #available(macCatalyst 14.0, *),
-           self.traitCollection.userInterfaceIdiom == .mac {
+        if fontPickerView.superview == menuView {
             NSLayoutConstraint.activate([
                 styleSlider.topAnchor.constraint(equalTo: fontPickerView.bottomAnchor),
                 styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
                 styleSlider.trailingAnchor.constraint(equalTo: menuView.trailingAnchor, constant: -60),
                 styleSlider.heightAnchor.constraint(equalToConstant: styleSliderHeight)
             ])
-        } else {
+        }
+        
+        if stylePicker.superview == menuView {
             NSLayoutConstraint.activate([
                 styleSlider.topAnchor.constraint(equalTo: stylePicker.bottomAnchor),
                 styleSlider.leadingAnchor.constraint(equalTo: menuView.leadingAnchor, constant: 60),
@@ -234,10 +233,21 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
                     $0.localizedName < $1.localizedName
                 }
         )
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
         
-        if let fontRow = fontFamilies.firstIndex(where: { $0.familyName == self.folioReader.currentFont }) {
+        guard let fontRow = fontFamilies.firstIndex(where: { $0.familyName == self.folioReader.currentFont })
+        else { return }
+        
+        if stylePicker.superview == menuView {
             stylePicker.selectRow(fontRow, inComponent: 0, animated: false)
         }
+        if fontPickerView.superview == menuView {
+            fontPickerView.selectRow(at: IndexPath(row: fontRow, section: 0), animated: true, scrollPosition: .middle)
+        }
+        
     }
     
     override func layoutSubviews(frame: CGRect) {
@@ -255,8 +265,12 @@ class FolioReaderFontsMenu: FolioReaderMenu, UIPickerViewDataSource, UIPickerVie
     override func reloadColors() {
         super.reloadColors()
 
-        fontPickerView.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
-        stylePicker.reloadAllComponents()
+        if fontPickerView.superview == self.menuView {
+            fontPickerView.reloadData()
+        }
+        if stylePicker.superview == self.stylePicker {
+            stylePicker.reloadAllComponents()
+        }
     }
     
     // MARK: - Picker
@@ -332,10 +346,14 @@ extension FolioReaderFontsMenu: UITableViewDataSource {
         
         let fontFamilyInfo = fontFamilies[indexPath.row]
         
-        cell.nameLabel.textColor = folioReader.nightMode ? UIColor.lightText : UIColor.darkText
+        cell.textColor = folioReader.nightMode ? .lightText : .darkText
+        cell.selectedTextColor = self.readerConfig.menuTextColorSelected
+        
+        cell.folioBackgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
+        cell.folioSelectedBackgroundColor = folioReader.nightMode ? .darkGray : .lightGray
+        
         cell.nameLabel.text = fontFamilyInfo.localizedName ?? fontFamilyInfo.familyName
         cell.nameLabel.font = fontFamilyInfo.regularFont
-        cell.nameLabel.backgroundColor = self.readerConfig.themeModeMenuBackground[self.folioReader.themeMode]
         
         return cell
     }
@@ -347,16 +365,26 @@ extension FolioReaderFontsMenu: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 40.0
     }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.folioReader.currentFont = fontFamilies[indexPath.row].familyName
+    }
 }
 
 class FolioReaderFontsMenuFontPickerCell: UITableViewCell {
     let nameLabel = UILabel()
+    var textColor = UIColor.white
+    var selectedTextColor = UIColor.white
+    
+    var folioBackgroundColor = UIColor.clear
+    var folioSelectedBackgroundColor = UIColor.gray
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         
         nameLabel.textAlignment = .center
         nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        nameLabel.backgroundColor = .clear
         contentView.addSubview(nameLabel)
         
         NSLayoutConstraint.activate([
@@ -369,5 +397,10 @@ class FolioReaderFontsMenuFontPickerCell: UITableViewCell {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func setSelected(_ selected: Bool, animated: Bool) {
+        self.nameLabel.textColor = selected ? selectedTextColor : textColor
+        self.contentView.backgroundColor = selected ? folioSelectedBackgroundColor : folioBackgroundColor
     }
 }
