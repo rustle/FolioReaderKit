@@ -23,6 +23,9 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
     let textIndentTopPadding = CGFloat(24)
     let textIndentStepper = UIStepper()
     
+    let textIndentMinusButton = UIButton()
+    let textIndentPlusButton = UIButton()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -254,7 +257,27 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
         if #available(iOS 14.0, *),
            #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
-            //TODO
+            textIndentMinusButton.translatesAutoresizingMaskIntoConstraints = false
+            textIndentMinusButton.setImage(UIImage(systemName: "minus"), for: .normal)
+            menuView.addSubview(textIndentMinusButton)
+            NSLayoutConstraint.activate([
+                textIndentMinusButton.centerYAnchor.constraint(equalTo: textIndentValue.centerYAnchor),
+                textIndentMinusButton.leadingAnchor.constraint(equalTo: textIndentValue.trailingAnchor, constant: 4),
+                textIndentMinusButton.widthAnchor.constraint(equalToConstant: 32),
+                textIndentMinusButton.heightAnchor.constraint(equalTo: textIndentValue.heightAnchor)
+            ])
+            textIndentMinusButton.addTarget(self, action: #selector(textIndentButtonAction(_:)), for: .primaryActionTriggered)
+            
+            textIndentPlusButton.translatesAutoresizingMaskIntoConstraints = false
+            textIndentPlusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            menuView.addSubview(textIndentPlusButton)
+            NSLayoutConstraint.activate([
+                textIndentPlusButton.centerYAnchor.constraint(equalTo: textIndentValue.centerYAnchor),
+                textIndentPlusButton.leadingAnchor.constraint(equalTo: textIndentMinusButton.trailingAnchor, constant: 8),
+                textIndentPlusButton.widthAnchor.constraint(equalToConstant: 32),
+                textIndentPlusButton.heightAnchor.constraint(equalTo: textIndentValue.heightAnchor)
+            ])
+            textIndentPlusButton.addTarget(self, action: #selector(textIndentButtonAction(_:)), for: .primaryActionTriggered)
         } else {
             menuView.addSubview(textIndentStepper)
             NSLayoutConstraint.activate([
@@ -291,6 +314,19 @@ class FolioReaderParagraphMenu: FolioReaderMenu {
     
     @objc func textIndentStepperValueChanged(_ sender: UIStepper) {
         self.folioReader.currentTextIndent = Int(sender.value)
+        textIndentValue.text = "\(folioReader.currentTextIndent)"
+    }
+    
+    // MARK: - Text Indent Buttons
+    @objc func textIndentButtonAction(_ sender: UIButton) {
+        var newValue = self.folioReader.currentTextIndent
+        if sender == textIndentMinusButton {
+            newValue = max(-4, newValue - 1)
+        }
+        if sender == textIndentPlusButton {
+            newValue = min(4, newValue + 1)
+        }
+        self.folioReader.currentTextIndent = newValue
         textIndentValue.text = "\(folioReader.currentTextIndent)"
     }
     

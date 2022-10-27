@@ -24,6 +24,9 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
     let structuralTocLevelValue = UILabel()
     let structuralTocLevelStepper = UIStepper()
     
+    let structuralTocLevelMinusButton = UIButton()
+    let structuralTocLevelPlusButton = UIButton()
+    
     let wrapParaLabel = UILabel()
     let wrapParaLabelHeight = CGFloat(32)
     let wrapParaSwitch = UISwitch()
@@ -163,13 +166,32 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
            #available(macCatalyst 14.0, *),
            self.traitCollection.userInterfaceIdiom == .mac {
             //TODO
+            structuralTocLevelMinusButton.translatesAutoresizingMaskIntoConstraints = false
+            structuralTocLevelMinusButton.setImage(UIImage(systemName: "minus"), for: .normal)
+            menuView.addSubview(structuralTocLevelMinusButton)
+            NSLayoutConstraint.activate([
+                structuralTocLevelMinusButton.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
+                structuralTocLevelMinusButton.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 4),
+                structuralTocLevelMinusButton.widthAnchor.constraint(equalToConstant: 32),
+                structuralTocLevelMinusButton.heightAnchor.constraint(equalTo: structuralTocLevelValue.heightAnchor)
+            ])
+            structuralTocLevelMinusButton.addTarget(self, action: #selector(structuralTocLevelButtonAction(_:)), for: .primaryActionTriggered)
             
-            
+            structuralTocLevelPlusButton.translatesAutoresizingMaskIntoConstraints = false
+            structuralTocLevelPlusButton.setImage(UIImage(systemName: "plus"), for: .normal)
+            menuView.addSubview(structuralTocLevelPlusButton)
+            NSLayoutConstraint.activate([
+                structuralTocLevelPlusButton.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
+                structuralTocLevelPlusButton.leadingAnchor.constraint(equalTo: structuralTocLevelMinusButton.trailingAnchor, constant: 8),
+                structuralTocLevelPlusButton.widthAnchor.constraint(equalToConstant: 32),
+                structuralTocLevelPlusButton.heightAnchor.constraint(equalTo: structuralTocLevelValue.heightAnchor)
+            ])
+            structuralTocLevelPlusButton.addTarget(self, action: #selector(structuralTocLevelButtonAction(_:)), for: .primaryActionTriggered)
         } else {
             menuView.addSubview(structuralTocLevelStepper)
             NSLayoutConstraint.activate([
                 structuralTocLevelStepper.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
-                structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 8),
+                structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelMinusButton.trailingAnchor, constant: 8),
                 structuralTocLevelStepper.widthAnchor.constraint(equalToConstant: 96),
                 structuralTocLevelStepper.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
             ])
@@ -277,6 +299,8 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
         
         self.structuralTocLevelValue.isEnabled = structuralStyle == .bundle
         self.structuralTocLevelStepper.isEnabled = structuralStyle == .bundle
+        self.structuralTocLevelMinusButton.isEnabled = structuralStyle == .bundle
+        self.structuralTocLevelPlusButton.isEnabled = structuralStyle == .bundle
         
         structuralTocLevelValueChanged(self.structuralTocLevelStepper)
     }
@@ -298,6 +322,18 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             self.folioReader.readerContainer?.book.updateBundleInfo(rootTocLevel: structuralTrackingTocLevel.rawValue)
         }
         self.structuralTocLevelValue.text = self.folioReader.structuralTrackingTocLevel.description
+    }
+    
+    @objc func structuralTocLevelButtonAction(_ sender: UIButton) {
+        var newValue = self.structuralTocLevelStepper.value
+        if sender == structuralTocLevelMinusButton {
+            newValue = max(Double(FolioReaderPositionTrackingStyle.level1.rawValue), newValue - 1)
+        }
+        if sender == structuralTocLevelPlusButton {
+            newValue = min(Double(FolioReaderPositionTrackingStyle.level3.rawValue), newValue + 1)
+        }
+        self.structuralTocLevelStepper.value = newValue
+        self.structuralTocLevelStepper.sendActions(for: .valueChanged)
     }
     
     // MARK: - Gestures
