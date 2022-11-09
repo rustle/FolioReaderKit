@@ -191,7 +191,7 @@ class FolioReaderAdvancedMenu: FolioReaderMenu {
             menuView.addSubview(structuralTocLevelStepper)
             NSLayoutConstraint.activate([
                 structuralTocLevelStepper.centerYAnchor.constraint(equalTo: structuralTocLevelValue.centerYAnchor),
-                structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelMinusButton.trailingAnchor, constant: 8),
+                structuralTocLevelStepper.leadingAnchor.constraint(equalTo: structuralTocLevelValue.trailingAnchor, constant: 8),
                 structuralTocLevelStepper.widthAnchor.constraint(equalToConstant: 96),
                 structuralTocLevelStepper.heightAnchor.constraint(equalToConstant: structuralTocLevelLabelHeight)
             ])
