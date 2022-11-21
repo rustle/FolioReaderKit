@@ -588,6 +588,18 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     
     func getAndRecordScrollPosition() {
         getWebViewScrollPosition { position in
+            //prevent overwriting last known good cfi
+            if self.layoutAdapting {
+                return
+            }
+            
+            let badCFI = "epubcfi(/\((self.pageNumber ?? 1) * 2)/2)"
+            if position.cfi == badCFI,
+               let oldPosition = self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1],
+               oldPosition.cfi != badCFI {
+                return
+            }
+            
             self.folioReader.readerCenter?.currentWebViewScrollPositions[self.pageNumber - 1] = position
             
             //prevent invisible pages updating read positions

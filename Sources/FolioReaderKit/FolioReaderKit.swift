@@ -665,7 +665,7 @@ extension FolioReader {
         currentPage.getWebViewScrollPosition() { position in
             print("saveReaderState after getVisibleCFI \(Date())")
 
-            print("saveReaderState position \(position)")
+            print("saveReaderState position cfi=\(position.cfi)")
             
             self.savedPositionForCurrentBook = position
 
