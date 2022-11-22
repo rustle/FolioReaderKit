@@ -84,9 +84,56 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     fileprivate var menuIsVisible = false
     fileprivate var firstLoadReloaded = false
     
+    private var adView: UIView? = nil
+    private var adViewConstraintsToDeactivate = [NSLayoutConstraint]()
+    
     var layoutAdapting = false {
         didSet {
-            layoutAdapting ? loadingView.startAnimating() : loadingView.stopAnimating()
+            if layoutAdapting {
+                loadingView.startAnimating()
+                
+                if pageNumber > 1 {
+                    guard self.adView == nil,
+                          let adView = self.folioReader.delegate?.folioReaderAdView?(self.folioReader)
+                            
+                    else { return }
+                    
+                    self.contentView.addSubview(adView)
+                    
+                    NSLayoutConstraint.deactivate(adViewConstraintsToDeactivate)
+                    
+                    if folioReader.readerCenter?.menuBarController.presentingViewController != nil {
+                        adViewConstraintsToDeactivate = [
+                            adView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 70)  //navbar + padding
+                        ]
+                    } else {
+                        adViewConstraintsToDeactivate = [
+                            adView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+                        ]
+                    }
+                    
+                    NSLayoutConstraint.activate([
+                        adView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+                        loadingView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+                        loadingView.topAnchor.constraint(equalTo: adView.bottomAnchor, constant: 32)
+                    ])
+                    NSLayoutConstraint.activate(adViewConstraintsToDeactivate)
+                    
+                    self.adView = adView
+                } else {
+                    let constraint = loadingView.centerYAnchor.constraint(equalTo: contentView.centerYAnchor)
+                    constraint.priority = .defaultLow
+                    adViewConstraintsToDeactivate = [
+                        constraint
+                    ]
+                    NSLayoutConstraint.activate(adViewConstraintsToDeactivate)
+                }
+            } else {
+                loadingView.stopAnimating()
+                adView?.removeFromSuperview()
+                adView = nil
+            }
+            
         }
     }
     fileprivate var readerConfig: FolioReaderConfig {
@@ -121,7 +168,6 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         self.pageNumber = -1     //guard against webView didFinish handler
         self.currentChapterName = nil
-        self.layoutAdapting = true
         
         if webView == nil {
             webView = FolioReaderWebView(frame: webViewFrame(), readerContainer: readerContainer)
@@ -201,7 +247,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         loadingView.style = folioReader.isNight(.white, .gray)
         loadingView.hidesWhenStopped = true
         loadingView.startAnimating()
+        loadingView.translatesAutoresizingMaskIntoConstraints = false
         self.contentView.addSubview(loadingView)
+        
+        NSLayoutConstraint.activate([
+            loadingView.centerXAnchor.constraint(equalTo: contentView.centerXAnchor),
+        ])
         
         // Remove all gestures before adding new one
         webView?.gestureRecognizers?.forEach({ gesture in
@@ -243,7 +294,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         panDeadZoneRight?.frame = panDeadZoneRightFrame
         
         print("\(#function) frame=\(frame) webViewFrame=\(webViewFrame)  panDeadZoneLeftFrame=\(panDeadZoneLeftFrame) panDeadZoneRightFrame=\(panDeadZoneRightFrame)")
-        loadingView.center = contentView.center
+//        loadingView.center = contentView.center
     }
 
     func webViewFrame() -> CGRect {
@@ -1202,7 +1253,6 @@ writingMode
                 self.writingMode = writingMode
             }
             delay(bySecond) {
-                self.layoutAdapting = false
                 completion?()
             }
         }

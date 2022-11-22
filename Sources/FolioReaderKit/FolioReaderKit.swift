@@ -117,6 +117,10 @@ public enum NavigationMenuBookListStyle: Int, CaseIterable {
     /// - Parameter folioReader: The FolioReader instance
     @objc optional func folioReaderDidClose(_ folioReader: FolioReader)
     
+    /// AD
+    @objc optional func folioReaderAdView(_ folioReader: FolioReader) -> UIView?
+    
+    /// Providers
     @objc optional func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider
     
     @objc optional func folioReaderBookmarkProvider(_ folioReader: FolioReader) -> FolioReaderBookmarkProvider
