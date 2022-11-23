@@ -120,6 +120,8 @@ public enum NavigationMenuBookListStyle: Int, CaseIterable {
     /// AD
     @objc optional func folioReaderAdView(_ folioReader: FolioReader) -> UIView?
     
+    @objc optional func folioReaderAdPresent(_ folioReader: FolioReader)
+    
     /// Providers
     @objc optional func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider
     

@@ -92,6 +92,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             if layoutAdapting {
                 loadingView.startAnimating()
                 
+//                self.folioReader.delegate?.folioReaderAdPresent?(self.folioReader)
+                
                 if pageNumber > 1 {
                     guard self.adView == nil,
                           let adView = self.folioReader.delegate?.folioReaderAdView?(self.folioReader)
