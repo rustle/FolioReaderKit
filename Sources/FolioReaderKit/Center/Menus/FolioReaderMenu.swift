@@ -5,7 +5,7 @@
 //  Created by 京太郎 on 2021/9/22.
 //
 
-import Foundation
+import UIKit
 
 class FolioReaderMenu: UIViewController, UIGestureRecognizerDelegate {
     public var menuView = UIView()

@@ -127,7 +127,7 @@ class FREpubParserArchive: NSObject {
 
         var entrySizeMap = [String:Int]()
         archive.forEach { entry in
-            entrySizeMap[entry.path] = entry.uncompressedSize
+            entrySizeMap[entry.path] = Int(entry.uncompressedSize)
         }
         // Parse and save each "manifest item"
         xmlDoc.root["manifest"]["item"].all?.forEach {

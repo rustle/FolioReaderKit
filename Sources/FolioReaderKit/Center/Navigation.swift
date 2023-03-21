@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 extension FolioReaderCenter {
     /* replaced by FolioReaderPage.updatePageInfo and .waitForLayoutFinish
