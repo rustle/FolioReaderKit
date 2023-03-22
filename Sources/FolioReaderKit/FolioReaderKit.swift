@@ -195,7 +195,7 @@ extension FolioReader {
     ///   - config: FolioReader configuration.
     ///   - shouldRemoveEpub: Boolean to remove the epub or not. Default true.
     ///   - animated: Pass true to animate the presentation; otherwise, pass false.
-    open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
+    @objc open func presentReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
         let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath)
         readerContainer.modalPresentationStyle = .fullScreen
         self.readerContainer = readerContainer
@@ -204,7 +204,7 @@ extension FolioReader {
         addObservers()
     }
     
-    open func prepareReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
+    @objc open func prepareReader(parentViewController: UIViewController, withEpubPath epubPath: String, andConfig config: FolioReaderConfig, animated: Bool = true, folioReaderCenterDelegate: FolioReaderCenterDelegate?) {
         let readerContainer = FolioReaderContainer(withConfig: config, folioReader: self, epubPath: epubPath)
         self.readerContainer = readerContainer
         
@@ -217,7 +217,7 @@ extension FolioReader {
 extension FolioReader {
 
     /// Check if current theme is Night mode
-    open var nightMode: Bool {
+    @objc open var nightMode: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(nightMode: false) ?? false
         }
@@ -238,7 +238,7 @@ extension FolioReader {
         }
     }
     
-    open var themeMode: Int {
+    @objc open var themeMode: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(themeMode: 1) ?? 1
         }
@@ -295,7 +295,7 @@ extension FolioReader {
         }
     }
 
-    open var currentFont: String {
+    @objc open var currentFont: String {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentFont: "Georgia") ?? "Georgia"
         }
@@ -309,7 +309,7 @@ extension FolioReader {
     public static let DefaultFontSize = FolioReader.FontSizes[3]
     
     /// Check current font size. Default .m
-    open var currentFontSize: String {
+    @objc open var currentFontSize: String {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontSize: FolioReader.DefaultFontSize) ?? FolioReader.DefaultFontSize
         }
@@ -319,12 +319,12 @@ extension FolioReader {
         }
     }
     
-    open var currentFontSizeOnly: Int {
+    @objc open var currentFontSizeOnly: Int {
         return Int(Double(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20)
     }
 
     public static let DefaultFontWeight = "500"
-    open var currentFontWeight: String {
+    @objc open var currentFontWeight: String {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentFontWeight: "500") ?? "500"
         }
@@ -335,7 +335,7 @@ extension FolioReader {
     }
     
     /// Check current audio rate, the speed of speech voice. Default 0
-    open var currentAudioRate: Int {
+    @objc open var currentAudioRate: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentAudioRate: 1) ?? 1
         }
@@ -345,7 +345,7 @@ extension FolioReader {
     }
 
     /// Check the current highlight style.Default 0
-    open var currentHighlightStyle: Int {
+    @objc open var currentHighlightStyle: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
                 .preference(currentHighlightStyle: FolioReaderHighlightStyle.yellow.rawValue)
@@ -374,7 +374,7 @@ extension FolioReader {
         self.readerContainer?.book.spine.isRtl == true ? .horitonzalWithPagedContent : .horizontalWithScrollContent
     }
     /// Check the current scroll direction. Default .defaultVertical
-    open var currentScrollDirection: Int {
+    @objc open var currentScrollDirection: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self)
                 .preference(currentScrollDirection: defaultScrollDirection.rawValue)
@@ -388,7 +388,7 @@ extension FolioReader {
         }
     }
 
-    open var currentNavigationMenuIndex: Int {
+    @objc open var currentNavigationMenuIndex: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentNavigationMenuIndex: 0) ?? 0
         }
@@ -397,7 +397,7 @@ extension FolioReader {
         }
     }
     
-    open var currentAnnotationMenuIndex: Int {
+    @objc open var currentAnnotationMenuIndex: Int {
         get {
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentAnnotationMenuIndex: 0) ?? 0
         }
@@ -426,7 +426,7 @@ extension FolioReader {
         }
     }
     
-    open var currentVMarginLinked: Bool {
+    @objc open var currentVMarginLinked: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentVMarginLinked: true) ?? true
         }
@@ -438,7 +438,7 @@ extension FolioReader {
     public var defaultMarginTop: Int {
         (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
     }
-    open var currentMarginTop: Int {
+    @objc open var currentMarginTop: Int {
         get {
             let defaults = self.defaultMarginTop
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginTop: defaults) ?? defaults
@@ -457,7 +457,7 @@ extension FolioReader {
     public var defaultMarginBottom: Int {
         (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
     }
-    open var currentMarginBottom: Int {
+    @objc open var currentMarginBottom: Int {
         get {
             let defaults = defaultMarginBottom
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginBottom: defaults) ?? defaults
@@ -473,7 +473,7 @@ extension FolioReader {
         }
     }
 
-    open var currentHMarginLinked: Bool {
+    @objc open var currentHMarginLinked: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentHMarginLinked: true) ?? true
         }
@@ -485,7 +485,7 @@ extension FolioReader {
     public var defaultMarginLeft: Int {
         (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).horizontalSizeClass == .regular ? 30 : 5    //15% for regular size, otherwise 2.5%
     }
-    open var currentMarginLeft: Int {
+    @objc open var currentMarginLeft: Int {
         get {
             let defaults = self.defaultMarginLeft
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginLeft: defaults) ?? defaults
@@ -504,7 +504,7 @@ extension FolioReader {
     public var defaultMarginRight: Int {
         (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).horizontalSizeClass == .regular ? 30 : 5     //15% for regular size, otherwise 2.5%
     }
-    open var currentMarginRight: Int {
+    @objc open var currentMarginRight: Int {
         get {
             let defaults = self.defaultMarginRight
             return delegate?.folioReaderPreferenceProvider?(self).preference(currentMarginRight: defaults) ?? defaults
@@ -521,7 +521,7 @@ extension FolioReader {
     }
     
     public static let DefaultLetterSpacing = 2
-    open var currentLetterSpacing: Int {
+    @objc open var currentLetterSpacing: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentLetterSpacing: 2) ?? 2
         }
@@ -532,7 +532,7 @@ extension FolioReader {
     }
     
     public static let DefaultLineHeight = 3
-    open var currentLineHeight: Int {
+    @objc open var currentLineHeight: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentLineHeight: 3) ?? 3
         }
@@ -544,7 +544,7 @@ extension FolioReader {
 
     //in em
     public static let DefaultTextIndent = 2
-    open var currentTextIndent: Int {
+    @objc open var currentTextIndent: Int {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(currentTextIndent: 2) ?? 2
         }
@@ -554,7 +554,7 @@ extension FolioReader {
         }
     }
     
-    open var doWrapPara: Bool {
+    @objc open var doWrapPara: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(doWrapPara: false) ?? false
         }
@@ -563,7 +563,7 @@ extension FolioReader {
         }
     }
     
-    open var doClearClass: Bool {
+    @objc open var doClearClass: Bool {
         get {
             delegate?.folioReaderPreferenceProvider?(self).preference(doClearClass: true) ?? true
         }
@@ -680,7 +680,7 @@ extension FolioReader {
     }
 
     /// Closes and save the reader current instance.
-    open func close() {
+    @objc open func close() {
         self.saveReaderState() {
             self.isReaderOpen = false
             self.isReaderReady = false
