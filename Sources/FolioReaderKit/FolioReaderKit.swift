@@ -357,7 +357,7 @@ extension FolioReader {
     }
 
     /// Check the current Media Overlay or TTS style
-    open var currentMediaOverlayStyle: MediaOverlayStyle {
+    public var currentMediaOverlayStyle: MediaOverlayStyle {
         get {
             guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(currentMediaOverlayStyle: MediaOverlayStyle.default.rawValue),
                 let style = MediaOverlayStyle(rawValue: rawValue) else {
@@ -370,7 +370,7 @@ extension FolioReader {
         }
     }
 
-    open var defaultScrollDirection: FolioReaderScrollDirection {
+    public var defaultScrollDirection: FolioReaderScrollDirection {
         self.readerContainer?.book.spine.isRtl == true ? .horitonzalWithPagedContent : .horizontalWithScrollContent
     }
     /// Check the current scroll direction. Default .defaultVertical
@@ -410,7 +410,7 @@ extension FolioReader {
      0: Grid
      1: List
      */
-    open var currentNavigationMenuBookListSyle: NavigationMenuBookListStyle {
+    public var currentNavigationMenuBookListSyle: NavigationMenuBookListStyle {
         get {
             guard self.structuralStyle == .bundle else {
                 return .List
@@ -572,7 +572,7 @@ extension FolioReader {
         }
     }
     
-    open var styleOverride: StyleOverrideTypes {
+    public var styleOverride: StyleOverrideTypes {
         get {
             guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(styleOverride: StyleOverrideTypes.PNode.rawValue),
                   let value = StyleOverrideTypes(rawValue: rawValue) else {
@@ -621,7 +621,7 @@ extension FolioReader {
         }
     }
     
-    open var structuralStyle: FolioReaderStructuralStyle {
+    public var structuralStyle: FolioReaderStructuralStyle {
         get {
             guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(structuralStyle: FolioReaderStructuralStyle.atom.rawValue),
                   let value = FolioReaderStructuralStyle(rawValue: rawValue) else {
@@ -634,7 +634,7 @@ extension FolioReader {
         }
     }
     
-    open var structuralTrackingTocLevel: FolioReaderPositionTrackingStyle {
+    public var structuralTrackingTocLevel: FolioReaderPositionTrackingStyle {
         get {
             guard let rawValue = delegate?.folioReaderPreferenceProvider?(self).preference(structuralTocLevel: FolioReaderPositionTrackingStyle.linear.rawValue),
                   let value = FolioReaderPositionTrackingStyle(rawValue: rawValue) else {
