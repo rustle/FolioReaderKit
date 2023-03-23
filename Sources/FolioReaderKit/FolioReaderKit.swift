@@ -67,9 +67,8 @@ extension FolioReaderDelegate {
 }
 
 /// Main Library class with some useful constants and methods
-public class FolioReader: NSObject {
-
-    public override init() { }
+public class FolioReader {
+    public init() { }
 
     deinit {
         removeObservers()
