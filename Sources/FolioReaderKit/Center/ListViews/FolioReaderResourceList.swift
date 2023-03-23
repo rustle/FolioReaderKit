@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import UIKit
 
 /// Table Of Contents delegate
@@ -24,11 +25,11 @@ import UIKit
 class FolioReaderResourceList: UITableViewController {
 
     weak var delegate: FolioReaderResourceListDelegate?
-    fileprivate var book: FRBook
+    fileprivate var book: Book
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
 
-    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderResourceListDelegate?) {
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: Book, delegate: FolioReaderResourceListDelegate?) {
         self.readerConfig = readerConfig
         self.folioReader = folioReader
         self.delegate = delegate

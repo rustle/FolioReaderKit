@@ -40,7 +40,7 @@ class FolioReaderHighlightList: UITableViewController {
         guard let readerCenter = self.folioReader.readerCenter,
               let book = self.folioReader.readerContainer?.book,
               let bookId = (book.name as NSString?)?.deletingPathExtension,
-              let highlights = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
+              let highlights = self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
         else {
             return
         }
@@ -292,7 +292,7 @@ class FolioReaderHighlightList: UITableViewController {
                 FolioReaderHighlight.removeFromHTMLById(withinPage: page, highlightId: highlight.highlightId) // Remove from HTML
             }
 
-            folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(folioReader, removedId: highlight.highlightId)
+            folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(folioReader, removedId: highlight.highlightId)
             
             sectionHighlights[sections[indexPath.section]]?.remove(at: indexPath.row)
             if sectionHighlights[sections[indexPath.section]]?.isEmpty == true {

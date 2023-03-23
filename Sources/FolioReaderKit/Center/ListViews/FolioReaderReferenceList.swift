@@ -6,8 +6,9 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-import UIKit
+import EpubCore
 import SwiftSoup
+import UIKit
 
 class FolioReaderReferenceList: UITableViewController {
 
@@ -50,7 +51,7 @@ class FolioReaderReferenceList: UITableViewController {
         loadSections()
     }
 
-    func loadSection(bookId: String, book: FRBook, pageNumber: Int, refText: String, deepest: FolioReaderBookmark) -> [FolioReaderBookmark] {
+    func loadSection(bookId: String, book: Book, pageNumber: Int, refText: String, deepest: FolioReaderBookmark) -> [FolioReaderBookmark] {
         var epubEntryData = Data()
         
         guard let epubArchive = book.threadEpubArchive,
@@ -205,7 +206,7 @@ class FolioReaderReferenceList: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         if let addingBookmarkPos = addingBookmarkPos,
-           let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) {
+           let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader) {
             provider.folioReaderBookmark(self.folioReader, removed: addingBookmarkPos)
         }
         
@@ -415,7 +416,7 @@ class FolioReaderReferenceList: UITableViewController {
                 return
             }
 
-            folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(folioReader, removed: pos)
+            folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader).folioReaderBookmark(folioReader, removed: pos)
             
             sectionBookmarks[sections[indexPath.section]]?.remove(at: indexPath.row)
             if sectionBookmarks[sections[indexPath.section]]?.isEmpty == true {
@@ -484,7 +485,7 @@ class FolioReaderReferenceList: UITableViewController {
     
     func addBookmark(completion: (() -> Void)? = nil) {
         guard let currentPage = self.folioReader.readerCenter?.currentPage,
-              let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader)
+              let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader)
         else {
             completion?()
             return
@@ -530,7 +531,7 @@ class FolioReaderReferenceList: UITableViewController {
               let editView = cellContentView.viewWithTag(1234) as? UITextField,
               let title = editView.text else { return }
         
-        guard let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) else { return }
+        guard let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader) else { return }
         
         provider.folioReaderBookmark(self.folioReader, updated: editingPos, title: title)
         

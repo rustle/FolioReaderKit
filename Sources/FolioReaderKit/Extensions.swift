@@ -3,7 +3,8 @@
 //  Pods
 //
 //  Created by Kevin Delord on 01/04/17.
-//
+//  Copyright (c) 2015 Folio Reader. All rights reserved.
+//  Copyright (c) 2023 Doug Russell. All rights reserved.
 //
 
 import Foundation

@@ -1,12 +1,13 @@
 //
 //  MediaType.swift
-//  FolioReaderKit
+//  EpubCore
 //
 //  Created by Heberti Almeida on 29/04/15.
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
+//  Copyright (c) 2023 Doug Russell. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 /**
  MediaType is used to tell the type of content a resource is.
@@ -14,26 +15,29 @@ import UIKit
  Examples of mediatypes are image/gif, text/css and application/xhtml+xml
  */
 public struct MediaType: Equatable {
+    public static func == (
+        lhs: MediaType,
+        rhs: MediaType
+    ) -> Bool {
+        guard lhs.name == rhs.name else { return false }
+        guard lhs.defaultExtension == rhs.defaultExtension else { return false }
+        guard lhs.extensions == rhs.extensions else { return false }
+        return true
+    }
     public let name: String
     public let defaultExtension: String
     public let extensions: [String]
 
-    public init(name: String, defaultExtension: String, extensions: [String] = []) {
+    public init(
+        name: String,
+        defaultExtension: String,
+        extensions: [String] = []
+    ) {
         self.name = name
         self.defaultExtension = defaultExtension
         self.extensions = extensions
     }
 
-}
-
-// MARK: - Equatable
-
-/// :nodoc:
-public func == (lhs: MediaType, rhs: MediaType) -> Bool {
-    guard lhs.name == rhs.name else { return false }
-    guard lhs.defaultExtension == rhs.defaultExtension else { return false }
-    guard lhs.extensions == rhs.extensions else { return false }
-    return true
 }
 
 

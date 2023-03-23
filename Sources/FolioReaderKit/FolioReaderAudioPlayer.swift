@@ -6,19 +6,19 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-import UIKit
 import AVFoundation
+import EpubCore
 import MediaPlayer
+import UIKit
 
 open class FolioReaderAudioPlayer: NSObject {
-
     var isTextToSpeech = false
     var synthesizer: AVSpeechSynthesizer!
     var playing = false
     var player: AVAudioPlayer?
     var currentHref: String!
     var currentFragment: String!
-    var currentSmilFile: FRSmilFile!
+    var currentSmilFile: SmilFile!
     var currentAudioFile: String!
     var currentBeginTime: Double!
     var currentEndTime: Double!
@@ -27,12 +27,12 @@ open class FolioReaderAudioPlayer: NSObject {
     var completionHandler: () -> Void = {}
     var utteranceRate: Float = 0
 
-    fileprivate var book: FRBook
+    fileprivate var book: Book
     fileprivate var folioReader: FolioReader
 
     // MARK: Init
 
-    init(withFolioReader folioReader: FolioReader, book: FRBook) {
+    init(withFolioReader folioReader: FolioReader, book: Book) {
         self.book = book
         self.folioReader = folioReader
 
@@ -259,7 +259,7 @@ open class FolioReaderAudioPlayer: NSObject {
      Once an audio fragment begins playing, the audio clip will continue playing until the player timer detects
      the audio is out of the fragment timeframe.
      */
-    @discardableResult fileprivate func _playFragment(_ smil: FRSmilElement?) -> Bool {
+    @discardableResult fileprivate func _playFragment(_ smil: SmilElement?) -> Bool {
 
         guard let smil = smil else {
             // FIXME: What about the log that the library prints in the console? shouldn’t we disable it? use another library for that or some compiler flags?
@@ -325,7 +325,7 @@ open class FolioReaderAudioPlayer: NSObject {
 
      Gets the next audio fragment in the current smil file, or moves on to the next smil file
      */
-    fileprivate func nextAudioFragment() -> FRSmilElement? {
+    fileprivate func nextAudioFragment() -> SmilElement? {
 
         guard let smilFile = book.smilFile(forHref: currentHref) else {
             return nil

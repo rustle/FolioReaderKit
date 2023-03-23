@@ -6,14 +6,19 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import UIKit
 
 /// Table Of Contents delegate
-@objc protocol FolioReaderChapterListDelegate: AnyObject {
+protocol FolioReaderChapterListDelegate: AnyObject {
     /**
      Notifies when the user selected some item on menu.
      */
-    func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference)
+    func chapterList(
+        _ chapterList: FolioReaderChapterList,
+        didSelectRowAtIndexPath indexPath: IndexPath,
+        withTocReference reference: TocReference
+    )
 
     /**
      Notifies when chapter list did totally dismissed.
@@ -24,13 +29,13 @@ import UIKit
 class FolioReaderChapterList: UITableViewController {
 
     weak var delegate: FolioReaderChapterListDelegate?
-    fileprivate var tocItems = [FRTocReference]()
-    fileprivate var book: FRBook
+    fileprivate var tocItems = [TocReference]()
+    fileprivate var book: Book
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
     fileprivate var highlightResourceIds = Set<String>()
 
-    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderChapterListDelegate?) {
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: Book, delegate: FolioReaderChapterListDelegate?) {
         self.readerConfig = readerConfig
         self.folioReader = folioReader
         self.delegate = delegate
@@ -62,7 +67,7 @@ class FolioReaderChapterList: UITableViewController {
             let tocSet = Set<String>(tocList)
             let tocLevel = self.folioReader.structuralTrackingTocLevel.rawValue
             self.tocItems = self.book.flatTableOfContents.filter {
-                var toc: FRTocReference? = $0
+                var toc: TocReference? = $0
                 if toc?.level < tocLevel {
                     return false
                 }

@@ -6,8 +6,9 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-import UIKit
+import EpubCore
 import FontBlaster
+import UIKit
 import ZIPFoundation
 
 /// Reader container
@@ -16,7 +17,7 @@ open class FolioReaderContainer: UIViewController {
     
     // Mark those property as public so they can accessed from other classes/subclasses.
     public var epubPath: String
-    public var book: FRBook
+    public var book: Book
     
     public var centerNavigationController: UINavigationController?
     public var centerViewController: FolioReaderCenter?
@@ -41,7 +42,7 @@ open class FolioReaderContainer: UIViewController {
         self.readerConfig = config
         self.folioReader = folioReader
         self.epubPath = path
-        self.book = FRBook()
+        self.book = Book()
 
         super.init(nibName: nil, bundle: Bundle.frameworkBundle())
 
@@ -62,7 +63,7 @@ open class FolioReaderContainer: UIViewController {
         self.readerConfig = FolioReaderConfig()
         self.folioReader = FolioReader()
         self.epubPath = ""
-        self.book = FRBook()
+        self.book = Book()
 
         super.init(coder: aDecoder)
 
@@ -98,7 +99,7 @@ open class FolioReaderContainer: UIViewController {
         do {
             guard let archive = Archive(url: URL(fileURLWithPath: self.epubPath), accessMode: .read, preferredEncoding: .utf8) else { throw FolioReaderError.errorInContainer }
             folioLogger("BEFORE readEpub")
-            let parsedBook = try FREpubParserArchive(book: FRBook(), archive: archive).readEpubLight(epubPath: self.epubPath)
+            let parsedBook = try EpubParser(archive: archive).readEpubLight(epubPath: self.epubPath)
             folioLogger("AFTER readEpub")
 
             self.book = parsedBook
@@ -173,7 +174,7 @@ open class FolioReaderContainer: UIViewController {
                 do {
                     guard let archive = self.book.epubArchive else { throw FolioReaderError.errorInContainer }
                     folioLogger("BEFORE readEpub")
-                    let parsedBook = try FREpubParserArchive(book: self.book, archive: archive).readEpub(epubPath: self.epubPath)
+                    let parsedBook = try EpubParser(archive: archive).readEpub(epubPath: self.epubPath)
                     folioLogger("AFTER readEpub")
 
                     self.book = parsedBook
@@ -194,7 +195,7 @@ open class FolioReaderContainer: UIViewController {
                         self.book.updateBundleInfo(rootTocLevel: structuralTrackingTocLevel.rawValue)
                         
                         //FIXME: temp fix for highlights
-                        if let highlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
+                        if let highlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader),
                            let bookId = (self.book.name as NSString?)?.deletingPathExtension {
                             highlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: nil)
                                 .filter {
@@ -228,7 +229,7 @@ open class FolioReaderContainer: UIViewController {
                             self.addAudioPlayer()
                         }
                         
-                        self.folioReader.delegate?.folioReader?(self.folioReader, didFinishedLoading: self.book)
+                        self.folioReader.delegate?.folioReader(self.folioReader, didFinishLoading: self.book)
                         
                         self.centerViewController?.reloadData()
                         self.folioReader.isReaderReady = true

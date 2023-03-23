@@ -1,88 +1,83 @@
 //
-//  FRBook.swift
-//  FolioReaderKit
+//  Book.swift
+//  EpubCore
 //
 //  Created by Heberti Almeida on 09/04/15.
 //  Extended by Kevin Jantzer on 12/30/15
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
+//  Copyright (c) 2015 Kevin Jantzer. All rights reserved.
+//  Copyright (c) 2023 Doug Russell. All rights reserved.
 //
 
-import UIKit
+import Foundation
 import ZIPFoundation
 
-open class FRBook: NSObject {
-    var metadata = FRMetadata()
-    var spine = FRSpine()
-    var smils = FRSmils()
-    var version: Double?
-    
-    public var opfResource: FRResource!
-    public var tocResource: FRResource?
+final public class Book {
+    public var metadata: Metadata = .init()
+    public var spine: Spine = .init()
+    public var smils: Smils = .init()
+    public var version: Double?
+
+    public var opfResource: Resource!
+    public var tocResource: Resource?
     public var uniqueIdentifier: String?
-    public var coverImage: FRResource?
+    public var coverImage: Resource?
     public var name: String?
-    public var resources = FRResources()
-    public var tableOfContents: [FRTocReference]!
-    public var flatTableOfContents: [FRTocReference]!
-    public var resourceTocMap: [FRResource: [FRTocReference]]!
+    public var resources: Resources = .init()
+    public var tableOfContents: [TocReference]!
+    public var flatTableOfContents: [TocReference]!
+    public var resourceTocMap: [Resource: [TocReference]]!
 
     public var epubArchive: Archive?
-    
+
     public var threadEpubArchive: Archive? {
         guard let archiveURL = self.epubArchive?.url,
               let epubArchive = Archive(url: archiveURL, accessMode: .read)
         else { return nil }
         return epubArchive
     }
-    
-    var hasAudio: Bool {
-        return smils.smils.count > 0
+
+    public var hasAudio: Bool {
+        smils.smils.count > 0
     }
 
-    var title: String? {
-        return metadata.titles.first
+    public var title: String? {
+        metadata.titles.first
     }
 
-    var authorName: String? {
-        return metadata.creators.first?.name
+    public var authorName: String? {
+        metadata.creators.first?.name
     }
+
+    public init() {}
 
     /**
-     Find a page by FRTocReference, i.e IndexPath.row or pageNumber-1
+     Find a page by TocReference, i.e IndexPath.row or pageNumber-1
      */
-    public func findPageByResource(_ reference: FRTocReference) -> Int {
+    public func findPageByResource(_ reference: TocReference) -> Int {
         if let resHref = reference.resource?.href,
            let index = resources.findByHref(resHref)?.spineIndices.first {
             return index
         }
             
         return spine.spineReferences.count
-        
-//        var count = 0
-//        for item in spine.spineReferences {
-//            if let resource = reference.resource, item.resource == resource {
-//                return count
-//            }
-//            count += 1
-//        }
-//        return count
     }
 
     // MARK: - Media Overlay Metadata
     // http://www.idpf.org/epub/301/spec/epub-mediaoverlays.html#sec-package-metadata
 
-    var duration: String? {
+    public var duration: String? {
         return metadata.find(byProperty: "media:duration")?.value
     }
 
-    var activeClass: String {
+    public var activeClass: String {
         guard let className = metadata.find(byProperty: "media:active-class")?.value else {
             return "epub-media-overlay-active"
         }
         return className
     }
 
-    var playbackActiveClass: String {
+    public var playbackActiveClass: String {
         guard let className = metadata.find(byProperty: "media:playback-active-class")?.value else {
             return "epub-media-overlay-playing"
         }
@@ -94,7 +89,7 @@ open class FRBook: NSObject {
     /**
      Get Smil File from a resource (if it has a media-overlay)
      */
-    func smilFileForResource(_ resource: FRResource?) -> FRSmilFile? {
+    public func smilFileForResource(_ resource: Resource?) -> SmilFile? {
         guard let resource = resource, let mediaOverlay = resource.mediaOverlay else { return nil }
 
         // lookup the smile resource to get info about the file
@@ -104,21 +99,21 @@ open class FRBook: NSObject {
         return smils.findByHref(smilResource.href)
     }
 
-    func smilFile(forHref href: String) -> FRSmilFile? {
-        return smilFileForResource(resources.findByHref(href))
+    public func smilFile(forHref href: String) -> SmilFile? {
+        smilFileForResource(resources.findByHref(href))
     }
 
-    func smilFile(forId ID: String) -> FRSmilFile? {
-        return smilFileForResource(resources.findById(ID))
+    public func smilFile(forId ID: String) -> SmilFile? {
+        smilFileForResource(resources.findById(ID))
     }
     
     // @NOTE: should "#" be automatically prefixed with the ID?
-    func duration(for ID: String) -> String? {
-        return metadata.find(byProperty: "media:duration", refinedBy: ID)?.value
+    public func duration(for ID: String) -> String? {
+        metadata.find(byProperty: "media:duration", refinedBy: ID)?.value
     }
     
     // MARK: - for Bundle Book
-    public var bundleRootTableOfContents: [FRTocReference]!
+    public var bundleRootTableOfContents: [TocReference]!
     public var bundleBookSizes: [Int]!
 
     public func updateBundleInfo(rootTocLevel: Int) {

@@ -6,6 +6,7 @@
 //  Copyright © 2021 FolioReader. All rights reserved.
 //
 
+import EpubCore
 import Foundation
 import UIKit
 
@@ -384,12 +385,12 @@ extension FolioReaderCenter {
     /**
      Find and return the chapter name, first of current page, or last of previous pages
      */
-    public func getChapterName(pageNumber: Int) -> FRTocReference? {
+    public func getChapterName(pageNumber: Int) -> TocReference? {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var foundChapterName: FRTocReference?
+        var foundChapterName: TocReference?
         
-//        func search(_ items: [FRTocReference]) {
+//        func search(_ items: [TocReference]) {
 //            for item in items {
 //                guard foundChapterName == nil else { break }
 //
@@ -428,12 +429,12 @@ extension FolioReaderCenter {
     /**
      Find and return the chapter name, limit to current page only
      */
-    public func getChapterNames(pageNumber: Int) -> [FRTocReference] {
+    public func getChapterNames(pageNumber: Int) -> [TocReference] {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var foundChapterNames = [FRTocReference]()
+        var foundChapterNames = [TocReference]()
         
-//        func search(_ items: [FRTocReference]) {
+//        func search(_ items: [TocReference]) {
 //            for item in items {
 //                if let reference = self.book.spine.spineReferences[safe: (pageNumber - 1)],
 //                    let resource = item.resource,

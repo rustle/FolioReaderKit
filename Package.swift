@@ -7,7 +7,14 @@ let package = Package(
         .iOS(.v12),
     ],
 	products: [
-		.library(name: "FolioReaderKit", targets: ["FolioReaderKit"])
+		.library(
+            name: "FolioReaderKit",
+            targets: ["FolioReaderKit"]
+        ),
+        .library(
+            name: "EpubCore",
+            targets: ["EpubCore"]
+        ),
 	],
 	dependencies: [
         .package(url: "https://github.com/drearycold/ZipArchive.git", from: "2.2.5"),
@@ -24,23 +31,36 @@ let package = Package(
         .target(
             name: "FolioReaderKit",
             dependencies: [
+                "EpubCore",
                 "AEXML",
                 "ZipArchive",
                 "FontBlaster",
                 "MenuItemKit",
                 "ZFDragableModalTransition",
                 "SwiftSoup",
-                "ZIPFoundation",
                 .product(name: "RealmSwift", package: "Realm")
             ],
-            //exclude: ["Info.plist"],
             resources: [
                 .process("Resources/Bridge.js"),
                 .process("Resources/Style.css"),
                 .process("Resources/Fonts")
             ]
         ),
-		.testTarget(name: "FolioReaderKitTests", dependencies: ["FolioReaderKit"])
+        .target(
+            name: "EpubCore",
+            dependencies: [
+                "AEXML",
+                "ZIPFoundation",
+            ]
+        ),
+        .testTarget(
+            name: "FolioReaderKitTests",
+            dependencies: ["FolioReaderKit"]
+        ),
+        .testTarget(
+            name: "EpubCoreTests",
+            dependencies: ["EpubCore"]
+        ),
 	]
 )
 	

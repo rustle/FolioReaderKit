@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import WebKit
 
 public typealias JSCallback = (String?) ->()
@@ -43,8 +44,8 @@ open class FolioReaderWebView: WKWebView {
         return readerContainer.readerConfig
     }
 
-    fileprivate var book: FRBook {
-        guard let readerContainer = readerContainer else { return FRBook() }
+    fileprivate var book: Book {
+        guard let readerContainer = readerContainer else { return Book() }
         return readerContainer.book
     }
 
@@ -184,7 +185,7 @@ open class FolioReaderWebView: WKWebView {
     func remove(_ sender: UIMenuController?) {
         js("removeThisHighlight()") { removedId in
             guard let removedId = removedId else { return }
-            self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, removedId: removedId)
+            self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(self.folioReader, removedId: removedId)
         }
         createMenu(onHighlight: false)
         setMenuVisible(false)
@@ -342,7 +343,7 @@ open class FolioReaderWebView: WKWebView {
                         completion?(highlight, nil)
                     }
                 } else {
-                    self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
+                    self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(self.folioReader, added: highlight) { error in
                         guard error == nil else {
                             if original == nil {
                                 self.folioReader.readerCenter?.presentAddHighlightError(error!.localizedDescription)
@@ -375,7 +376,7 @@ open class FolioReaderWebView: WKWebView {
         js("getHighlightId()") { highlightId in
             guard
                 let highlightId = highlightId,
-                let highlightNote = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, getById: highlightId)
+                let highlightNote = self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(self.folioReader, getById: highlightId)
             else { return }
             
             self.folioReader.readerCenter?.presentAddHighlightNote(highlightNote, edit: true)
@@ -474,7 +475,7 @@ open class FolioReaderWebView: WKWebView {
 
         js("setHighlightStyle('\(FolioReaderHighlightStyle.classForStyle(style.rawValue))')") { updateId in
             guard let updateId = updateId else { return }
-            self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader).folioReaderHighlight(self.folioReader, updateById: updateId, type: style)
+            self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader).folioReaderHighlight(self.folioReader, updateById: updateId, type: style)
         }
         
         //FIX: https://github.com/FolioReader/FolioReaderKit/issues/316

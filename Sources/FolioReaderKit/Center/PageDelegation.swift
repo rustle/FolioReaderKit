@@ -27,7 +27,7 @@ extension FolioReaderCenter: FolioReaderPageDelegate {
            let bundleRootResourceSpineIndices = bundleRootToc.resource?.spineIndices,
            bundleRootResourceSpineIndices.contains(page.pageNumber - 1),
            let bookId = self.book.name?.deletingPathExtension,
-           let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: page.pageNumber),
+           let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: page.pageNumber),
            readPosition.pageNumber != page.pageNumber {
             
             folioLogger("NEW_BOOK_NAV readPosition=\(readPosition.pageNumber)")

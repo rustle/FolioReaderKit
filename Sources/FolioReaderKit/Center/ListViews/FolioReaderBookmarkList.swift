@@ -53,7 +53,7 @@ class FolioReaderBookmarkList: UITableViewController {
         guard let readerCenter = self.folioReader.readerCenter,
               let book = self.folioReader.readerContainer?.book,
               let bookId = (book.name as NSString?)?.deletingPathExtension,
-              let bookmarks = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(self.folioReader, allByBookId: bookId, andPage: nil)
+              let bookmarks = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader).folioReaderBookmark(self.folioReader, allByBookId: bookId, andPage: nil)
         else {
             return
         }
@@ -98,7 +98,7 @@ class FolioReaderBookmarkList: UITableViewController {
     
     override func viewWillDisappear(_ animated: Bool) {
         if let addingBookmarkPos = addingBookmarkPos,
-           let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) {
+           let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader) {
             provider.folioReaderBookmark(self.folioReader, removed: addingBookmarkPos)
         }
         
@@ -293,7 +293,7 @@ class FolioReaderBookmarkList: UITableViewController {
                 return
             }
 
-            folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader).folioReaderBookmark(folioReader, removed: pos)
+            folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader).folioReaderBookmark(folioReader, removed: pos)
             
             sectionBookmarks[sections[indexPath.section]]?.remove(at: indexPath.row)
             if sectionBookmarks[sections[indexPath.section]]?.isEmpty == true {
@@ -362,7 +362,7 @@ class FolioReaderBookmarkList: UITableViewController {
     
     func addBookmark(completion: (() -> Void)? = nil) {
         guard let currentPage = self.folioReader.readerCenter?.currentPage,
-              let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader)
+              let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader)
         else {
             completion?()
             return
@@ -408,7 +408,7 @@ class FolioReaderBookmarkList: UITableViewController {
               let editView = cellContentView.viewWithTag(1234) as? UITextField,
               let title = editView.text else { return }
         
-        guard let provider = self.folioReader.delegate?.folioReaderBookmarkProvider?(self.folioReader) else { return }
+        guard let provider = self.folioReader.delegate?.folioReaderBookmarkProvider(self.folioReader) else { return }
         
         provider.folioReaderBookmark(self.folioReader, updated: editingPos, title: title)
         

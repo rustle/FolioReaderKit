@@ -6,6 +6,7 @@
 //  Copyright (c) 2016 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import UIKit
 
 class FolioReaderQuoteShare: UIViewController {
@@ -23,13 +24,13 @@ class FolioReaderQuoteShare: UIViewController {
     let imagePicker = UIImagePickerController()
     var selectedIndex = 0
 
-    fileprivate var book: FRBook
+    fileprivate var book: Book
     fileprivate var folioReader: FolioReader
     fileprivate var readerConfig: FolioReaderConfig
 
     // MARK: Init
 
-    init(initWithText shareText: String, readerConfig: FolioReaderConfig, folioReader: FolioReader, book: FRBook) {
+    init(initWithText shareText: String, readerConfig: FolioReaderConfig, folioReader: FolioReader, book: Book) {
         self.folioReader = folioReader
         self.readerConfig = readerConfig
         self.quoteText = shareText.stripLineBreaks().stripHtml()

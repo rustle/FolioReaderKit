@@ -117,7 +117,7 @@ class FolioReaderProfileMenu: FolioReaderMenu {
     
     func loadProfileNames() {
         profileNames.removeAll()
-        if let names = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader).preference(listProfile: nil) {
+        if let names = self.folioReader.delegate?.folioReaderPreferenceProvider(self.folioReader).preference(listProfile: nil) {
             profileNames.append(contentsOf: names.sorted(by: { lhs, rhs in
                 if lhs == "Default" {
                     return true
@@ -202,7 +202,7 @@ extension FolioReaderProfileMenu: UITableViewDataSource {
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             guard let profileName = profileNames[safe: indexPath.row],
-                  let provider = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader)
+                  let provider = self.folioReader.delegate?.folioReaderPreferenceProvider(self.folioReader)
             else { return }
             
             provider.preference(removeProfile: profileName)
@@ -224,7 +224,7 @@ extension FolioReaderProfileMenu: UITableViewDataSource {
 extension FolioReaderProfileMenu {
     @objc func loadButtonAction(_ sender: UIButton?) {
         folioLogger("load")
-        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader) else { return }
+        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider(self.folioReader) else { return }
         guard let selectedIndex = self.tableView.indexPathForSelectedRow,
               let profileName = profileNames[safe: selectedIndex.row]
         else { return }
@@ -252,7 +252,7 @@ extension FolioReaderProfileMenu {
     }
     
     @objc func overwriteButtonAction(_ sender: UIButton?) {
-        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader) else { return }
+        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider(self.folioReader) else { return }
         guard let selectedIndex = self.tableView.indexPathForSelectedRow,
               let profileName = profileNames[safe: selectedIndex.row]
         else { return }
@@ -274,7 +274,7 @@ extension FolioReaderProfileMenu {
     @objc func saveasButtonAction(_ sender: UIButton?) {
         folioLogger("save as")
         
-        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider?(self.folioReader) else { return }
+        guard let provider = self.folioReader.delegate?.folioReaderPreferenceProvider(self.folioReader) else { return }
         
         var profileName: String!
         if let bookTitle = self.folioReader.readerCenter?.book.title ?? self.folioReader.readerCenter?.book.name ?? self.folioReader.readerConfig?.identifier {

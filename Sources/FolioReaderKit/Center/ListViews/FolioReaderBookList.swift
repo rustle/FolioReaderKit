@@ -6,15 +6,20 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-import UIKit
 import AEXML
+import EpubCore
+import UIKit
 
 /// Table Of Contents delegate
-@objc protocol FolioReaderBookListDelegate: AnyObject {
+protocol FolioReaderBookListDelegate: AnyObject {
     /**
      Notifies when the user selected some item on menu.
      */
-    func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference)
+    func bookList(
+        _ bookList: FolioReaderBookList,
+        didSelectRowAtIndexPath indexPath: IndexPath,
+        withTocReference reference: TocReference
+    )
 
     /**
      Notifies when book list did totally dismissed.
@@ -24,17 +29,17 @@ import AEXML
 
 class FolioReaderBookList: UICollectionViewController {
     weak var delegate: FolioReaderBookListDelegate?
-    fileprivate var tocItems = [FRTocReference]()
-    fileprivate var sectionTocItems = [(FRTocReference, [FRTocReference])]()
-    fileprivate var tocPositions = [FRTocReference: FolioReaderReadPosition]()
-    fileprivate var book: FRBook
+    fileprivate var tocItems = [TocReference]()
+    fileprivate var sectionTocItems = [(TocReference, [TocReference])]()
+    fileprivate var tocPositions = [TocReference: FolioReaderReadPosition]()
+    fileprivate var book: Book
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
     fileprivate var highlightResourceIds = Set<String>()
     fileprivate var layout = UICollectionViewFlowLayout()
     fileprivate var coverImage: UIImage?
     
-    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderBookListDelegate?) {
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: Book, delegate: FolioReaderBookListDelegate?) {
         self.readerConfig = readerConfig
         self.folioReader = folioReader
         self.delegate = delegate
@@ -81,7 +86,7 @@ class FolioReaderBookList: UICollectionViewController {
             self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
                 let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
                 let bookTocPageNumber = bookTocIndexPathRow + 1
-                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
+                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
                 else { return }
                 partialResult[tocRef] = readPosition
             })
@@ -107,7 +112,7 @@ class FolioReaderBookList: UICollectionViewController {
             self.tocPositions = self.tocItems.reduce(into: [:], { partialResult, tocRef in
                 let bookTocIndexPathRow = self.book.findPageByResource(tocRef)
                 let bookTocPageNumber = bookTocIndexPathRow + 1
-                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
+                guard let readPosition = self.folioReader.delegate?.folioReaderReadPositionProvider(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocPageNumber)
                 else { return }
                 partialResult[tocRef] = readPosition
             })
@@ -223,7 +228,7 @@ class FolioReaderBookList: UICollectionViewController {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: kReuseCellIdentifier, for: indexPath) as! FolioReaderBookListCell
 
         cell.setup(withConfiguration: self.readerConfig)
-        guard let tocReference = { () -> FRTocReference? in
+        guard let tocReference = { () -> TocReference? in
             switch self.folioReader.currentNavigationMenuBookListSyle{
             case .Grid:
                 return tocItems[indexPath.row]
@@ -347,7 +352,7 @@ class FolioReaderBookList: UICollectionViewController {
         let headerView = collectionView.dequeueReusableSupplementaryView(ofKind: UICollectionView.elementKindSectionHeader, withReuseIdentifier: kReuseHeaderFooterIdentifier, for: indexPath)
         
         guard let cell = headerView as? FolioReaderBookListHeader else { return headerView }
-        var sectionToc: FRTocReference? = self.sectionTocItems[safe: indexPath.section]?.0
+        var sectionToc: TocReference? = self.sectionTocItems[safe: indexPath.section]?.0
         var titles = [String]()
         while let title = sectionToc?.title {
             titles.append(title)
@@ -362,7 +367,7 @@ class FolioReaderBookList: UICollectionViewController {
 
     override func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         
-        let tocReference = { () -> FRTocReference in
+        let tocReference = { () -> TocReference in
             switch self.folioReader.currentNavigationMenuBookListSyle {
             case .Grid:
                 return self.tocItems[indexPath.row]

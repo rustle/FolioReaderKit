@@ -1,35 +1,53 @@
 //
-//  FREpubParser.swift
-//  FolioReaderKit
+//  EpubParser.swift
+//  EpubCore
 //
 //  Created by Heberti Almeida on 04/05/15.
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
+//  Copyright (c) 2023 Doug Russell. All rights reserved.
 //
 
-import UIKit
 import AEXML
+import Foundation
 import ZIPFoundation
 
-class FREpubParserArchive: NSObject {
+public enum EpubCoreError: Error, LocalizedError {
+    case bookNotAvailable
+    case errorInContainer
+    case errorInOpf
+    case fullPathEmpty
+
+    public var errorDescription: String? {
+        switch self {
+        case .bookNotAvailable:
+            return "Book not found"
+        case .errorInContainer, .errorInOpf:
+            return "Invalid book format"
+        case .fullPathEmpty:
+            return "Book corrupted"
+        }
+    }
+}
+
+public class EpubParser {
     static let ContainerPath = "META-INF/container.xml"
 
-    let book: FRBook
+    let book: Book = .init()
     let archive: Archive
     
-    init(book: FRBook, archive: Archive) {
-        self.book = book
+    public init(archive: Archive) {
         self.archive = archive
     }
-    
+
     /// Unzip, delete and read an epub file.
     ///
     /// - Parameters:
     ///   - withEpubPath: Epub path on the disk
     /// - Returns: `FRBook` Object
-    /// - Throws: `FolioReaderError`
-    func readEpub(epubPath withEpubPath: String) throws -> FRBook {
+    /// - Throws: `EpubCoreError`
+    public func readEpub(epubPath withEpubPath: String) throws -> Book {
         guard FileManager.default.fileExists(atPath: withEpubPath) else {
-            throw FolioReaderError.bookNotAvailable
+            throw EpubCoreError.bookNotAvailable
         }
 
         book.name = withEpubPath.lastPathComponent
@@ -46,23 +64,23 @@ class FREpubParserArchive: NSObject {
     /// - Parameters:
     ///   - withEpubPath: Epub path on the disk
     /// - Returns: `FRBook` Object
-    /// - Throws: `FolioReaderError`
-    func readEpubLight(epubPath withEpubPath: String) throws -> FRBook {
+    /// - Throws: `EpubCoreError`
+    public func readEpubLight(epubPath withEpubPath: String) throws -> Book {
         guard FileManager.default.fileExists(atPath: withEpubPath) else {
-            throw FolioReaderError.bookNotAvailable
+            throw EpubCoreError.bookNotAvailable
         }
 
         book.name = withEpubPath.lastPathComponent
         try readContainer()
         
         guard let opfPath = book.opfResource.href,
-              let opfEntry = archive[opfPath] else  { throw FolioReaderError.errorInOpf }
+              let opfEntry = archive[opfPath] else  { throw EpubCoreError.errorInOpf }
         
         var opfData = Data(capacity: Int(opfEntry.uncompressedSize))
         let crc = try archive.extract(opfEntry) { data in
             opfData.append(data)
         }
-        guard crc == opfEntry.checksum else { throw FolioReaderError.errorInOpf }
+        guard crc == opfEntry.checksum else { throw EpubCoreError.errorInOpf }
         let xmlDoc = try AEXMLDocument(xml: opfData)
 
         // Read Spine
@@ -80,19 +98,19 @@ class FREpubParserArchive: NSObject {
     /// Read and parse container.xml file.
     ///
     /// - Parameter bookBasePath: The base book path
-    /// - Throws: `FolioReaderError`
+    /// - Throws: `EpubCoreError`
     private func readContainer() throws {
-        guard let containerEntry = archive[FREpubParserArchive.ContainerPath] else { throw FolioReaderError.errorInContainer }
+        guard let containerEntry = archive[EpubParser.ContainerPath] else { throw EpubCoreError.errorInContainer }
         var containerData = Data(capacity: Int(containerEntry.uncompressedSize))
         let crc = try archive.extract(containerEntry) { data in
             containerData.append(data)
         }
-        guard crc == containerEntry.checksum else { throw FolioReaderError.errorInContainer }
+        guard crc == containerEntry.checksum else { throw EpubCoreError.errorInContainer }
         let xmlDoc = try AEXMLDocument(xml: containerData)
         
-        let opfResource = FRResource()
+        let opfResource = Resource()
         guard let fullPath = xmlDoc.root["rootfiles"]["rootfile"].attributes["full-path"] else {
-            throw FolioReaderError.fullPathEmpty
+            throw EpubCoreError.fullPathEmpty
         }
         opfResource.href = fullPath
         opfResource.mediaType = MediaType.by(fileName: fullPath)
@@ -102,10 +120,10 @@ class FREpubParserArchive: NSObject {
     /// Read and parse .opf file.
     ///
     /// - Parameter bookBasePath: The base book path
-    /// - Throws: `FolioReaderError`
+    /// - Throws: `EpubCoreError`
     private func readOpf() throws {
         guard let opfPath = book.opfResource.href,
-              let opfEntry = archive[opfPath] else  { throw FolioReaderError.errorInOpf }
+              let opfEntry = archive[opfPath] else  { throw EpubCoreError.errorInOpf }
         
         var identifier: String?
 
@@ -113,7 +131,7 @@ class FREpubParserArchive: NSObject {
         let crc = try archive.extract(opfEntry) { data in
             opfData.append(data)
         }
-        guard crc == opfEntry.checksum else { throw FolioReaderError.errorInOpf }
+        guard crc == opfEntry.checksum else { throw EpubCoreError.errorInOpf }
         let xmlDoc = try AEXMLDocument(xml: opfData)
 
         // Base OPF info
@@ -131,7 +149,7 @@ class FREpubParserArchive: NSObject {
         }
         // Parse and save each "manifest item"
         xmlDoc.root["manifest"]["item"].all?.forEach {
-            let resource = FRResource()
+            let resource = Resource()
             resource.id = $0.attributes["id"]
             resource.properties = $0.attributes["properties"]
             resource.href = $0.attributes["href"]
@@ -188,7 +206,7 @@ class FREpubParserArchive: NSObject {
             
             var tocList = book.resourceTocMap[resource]
             if tocList == nil {
-                tocList = [FRTocReference]()
+                tocList = [TocReference]()
                 book.resourceTocMap[resource] = tocList
             }
             book.resourceTocMap[resource]?.append(tocItem)
@@ -206,8 +224,8 @@ class FREpubParserArchive: NSObject {
 
     /// Reads and parses a .smil file.
     ///
-    /// - Parameter resource: A `FRResource` to read the smill
-    private func readSmilFile(_ resource: FRResource) {
+    /// - Parameter resource: A `Resource` to read the smill
+    private func readSmilFile(_ resource: Resource) {
         do {
             guard let smilPath = resource.href,
                   let smilEntry = archive[book.opfResource.href.deletingLastPathComponent.appendingPathComponent(smilPath)] else { return }
@@ -218,7 +236,7 @@ class FREpubParserArchive: NSObject {
             }
             guard crc == smilEntry.checksum else { return }
             
-            var smilFile = FRSmilFile(resource: resource)
+            var smilFile = SmilFile(resource: resource)
             let xmlDoc = try AEXMLDocument(xml: smilData)
 
             let children = xmlDoc.root["body"].children
@@ -233,12 +251,12 @@ class FREpubParserArchive: NSObject {
         }
     }
 
-    private func readSmilFileElements(_ children: [AEXMLElement]) -> [FRSmilElement] {
-        var data = [FRSmilElement]()
+    private func readSmilFileElements(_ children: [AEXMLElement]) -> [SmilElement] {
+        var data = [SmilElement]()
 
         // convert each smil element to a FRSmil object
         children.forEach{
-            let smil = FRSmilElement(name: $0.name, attributes: $0.attributes)
+            let smil = SmilElement(name: $0.name, attributes: $0.attributes)
 
             // if this element has children, convert them to objects too
             if $0.children.count > 0 {
@@ -254,8 +272,8 @@ class FREpubParserArchive: NSObject {
     /// Read and parse the Table of Contents.
     ///
     /// - Returns: A list of toc references
-    private func findTableOfContents() -> [FRTocReference] {
-        var tableOfContent = [FRTocReference]()
+    private func findTableOfContents() -> [TocReference] {
+        var tableOfContent = [TocReference]()
         var tocItems: [AEXMLElement]?
         guard let tocResource = book.tocResource,
               let tocPath = tocResource.href,
@@ -300,7 +318,8 @@ class FREpubParserArchive: NSObject {
     ///
     /// - Parameter element: An `AEXMLElement`, usually the `<body>`
     /// - Returns: If found the `<nav>` `AEXMLElement`
-    @discardableResult func findNavTag(_ element: AEXMLElement) -> AEXMLElement? {
+    @discardableResult
+    func findNavTag(_ element: AEXMLElement) -> AEXMLElement? {
         for element in element.children {
             if let nav = element["nav"].first {
                 return nav
@@ -311,7 +330,11 @@ class FREpubParserArchive: NSObject {
         return nil
     }
 
-    fileprivate func readTOCReference(_ navpointElement: AEXMLElement, level: Int, parent: FRTocReference? = nil) -> FRTocReference? {
+    fileprivate func readTOCReference(
+        _ navpointElement: AEXMLElement,
+        level: Int,
+        parent: TocReference? = nil
+    ) -> TocReference? {
         var label = ""
 
         if book.tocResource?.mediaType == MediaType.ncx {
@@ -325,7 +348,7 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
+            let toc = TocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
 
             // Recursively find child
             if let navPoints = navpointElement["navPoint"].all {
@@ -346,7 +369,7 @@ class FREpubParserArchive: NSObject {
             let href = hrefSplit[0]
 
             let resource = book.resources.findByHref(href)
-            let toc = FRTocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
+            let toc = TocReference(title: label, resource: resource, fragmentID: fragmentID, level: level, parent: parent)
 
             // Recursively find child
             if let navPoints = navpointElement["ol"]["li"].all {
@@ -361,8 +384,8 @@ class FREpubParserArchive: NSObject {
 
     // MARK: - Recursive add items to a list
 
-    var flatTOC: [FRTocReference] {
-        var tocItems = [FRTocReference]()
+    var flatTOC: [TocReference] {
+        var tocItems = [TocReference]()
 
         for item in book.tableOfContents {
             tocItems.append(item)
@@ -371,8 +394,8 @@ class FREpubParserArchive: NSObject {
         return tocItems
     }
 
-    func countTocChild(_ item: FRTocReference) -> [FRTocReference] {
-        var tocItems = [FRTocReference]()
+    func countTocChild(_ item: TocReference) -> [TocReference] {
+        var tocItems = [TocReference]()
 
         item.children.forEach {
             tocItems.append($0)
@@ -385,8 +408,8 @@ class FREpubParserArchive: NSObject {
     ///
     /// - Parameter tags: XHTML tags
     /// - Returns: Metadata object
-    fileprivate func readMetadata(_ tags: [AEXMLElement]) -> FRMetadata {
-        let metadata = FRMetadata()
+    fileprivate func readMetadata(_ tags: [AEXMLElement]) -> Metadata {
+        let metadata = Metadata()
 
         for tag in tags {
             if tag.name == "dc:title" {
@@ -452,8 +475,8 @@ class FREpubParserArchive: NSObject {
     ///
     /// - Parameter tags: XHTML tags
     /// - Returns: Spine object
-    fileprivate func readSpine(_ tags: [AEXMLElement]) -> FRSpine {
-        let spine = FRSpine()
+    fileprivate func readSpine(_ tags: [AEXMLElement]) -> Spine {
+        let spine = Spine()
 
         var sizeUpto = 0
         for tag in tags {
@@ -466,7 +489,7 @@ class FREpubParserArchive: NSObject {
 
             guard let resource = book.resources.findById(idref) else { continue }
             resource.spineIndices.append(spine.spineReferences.count)
-            spine.spineReferences.append(Spine(resource: resource, linear: linear, sizeUpto: sizeUpto))
+            spine.spineReferences.append(SpineReference(resource: resource, linear: linear, sizeUpto: sizeUpto))
             sizeUpto += Int(resource.size ?? 0)
         }
         spine.size = sizeUpto

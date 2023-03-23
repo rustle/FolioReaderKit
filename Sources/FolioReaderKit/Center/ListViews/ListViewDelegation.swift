@@ -6,11 +6,12 @@
 //  Copyright © 2021 FolioReader. All rights reserved.
 //
 
+import EpubCore
 import Foundation
 
 extension FolioReaderCenter: FolioReaderChapterListDelegate {
     
-    func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
+    func chapterList(_ chapterList: FolioReaderChapterList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: TocReference) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
         
         guard let readerCenter = self.folioReader.readerCenter else { return }
@@ -50,11 +51,11 @@ extension FolioReaderCenter: FolioReaderChapterListDelegate {
 }
 
 extension FolioReaderCenter: FolioReaderBookListDelegate {
-    func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: FRTocReference) {
+    func bookList(_ bookList: FolioReaderBookList, didSelectRowAtIndexPath indexPath: IndexPath, withTocReference reference: TocReference) {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
         
-        func countTocChild(_ item: FRTocReference) -> [FRTocReference] {
-            var tocItems = [FRTocReference]()
+        func countTocChild(_ item: TocReference) -> [TocReference] {
+            var tocItems = [TocReference]()
 
             item.children.forEach {
                 tocItems.append($0)
@@ -63,7 +64,7 @@ extension FolioReaderCenter: FolioReaderBookListDelegate {
             return tocItems
         }
         
-        var tocItems = [FRTocReference]()
+        var tocItems = [TocReference]()
         tocItems.append(reference)
         tocItems.append(contentsOf: countTocChild(reference))
         

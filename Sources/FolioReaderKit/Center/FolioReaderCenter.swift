@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import UIKit
 import WebKit
 import ZFDragableModalTransition
@@ -79,7 +80,7 @@ open class FolioReaderCenter: UIViewController {
 
     var screenBounds: CGRect!
     var pointNow = CGPoint.zero
-    var tempReference: FRTocReference?
+    var tempReference: TocReference?
 //    var isFirstLoad = true
     
     /**
@@ -104,8 +105,8 @@ open class FolioReaderCenter: UIViewController {
         return readerContainer.readerConfig
     }
 
-    var book: FRBook {
-        guard let readerContainer = readerContainer else { return FRBook() }
+    var book: Book {
+        guard let readerContainer = readerContainer else { return Book() }
         return readerContainer.book
     }
 

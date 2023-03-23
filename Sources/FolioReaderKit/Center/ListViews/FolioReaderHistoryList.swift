@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
+import EpubCore
 import UIKit
 
 /// Table Of Contents delegate
@@ -13,7 +14,10 @@ import UIKit
     /**
      Notifies when the user selected some item on menu.
      */
-    func historyList(_ HistoryList: FolioReaderHistoryList, didSelectRowAtIndexPath indexPath: IndexPath)
+    func historyList(
+        _ HistoryList: FolioReaderHistoryList,
+        didSelectRowAtIndexPath indexPath: IndexPath
+    )
 
     /**
      Notifies when History list did totally dismissed.
@@ -26,12 +30,12 @@ import UIKit
 class FolioReaderHistoryList: UITableViewController {
 
     weak var delegate: FolioReaderHistoryListDelegate?
-    fileprivate var book: FRBook
+    fileprivate var book: Book
     fileprivate var readerConfig: FolioReaderConfig
     fileprivate var folioReader: FolioReader
     var historyList = [FolioReaderReadPositionHistory]()
     
-    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: FRBook, delegate: FolioReaderHistoryListDelegate?) {
+    init(folioReader: FolioReader, readerConfig: FolioReaderConfig, book: Book, delegate: FolioReaderHistoryListDelegate?) {
         self.readerConfig = readerConfig
         self.folioReader = folioReader
         self.delegate = delegate
@@ -58,7 +62,7 @@ class FolioReaderHistoryList: UITableViewController {
         self.tableView.estimatedRowHeight = 50
 
         if let bookId = readerConfig.identifier,
-           let historyList = folioReader.delegate?.folioReaderReadPositionProvider?(folioReader).folioReaderPositionHistory(folioReader, bookId: bookId) {
+           let historyList = folioReader.delegate?.folioReaderReadPositionProvider(folioReader).folioReaderPositionHistory(folioReader, bookId: bookId) {
             self.historyList = historyList.filter({ $0.endPosition != nil }).sorted(by: { $0.startDatetime > $1.startDatetime })
         }
     }

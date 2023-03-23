@@ -6,10 +6,11 @@
 //  Copyright (c) 2015 Folio Reader. All rights reserved.
 //
 
-import UIKit
-import SafariServices
+import EpubCore
 import MenuItemKit
 import OSLog
+import SafariServices
+import UIKit
 import WebKit
 
 /// Protocol which is used from `FolioReaderPage`s.
@@ -76,7 +77,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         }
     }
     var currentChapterName: String?
-    var pageChapterTocReferences: [FRTocReference]?
+    var pageChapterTocReferences: [TocReference]?
     var idOffsets: [String: Int]?
     
     fileprivate var colorView: UIView!
@@ -96,7 +97,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
                 
                 if pageNumber > 1 {
                     guard self.adView == nil,
-                          let adView = self.folioReader.delegate?.folioReaderAdView?(self.folioReader)
+                          let adView = self.folioReader.delegate?.folioReaderAdView(self.folioReader)
                             
                     else { return }
                     
@@ -143,8 +144,8 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
         return readerContainer.readerConfig
     }
 
-    fileprivate var book: FRBook {
-        guard let readerContainer = readerContainer else { return FRBook() }
+    fileprivate var book: Book {
+        guard let readerContainer = readerContainer else { return Book() }
         return readerContainer.book
     }
 
@@ -855,7 +856,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             let bookSize = self.book.bundleBookSizes[bookTocIndex]
             let bookTocSpineIndex = self.book.findPageByResource(self.book.bundleRootTableOfContents[bookTocIndex])
             
-            if let position = self.folioReader.delegate?.folioReaderReadPositionProvider?(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocSpineIndex + 1) {
+            if let position = self.folioReader.delegate?.folioReaderReadPositionProvider(self.folioReader).folioReaderReadPosition(self.folioReader, bookId: bookId, by: bookTocSpineIndex + 1) {
                 bundleProgress += position.bookProgress * Double(bookSize)
             }
         }
@@ -869,12 +870,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     /**
      Find and return the current chapter resource.
      */
-    public func getChapter() -> FRResource? {
+    public func getChapter() -> Resource? {
         if readerConfig.debug.contains(.functionTrace) { folioLogger("ENTER") }
 
-        var foundResource: FRResource?
+        var foundResource: Resource?
 
-        func search(_ items: [FRTocReference]) {
+        func search(_ items: [TocReference]) {
             for item in items {
                 guard foundResource == nil else { break }
 
@@ -901,7 +902,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
 
         var foundChapterName: String?
         
-        func search(_ items: [FRTocReference]) {
+        func search(_ items: [TocReference]) {
             for item in items {
                 guard foundChapterName == nil else { break }
                 
@@ -1103,12 +1104,12 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
     /**
      return: array from child to each level of parent
      */
-    func getChapterTocReferences(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [FRTocReference] {
+    func getChapterTocReferences(for contentOffset: CGPoint, by webViewFrameSize: CGSize) -> [TocReference] {
         var firstChapterTocReference = self.folioReader.readerCenter?.getChapterName(pageNumber: self.pageNumber)
         
         if let pageChapterTocReferences = self.pageChapterTocReferences,
            let idOffsets = self.idOffsets {
-            let tocRefWithDistance = pageChapterTocReferences.compactMap({ (toc) -> (toc: FRTocReference, offset: Int, distance: CGFloat)? in
+            let tocRefWithDistance = pageChapterTocReferences.compactMap({ (toc) -> (toc: TocReference, offset: Int, distance: CGFloat)? in
                 guard let id = toc.fragmentID,
                       let offset = idOffsets[id] else { return nil }
                 return (
@@ -1126,7 +1127,7 @@ open class FolioReaderPage: UICollectionViewCell, WKNavigationDelegate, UIGestur
             }
         }
            
-        var chapterTocReferences = [FRTocReference]()
+        var chapterTocReferences = [TocReference]()
         while (firstChapterTocReference != nil) {
             chapterTocReferences.append(firstChapterTocReference!)
             firstChapterTocReference = firstChapterTocReference?.parent
@@ -1636,7 +1637,7 @@ writingMode
     
     func injectHighlights(completion: (() -> Void)? = nil) {
         guard let bookId = (self.book.name as NSString?)?.deletingPathExtension,
-              let folioReaderHighlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider?(self.folioReader),
+              let folioReaderHighlightProvider = self.folioReader.delegate?.folioReaderHighlightProvider(self.folioReader),
               let highlights = folioReaderHighlightProvider.folioReaderHighlight(self.folioReader, allByBookId: bookId, andPage: pageNumber as NSNumber?).map({ hl -> FolioReaderHighlight in
                   let prefix = "/2"
                   if let cfiStart = hl.cfiStart, cfiStart.hasPrefix(prefix) {
