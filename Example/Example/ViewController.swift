@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import EpubCore
 import FolioReaderKit
 import RealmSwift
 
@@ -128,7 +129,6 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: FolioReaderDelegate {
-    
     func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider {
         if let preferenceProvider = preferenceProvider {
             return preferenceProvider
@@ -139,7 +139,7 @@ extension ViewController: FolioReaderDelegate {
             return preferenceProvider
         }
     }
-    
+
     func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider {
         if let highlightProvider = highlightProvider {
             return highlightProvider
@@ -151,6 +151,7 @@ extension ViewController: FolioReaderDelegate {
         }
     }
 }
+
 open class HighlightRealm: Object {
     @objc open dynamic var bookId: String!
     @objc open dynamic var content: String!
@@ -169,7 +170,7 @@ open class HighlightRealm: Object {
     override open class func primaryKey()-> String {
         return "highlightId"
     }
-    
+
     func fromHighlight(_ highlight: Highlight) {
         bookId = highlight.bookId
         content = highlight.content
@@ -185,7 +186,7 @@ open class HighlightRealm: Object {
         cfiStart = highlight.cfiStart
         cfiEnd = highlight.cfiEnd
     }
-    
+
     func toHighlight() -> Highlight {
         let highlight = Highlight()
         highlight.bookId = bookId
