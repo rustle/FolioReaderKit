@@ -18,91 +18,6 @@ internal let kHighlightRange = 30
 internal let kReuseCellIdentifier = "com.folioreader.Cell.ReuseIdentifier"
 internal let kReuseHeaderFooterIdentifier = "com.folioreader.HeaderFooter.ReuseIdentifier"
 
-public enum FolioReaderError: Error, LocalizedError {
-    case bookNotAvailable
-    case errorInContainer
-    case errorInOpf
-    case authorNameNotAvailable
-    case coverNotAvailable
-    case invalidImage(path: String)
-    case titleNotAvailable
-    case fullPathEmpty
-
-    public var errorDescription: String? {
-        switch self {
-        case .bookNotAvailable:
-            return "Book not found"
-        case .errorInContainer, .errorInOpf:
-            return "Invalid book format"
-        case .authorNameNotAvailable:
-            return "Author name not available"
-        case .coverNotAvailable:
-            return "Cover image not available"
-        case let .invalidImage(path):
-            return "Invalid image at path: " + path
-        case .titleNotAvailable:
-            return "Book title not available"
-        case .fullPathEmpty:
-            return "Book corrupted"
-        }
-    }
-}
-
-/// Defines the media overlay and TTS selection
-///
-/// - `default`: The background is colored
-/// - underline: The underlined is colored
-/// - textColor: The text is colored
-public enum MediaOverlayStyle: Int {
-    case `default`
-    case underline
-    case textColor
-
-    init() {
-        self = .default
-    }
-
-    func className() -> String {
-        return "mediaOverlayStyle\(self.rawValue)"
-    }
-}
-
-struct FontFamilyInfo {
-    let familyName: String
-    let localizedName: String?
-    let regularFont: UIFont
-}
-
-public enum StyleOverrideTypes: Int, CaseIterable {
-    case None           //0
-    case PNode          //1
-    case PlusTD         //2
-    case PlusSPAN       //3
-    case AllText        //4
-    
-    var description: String {
-        get {
-            switch(self) {
-            case .None:
-                return "none"
-            case .PNode:
-                return "only <p>"
-            case .PlusTD:
-                return "+ <td>"
-            case .PlusSPAN:
-                return "+ <span>"
-            case .AllText:
-                return "all text"
-            }
-        }
-    }
-}
-
-public enum NavigationMenuBookListStyle: Int, CaseIterable {
-    case Grid = 0
-    case List = 1
-}
-
 /// FolioReader actions delegate
 public protocol FolioReaderDelegate: AnyObject {
     
@@ -131,6 +46,24 @@ public protocol FolioReaderDelegate: AnyObject {
     func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider
     
     func folioReaderReadPositionProvider(_ folioReader: FolioReader) -> FolioReaderReadPositionProvider
+}
+
+extension FolioReaderDelegate {
+    public func folioReader(_ folioReader: FolioReader, didFinishLoading book: Book) {}
+
+    public func folioReaderDidClose(_ folioReader: FolioReader) {}
+
+    public func folioReaderAdView(_ folioReader: FolioReader) -> UIView? { nil }
+
+    public func folioReaderAdPresent(_ folioReader: FolioReader) {}
+
+    //public func folioReaderHighlightProvider(_ folioReader: FolioReader) -> FolioReaderHighlightProvider {}
+
+    //public func folioReaderBookmarkProvider(_ folioReader: FolioReader) -> FolioReaderBookmarkProvider {}
+
+    //public func folioReaderPreferenceProvider(_ folioReader: FolioReader) -> FolioReaderPreferenceProvider {}
+
+    //public func folioReaderReadPositionProvider(_ folioReader: FolioReader) -> FolioReaderReadPositionProvider {}
 }
 
 /// Main Library class with some useful constants and methods
@@ -216,7 +149,6 @@ extension FolioReader {
 // MARK: -  Getters and setters for stored values
 
 extension FolioReader {
-
     /// Check if current theme is Night mode
     @objc open var nightMode: Bool {
         get {
@@ -238,7 +170,7 @@ extension FolioReader {
             }
         }
     }
-    
+
     @objc open var themeMode: Int {
         get {
             return delegate?.folioReaderPreferenceProvider(self).preference(themeMode: 1) ?? 1
@@ -308,7 +240,7 @@ extension FolioReader {
 
     static let FontSizes = ["15.5px", "17px", "18.5px", "20px", "22px", "24px", "26px", "28px", "30.5px", "33px", "35.5px"]
     public static let DefaultFontSize = FolioReader.FontSizes[3]
-    
+
     /// Check current font size. Default .m
     @objc open var currentFontSize: String {
         get {
@@ -319,7 +251,7 @@ extension FolioReader {
             readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
-    
+
     @objc open var currentFontSizeOnly: Int {
         return Int(Double(currentFontSize.replacingOccurrences(of: "px", with: "")) ?? 20)
     }
@@ -334,7 +266,7 @@ extension FolioReader {
             readerCenter?.currentPage?.updateRuntimStyle(delay: 0.4)
         }
     }
-    
+
     /// Check current audio rate, the speed of speech voice. Default 0
     @objc open var currentAudioRate: Int {
         get {
@@ -397,7 +329,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider(self).preference(setCurrentNavigationMenuIndex: value)
         }
     }
-    
+
     @objc open var currentAnnotationMenuIndex: Int {
         get {
             return delegate?.folioReaderPreferenceProvider(self).preference(currentAnnotationMenuIndex: 0) ?? 0
@@ -406,7 +338,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider(self).preference(setCurrentAnnotationMenuIndex: value)
         }
     }
-    
+
     /**
      0: Grid
      1: List
@@ -426,7 +358,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider(self).preference(setCurrentNavigationMenuBookListStyle: value.rawValue)
         }
     }
-    
+
     @objc open var currentVMarginLinked: Bool {
         get {
             delegate?.folioReaderPreferenceProvider(self).preference(currentVMarginLinked: true) ?? true
@@ -435,7 +367,7 @@ extension FolioReader {
             delegate?.folioReaderPreferenceProvider(self).preference(setCurrentVMarginLinked: value)
         }
     }
-    
+
     public var defaultMarginTop: Int {
         (self.readerCenter?.traitCollection ?? UIScreen.main.traitCollection).verticalSizeClass == .regular ? 10 : 5    //5% for regular size, otherwise 2.5%
     }
@@ -652,7 +584,6 @@ extension FolioReader {
 // MARK: - Exit, save and close FolioReader
 
 extension FolioReader {
-
     /// Save Reader state, book, page and scroll offset.
     @objc open func saveReaderState(completion: (() -> Void)? = nil) {
         guard isReaderOpen,
@@ -695,8 +626,6 @@ extension FolioReader {
 
 
 extension FolioReader {
-    
-    
     func generateRuntimeStyle() -> String {
         let letterSpacing = Float(currentLetterSpacing * 2 * currentFontSizeOnly) / Float(100)
         let lineHeight = Decimal((currentLineHeight + 10) * 5) / 100 + 1    //1.5 ~ 2.05
@@ -864,26 +793,26 @@ extension FolioReader {
         
         return style
     }
-    
+
     static let CssLevelTags : [StyleOverrideTypes: String] = [.PNode: "p", .PlusTD: "td", .PlusSPAN: "span", .AllText: " "]
     static func CssLevels(type: String, def: String) -> [String] {
         CssLevelTags.map {
             ".folioStyleL\($0.rawValue)\(type) \($1) { \(def) }"
         }.sorted()
     }
-    
+
     static func CssImgLevels(type: String, def: String) -> [String] {
         CssLevelTags.map {
             ".folioStyleL\($0.rawValue)\(type) \($1) img.folioImg { \(def) }"
         }.sorted()
     }
-    
+
     func cssFontFamilies() -> String {
         UIFont.familyNames.map {
             FolioReader.CssLevels(type: "FontFamily\($0.replacingOccurrences(of: " ", with: "_"))", def: "font-family: \"\($0)\" !important;")
         }.flatMap { $0 }.joined(separator: "\n")
     }
-    
+
     func cssUserFontFaces() -> String {
         guard let readerConfig = readerConfig else { return "" }
         
