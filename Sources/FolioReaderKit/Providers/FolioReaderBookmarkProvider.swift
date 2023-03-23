@@ -7,23 +7,37 @@
 
 import Foundation
 
-@objc public protocol FolioReaderBookmarkProvider: AnyObject {
+public protocol FolioReaderBookmarkProvider: AnyObject {
 
     /// Save a Bookmark with completion block
     ///
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, added bookmark: FolioReaderBookmark, completion: Completion?)
+    func folioReaderBookmark(
+        _ folioReader: FolioReader,
+        added bookmark: FolioReaderBookmark,
+        completion: Completion?
+    )
     
     /// Remove a Bookmark by pos(cfi)
     ///
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, removed bookmarkPos: String)
+    func folioReaderBookmark(
+        _ folioReader: FolioReader,
+        removed bookmarkPos: String
+    )
     
     /// Update a Bookmark Title by pos
     ///
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, updated bookmarkPos: String, title: String)
+    func folioReaderBookmark(
+        _ folioReader: FolioReader,
+        updated bookmarkPos: String,
+        title: String
+    )
     
     /// Return a Bookmark by Pos
     ///
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, getBy bookmarkPos: String) -> FolioReaderBookmark?
+    func folioReaderBookmark(
+        _ folioReader: FolioReader,
+        getBy bookmarkPos: String
+    ) -> FolioReaderBookmark?
     
     /// Return a list of Bookmarks with specified book and optionally page
     ///
@@ -31,12 +45,16 @@ import Foundation
     ///   - bookId: Book ID
     ///   - page: Page number
     /// - Returns: Return a list of Bookmarks
-    @objc func folioReaderBookmark(_ folioReader: FolioReader, allByBookId bookId: String, andPage page: NSNumber?) -> [FolioReaderBookmark]
+    func folioReaderBookmark(
+        _ folioReader: FolioReader,
+        allByBookId bookId: String,
+        andPage page: NSNumber?
+    ) -> [FolioReaderBookmark]
     
     /// Return all Bookmarks
     ///
     /// - Returns: Return all Bookmarks
-    @objc func folioReaderBookmark(_ folioReader: FolioReader) -> [FolioReaderBookmark]
+    func folioReaderBookmark(_ folioReader: FolioReader) -> [FolioReaderBookmark]
 }
 
 public class FolioReaderNaiveBookmarkProvider: FolioReaderBookmarkProvider {
